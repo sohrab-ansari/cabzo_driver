@@ -49,10 +49,9 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
       backgroundColor: AppColors.white,
       //appbar
       appBar: AppBar(
-      
         backgroundColor: AppColors.white,
         elevation: 0,
- leadingWidth: w * 0.010,
+        leadingWidth: w * 0.010,
         // centerTitle: true,
         leading: SizedBox(),
         title:
