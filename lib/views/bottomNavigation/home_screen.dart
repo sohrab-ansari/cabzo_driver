@@ -279,9 +279,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   backgroundColor: Color(0xFF34C759),
                   minimumSize: const Size(double.infinity, 50), // full width
                 ),
-                child: const Text(
+                child: Text(
                   "Go Online",
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(fontSize: w * 0.04, color: Colors.white),
                 ),
               ),
 
@@ -320,7 +320,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: const [
                         Text(
                           "Today's Earnings",
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF414142),
+                          ),
                         ),
                         SizedBox(height: 6),
                         Text(
@@ -369,7 +372,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 "Online",
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: Colors.grey,
+                                  color: Color(0xFF414142),
                                 ),
                               ),
                               SizedBox(height: 4),
@@ -393,7 +396,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 "Cash",
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: Colors.grey,
+                                  color: Color(0xFF414142),
                                 ),
                               ),
                               SizedBox(height: 4),
@@ -427,7 +430,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 "Total Rides",
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: Colors.grey,
+                                  color: const Color(0xFF414142),
                                 ),
                               ),
                               SizedBox(height: 4),
@@ -472,7 +475,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 "Total Rides",
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: Colors.grey,
+                                  color: const Color(0xFF414142),
                                 ),
                               ),
                               SizedBox(height: 4),
@@ -701,7 +704,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: w * .1),
+              SizedBox(height: w * .05),
               Container(
                 // height: w * 0.4,
                 decoration: BoxDecoration(
@@ -838,24 +841,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: w * .1),
-              AppButtons.solid(
-                context: context,
-                text: "Live Ride",
-                onClicked: () {
-                  CustomNavigator.push(
-                    context,
-                    LiveRide(),
-                    transition: TransitionType.fade,
-                  );
-                },
-                isFullWidth: true,
-                backgroundColor: ColorsList.mainButtonColor,
-                textColor: ColorsList.mainButtonTextColor,
-                fontSize: w * .045,
-                height: w * .140,
-                radius: 12.0,
-              ),
+              SizedBox(height: w * .04),
+
+              //////////////////////////live ride button is commented for now on this screen as we dont need it here  can remove code id dont need////////
+              // AppButtons.solid(
+              //   context: context,
+              //   text: "Live Ride",
+              //   onClicked: () {
+              //     CustomNavigator.push(
+              //       context,
+              //       LiveRide(),
+              //       transition: TransitionType.fade,
+              //     );
+              //   },
+              //   isFullWidth: true,
+              //   backgroundColor: ColorsList.mainButtonColor,
+              //   textColor: ColorsList.mainButtonTextColor,
+              //   fontSize: w * .045,
+              //   height: w * .140,
+              //   radius: 12.0,
+              // ),
             ],
           ),
         ),
