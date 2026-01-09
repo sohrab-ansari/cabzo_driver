@@ -7,6 +7,7 @@ import 'package:corezap_driver/utilities/custom_font.dart';
 import 'package:corezap_driver/utilities/custom_images.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
 import 'package:corezap_driver/views/alerts/driver_agreement.dart';
+import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
 import 'package:corezap_driver/views/bottomNavigation/home_maps_screen.dart';
 import 'package:corezap_driver/views/home_related/live_ride.dart';
 import 'package:corezap_driver/views/home_related/raise_requiest.dart';
@@ -245,7 +246,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => HomeMapsScreen()),
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const BottomnavmainScreen(startWithMaps: true),
+                    ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
