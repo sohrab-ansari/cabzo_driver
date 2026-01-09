@@ -127,85 +127,102 @@ class _HomeScreenState extends State<HomeScreen> {
                           //   ),
                           // ),
                           // toggle
-                          Obx(
-                            () => InkWell(
-                              onTap: () {
-                                controllers.driverStatus.value =
-                                    !controllers.driverStatus.value;
-                              },
+                          Container(
+                            width: w * 0.26,
+                            height: w * 0.10,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF26061),
                               borderRadius: BorderRadius.circular(w * 0.06),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 250),
-                                curve: Curves.easeInOut,
-                                width: w * 0.26,
-                                height: w * 0.10,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: w * 0.015,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: controllers.driverStatus.value
-                                      ? AppColors.green.withOpacity(0.1)
-                                      : AppColors.primaryRed.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(w * 0.06),
-                                  border: Border.all(
-                                    color: controllers.driverStatus.value
-                                        ? AppColors.green
-                                        : AppColors.primaryRed,
-                                    width: 1.2,
-                                  ),
-                                ),
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    // Text
-                                    Align(
-                                      alignment: controllers.driverStatus.value
-                                          ? Alignment.centerRight
-                                          : Alignment.centerLeft,
-                                      child: Padding(
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: w * 0.025,
-                                        ),
-                                        child: AppFonts.textPoppins(
-                                          context,
-                                          controllers.driverStatus.value
-                                              ? "Online"
-                                              : "Offline",
-                                          w * 0.032,
-                                          FontWeight.w500,
-                                          controllers.driverStatus.value
-                                              ? AppColors.green
-                                              : AppColors.primaryRed,
-                                          TextAlign.center,
-                                          TextOverflow.visible,
-                                        ),
-                                      ),
-                                    ),
-
-                                    // Circle knob
-                                    AnimatedAlign(
-                                      duration: const Duration(
-                                        milliseconds: 250,
-                                      ),
-                                      alignment: controllers.driverStatus.value
-                                          ? Alignment.centerLeft
-                                          : Alignment.centerRight,
-                                      child: Container(
-                                        width: w * 0.06,
-                                        height: w * 0.06,
-                                        decoration: BoxDecoration(
-                                          color: controllers.driverStatus.value
-                                              ? AppColors.green
-                                              : AppColors.primaryRed,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Offline',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: w * 0.032,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
+                          // Obx(
+                          //   () => InkWell(
+                          //     onTap: () {
+                          //       controllers.driverStatus.value =
+                          //           !controllers.driverStatus.value;
+                          //     },
+                          //     borderRadius: BorderRadius.circular(w * 0.06),
+                          //     child: AnimatedContainer(
+                          //       duration: const Duration(milliseconds: 250),
+                          //       curve: Curves.easeInOut,
+                          //       width: w * 0.26,
+                          //       height: w * 0.10,
+                          //       padding: EdgeInsets.symmetric(
+                          //         horizontal: w * 0.015,
+                          //       ),
+                          //       decoration: BoxDecoration(
+                          //         color: controllers.driverStatus.value
+                          //             ? AppColors.green.withOpacity(0.1)
+                          //             : const Color.fromARGB(255, 227, 104, 38).withOpacity(0.1),
+                          //         borderRadius: BorderRadius.circular(w * 0.06),
+                          //         border: Border.all(
+                          //           color: controllers.driverStatus.value
+                          //               ? AppColors.green
+                          //               : AppColors.primaryRed,
+                          //           width: 1.2,
+                          //         ),
+                          //       ),
+                          //       child: Stack(
+                          //         alignment: Alignment.center,
+                          //         children: [
+                          //           // Text
+                          //           Align(
+                          //             alignment: controllers.driverStatus.value
+                          //                 ? Alignment.centerRight
+                          //                 : Alignment.centerLeft,
+                          //             child: Padding(
+                          //               padding: EdgeInsets.symmetric(
+                          //                 horizontal: w * 0.025,
+                          //               ),
+                          //               child: AppFonts.textPoppins(
+                          //                 context,
+                          //                 controllers.driverStatus.value
+                          //                     ? "Online"
+                          //                     : "Offline",
+                          //                 w * 0.032,
+                          //                 FontWeight.w500,
+                          //                 controllers.driverStatus.value
+                          //                     ? AppColors.green
+                          //                     : AppColors.primaryRed,
+                          //                 TextAlign.center,
+                          //                 TextOverflow.visible,
+                          //               ),
+                          //             ),
+                          //           ),
+
+                          //           // Circle knob
+                          //           AnimatedAlign(
+                          //             duration: const Duration(
+                          //               milliseconds: 250,
+                          //             ),
+                          //             alignment: controllers.driverStatus.value
+                          //                 ? Alignment.centerLeft
+                          //                 : Alignment.centerRight,
+                          //             child: Container(
+                          //               width: w * 0.06,
+                          //               height: w * 0.06,
+                          //               decoration: BoxDecoration(
+                          //                 color: controllers.driverStatus.value
+                          //                     ? AppColors.green
+                          //                     : AppColors.primaryRed,
+                          //                 shape: BoxShape.circle,
+                          //               ),
+                          //             ),
+                          //           ),
+                          //         ],
+                          //       ),
+                          //     ),
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),
@@ -233,12 +250,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
               Text(
                 "You're Offline",
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: w * 0.05,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
 
               Text(
                 "Go online to start accepting rides.",
-                style: TextStyle(fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  color: const Color(0xFF5F6165),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
 
               SizedBox(height: w * 0.04),

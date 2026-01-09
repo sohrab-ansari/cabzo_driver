@@ -222,13 +222,49 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                                       children: [
                                         Row(
                                           children: [
-                                            SizedBox(
-                                              width: w * 0.94,
-                                              height: h * 0.55,
+                                            Container(
+                                              width: w * 0.46,
                                               child: vehicleCard(
                                                 image:
                                                     "assets/images/image1.png",
                                                 title: "I have a vehicle",
+                                                desc:
+                                                    "Register your vehicle to begin driving. A quick verification will get you on the road.",
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Container(
+                                              width: w * 0.46,
+                                              child: vehicleCard(
+                                                image:
+                                                    "assets/images/image2.png",
+                                                title: "I have a vehicle",
+                                                desc:
+                                                    "Register your vehicle to begin driving. A quick verification will get you on the road.",
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              width: w * 0.46,
+                                              child: vehicleCard(
+                                                image:
+                                                    "assets/images/image3.png",
+                                                title: "I need a vehicle",
+                                                desc:
+                                                    "Register your vehicle to begin driving. A quick verification will get you on the road.",
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Container(
+                                              width: w * 0.46,
+                                              child: vehicleCard(
+                                                image:
+                                                    "assets/images/image4.png",
+                                                title: "I need a vehicle",
                                                 desc:
                                                     "Register your vehicle to begin driving. A quick verification will get you on the road.",
                                               ),
@@ -1157,13 +1193,13 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                                     maxLines: 2,
                                   ),
                                 ),
-                                SizedBox(height: w * .02),
+                                SizedBox(height: w * .17),
                                 Center(
                                   child: Column(
                                     children: [
                                       CustomDocumentUploader(
-                                        width: w * .4,
-                                        height: w * .4,
+                                        width: w * .5,
+                                        height: w * .5,
                                         isCircular: true,
                                         // onUploadPressed: () {
                                         //   // Handle file upload logic here, e.g., show file picker.
