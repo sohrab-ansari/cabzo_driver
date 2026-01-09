@@ -114,7 +114,6 @@
 // // //                             ],
 // // //                           ),
 
-                         
 // // //                         ],
 // // //                       ),
 // // //                     ),
@@ -125,7 +124,7 @@
 // // //                     begin: const Offset(0.95, 0.95),
 // // //                     end: const Offset(1, 1),
 // // //                   ),
-             
+
 // // //              GoogleMap(initialCameraPosition: initialCameraPosition),
 // // //               AppFonts.textPoppins(
 // // //                 context,
@@ -299,7 +298,7 @@
 // // //                           end: const Offset(1, 1),
 // // //                         ),
 // // //               ),
-             
+
 // // //               //? timer for except ride
 // // //               // Center(child: CircularTimer(size: w * .5)),
 // // //               Padding(
@@ -358,7 +357,6 @@
 // // //     );
 // // //   }
 // // // }
-
 
 // // import 'package:corezap_driver/controller/controllers.dart';
 // // import 'package:corezap_driver/controller/stepper_controller.dart';
@@ -421,12 +419,10 @@
 // //               _dateText(context, w),
 // //               SizedBox(height: w * 0.04),
 
-             
 // //               SizedBox(height: w * 0.04),
 
 // //               Stack(children :[
 // // _mapView(w),
-                
 
 // //                  _fareCard(context, w),
 // //               ] ),
@@ -826,7 +822,6 @@
 // //   }
 // // }
 
-
 // import 'package:corezap_driver/controller/controllers.dart';
 // import 'package:corezap_driver/controller/stepper_controller.dart';
 // import 'package:corezap_driver/utilities/app_buttons.dart';
@@ -1195,7 +1190,6 @@
 //   }
 // }
 
-
 import 'package:corezap_driver/controller/controllers.dart';
 import 'package:corezap_driver/controller/stepper_controller.dart';
 import 'package:corezap_driver/utilities/app_buttons.dart';
@@ -1271,12 +1265,14 @@ class _LiveRideState extends State<LiveRide> {
       bounds = LatLngBounds(southwest: dropLatLng, northeast: pickupLatLng);
     } else if (pickupLatLng.longitude > dropLatLng.longitude) {
       bounds = LatLngBounds(
-          southwest: LatLng(pickupLatLng.latitude, dropLatLng.longitude),
-          northeast: LatLng(dropLatLng.latitude, pickupLatLng.longitude));
+        southwest: LatLng(pickupLatLng.latitude, dropLatLng.longitude),
+        northeast: LatLng(dropLatLng.latitude, pickupLatLng.longitude),
+      );
     } else if (pickupLatLng.latitude > dropLatLng.latitude) {
       bounds = LatLngBounds(
-          southwest: LatLng(dropLatLng.latitude, pickupLatLng.longitude),
-          northeast: LatLng(pickupLatLng.latitude, dropLatLng.longitude));
+        southwest: LatLng(dropLatLng.latitude, pickupLatLng.longitude),
+        northeast: LatLng(pickupLatLng.latitude, dropLatLng.longitude),
+      );
     } else {
       bounds = LatLngBounds(southwest: pickupLatLng, northeast: dropLatLng);
     }
@@ -1330,7 +1326,7 @@ class _LiveRideState extends State<LiveRide> {
       "30 August, 2025",
       w * 0.04,
       FontWeight.w500,
-      AppColors.black,
+      const Color(0xFF5F6165),
       TextAlign.center,
       TextOverflow.visible,
     );
@@ -1391,7 +1387,10 @@ class _LiveRideState extends State<LiveRide> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(w * 0.03),
         child: GoogleMap(
-          initialCameraPosition: CameraPosition(target: pickupLatLng, zoom: 14.5),
+          initialCameraPosition: CameraPosition(
+            target: pickupLatLng,
+            zoom: 14.5,
+          ),
           myLocationEnabled: true,
           zoomControlsEnabled: false,
           markers: _markers,
@@ -1409,9 +1408,32 @@ class _LiveRideState extends State<LiveRide> {
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
-            Text("Location", style: TextStyle(fontWeight: FontWeight.w500)),
-            Text("Time 10 min", style: TextStyle(fontWeight: FontWeight.w500)),
+          children: [
+            Text(
+              "Location",
+              style: TextStyle(fontSize: w * 0.04, fontWeight: FontWeight.w500),
+            ),
+            // Text("Time 10 min", style: TextStyle(fontWeight: FontWeight.w500)),
+            Text.rich(
+              TextSpan(
+                text: "Time ",
+                style: TextStyle(
+                  fontSize: w * 0.029,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF7C7C8D),
+                ),
+                children: [
+                  TextSpan(
+                    text: "10 min",
+                    style: TextStyle(
+                      fontSize: w * 0.04,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
         SizedBox(height: 10),
@@ -1420,7 +1442,11 @@ class _LiveRideState extends State<LiveRide> {
           children: [
             Column(
               children: [
-                CustomImages.images("assets/icons/greenDot.png", w * 0.05, w * 0.05),
+                CustomImages.images(
+                  "assets/icons/greenDot.png",
+                  w * 0.05,
+                  w * 0.05,
+                ),
                 SizedBox(
                   height: w * 0.1,
                   child: DottedLine(
@@ -1429,7 +1455,11 @@ class _LiveRideState extends State<LiveRide> {
                     dashColor: AppColors.green,
                   ),
                 ),
-                CustomImages.images("assets/icons/redDot.png", w * 0.05, w * 0.05),
+                CustomImages.images(
+                  "assets/icons/redDot.png",
+                  w * 0.05,
+                  w * 0.05,
+                ),
               ],
             ),
             SizedBox(width: w * 0.03),
@@ -1437,11 +1467,17 @@ class _LiveRideState extends State<LiveRide> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _locationText(context, "Pickup",
-                      "Manikonda Jagir, Hyderabad, Telangana"),
+                  _locationText(
+                    context,
+                    "Pickup",
+                    "Manikonda Jagir, Hyderabad, Telangana",
+                  ),
                   SizedBox(height: w * 0.05),
-                  _locationText(context, "Drop",
-                      "Manikonda Jagir, Hyderabad, Telangana"),
+                  _locationText(
+                    context,
+                    "Drop",
+                    "Manikonda Jagir, Hyderabad, Telangana",
+                  ),
                 ],
               ),
             ),
@@ -1479,14 +1515,17 @@ class _LiveRideState extends State<LiveRide> {
   }
 
   Widget _distanceCard(BuildContext context, double w) {
-    return Container(
+    return SizedBox(
       height: w * 0.20,
       child: Row(
         children: List.generate(detailsTitle.length, (index) {
           return Expanded(
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: w * 0.015),
-              padding: EdgeInsets.symmetric(vertical: w * 0.03, horizontal: w * 0.02),
+              padding: EdgeInsets.symmetric(
+                vertical: w * 0.03,
+                horizontal: w * 0.02,
+              ),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(w * 0.025),
@@ -1497,7 +1536,9 @@ class _LiveRideState extends State<LiveRide> {
                     offset: const Offset(0, 3),
                   ),
                 ],
-                border: Border.all(color: AppColors.mediumGray.withOpacity(0.3)),
+                border: Border.all(
+                  color: AppColors.mediumGray.withOpacity(0.3),
+                ),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1505,7 +1546,7 @@ class _LiveRideState extends State<LiveRide> {
                   AppFonts.textPoppins(
                     context,
                     detailsTitle[index],
-                    w * 0.032,
+                    w * 0.037,
                     FontWeight.w600,
                     AppColors.mediumGray,
                     TextAlign.center,
