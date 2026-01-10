@@ -327,7 +327,6 @@
 //   }
 // }
 
-
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/colors/colors_list.dart';
 import 'package:corezap_driver/utilities/custom_font.dart';
@@ -424,19 +423,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: const SizedBox(),
-        title: AppFonts.textRubik(
-          context,
-          "Profile",
-          w * 0.055,
-          FontWeight.w600,
-          AppColors.black,
-          TextAlign.center,
-          TextOverflow.ellipsis,
-          maxLines: 1,
-        )
-            .animate()
-            .fade(duration: 800.ms)
-            .scale(begin: const Offset(0.95, 0.95)),
+        title:
+            AppFonts.textRubik(
+                  context,
+                  "Profile",
+                  w * 0.055,
+                  FontWeight.w600,
+                  AppColors.black,
+                  TextAlign.center,
+                  TextOverflow.ellipsis,
+                  maxLines: 1,
+                )
+                .animate()
+                .fade(duration: 800.ms)
+                .scale(begin: const Offset(0.95, 0.95)),
       ),
       body: ListView(
         padding: EdgeInsets.symmetric(horizontal: w * .02),
@@ -532,8 +532,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: customMenuItemsButton(images[index], titles[index]),
               ),
-              if (index != images.length - 1)
-                Divider(indent: w * .13),
+              if (index != images.length - 1) Divider(indent: w * .13),
             ],
           );
         }),
@@ -551,7 +550,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           padding: EdgeInsets.all(w * .04),
           child: Row(
             children: [
-              CustomImages.images("assets/icons/Sign_Out.png", w * .06, w * .06),
+              CustomImages.images(
+                "assets/icons/Sign_Out.png",
+                w * .06,
+                w * .06,
+              ),
               SizedBox(width: w * .03),
               CustomText(
                 text: "Logout",
@@ -569,16 +572,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget customMenuItemsButton(String imagePath, String title) {
     final double w = MediaQuery.of(context).size.width;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: w * .04, vertical: w * .012),
-      child: Row(
-        children: [
-          CustomImages.images(imagePath, w * .07, w * .07),
-          SizedBox(width: w * .03),
-          CustomText(text: title, textFontSize: w * .04),
-          const Spacer(),
-          Icon(Icons.arrow_forward_ios, size: w * .04),
-        ],
+    return Container(
+      width: double.infinity,
+      color: ColorsList.scaffoldColor,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: w * .04, vertical: w * .012),
+        child: Row(
+          children: [
+            CustomImages.images(imagePath, w * .07, w * .07),
+            SizedBox(width: w * .03),
+            CustomText(text: title, textFontSize: w * .04),
+            const Spacer(),
+            Icon(Icons.arrow_forward_ios, size: w * .04),
+          ],
+        ),
       ),
     );
   }
