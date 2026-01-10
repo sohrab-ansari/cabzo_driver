@@ -77,7 +77,7 @@ class _BottomnavmainScreenState extends State<BottomnavmainScreen> {
                           text: 'Home',
                           iconSize: w * 0.06,
                           leading: Image.asset(
-                            'assets/icons/home1.png',
+                            'assets/icons/home.png',
                             width: w * 0.06,
                             height: w * 0.06,
                             color: _selectedIndex == 0
@@ -90,7 +90,7 @@ class _BottomnavmainScreenState extends State<BottomnavmainScreen> {
                           text: 'Rides',
                           iconSize: w * 0.06,
                           leading: Image.asset(
-                            'assets/icons/rides1.png',
+                            'assets/icons/rides.png',
                             width: w * 0.06,
                             height: w * 0.06,
                             color: _selectedIndex == 1
@@ -103,7 +103,7 @@ class _BottomnavmainScreenState extends State<BottomnavmainScreen> {
                           text: 'Wallet',
                           iconSize: w * 0.06,
                           leading: Image.asset(
-                            'assets/icons/wallet3.png',
+                            'assets/icons/wallet.png',
                             width: w * 0.06,
                             height: w * 0.06,
                             color: _selectedIndex == 2

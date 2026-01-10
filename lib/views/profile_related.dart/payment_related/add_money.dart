@@ -298,7 +298,7 @@ class _AddMoneyState extends State<AddMoney> {
               padding: EdgeInsets.symmetric(horizontal: w * .06),
               child: AppButtons.solid(
                 context: context,
-                text: "+ Add Money",
+                text: "Pay(50)",
                 onClicked: () {},
                 isFullWidth: true,
                 backgroundColor: const Color(0xFFE0E4E7),
