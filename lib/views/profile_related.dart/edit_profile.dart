@@ -6,6 +6,7 @@ import 'package:corezap_driver/utilities/custom_text.dart';
 import 'package:corezap_driver/utilities/form_field.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:corezap_driver/utilities/colors.dart';
@@ -241,7 +242,7 @@ class _EditProfileState extends State<EditProfile> {
                   },
                   suffixIcon: Icon(
                     Icons.calendar_month,
-                    color: AppColors.primaryRed,
+                    color: Colors.black,
                     size: w * 0.055,
                   ),
                 ),
@@ -305,7 +306,7 @@ class _EditProfileState extends State<EditProfile> {
                   },
                   suffixIcon: Icon(
                     Icons.keyboard_arrow_down_rounded,
-                    color: AppColors.primaryRed,
+                    color: Colors.black,
                     size: w * 0.065,
                   ),
                 ),
@@ -314,7 +315,10 @@ class _EditProfileState extends State<EditProfile> {
                 AppButtons.solid(
                   context: context,
                   text: "Profile Update",
-                  onClicked: () {},
+                  onClicked: () {
+                    // updateProfile();
+                    Get.back();
+                  },
                   isFullWidth: true,
                   backgroundColor: AppColors.primaryRed,
                   textColor: AppColors.black,

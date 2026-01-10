@@ -336,7 +336,7 @@ import 'package:corezap_driver/utilities/navigator.dart';
 import 'package:corezap_driver/views/popups/pop_ups.dart';
 import 'package:corezap_driver/views/profile_related.dart/documents.dart';
 import 'package:corezap_driver/views/profile_related.dart/edit_profile.dart';
-import 'package:corezap_driver/views/profile_related.dart/faq_screen.dart';
+// FAQ removed from profile menu
 import 'package:corezap_driver/views/profile_related.dart/help_related/help_screen.dart';
 import 'package:corezap_driver/views/profile_related.dart/notification.dart';
 import 'package:corezap_driver/views/profile_related.dart/notification_screen.dart';
@@ -392,22 +392,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   /// Second section
   final List<String> secondImagePathList = [
     "assets/icons/Question_Circle.png",
-    "assets/icons/Task_List_Square.png",
     "assets/icons/material-symbols_policy.png",
     "assets/icons/material-symbols_policy.png",
   ];
 
   final List<Widget> secondScreens = [
     HelpScreen(),
-    FaqScreen(),
-    // HelpScreen(), // replace with FaqScreen() if available
     TermsCondition(),
     PrivacyPolicy(),
   ];
 
   final List<String> secondTitleList = [
-    "Help",
-    "Faqs",
+    "Help & Support",
     "Terms & Conditions",
     "Privacy Policy",
   ];
@@ -517,26 +513,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
     List<String> titles,
     List<Widget> screens,
   ) {
-    return Card(
-      elevation: 1,
-      color: ColorsList.scaffoldColor,
-      child: Column(
-        children: List.generate(images.length, (index) {
-          return Column(
-            children: [
-              GestureDetector(
-                onTap: () => CustomNavigator.push(
-                  context,
-                  screens[index],
-                  transition: TransitionType.slideLeft,
-                ),
-                child: customMenuItemsButton(images[index], titles[index]),
+    return Column(
+      children: List.generate(images.length, (index) {
+        return Padding(
+          padding: EdgeInsets.only(bottom: w * .02),
+          child: Card(
+            elevation: 1,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => CustomNavigator.push(
+                context,
+                screens[index],
+                transition: TransitionType.slideLeft,
               ),
-              if (index != images.length - 1) Divider(indent: w * .13),
-            ],
-          );
-        }),
-      ),
+              child: customMenuItemsButton(images[index], titles[index]),
+            ),
+          ),
+        );
+      }),
     );
   }
 
@@ -571,18 +568,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   /// COMMON MENU ITEM
   Widget customMenuItemsButton(String imagePath, String title) {
     final double w = MediaQuery.of(context).size.width;
-
     return Container(
       width: double.infinity,
-      color: ColorsList.scaffoldColor,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: w * .04, vertical: w * .012),
+        padding: EdgeInsets.all(w * .04),
         child: Row(
           children: [
-            CustomImages.images(imagePath, w * .07, w * .07),
+            CustomImages.images(imagePath, w * .06, w * .06),
             SizedBox(width: w * .03),
-            CustomText(text: title, textFontSize: w * .04),
-            const Spacer(),
+            Expanded(
+              child: CustomText(
+                text: title,
+                textFontSize: w * .04,
+                textFontWeight: FontWeight.w500,
+              ),
+            ),
             Icon(Icons.arrow_forward_ios, size: w * .04),
           ],
         ),

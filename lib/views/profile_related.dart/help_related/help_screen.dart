@@ -71,9 +71,7 @@
 //             mainAxisSize: MainAxisSize.min,
 //             children: [
 
-
 //               Text("Comman Topics"),
-
 
 //                Row(
 //                  children: [
@@ -109,8 +107,6 @@
 //                    ),
 //                  ],
 //                ),
-              
-              
 
 //  Image.asset("assets/images/image5.png"),
 //                Text("Need help? We’re just a message away!"),
@@ -138,8 +134,7 @@
 
 //               //  }, child: Text("Contact Live Support"))
 //             ]
-            
-            
+
 //             // List.generate(4, (index) {
 //             //   return Column(
 //             //     children: [
@@ -171,8 +166,7 @@
 //             //     ],
 //             //   );
 //             // }),
-         
-         
+
 //           ),
 //         ),
 //       ),
@@ -217,7 +211,6 @@
 //   }
 // }
 
-
 import 'package:corezap_driver/utilities/colors/colors_list.dart';
 import 'package:corezap_driver/utilities/custom_images.dart';
 import 'package:corezap_driver/utilities/custom_text.dart';
@@ -234,22 +227,10 @@ class HelpScreen extends StatefulWidget {
 
 class _HelpScreenState extends State<HelpScreen> {
   final List<Map<String, String>> commonTopics = [
-    {
-      "icon": "assets/images/drive_image.png",
-      "title": "Ride Issues",
-    },
-    {
-      "icon": "assets/images/earnimage.png",
-      "title": "Earning Issues",
-    },
-    {
-      "icon": "assets/images/steering-wheel.png",
-      "title": "Account Issues",
-    },
-    {
-      "icon": "assets/images/steering-wheel2.png",
-      "title": "Safety Issues",
-    },
+    {"icon": "assets/images/drive_image.png", "title": "Ride Issues"},
+    {"icon": "assets/images/earnimage.png", "title": "Earning Issues"},
+    {"icon": "assets/images/steering-wheel.png", "title": "Account Issues"},
+    {"icon": "assets/images/steering-wheel2.png", "title": "Safety Issues"},
   ];
 
   @override
@@ -262,7 +243,7 @@ class _HelpScreenState extends State<HelpScreen> {
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: w * .04),
         child: Container(
-           color: Colors.white,
+          color: Colors.white,
           child: Padding(
             padding: EdgeInsets.all(w * .04),
             child: Column(
@@ -275,9 +256,9 @@ class _HelpScreenState extends State<HelpScreen> {
                   textFontSize: w * .045,
                   textFontWeight: FontWeight.w600,
                 ),
-                    
+
                 SizedBox(height: w * .04),
-                    
+
                 /// Common Topics Grid
                 GridView.builder(
                   shrinkWrap: true,
@@ -296,9 +277,9 @@ class _HelpScreenState extends State<HelpScreen> {
                     );
                   },
                 ),
-                    
+
                 SizedBox(height: w * .06),
-                    
+
                 /// Illustration
                 Center(
                   child: Image.asset(
@@ -306,9 +287,9 @@ class _HelpScreenState extends State<HelpScreen> {
                     width: w * .55,
                   ),
                 ),
-                    
+
                 SizedBox(height: w * .04),
-                    
+
                 /// Support Text
                 Center(
                   child: CustomText(
@@ -319,9 +300,9 @@ class _HelpScreenState extends State<HelpScreen> {
                     textFontWeight: FontWeight.w400,
                   ),
                 ),
-                    
+
                 SizedBox(height: w * .05),
-                    
+
                 /// Contact Support Button
                 Center(
                   child: SizedBox(
@@ -386,38 +367,26 @@ class _HelpScreenState extends State<HelpScreen> {
   }
 
   /// -------------------- Common Topic Item --------------------
-  Widget _commonTopicItem({
-    required String icon,
-    required String title,
-  }) {
+  Widget _commonTopicItem({required String icon, required String title}) {
     return InkWell(
       borderRadius: BorderRadius.circular(10),
       onTap: () {
-        if (title == "FAQs") {
-          CustomNavigator.push(
-            context,
-            FAQs(),
-            transition: TransitionType.slideLeft,
-          );
-        }
+        CustomNavigator.push(
+          context,
+          FAQs(),
+          transition: TransitionType.slideLeft,
+        );
       },
       child: Container(
-      
         decoration: BoxDecoration(
           color: Color(0xFFF7F7F7),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: ColorsList.textfieldBorderColorSe,
-          ),
+          border: Border.all(color: ColorsList.textfieldBorderColorSe),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              icon,
-              width: 40,
-              height: 40,
-            ),
+            Image.asset(icon, width: 40, height: 40),
             const SizedBox(height: 8),
             CustomText(
               text: title,
