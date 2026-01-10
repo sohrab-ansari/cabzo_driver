@@ -623,12 +623,16 @@
 
 
 import 'package:corezap_driver/controller/stepper_controller.dart';
+import 'package:corezap_driver/utilities/navigator.dart';
+import 'package:corezap_driver/views/scheduled_pickups/accepted_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 class ArrivedOtpScreen extends StatefulWidget {
-  const ArrivedOtpScreen({super.key});
+  bool? bookridetypecheck;
+
+   ArrivedOtpScreen({super.key, this.bookridetypecheck});
 
   @override
   State<ArrivedOtpScreen> createState() => _ArrivedOtpScreenState();
@@ -651,17 +655,22 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
 
+
+      
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text("OTP"),
-        centerTitle: true,
+        leadingWidth: w * 0.08,
+        title:  Text("OTP  ${widget.bookridetypecheck}"),
+        // centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
       ),
-      body: SingleChildScrollView(
+      body: 
+
+      SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(
           w * 0.06,
           w * 0.06,
@@ -742,14 +751,193 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
               onCompleted: (value) => enteredOtp = value,
             ),
 
-            const SizedBox(height: 60),
+            const SizedBox(height: 20),
+
+
+            if(widget.bookridetypecheck == true) ...[
+
+              Container(
+  decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(14),
+    border: Border.all(
+      color: Colors.grey,
+      width: 1,
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.15),
+        blurRadius: 6,
+        offset: const Offset(0, 3),
+      ),
+    ],
+  ),
+  child: Padding(
+    padding: EdgeInsets.symmetric(
+      horizontal: w * 0.04,
+      vertical: w * 0.035,
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        /// Red Dot Icon
+        Image.asset(
+          "assets/icons/redDot.png",
+          height: w * 0.05,
+          width: w * 0.05,
+        ),
+
+        SizedBox(width: w * 0.03),
+
+        /// Text Content
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// Label
+              Text(
+                "Drop",
+                style: TextStyle(
+                  fontSize: w * 0.035,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+              ),
+
+              SizedBox(height: 6),
+
+              /// Address
+              Text(
+                "Bus Sta Upas, Majestic, Bengaluru, Karnataka 560009",
+                style: TextStyle(
+                  fontSize: w * 0.032,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.grey.shade700,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  ),
+),
+  SizedBox(height: 20),
+
+//               Card(
+//                 color: Colors.white,
+//   elevation: 3,
+//   shadowColor: Colors.black.withOpacity(0.15),
+//   shape: RoundedRectangleBorder(
+//     borderRadius: BorderRadius.circular(14),
+//   ),
+//   child: Padding(
+//     padding: EdgeInsets.symmetric(
+//       horizontal: w * 0.04,
+//       vertical: w * 0.035,
+//     ),
+//     child: Row(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         /// Red Dot Icon
+//         Image.asset(
+//           "assets/icons/redDot.png",
+//           height: w * 0.05,
+//           width: w * 0.05,
+//         ),
+
+//         SizedBox(width: w * 0.03),
+
+//         /// Text Content
+//         Expanded(
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               /// Label
+//               Text(
+//                 "Drop",
+//                 style: TextStyle(
+//                   fontSize: w * 0.035,
+//                   fontWeight: FontWeight.w600,
+//                   color: Colors.black,
+//                 ),
+//               ),
+
+//               SizedBox(height: 6),
+
+//               /// Address
+//               Text(
+//                 "Bus Sta Upas, Majestic, Bengaluru, Karnataka 560009",
+//                 style: TextStyle(
+//                   fontSize: w * 0.032,
+//                   fontWeight: FontWeight.w400,
+//                   color: Colors.grey.shade700,
+//                 ),
+//                 maxLines: 2,
+//                 overflow: TextOverflow.ellipsis,
+//               ),
+//             ],
+//           ),
+//         ),
+//       ],
+//     ),
+//   ),
+// )
+
+
+ SizedBox(height: 10,)
+
+    //           Column(
+    //             children: [
+    //               Row(
+    //                 children: [
+
+    // Image.asset(
+    //                   "assets/icons/redDot.png",
+    //                   height: w * 0.06,
+    //                   width: w * 0.06,
+    //                 ),
+    //                   Column(
+    //                     crossAxisAlignment: CrossAxisAlignment.start,
+    //                     children: [
+    //                       Text("Drop"),
+    //                                         Text("Bus Sta Upas, Majestic, Bengaluru, Karnataka 560009")
+
+    //                     ],
+    //                   ),
+    //                 ],
+    //               ),
+
+                
+    //             ],
+    //           )
+
+              
+
+            ],
 
             /// VERIFY BUTTON
+            /// 
+            // ArrivingClient
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: () {
+                onPressed:  widget.bookridetypecheck == true  ?
+                
+                 () {
+            
+              CustomNavigator.push(
+        context,
+         ArrivingClient(typeCheck:  true,),
+        transition: TransitionType.fade,
+      );
+                       
+                }
+
+                :     () {
                   if (enteredOtp.length != 4) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
