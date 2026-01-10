@@ -199,7 +199,7 @@ class _HomeMapsScreenState extends State<HomeMapsScreen> {
     return Column(
       children: [
         /// Offline Image
-        Image.asset("assets/images/online.png", height: 120),
+        Image.asset("assets/images/onlinee.png", height: 120),
 
         const SizedBox(height: 12),
 
