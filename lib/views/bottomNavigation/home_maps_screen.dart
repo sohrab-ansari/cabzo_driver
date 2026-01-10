@@ -1,5 +1,6 @@
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/custom_font.dart';
+import 'package:corezap_driver/views/book_ride/book_ride.dart';
 import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -21,6 +22,7 @@ class _HomeMapsScreenState extends State<HomeMapsScreen> {
   @override
   void initState() {
     super.initState();
+
     ///
     ///**** this need to modify */
     //this will navigate to live ride screen after 2 seconds when home map screen is loaded for demo purpose
@@ -34,6 +36,7 @@ class _HomeMapsScreenState extends State<HomeMapsScreen> {
       });
     });
   }
+
   ///
   ///
   ///
@@ -67,7 +70,9 @@ class _HomeMapsScreenState extends State<HomeMapsScreen> {
               top: 16,
               right: 16,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Get.to(() => const BookRide());
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.cyan,
                   elevation: 4,
