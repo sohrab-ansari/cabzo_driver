@@ -20,6 +20,10 @@ class Documents extends StatefulWidget {
 class _DocumentsState extends State<Documents> {
   DriverFormController driverFormController = Get.put(DriverFormController());
   List detailsAbout = ["Vehicle Details", "Personal Details", "Profile Photo"];
+
+
+
+
   List detailsSubTitle = [
     "Add your vehicle information for verification.",
     "Your personal info helps us verify your account.",
@@ -190,13 +194,18 @@ class _DocumentsState extends State<Documents> {
                       padding: EdgeInsets.symmetric(vertical: w * .03),
                       child: InkWell(
                         onTap: () {
+
+                          print("i_am_tapping>>>>");
                           int targetStep;
                           if (driverFormController.activeStep.value == 0) {
-                            targetStep = index + 1;
+
+                            // targetStep = index ;
+
                           } else {
-                            targetStep = index + 2;
+
+                            // targetStep = index ;
                           }
-                          driverFormController.activeStep.value = targetStep;
+                          // driverFormController.activeStep.value = targetStep;
                           CustomNavigator.push(
                             context,
                             DriverRegistration(),
@@ -238,6 +247,7 @@ class _DocumentsState extends State<Documents> {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    //  Text("${driverFormController.activeStep.value }"),
                                     AppFonts.textPoppins(
                                       context,
                                       driverFormController.activeStep.value == 0
