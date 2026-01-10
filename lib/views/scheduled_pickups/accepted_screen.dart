@@ -13,7 +13,9 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class ArrivingClient extends StatefulWidget {
-  const ArrivingClient({super.key});
+  bool? typeCheck;
+
+   ArrivingClient({super.key, this.typeCheck});
 
   @override
   State<ArrivingClient> createState() => _ArrivingClientState();
@@ -169,9 +171,31 @@ class _ArrivingClientState extends State<ArrivingClient> {
             style: TextStyle(color: Colors.black54),
           ),
           SizedBox(height: w * .04),
+
+
+  if(widget.typeCheck == true) ...[
+_buildClientCard2(w)
+
+  ] else ...[
+
           _buildClientCard(w),
+
+  ],
+
+
+          
           const Spacer(),
+
+
+            if(widget.typeCheck == true) ...[
+_buildActionButtons2(w)
+
+  ] else ...[
+
           _buildActionButtons(w),
+
+  ],
+          // _buildActionButtons(w),
         ],
       ),
     );
@@ -194,6 +218,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          
           Row(
             children: [
               CircleAvatar(
@@ -235,6 +260,72 @@ class _ArrivingClientState extends State<ArrivingClient> {
     );
   }
 
+
+
+ Widget _buildClientCard2(double w) {
+    return Container(
+
+  height: w * 0.5,
+      padding: EdgeInsets.all(w * .04),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(.08),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          
+          Row(
+            children: [
+              CircleAvatar(
+                radius: w * .055,
+                backgroundColor: Colors.grey.shade300,
+                child:Image.asset("assets/images/profile3.png")
+                
+                // profile3
+                //  Icon(
+                //   Icons.person,
+                //   size: w * .07,
+                //   color: Colors.grey.shade700,
+                // ),
+              ),
+              SizedBox(width: w * .03),
+              Expanded(
+                child: CustomText(
+                  text: "Muskan",
+                  textFontSize: w * .046,
+                  textFontWeight: FontWeight.w500,
+                ),
+              ),
+              // _circleIcon(Icons.call, () {}),
+              // SizedBox(width: w * .02),
+              // _circleImage("assets/images/mess.png", () {
+              //   CustomNavigator.push(context, const ChatScreen());
+              // }),
+            ],
+          ),
+          SizedBox(height: w * .08),
+          Align(
+            alignment: Alignment.center,
+            child: Text(
+              "Total Fare: ₹100",
+              style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blue,fontSize: 18),
+            ),
+          ),
+          SizedBox(height: w * .03),
+          // _buildPickupAddress(),
+        ],
+      ),
+    );
+  }
+
   Widget _buildPickupAddress() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,7 +346,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
     );
   }
 
-  Widget _buildActionButtons(double w) {
+ Widget _buildActionButtons(double w) {
     return Obx(() {
       final step = stepperController.activeStep.value;
 
@@ -284,13 +375,62 @@ class _ArrivingClientState extends State<ArrivingClient> {
                   // Navigate to OTP screen
                   CustomNavigator.push(
                     context,
-                    const ArrivedOtpScreen(),
+                     ArrivedOtpScreen(),
                     transition: TransitionType.fade,
                   );
                 } else if (step == 1) {
                   // Start trip action
                   _startTrip();
                 } else if (step == 2) {
+                  CustomNavigator.removeUntil(
+                    context,
+                    const ReceivePaymentModes(),
+                    transition: TransitionType.fade,
+                  );
+
+                  // ReceivePaymentModes
+                  // // Complete trip action (when trip is started)
+                  // _completeTrip();
+                } else {
+                  // Complete trip action (when trip is already marked as completed)
+                  _finalizeTrip();
+                }
+              },
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _buildActionButtons2(double w) {
+    return Obx(() {
+      final step = stepperController.activeStep.value;
+
+      return Row(
+        children: [
+          Expanded(
+            child: _actionButton(
+              text: "Cancel",
+              color: const Color(0xFFE0E4E7),
+              textColor: Colors.grey,
+              onTap: () {},
+            ),
+          ),
+          SizedBox(width: w * .04),
+          Expanded(
+            child: _actionButton(
+              text: step == 0
+                  ? "Start Trip"
+                  
+                  : "Complete", // Step 2 and 3 will both show "Complete"
+              color: const Color(0xFF26E3DD),
+              textColor: Colors.black87,
+              onTap: () {
+               if (step == 0) {
+                  // Start trip action
+                  _startTrip();
+                } else if (step == 1) {
                   CustomNavigator.removeUntil(
                     context,
                     const ReceivePaymentModes(),
