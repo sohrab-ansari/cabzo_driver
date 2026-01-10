@@ -1294,25 +1294,16 @@ class _LiveRideState extends State<LiveRide> {
           child: Column(
             children: [
               _dateText(context, w),
-              SizedBox(height: w * 0.04),
-
-              Stack(
-                children: [
-                  _mapView(w),
-                  Positioned(
-                    top: w * 0.04,
-                    left: w * 0.04,
-                    right: w * 0.04,
-                    child: _fareCard(context, w),
-                  ),
-                ],
-              ),
+              SizedBox(height: w * 0.02),
+              _fareCard(context, w),
+              SizedBox(height: w * 0.03),
+              _mapView(w),
 
               SizedBox(height: w * 0.04),
               _locationInfo(context, w),
               SizedBox(height: w * 0.04),
               _distanceCard(context, w),
-              SizedBox(height: w * 0.06),
+              SizedBox(height: w * 0.03),
               _actionButtons(context, w),
             ],
           ),
@@ -1517,14 +1508,14 @@ class _LiveRideState extends State<LiveRide> {
 
   Widget _distanceCard(BuildContext context, double w) {
     return SizedBox(
-      height: w * 0.20,
+      height: w * 0.18,
       child: Row(
         children: List.generate(detailsTitle.length, (index) {
           return Expanded(
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: w * 0.015),
               padding: EdgeInsets.symmetric(
-                vertical: w * 0.03,
+                vertical: w * 0.02,
                 horizontal: w * 0.02,
               ),
               decoration: BoxDecoration(
@@ -1553,7 +1544,7 @@ class _LiveRideState extends State<LiveRide> {
                     TextAlign.center,
                     TextOverflow.visible,
                   ),
-                  SizedBox(height: w * 0.012),
+
                   AppFonts.textPoppins(
                     context,
                     detailsValue[index],
