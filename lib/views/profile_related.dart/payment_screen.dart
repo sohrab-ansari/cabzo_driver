@@ -76,7 +76,7 @@
 //           child: Column(
 //             crossAxisAlignment: CrossAxisAlignment.start,
 //             children: [
-              
+
 //               AppFonts.textPoppins(
 //                     context,
 //                     "Wallets",
@@ -464,8 +464,6 @@
 //   }
 // }
 
-
-
 import 'package:corezap_driver/utilities/app_buttons.dart';
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/colors/colors_list.dart';
@@ -545,7 +543,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              
               AppFonts.textPoppins(
                     context,
                     "Wallets",
@@ -562,12 +559,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     end: const Offset(1, 1),
                   ),
               SizedBox(height: w * .02),
+
               //wallet container
 
               ////////////////////////////////////////////////////////////////////
-              
+
               // Column(
-                
+
               //   children: [
               //     InkWell(
               //       onTap: () {
@@ -679,7 +677,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               //                     //     //       );
               //                     //     //       walletButtonController.resetSelection();
               //                     //     //     },
-                  
+
               //                     //     //     buttonText: Padding(
               //                     //     //       padding: EdgeInsets.symmetric(
               //                     //     //         horizontal: w * .01,
@@ -724,7 +722,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
               //                     //     //   ),
               //                     //     // ),
 
-                                      
               //                     //     // AppButtons.outlined(
               //                     //     //   context: context,
               //                     //     //   text: "Add Money",
@@ -791,8 +788,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               //                     //     //     horizontal: w * .005,
               //                     //     //   ),
               //                     //     // ),
-                                      
-                                      
+
               //                     //     // Obx(
               //                     //     //   () => Buttons(
               //                     //     //     buttonWidth: w * .3,
@@ -810,7 +806,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               //                     //     //     borderColor: ColorsList.mainBlurLightColor,
               //                     //     //     onTap: () async {
               //                     //     //       walletButtonController.selectButton(1);
-                  
+
               //                     //     //       await Navigator.push(
               //                     //     //         context,
               //                     //     //         MaterialPageRoute(
@@ -818,7 +814,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               //                     //     //               TransactionsHistoryScreen(),
               //                     //     //         ),
               //                     //     //       );
-                  
+
               //                     //     //       walletButtonController.resetSelection();
               //                     //     //     },
               //                     //     //     buttonText: Padding(
@@ -856,8 +852,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               //                     //     // ),
               //                     //   ],
               //                     // ),
-                                
-                                
+
               //                   ],
               //                 ),
               //               ),
@@ -866,171 +861,156 @@ class _PaymentScreenState extends State<PaymentScreen> {
               //         ),
               //       ),
               //     ),
-                
-                
+
               //   ],
               // ),
-              
               Center(
-  child: Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-      InkWell(
-        onTap: () {
-          CustomNavigator.push(
-            context,
-            Wallet(),
-            transition: TransitionType.slideLeft,
-          );
-        },
-        child: Container(
-          width: double.infinity,
-          color: ColorsList.scaffoldColor,
-          padding: EdgeInsets.symmetric(
-            horizontal: w * .04,
-            vertical: w * .04,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: w * .75,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    AppFonts.textPoppins(
-                      context,
-                      "Available Balance",
-                      w * 0.030,
-                      FontWeight.w500,
-                      AppColors.black,
-                      TextAlign.center,
-                      TextOverflow.visible,
-                    )
-                        .animate()
-                        .fade(duration: 900.ms)
-                        .scale(),
+                    InkWell(
+                      onTap: () {
+                        CustomNavigator.push(
+                          context,
+                          Wallet(),
+                          transition: TransitionType.slideLeft,
+                        );
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        color: ColorsList.scaffoldColor,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: w * .04,
+                          vertical: w * .04,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: w * .75,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  AppFonts.textPoppins(
+                                    context,
+                                    "Available Balance",
+                                    w * 0.030,
+                                    FontWeight.w500,
+                                    const Color(0xFF72767C),
+                                    TextAlign.center,
+                                    TextOverflow.visible,
+                                  ).animate().fade(duration: 900.ms).scale(),
 
-                    SizedBox(height: w * .01),
+                                  SizedBox(height: w * .01),
 
-                    AppFonts.textPoppins(
-                      context,
-                      "₹1000.00",
-                      w * 0.1,
-                      FontWeight.w600,
-                     Color( 0xFF27C840),
-                      // AppColors.green,
-                      TextAlign.center,
-                      TextOverflow.visible,
-                    )
-                        .animate()
-                        .fade(duration: 900.ms)
-                        .scale(),
+                                  AppFonts.textPoppins(
+                                    context,
+                                    "₹1000.00",
+                                    w * 0.1,
+                                    FontWeight.w600,
+                                    Color(0xFF27C840),
+                                    // AppColors.green,
+                                    TextAlign.center,
+                                    TextOverflow.visible,
+                                  ).animate().fade(duration: 900.ms).scale(),
 
-                    SizedBox(height: w * .02),
+                                  SizedBox(height: w * .02),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    ],
-  ),
-),
 
+              Row(
+                children: [
+                  SizedBox(
+                    height: w * .12,
+                    width: w * .45,
+                    child: AppButtons.outlined(
+                      context: context,
+                      text: "Add Money",
+                      onClicked: () {
+                        CustomNavigator.push(
+                          context,
+                          WalletScreen(),
+                          transition: TransitionType.slideLeft,
+                        );
+                      },
+                      // prefixIcon: Container(
+                      //   width: w * .04,
+                      //   height: w * .04,
+                      //   decoration: BoxDecoration(
+                      //     borderRadius: BorderRadius.circular(20),
+                      //     color: ColorsList.addBackgroundColor,
+                      //   ),
+                      //   child: Icon(
+                      //     Icons.add,
+                      //     color: ColorsList.mainButtonColor,
+                      //     size: w * .04,
+                      //   ),
+                      // ),
+                      isFullWidth: false,
+                      width: w * .3,
+                      height: w * .08,
+                      borderColor: AppColors.primaryRed,
+                      backgroundColor: AppColors.white,
+                      textColor: AppColors.black,
+                      fontSize: w * .03,
+                      radius: 10,
+                      fontWeight: FontWeight.w500,
+                      padding: EdgeInsets.symmetric(horizontal: w * .005),
+                    ),
+                  ),
+                  //-----------------
+                  SizedBox(width: w * .02),
+                  SizedBox(
+                    height: w * .12,
+                    width: w * .45,
+                    child: AppButtons.outlined(
+                      context: context,
+                      text: "Transactions",
+                      onClicked: () {
+                        CustomNavigator.push(
+                          context,
+                          Transactions(),
+                          transition: TransitionType.slideLeft,
+                        );
+                      },
 
-Row(
-  children: [
-      SizedBox(
-        height: w * .12,
-        width: w * .45,
-        child: AppButtons.outlined(
-                                          context: context,
-                                          text: "Add Money",
-                                          onClicked: () {
-                                            CustomNavigator.push(
-                                              context,
-                                              WalletScreen(),
-                                              transition: TransitionType.slideLeft,
-                                            );
-                                          },
-                                          // prefixIcon: Container(
-                                          //   width: w * .04,
-                                          //   height: w * .04,
-                                          //   decoration: BoxDecoration(
-                                          //     borderRadius: BorderRadius.circular(20),
-                                          //     color: ColorsList.addBackgroundColor,
-                                          //   ),
-                                          //   child: Icon(
-                                          //     Icons.add,
-                                          //     color: ColorsList.mainButtonColor,
-                                          //     size: w * .04,
-                                          //   ),
-                                          // ),
-                                          isFullWidth: false,
-                                          width: w * .3,
-                                          height: w * .08,
-                                          borderColor: AppColors.primaryRed,
-                                          backgroundColor: AppColors.white,
-                                          textColor: AppColors.black,
-                                          fontSize: w * .03,
-                                          radius: 10,
-                                          fontWeight: FontWeight.w500,
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: w * .005,
-                                          ),
-                                        ),
-      ),
-                                      //-----------------
-                                      SizedBox(width: w * .02),
-                                      SizedBox(
-                                          height: w * .12,
-        width: w * .45,
-                                        child: AppButtons.outlined(
-                                          context: context,
-                                          text: "Transactions",
-                                          onClicked: () {
-                                            CustomNavigator.push(
-                                              context,
-                                              Transactions(),
-                                              transition: TransitionType.slideLeft,
-                                            );
-                                          },
-                                          // prefixIcon: CustomImages.images(
-                                          //   "assets/icons/transButtonIcon.png",
-                                          //   w * .04,
-                                          //   w * .04,
-                                          // ),
-
-                                          isFullWidth: false,
-                                          width: w * .3,
-                                          height: w * .08,
-                                          borderColor: AppColors.primaryRed,
-                                          backgroundColor: AppColors.white,
-                                          textColor: AppColors.black,
-                                          fontSize: w * .03,
-                                          radius: 10,
-                                          fontWeight: FontWeight.w500,
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: w * .005,
-                                          ),
-                                        ),
-                                      ),
-                                      
-  ],
-)
-       ,       
-              SizedBox(height: w * .02),
+                      // prefixIcon: CustomImages.images(
+                      //   "assets/icons/transButtonIcon.png",
+                      //   w * .04,
+                      //   w * .04,
+                      // ),
+                      isFullWidth: false,
+                      width: w * .3,
+                      height: w * .08,
+                      borderColor: AppColors.primaryRed,
+                      backgroundColor: AppColors.white,
+                      textColor: AppColors.black,
+                      fontSize: w * .03,
+                      radius: 10,
+                      fontWeight: FontWeight.w500,
+                      padding: EdgeInsets.symmetric(horizontal: w * .005),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: w * .06),
 
               AppFonts.textPoppins(
                     context,
                     "Add your Account",
-                    w * 0.03,
-                    FontWeight.w500,
+                    w * 0.04,
+                    FontWeight.w600,
                     AppColors.black,
                     TextAlign.left,
                     TextOverflow.visible,

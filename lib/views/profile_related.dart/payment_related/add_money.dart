@@ -38,7 +38,7 @@ class _AddMoneyState extends State<AddMoney> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         decoration: BoxDecoration(
-          color: Colors.grey.shade200,
+          color: const Color(0xFFF7F7F7),
           border: Border.all(color: Colors.black),
           borderRadius: BorderRadius.circular(20),
         ),
@@ -104,14 +104,14 @@ class _AddMoneyState extends State<AddMoney> {
 
             /* ----------------------------- INFO TEXT ----------------------------- */
             SizedBox(
-              width: w * .8,
+              width: w * .9,
               child: Container(
                 margin: EdgeInsets.only(left: w * .05),
                 child: AppFonts.textPoppins(
                   context,
                   "Maintain minimum balance to continue accepting rides.",
                   w * 0.037,
-                  FontWeight.w500,
+                  FontWeight.w400,
                   AppColors.black,
                   TextAlign.left,
                   TextOverflow.visible,
@@ -195,7 +195,7 @@ class _AddMoneyState extends State<AddMoney> {
                     "Coupon",
                     w * 0.045,
                     FontWeight.w600,
-                    AppColors.black,
+                    const Color(0xFF414141),
                     TextAlign.start,
                     TextOverflow.visible,
                   ),
@@ -209,7 +209,7 @@ class _AddMoneyState extends State<AddMoney> {
             InkWell(
               onTap: () => PopUps().coupanAdd(context),
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: w * .04),
+                padding: EdgeInsets.symmetric(horizontal: w * .029),
                 child: Container(
                   margin: EdgeInsets.only(left: w * .03),
                   child: NotchedCard(
@@ -217,12 +217,13 @@ class _AddMoneyState extends State<AddMoney> {
                     height: w * .3,
                     child: Row(
                       children: [
+                        SizedBox(width: w * .06),
                         CustomImages.images(
                           "assets/images/logo2.png",
                           w * .15,
                           w * .15,
                         ),
-                        const SizedBox(width: 20),
+                        SizedBox(width: w * .01),
                         Padding(
                           padding: EdgeInsets.symmetric(vertical: w * .045),
                           child: VerticalDottedDivider(
@@ -234,7 +235,7 @@ class _AddMoneyState extends State<AddMoney> {
                         ),
                         Expanded(
                           child: Padding(
-                            padding: EdgeInsets.only(left: w * .03),
+                            padding: EdgeInsets.only(left: w * .02),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -290,7 +291,7 @@ class _AddMoneyState extends State<AddMoney> {
               ),
             ),
 
-            SizedBox(height: w * .5),
+            SizedBox(height: w * .69),
 
             /* ----------------------------- ADD MONEY BUTTON ----------------------------- */
             Padding(
@@ -300,7 +301,7 @@ class _AddMoneyState extends State<AddMoney> {
                 text: "+ Add Money",
                 onClicked: () {},
                 isFullWidth: true,
-                backgroundColor: AppColors.lightGray,
+                backgroundColor: const Color(0xFFE0E4E7),
                 textColor: AppColors.mediumGray,
                 fontSize: w * .045,
                 height: w * .14,
@@ -311,36 +312,29 @@ class _AddMoneyState extends State<AddMoney> {
             SizedBox(height: w * .03),
 
             /* ----------------------------- TRANSFER BUTTON ----------------------------- */
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: w * .06),
-              child: AppButtons.solid(
-                context: context,
-                text: "Money Transfer Screen",
-                onClicked: () {
-                  CustomNavigator.push(
-                    context,
-                    const MoneyTransferScreen(),
-                    transition: TransitionType.fade,
-                  );
-                },
-                isFullWidth: true,
-                backgroundColor: AppColors.primaryRed,
-                textColor: AppColors.white,
-                fontSize: w * .045,
-                height: w * .14,
-                radius: 12.0,
-              ),
-            ),
+            // Padding(
+            //   padding: EdgeInsets.symmetric(horizontal: w * .06),
+            //   child: AppButtons.solid(
+            //     context: context,
+            //     text: "Money Transfer Screen",
+            //     onClicked: () {
+            //       CustomNavigator.push(
+            //         context,
+            //         const MoneyTransferScreen(),
+            //         transition: TransitionType.fade,
+            //       );
+            //     },
+            //     isFullWidth: true,
+            //     backgroundColor: AppColors.primaryRed,
+            //     textColor: AppColors.white,
+            //     fontSize: w * .045,
+            //     height: w * .14,
+            //     radius: 12.0,
+            //   ),
+            // ),
           ],
         ),
       ),
     );
   }
-
-
- 
-
 }
-
-
-

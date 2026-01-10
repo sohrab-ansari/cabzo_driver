@@ -101,7 +101,7 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 8,),
+                          SizedBox(height: 8),
                           // Padding(
                           //   padding: EdgeInsets.symmetric(horizontal: w * .03),
                           //   child: BalanceTextField(
@@ -211,7 +211,7 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
                                 child: AppFonts.textPoppins(
                                   context,
                                   "ADD NEW",
-                                  w * 0.03,
+                                  w * 0.035,
                                   FontWeight.w500,
                                   ColorsList.linksTextColor,
                                   TextAlign.left,
@@ -320,7 +320,7 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
                               child: AppFonts.textPoppins(
                                 context,
                                 "ADD NEW",
-                                w * 0.03,
+                                w * 0.035,
                                 FontWeight.w500,
                                 ColorsList.linksTextColor,
                                 TextAlign.left,
