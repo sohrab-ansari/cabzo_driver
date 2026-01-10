@@ -1,6 +1,7 @@
 import 'package:corezap_driver/utilities/colors/colors_list.dart';
 import 'package:corezap_driver/utilities/custom_text.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
+import 'package:corezap_driver/views/profile_related.dart/faqs_details_screen.dart';
 import 'package:flutter/material.dart';
 
 class FAQs extends StatefulWidget {
@@ -73,6 +74,14 @@ class _FAQsState extends State<FAQs> {
                 children: [
                   index == 0 ? SizedBox(height: w * .02) : SizedBox.shrink(),
                   GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FaqsDetailsScreen(),
+                        ),
+                      );
+                    },
                     // onTap: () {
                     //   index == 1
                     //       ? CustomNavigation.push(context, RideBillingScreen())
