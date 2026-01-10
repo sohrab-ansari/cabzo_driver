@@ -21,6 +21,11 @@ static const Color primaryblue = Color(0xFF26E3DD);
   static const Color mediumYellow = Color.fromRGBO(254, 216, 135, 1);
 
   static const Color lightYellow = Color.fromRGBO(255, 242, 213, 1);
+
+
+static const Color TextBuleColor   = Color(0xFF439AFE);
+
+  
 }
 
 

@@ -275,70 +275,233 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // row1
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    //text1
-                    AppFonts.textPoppins(
-                      context,
-                      "Roll ",
-                      w * 0.035,
-                      FontWeight.w600,
-                      AppColors.black.withOpacity(0.5),
-                      TextAlign.center,
-                      TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
+             
 
-                    AppFonts.textPoppins(
-                      context,
-                      "•",
-                      w * 0.030,
-                      FontWeight.w600,
-                      AppColors.mediumGray,
-                      TextAlign.center,
-                      TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-
-                    AppFonts.textPoppins(
-                      context,
-                      " Mini",
-                      w * 0.035,
-                      FontWeight.w600,
-                      AppColors.black.withOpacity(0.5),
-                      TextAlign.center,
-                      TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ],
-                ),
-
-                //text2
+             Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    Obx(() {
+      return Column(
+        children: [
+          // Text("hiii  ${currentTabBar.currentTabIndex.value}"),
+          Row(
+            children: [
+              if (currentTabBar.currentTabIndex.value == 0) ...[
                 AppFonts.textPoppins(
                   context,
-                  "₹105.99",
-                  w * 0.042,
+                  "New trip",
+                  w * 0.035,
                   FontWeight.w600,
-                  AppColors.black,
+                  AppColors.TextBuleColor,
                   TextAlign.center,
                   TextOverflow.ellipsis,
                   maxLines: 1,
                 ),
-              ],
-            ),
-
-            //row 2
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                //text1
+          
                 AppFonts.textPoppins(
                   context,
-                  "18/11/2025, 10:24 AM",
+                  " : ",
+                  w * 0.030,
+                  FontWeight.w600,
+                  AppColors.TextBuleColor,
+                  TextAlign.center,
+                  TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+          
+                AppFonts.textPoppins(
+                  context,
+                  "11:30 AM",
+                  w * 0.035,
+                  FontWeight.w600,
+                  AppColors.TextBuleColor,
+                  TextAlign.center,
+                  TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ] else if  (currentTabBar.currentTabIndex.value == 1) ...[
+   
+       
+   AppFonts.textPoppins(
+                  context,
+                  "Completed",
+                  w * 0.035,
+                  FontWeight.w600,
+                  AppColors.TextBuleColor,
+                  TextAlign.center,
+                  TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+          
+              ] 
+              
+              else ...[
+
+     
+   AppFonts.textPoppins(
+                  context,
+                  "Cancelled",
+                  w * 0.035,
+                  FontWeight.w600,
+                  Color(0xFFE02D3C),
+                  TextAlign.center,
+                  TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+
+              ]
+
+
+              
+            ],
+          ),
+        ],
+      );
+    }),
+
+    AppFonts.textPoppins(
+      context,
+      "₹105.99",
+      w * 0.042,
+      FontWeight.w600,
+      AppColors.black,
+      TextAlign.center,
+      TextOverflow.ellipsis,
+      maxLines: 1,
+    ),
+  ],
+),
+            // row1
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //   children: [
+            //     Obx((
+            //       child: Row(
+            //         children: [
+                  
+            //            if(currentTabBar.currentTabIndex.value == 0)  ...[
+                  
+                  
+                    
+            //                AppFonts.textPoppins(
+            //             context,
+            //             "New trip",
+            //             w * 0.035,
+            //             FontWeight.w600,
+            //             AppColors.TextBuleColor,
+            //             TextAlign.center,
+            //             TextOverflow.ellipsis,
+            //             maxLines: 1,
+            //           ),
+                  
+            //           AppFonts.textPoppins(
+            //             context,
+            //             " : ",
+            //             w * 0.030,
+            //             FontWeight.w600,
+                  
+            //              AppColors.TextBuleColor,
+            //             // AppColors.mediumGray,
+            //             TextAlign.center,
+            //             TextOverflow.ellipsis,
+            //             maxLines: 1,
+                            
+            //           ),
+                  
+            //           AppFonts.textPoppins(
+            //             context,
+            //             "11:30 AM",
+            //             w * 0.035,
+            //             FontWeight.w600,
+            //              AppColors.TextBuleColor,
+            //             // AppColors.black.withOpacity(0.5),
+            //             TextAlign.center,
+            //             TextOverflow.ellipsis,
+            //             maxLines: 1,
+                  
+            //           ),
+            //            ]
+            //            //text1
+            //           // AppFonts.textPoppins(
+            //           //   context,
+            //           //   "New trip",
+            //           //   w * 0.035,
+            //           //   FontWeight.w600,
+            //           //   AppColors.TextBuleColor,
+            //           //   TextAlign.center,
+            //           //   TextOverflow.ellipsis,
+            //           //   maxLines: 1,
+            //           // ),
+                  
+            //           // AppFonts.textPoppins(
+            //           //   context,
+            //           //   " : ",
+            //           //   w * 0.030,
+            //           //   FontWeight.w600,
+                  
+            //           //    AppColors.TextBuleColor,
+            //           //   // AppColors.mediumGray,
+            //           //   TextAlign.center,
+            //           //   TextOverflow.ellipsis,
+            //           //   maxLines: 1,
+                            
+            //           // ),
+                  
+            //           // AppFonts.textPoppins(
+            //           //   context,
+            //           //   "11:30 AM",
+            //           //   w * 0.035,
+            //           //   FontWeight.w600,
+            //           //    AppColors.TextBuleColor,
+            //           //   // AppColors.black.withOpacity(0.5),
+            //           //   TextAlign.center,
+            //           //   TextOverflow.ellipsis,
+            //           //   maxLines: 1,
+                  
+            //           // ),
+            //         ],
+            //       ),
+            //     ),
+
+            //     //text2
+            //     AppFonts.textPoppins(
+            //       context,
+            //       "₹105.99",
+            //       w * 0.042,
+            //       FontWeight.w600,
+            //       AppColors.black,
+            //       TextAlign.center,
+            //       TextOverflow.ellipsis,
+            //       maxLines: 1,
+            //     ),
+            //   ],
+            // ),
+
+            //row 2
+
+            Obx((){
+
+ return  Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+
+                if  (currentTabBar.currentTabIndex.value == 2) ...[
+
+  AppFonts.textPoppins(
+                  context,
+                  "Booked by mistake",
+                  w * 0.032,
+                  FontWeight.w600,
+                  AppColors.black.withOpacity(0.5),
+                  TextAlign.center,
+                  TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+                ] else ...[
+
+                      AppFonts.textPoppins(
+                  context,
+                  "Neha Gupta",
                   w * 0.032,
                   FontWeight.w600,
                   AppColors.black.withOpacity(0.5),
@@ -347,9 +510,47 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                   maxLines: 1,
                 ),
 
+                ],
+
+                
+                //text1
+            
+
+    // Booked by mistake
                 Row(
                   children: [
-                    Image.asset(
+
+
+ 
+
+  // AppFonts.textPoppins(
+  //                 context,
+  //                 "Booked by mistake",
+  //                 w * 0.032,
+  //                 FontWeight.w600,
+  //                 AppColors.black.withOpacity(0.5),
+  //                 TextAlign.center,
+  //                 TextOverflow.ellipsis,
+  //                 maxLines: 1,
+  //               ),
+                    
+
+                    if  (currentTabBar.currentTabIndex.value == 2) ...[
+
+                           AppFonts.textPoppins(
+                  context,
+                  "Neha Gupta",
+                  w * 0.032,
+                  FontWeight.w600,
+                  AppColors.black.withOpacity(0.5),
+                  TextAlign.center,
+                  TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+
+ ]else ...[
+
+   Image.asset(
                       "assets/icons/moneys.png",
                       height: w * 0.05,
                       width: w * 0.05,
@@ -365,38 +566,46 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                       TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
+
+ ],
+                   
                   ],
                 ),
               ],
-            ),
+            );
+
+            } ),
+           
+           
+           
             SizedBox(height: w * 0.02),
             //container with primary red color and at center some text with white colo
-            IntrinsicWidth(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.primaryRed,
-                  borderRadius: BorderRadius.circular(w * .05),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: w * 0.03,
-                    vertical: w * 0.01,
-                  ),
-                  child: Center(
-                    child: AppFonts.textPoppins(
-                      context,
-                      "One way | 4 Hours",
-                      w * 0.030,
-                      FontWeight.w500,
-                      AppColors.white,
-                      TextAlign.center,
-                      TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            // IntrinsicWidth(
+            //   child: Container(
+            //     decoration: BoxDecoration(
+            //       color: AppColors.primaryRed,
+            //       borderRadius: BorderRadius.circular(w * .05),
+            //     ),
+            //     child: Padding(
+            //       padding: EdgeInsets.symmetric(
+            //         horizontal: w * 0.03,
+            //         vertical: w * 0.01,
+            //       ),
+            //       child: Center(
+            //         child: AppFonts.textPoppins(
+            //           context,
+            //           "One way | 4 Hours",
+            //           w * 0.030,
+            //           FontWeight.w500,
+            //           AppColors.white,
+            //           TextAlign.center,
+            //           TextOverflow.ellipsis,
+            //           maxLines: 1,
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
 
             Divider(
               color: AppColors.mediumGray.withOpacity(0.4),
@@ -404,6 +613,30 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
               height: w * 0.1,
             ),
 
+
+  Row(
+    children: [
+
+      Image.asset("assets/images/bike_image.png",height: 30,width: 30,),
+      SizedBox(width: w * 0.02,),
+      // Text("Bike"),
+
+      AppFonts.textPoppins(
+                      context,
+                      "Bike",
+                      w * 0.035,
+                      FontWeight.w600,
+                      AppColors.black,
+                      TextAlign.center,
+                      TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+    ],
+  ),
+
+  SizedBox(height: w * 0.06,),
+  
+  
             // row 3
             Row(
               children: [
@@ -418,7 +651,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                     Container(
                       width: w * 0.002,
                       height: w * 0.10,
-                      color: AppColors.mediumGray,
+                      // color: AppColors.mediumGray,
                     ),
                     Image.asset(
                       "assets/icons/redDot.png",
@@ -494,109 +727,118 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
               ],
             ),
 
-            Divider(
-              color: AppColors.mediumGray.withOpacity(0.4),
-              thickness: w * .002,
-              height: w * 0.1,
-            ),
+            // Divider(
+            //   color: AppColors.mediumGray.withOpacity(0.4),
+            //   thickness: w * .002,
+            //   height: w * 0.1,
+            // ),
 
             // row4 with profile icon and name
-            Obx(() {
-              return currentTabBar.currentTabIndex.value == 0
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          "assets/icons/profile.png",
-                          height: w * 0.06,
-                          width: w * 0.06,
-                          color: AppColors.primaryRed,
-                        ),
-                        SizedBox(width: w * 0.02),
-                        AppFonts.textPoppins(
-                          context,
-                          "Muskan",
-                          w * 0.04,
-                          FontWeight.w600,
-                          AppColors.black,
-                          TextAlign.start,
-                          TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ],
-                    )
-                  : currentTabBar.currentTabIndex.value == 1
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // RatingBarIndicator(
-                        //   rating: 4.5,
-                        //   unratedColor: AppColors.white,
-                        //   itemBuilder: (context, index) =>
-                        //       Icon(Icons.star, color: Colors.amber),
-                        //   itemCount: 5,
-                        //   itemSize: w * .08,
-                        //   direction: Axis.horizontal,
-                        // ),
-                        RatingBarIndicator(
-                          rating: 4.5,
-                          itemCount: 5,
-                          itemSize: w * .08,
-                          direction: Axis.horizontal,
-                          itemBuilder: (context, index) {
-                            if (index < 4) {
-                              // fully filled stars
-                              return Icon(Icons.star, color: Colors.amber);
-                            } else if (index < 4.5) {
-                              // half star
-                              return Icon(Icons.star_half, color: Colors.amber);
-                            } else {
-                              // empty border star
-                              return Icon(
-                                Icons.star_border,
-                                color: Colors.grey,
-                              ); // visible border
-                            }
-                          },
-                        ),
+            // Obx(() {
+            //   return currentTabBar.currentTabIndex.value == 0
+            //       ? Row(
+            //           mainAxisAlignment: MainAxisAlignment.center,
+            //           children: [
+            //             Image.asset(
+            //               "assets/icons/profile.png",
+            //               height: w * 0.06,
+            //               width: w * 0.06,
+            //               color: AppColors.primaryRed,
+            //             ),
+            //             SizedBox(width: w * 0.02),
+            //             AppFonts.textPoppins(
+            //               context,
+            //               "Muskan",
+            //               w * 0.04,
+            //               FontWeight.w600,
+            //               AppColors.black,
+            //               TextAlign.start,
+            //               TextOverflow.ellipsis,
+            //               maxLines: 1,
+            //             ),
+            //           ],
+            //         )
+            //       : currentTabBar.currentTabIndex.value == 1
+            //       ? 
+            //        SizedBox()
+            //       // Row(
+            //       //     mainAxisAlignment: MainAxisAlignment.center,
+            //       //     children: [
+            //       //       // RatingBarIndicator(
+            //       //       //   rating: 4.5,
+            //       //       //   unratedColor: AppColors.white,
+            //       //       //   itemBuilder: (context, index) =>
+            //       //       //       Icon(Icons.star, color: Colors.amber),
+            //       //       //   itemCount: 5,
+            //       //       //   itemSize: w * .08,
+            //       //       //   direction: Axis.horizontal,
+            //       //       // ),
+            //       //       RatingBarIndicator(
+            //       //         rating: 4.5,
+            //       //         itemCount: 5,
+            //       //         itemSize: w * .08,
+            //       //         direction: Axis.horizontal,
+            //       //         itemBuilder: (context, index) {
+            //       //           if (index < 4) {
+            //       //             // fully filled stars
+            //       //             return Icon(Icons.star, color: Colors.amber);
+            //       //           } else if (index < 4.5) {
+            //       //             // half star
+            //       //             return Icon(Icons.star_half, color: Colors.amber);
+            //       //           } else {
+            //       //             // empty border star
+            //       //             return Icon(
+            //       //               Icons.star_border,
+            //       //               color: Colors.grey,
+            //       //             ); // visible border
+            //       //           }
+            //       //         },
+            //       //       ),
 
-                        SizedBox(width: w * .02),
-                        AppFonts.textPoppins(
-                          context,
-                          "(4.5)",
-                          w * 0.045,
-                          FontWeight.w600,
-                          AppColors.black,
-                          TextAlign.start,
-                          TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ],
-                    )
-                  : currentTabBar.currentTabIndex.value == 2
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.info,
-                          color: Color.fromRGBO(224, 45, 60, 1),
-                          size: w * .055,
-                        ),
-                        SizedBox(width: w * .02),
-                        AppFonts.textPoppins(
-                          context,
-                          "Booked by mistake",
-                          w * 0.042,
-                          FontWeight.w400,
-                          Color.fromRGBO(224, 45, 60, 1),
-                          TextAlign.start,
-                          TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ],
-                    )
-                  : SizedBox();
-            }),
+            //       //       SizedBox(width: w * .02),
+            //       //       AppFonts.textPoppins(
+            //       //         context,
+            //       //         "(4.5)",
+            //       //         w * 0.045,
+            //       //         FontWeight.w600,
+            //       //         AppColors.black,
+            //       //         TextAlign.start,
+            //       //         TextOverflow.ellipsis,
+            //       //         maxLines: 1,
+            //       //       ),
+            //       //     ],
+            //       //   )
+                 
+                 
+            //       : currentTabBar.currentTabIndex.value == 2
+            //       ?  SizedBox()
+                  
+            //       // Row(
+            //       //     mainAxisAlignment: MainAxisAlignment.center,
+            //       //     children: [
+            //       //       Icon(
+            //       //         Icons.info,
+            //       //         color: Color.fromRGBO(224, 45, 60, 1),
+            //       //         size: w * .055,
+            //       //       ),
+            //       //       SizedBox(width: w * .02),
+            //       //       AppFonts.textPoppins(
+            //       //         context,
+            //       //         "Booked by mistake",
+            //       //         w * 0.042,
+            //       //         FontWeight.w400,
+            //       //         Color.fromRGBO(224, 45, 60, 1),
+            //       //         TextAlign.start,
+            //       //         TextOverflow.ellipsis,
+            //       //         maxLines: 1,
+            //       //       ),
+            //       //     ],
+            //       //   )
+                 
+            //       : SizedBox();
+            // }),
+         
+         
           ],
         ),
       ),

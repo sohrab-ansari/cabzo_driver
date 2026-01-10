@@ -1200,6 +1200,7 @@ import 'package:corezap_driver/utilities/custom_font.dart';
 import 'package:corezap_driver/utilities/custom_images.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
 import 'package:corezap_driver/views/scheduled_pickups/accepted_screen.dart';
+import 'package:corezap_driver/views/splash/myscreen_arivinfclin%20et.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';

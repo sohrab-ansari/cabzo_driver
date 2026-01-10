@@ -187,6 +187,7 @@ import 'package:corezap_driver/utilities/colors/colors_list.dart';
 import 'package:corezap_driver/utilities/custom_font.dart';
 import 'package:corezap_driver/utilities/custom_images.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
+import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
 import 'package:corezap_driver/views/payment_modes_screen.dart/cash_payment_screen.dart';
 import 'package:corezap_driver/views/payment_modes_screen.dart/qr_code_screen.dart';
 import 'package:corezap_driver/views/scheduled_pickups/details.dart';
@@ -356,6 +357,15 @@ class _ReceivePaymentModesState extends State<ReceivePaymentModes> {
                 context: context,
                 text: "Done",
                 onClicked: () {
+
+
+
+  CustomNavigator.removeUntil(
+        context,
+        const BottomnavmainScreen(),
+        transition: TransitionType.fade,
+      );
+
                   // Navigate wherever needed
                 },
                 isFullWidth: true,

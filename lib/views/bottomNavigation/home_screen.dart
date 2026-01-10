@@ -13,6 +13,7 @@ import 'package:corezap_driver/views/home_related/live_ride.dart';
 import 'package:corezap_driver/views/home_related/raise_requiest.dart';
 import 'package:corezap_driver/views/scheduled_pickups/accepted_screen.dart';
 import 'package:corezap_driver/views/scheduled_pickups/details.dart';
+import 'package:corezap_driver/views/splash/myscreen_arivinfclin%20et.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
