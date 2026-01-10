@@ -705,143 +705,143 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: w * .05),
-              Container(
-                // height: w * 0.4,
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      spreadRadius: 2,
-                      blurRadius: 3,
-                    ),
-                  ],
-                  borderRadius: BorderRadius.circular(w * 0.03),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: w * .03,
-                    vertical: w * .03,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        children: [
-                          Center(
-                            child: Stack(
-                              children: [
-                                CircleAvatar(
-                                  radius: w * .06,
-                                  backgroundColor: Colors.grey.shade300,
-                                  child: Icon(
-                                    Icons.person,
-                                    size: w * .05,
-                                    color: Colors.grey.shade700,
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 0,
-                                  left: 6,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      //  Pick Image from gallery
-                                    },
-                                    child: CircleAvatar(
-                                      radius: w * .015,
-                                      backgroundColor: Colors.grey.shade300,
-                                      child: CircleAvatar(
-                                        radius: w * .012,
-                                        backgroundColor: AppColors.white,
-                                        child: CircleAvatar(
-                                          radius: w * .01,
-                                          backgroundColor: AppColors.green,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(width: w * .02),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                // mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  AppFonts.textPoppins(
-                                    context,
-                                    "Swift Dzire",
-                                    w * 0.04,
-                                    FontWeight.w600,
-                                    AppColors.black,
-                                    TextAlign.left,
-                                    TextOverflow.visible,
-                                  ),
-                                  SizedBox(width: w * .02),
-                                  CircleAvatar(
-                                    radius: 2,
-                                    backgroundColor: AppColors.black,
-                                  ),
-                                  SizedBox(width: w * .02),
-                                  AppFonts.textPoppins(
-                                    context,
-                                    "Mini",
-                                    w * 0.04,
-                                    FontWeight.w600,
-                                    const Color.fromARGB(255, 0, 94, 255),
-                                    TextAlign.left,
-                                    TextOverflow.visible,
-                                  ),
-                                  SizedBox(width: w * .07),
-                                  AppButtons.solid(
-                                    padding: EdgeInsets.zero,
-                                    context: context,
-                                    text: "Assigned Vehicle",
-                                    onClicked: () {},
-                                    isFullWidth: false,
-                                    backgroundColor: const Color.fromARGB(
-                                      255,
-                                      234,
-                                      241,
-                                      255,
-                                    ),
-                                    radius: 30,
-                                    textColor: ColorsList.linksTextColor,
-                                    fontSize: w * .025,
-                                    height: w * .05,
-                                    width: w * .28,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ],
-                              ),
-                              AppFonts.textPoppins(
-                                context,
-                                "HR26DQ5551",
-                                w * 0.035,
-                                FontWeight.w400,
-                                AppColors.mediumGray,
-                                TextAlign.left,
-                                TextOverflow.visible,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: w * .02),
-                      // raise requiest
-                      RaiseRequestDropdown(
-                        onSelected: (value) {
-                          debugPrint("Selected Option: $value");
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              // SizedBox(height: w * .05),
+              // Container(
+              //   // height: w * 0.4,
+              //   decoration: BoxDecoration(
+              //     color: AppColors.white,
+              //     boxShadow: [
+              //       BoxShadow(
+              //         color: Colors.grey.withOpacity(0.2),
+              //         spreadRadius: 2,
+              //         blurRadius: 3,
+              //       ),
+              //     ],
+              //     borderRadius: BorderRadius.circular(w * 0.03),
+              //   ),
+              //   child: Padding(
+              //     padding: EdgeInsets.symmetric(
+              //       horizontal: w * .03,
+              //       vertical: w * .03,
+              //     ),
+              //     child: Column(
+              //       mainAxisSize: MainAxisSize.min,
+              //       children: [
+              //         Row(
+              //           children: [
+              //             Center(
+              //               child: Stack(
+              //                 children: [
+              //                   CircleAvatar(
+              //                     radius: w * .06,
+              //                     backgroundColor: Colors.grey.shade300,
+              //                     child: Icon(
+              //                       Icons.person,
+              //                       size: w * .05,
+              //                       color: Colors.grey.shade700,
+              //                     ),
+              //                   ),
+              //                   Positioned(
+              //                     top: 0,
+              //                     left: 6,
+              //                     child: GestureDetector(
+              //                       onTap: () {
+              //                         //  Pick Image from gallery
+              //                       },
+              //                       child: CircleAvatar(
+              //                         radius: w * .015,
+              //                         backgroundColor: Colors.grey.shade300,
+              //                         child: CircleAvatar(
+              //                           radius: w * .012,
+              //                           backgroundColor: AppColors.white,
+              //                           child: CircleAvatar(
+              //                             radius: w * .01,
+              //                             backgroundColor: AppColors.green,
+              //                           ),
+              //                         ),
+              //                       ),
+              //                     ),
+              //                   ),
+              //                 ],
+              //               ),
+              //             ),
+              //             SizedBox(width: w * .02),
+              //             Column(
+              //               crossAxisAlignment: CrossAxisAlignment.start,
+              //               children: [
+              //                 Row(
+              //                   // mainAxisAlignment: MainAxisAlignment.start,
+              //                   children: [
+              //                     AppFonts.textPoppins(
+              //                       context,
+              //                       "Swift Dzire",
+              //                       w * 0.04,
+              //                       FontWeight.w600,
+              //                       AppColors.black,
+              //                       TextAlign.left,
+              //                       TextOverflow.visible,
+              //                     ),
+              //                     SizedBox(width: w * .02),
+              //                     CircleAvatar(
+              //                       radius: 2,
+              //                       backgroundColor: AppColors.black,
+              //                     ),
+              //                     SizedBox(width: w * .02),
+              //                     AppFonts.textPoppins(
+              //                       context,
+              //                       "Mini",
+              //                       w * 0.04,
+              //                       FontWeight.w600,
+              //                       const Color.fromARGB(255, 0, 94, 255),
+              //                       TextAlign.left,
+              //                       TextOverflow.visible,
+              //                     ),
+              //                     SizedBox(width: w * .07),
+              //                     AppButtons.solid(
+              //                       padding: EdgeInsets.zero,
+              //                       context: context,
+              //                       text: "Assigned Vehicle",
+              //                       onClicked: () {},
+              //                       isFullWidth: false,
+              //                       backgroundColor: const Color.fromARGB(
+              //                         255,
+              //                         234,
+              //                         241,
+              //                         255,
+              //                       ),
+              //                       radius: 30,
+              //                       textColor: ColorsList.linksTextColor,
+              //                       fontSize: w * .025,
+              //                       height: w * .05,
+              //                       width: w * .28,
+              //                       fontWeight: FontWeight.w600,
+              //                     ),
+              //                   ],
+              //                 ),
+              //                 AppFonts.textPoppins(
+              //                   context,
+              //                   "HR26DQ5551",
+              //                   w * 0.035,
+              //                   FontWeight.w400,
+              //                   AppColors.mediumGray,
+              //                   TextAlign.left,
+              //                   TextOverflow.visible,
+              //                 ),
+              //               ],
+              //             ),
+              //           ],
+              //         ),
+              //         SizedBox(height: w * .02),
+              //         // raise requiest
+              //         RaiseRequestDropdown(
+              //           onSelected: (value) {
+              //             debugPrint("Selected Option: $value");
+              //           },
+              //         ),
+              //       ],
+              //     ),
+              //   ),
+              // ),
               SizedBox(height: w * .04),
 
               //////////////////////////live ride button is commented for now on this screen as we dont need it here  can remove code id dont need////////

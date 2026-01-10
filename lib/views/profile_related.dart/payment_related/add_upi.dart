@@ -53,89 +53,99 @@ class _AddUpiState extends State<AddUpi> {
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: w * .03, vertical: w * .04),
-        child: Column(
-          // crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-
-            Image.asset("assets/images/upi_image.png",width: 300,height: 300,),
-            AppFonts.textPoppins(
-              context,
-              "UPI ID",
-              w * 0.046,
-              FontWeight.w600,
-              AppColors.black,
-              TextAlign.center,
-              TextOverflow.ellipsis,
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: w * .03, bottom: w * .02),
-              child: AppFormFields.custTextFormOther(
-                context: context,
-                hintText: "Example: abcdef@phonepe",
-
-                controller: textEditingController,
-                keyboardType: TextInputType.text,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Column(
+            // crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset(
+                "assets/images/upi_image.png",
+                width: 300,
+                height: 300,
               ),
-            ),
-            Container(
-              width: w,
-              color: Color.fromRGBO(240, 247, 255, 1),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: w * .02,
-                  vertical: w * .02,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CustomImages.images(
-                      "assets/icons/addupiIcon1.png",
-                      w * .06,
-                      w * .06,
-                    ),
+              AppFonts.textPoppins(
+                context,
+                "UPI ID",
+                w * 0.046,
+                FontWeight.w600,
+                AppColors.black,
+                TextAlign.center,
+                TextOverflow.ellipsis,
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: w * .03, bottom: w * .02),
+                child: AppFormFields.custTextFormOther(
+                  context: context,
+                  hintText: "Example: abcdef@phonepe",
 
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: w * .015),
-                      child: SizedBox(
-                        width: w * .8,
-                        //  color: Colors.amber,
-                        child: AppFonts.textPoppins(
-                          context,
-                          "Please enter the UPI details carefully and don’t worry, it is 100% safe!",
-                          w * 0.026,
-                          FontWeight.w500,
-                          ColorsList.linksTextColor,
-                          TextAlign.start,
-                          TextOverflow.ellipsis,
-                          maxLines: 2,
+                  controller: textEditingController,
+                  keyboardType: TextInputType.text,
+                ),
+              ),
+              Container(
+                width: w,
+                color: Color.fromRGBO(240, 247, 255, 1),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: w * .02,
+                    vertical: w * .02,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomImages.images(
+                        "assets/icons/addupiIcon1.png",
+                        w * .06,
+                        w * .06,
+                      ),
+
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: w * .015),
+                        child: SizedBox(
+                          width: w * .8,
+                          //  color: Colors.amber,
+                          child: AppFonts.textPoppins(
+                            context,
+                            "Please enter the UPI details carefully and don’t worry, it is 100% safe!",
+                            w * 0.026,
+                            FontWeight.w500,
+                            ColorsList.linksTextColor,
+                            TextAlign.start,
+                            TextOverflow.ellipsis,
+                            maxLines: 2,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Spacer(),
-            AppButtons.solid(
-              context: context,
-              text: "Update",
-              onClicked: () {
-                // CustomNavigator.push(
-                //   context,
-                //   MoneyTransferScreen(),
-                //   transition: TransitionType.fade,
-                // );
-              },
-              isFullWidth: true,
-              backgroundColor: AppColors.lightGray,
-              textColor: AppColors.mediumGray,
-              fontSize: w * .045,
-              height: w * .140,
-              radius: 12.0,
-            ),
-            SizedBox(height: w * .1),
-          ],
+
+              // remove Spacer() to avoid unbounded height inside scroll view
+              SizedBox(height: w * .65),
+              AppButtons.solid(
+                context: context,
+                text: "Update",
+                onClicked: () {
+                  // CustomNavigator.push(
+                  //   context,
+                  //   MoneyTransferScreen(),
+                  //   transition: TransitionType.fade,
+                  // );
+                },
+                isFullWidth: true,
+                backgroundColor: AppColors.lightGray,
+                textColor: AppColors.mediumGray,
+                fontSize: w * .045,
+                height: w * .140,
+                radius: 12.0,
+              ),
+              SizedBox(height: w * .1),
+            ],
+          ),
         ),
       ),
     );
