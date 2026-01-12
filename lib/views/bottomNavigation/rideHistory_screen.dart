@@ -521,18 +521,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                   children: [
 
 
- 
 
-  // AppFonts.textPoppins(
-  //                 context,
-  //                 "Booked by mistake",
-  //                 w * 0.032,
-  //                 FontWeight.w600,
-  //                 AppColors.black.withOpacity(0.5),
-  //                 TextAlign.center,
-  //                 TextOverflow.ellipsis,
-  //                 maxLines: 1,
-  //               ),
                     
 
                     if  (currentTabBar.currentTabIndex.value == 2) ...[

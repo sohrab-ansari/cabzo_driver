@@ -1,18 +1,22 @@
+
+
+
+import 'package:corezap_driver/views/auth/enter_otp_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:get/get.dart';
+import 'package:corezap_driver/apis/auth.api.dart';
+import 'package:corezap_driver/controller/signup_controller.dart';
 import 'package:corezap_driver/controller/login.controller.dart';
 import 'package:corezap_driver/controller/stepper_controller.dart';
+import 'package:corezap_driver/utilities/Custom_Snackbar.dart';
 import 'package:corezap_driver/utilities/app_buttons.dart';
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/custom_font.dart';
 import 'package:corezap_driver/utilities/form_field.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
-import 'package:corezap_driver/views/auth/enter_otp_screen.dart';
 import 'package:corezap_driver/views/auth/login_screen.dart';
-import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
-import 'package:corezap_driver/views/profile_related.dart/documents_related/driver_registration.dart';
 import 'package:corezap_driver/views/profile_related.dart/terms_condition.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:get/get.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -22,289 +26,337 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  DriverFormController driverFormController = Get.put(DriverFormController());
-  TextEditingController phone = TextEditingController();
-  //initialized login controller
-  LoginController loginController = Get.put(LoginController());
+  late final DriverFormController driverFormController;
+  late final TextEditingController phone;
+  late final LoginController loginController;
+  late final AuthApi authApi;
+  late final SignupController signupController;
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Initialize controllers in correct order
+    // 1. First initialize AuthApi (base dependency)
+    authApi = Get.put(AuthApi(), permanent: true);
+    
+    // 2. Then initialize other controllers
+    driverFormController = Get.put(DriverFormController());
+    loginController = Get.put(LoginController());
+    
+    // 3. Finally initialize SignupController (depends on AuthApi)
+    signupController = Get.put(SignupController());
+    
+    // 4. Initialize text controllers
+    phone = TextEditingController();
+    
+    // 5. Sync terms agreement between controllers
+    signupController.termsAgreed.value = loginController.isChecked.value;
+  }
+
+  @override
+  void dispose() {
+    // Clean up text controllers
+    phone.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
-
     double h = MediaQuery.of(context).size.height;
+    
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: h * 0.05),
-            //Login screen Image
-            Image.asset("assets/images/image7.png", fit: BoxFit.fill)
-                .animate()
-                .fade(duration: 800.ms, curve: Curves.easeInOut)
-                .scale(
-                  begin: const Offset(0.95, 0.95),
-                  end: const Offset(1, 1),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: h * 0.05),
+              
+              // Login screen Image
+              Image.asset("assets/images/image7.png", fit: BoxFit.fill)
+                  .animate()
+                  .fade(duration: 800.ms, curve: Curves.easeInOut)
+                  .scale(
+                    begin: const Offset(0.95, 0.95),
+                    end: const Offset(1, 1),
+                  ),
+
+              // Column with form fields
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: w * 0.04),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: w * 0.04),
+                    
+                    // Heading
+                    AppFonts.textPoppins(
+                          context,
+                          "Join NZCU Today",
+                          w * 0.06,
+                          FontWeight.w600,
+                          AppColors.black,
+                          TextAlign.left,
+                          TextOverflow.visible,
+                        )
+                        .animate()
+                        .fade(duration: 900.ms, curve: Curves.easeInOut)
+                        .scale(
+                          begin: const Offset(0.95, 0.95),
+                          end: const Offset(1, 1),
+                        ),
+
+                    // Subheading
+                    SizedBox(height: w * 0.02),
+                    AppFonts.textPoppins(
+                          context,
+                          "Let's get started! Enter your phone number to create your account.",
+                          w * 0.038,
+                          FontWeight.w400,
+                          AppColors.darkGray.withOpacity(0.6),
+                          TextAlign.left,
+                          TextOverflow.visible,
+                          maxLines: 2,
+                        )
+                        .animate()
+                        .fade(duration: 1000.ms, curve: Curves.easeInOut)
+                        .scale(
+                          begin: const Offset(0.95, 0.95),
+                          end: const Offset(1, 1),
+                        ),
+
+                    SizedBox(height: w * 0.04),
+
+                    // Phone Number Label
+                    AppFonts.textPoppins(
+                          context,
+                          "Phone Number",
+                          w * 0.038,
+                          FontWeight.w500,
+                          AppColors.black.withOpacity(0.8),
+                          TextAlign.left,
+                          TextOverflow.visible,
+                        )
+                        .animate()
+                        .fade(duration: 1100.ms, curve: Curves.easeInOut)
+                        .scale(
+                          begin: const Offset(0.95, 0.95),
+                          end: const Offset(1, 1),
+                        ),
+
+                    SizedBox(height: w * 0.02),
+
+                    // Phone Number Text Field
+                    AppFormFields.custTextFormOther(
+                          context: context,
+                          hintText: "Enter 10-digit mobile number",
+                          controller: phone,
+                          maxLength: 10,
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            return signupController.validatePhoneNumber(value);
+                          },
+                        )
+                        .animate()
+                        .fade(duration: 1200.ms, curve: Curves.easeInOut)
+                        .scale(
+                          begin: const Offset(0.95, 0.95),
+                          end: const Offset(1, 1),
+                        ),
+                  ],
                 ),
-
-            //column
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: w * 0.04),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  //space 1
-                  SizedBox(height: w * 0.04),
-                  //text
-                  AppFonts.textPoppins(
-                        context,
-                        "Join NZCU Today",
-                        w * 0.06,
-                        FontWeight.w600,
-                        AppColors.black,
-                        TextAlign.left,
-                        TextOverflow.visible,
-                      )
-                      .animate()
-                      .fade(duration: 900.ms, curve: Curves.easeInOut)
-                      .scale(
-                        begin: const Offset(0.95, 0.95),
-                        end: const Offset(1, 1),
-                      ),
-
-                  //text 2
-                  SizedBox(height: w * 0.02),
-                  AppFonts.textPoppins(
-                        context,
-                        "Let’s get stared! Enter your phone number to create your Indrive account.",
-                        w * 0.038,
-                        FontWeight.w400,
-                        AppColors.darkGray.withOpacity(0.6),
-                        TextAlign.left,
-                        TextOverflow.visible,
-                        maxLines: 2,
-                      )
-                      .animate()
-                      .fade(duration: 1000.ms, curve: Curves.easeInOut)
-                      .scale(
-                        begin: const Offset(0.95, 0.95),
-                        end: const Offset(1, 1),
-                      ),
-
-                  //space 2
-                  SizedBox(height: w * 0.04),
-
-                  //text 3
-                  AppFonts.textPoppins(
-                        context,
-                        "Phone Number",
-                        w * 0.038,
-                        FontWeight.w500,
-                        AppColors.black.withOpacity(0.8),
-                        TextAlign.left,
-                        TextOverflow.visible,
-                      )
-                      .animate()
-                      .fade(duration: 1100.ms, curve: Curves.easeInOut)
-                      .scale(
-                        begin: const Offset(0.95, 0.95),
-                        end: const Offset(1, 1),
-                      ),
-
-                  //space 3
-                  SizedBox(height: w * 0.02),
-
-                  //text field
-                  AppFormFields.custTextFormOther(
-                        context: context,
-                        hintText: "Enter here",
-                        controller: phone,
-                        maxLength: 10,
-                        keyboardType: TextInputType.number,
-                      )
-                      .animate()
-                      .fade(duration: 1200.ms, curve: Curves.easeInOut)
-                      .scale(
-                        begin: const Offset(0.95, 0.95),
-                        end: const Offset(1, 1),
-                      ),
-                ],
               ),
-            ),
 
-            //row with checkbox and text
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: w * .010),
-              child:
-                  Row(
-                        children: [
-                          //checkBox
-                          Obx(
-                            () => Checkbox(
-                              value: loginController.isChecked.value,
-                              activeColor: AppColors.primaryRed,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              onChanged: (value) {
-                                loginController.isChecked.value = value!;
-                              },
+              // Terms and Conditions Checkbox
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: w * .010),
+                child: Row(
+                      children: [
+                        // Checkbox using SignupController
+                        Obx(
+                          () => Checkbox(
+                            value: signupController.termsAgreed.value,
+                            activeColor: AppColors.primaryRed,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
                             ),
+                            onChanged: (value) {
+                              if (value != null) {
+                                signupController.toggleTermsAgreement(value);
+                                // Also update login controller for consistency
+                                loginController.isChecked.value = value;
+                              }
+                            },
                           ),
+                        ),
 
-                          //text
-                          AppFonts.textPoppins(
+                        // Terms text
+                        AppFonts.textPoppins(
+                          context,
+                          "I agree to Indrive ",
+                          w * 0.032,
+                          FontWeight.w500,
+                          AppColors.black.withOpacity(0.7),
+                          TextAlign.left,
+                          TextOverflow.visible,
+                          maxLines: 2,
+                        ),
+
+                        // Terms link
+                        InkWell(
+                          onTap: () {
+                            CustomNavigator.push(
+                              context,
+                              TermsCondition(),
+                              transition: TransitionType.slideTop,
+                            );
+                          },
+                          child: AppFonts.textPoppins(
                             context,
-                            "I agree to Indrive ",
+                            "Terms & Conditions",
                             w * 0.032,
-                            FontWeight.w500,
-                            AppColors.black.withOpacity(0.7),
+                            FontWeight.w400,
+                            const Color(0xFF439AFE),
                             TextAlign.left,
                             TextOverflow.visible,
                             maxLines: 2,
                           ),
+                        ),
+                      ],
+                    )
+                    .animate()
+                    .fade(duration: 1300.ms, curve: Curves.easeInOut)
+                    .scale(
+                      begin: const Offset(0.95, 0.95),
+                      end: const Offset(1, 1),
+                    ),
+              ),
 
-                          //text
-                          InkWell(
-                            onTap: () {
-                              CustomNavigator.push(
-                                context,
-                                TermsCondition(),
-                                transition: TransitionType.slideTop,
-                              );
-                            },
-                            child: AppFonts.textPoppins(
+              SizedBox(height: w * 0.07),
+
+              // Already have an account section
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: w * 0.04),
+                child: Column(
+                  children: [
+                    Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            AppFonts.textPoppins(
                               context,
-                              "Terms & Conditions",
-                              w * 0.032,
-                              FontWeight.w400,
-                              const Color(0xFF439AFE),
-                              TextAlign.left,
-                              TextOverflow.visible,
-                              maxLines: 2,
-                            ),
-                          ),
-                        ],
-                      )
-                      .animate()
-                      .fade(duration: 1300.ms, curve: Curves.easeInOut)
-                      .scale(
-                        begin: const Offset(0.95, 0.95),
-                        end: const Offset(1, 1),
-                      ),
-            ),
-
-            //space
-            SizedBox(height: w * 0.07),
-
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: w * 0.04),
-              child: Column(
-                children: [
-                  //row with already have an account
-                  Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          //text
-                          AppFonts.textPoppins(
-                            context,
-                            "Already have an account?",
-                            w * 0.036,
-                            FontWeight.w400,
-                            AppColors.black.withOpacity(0.7),
-                            TextAlign.left,
-                            TextOverflow.visible,
-                          ),
-
-                          InkWell(
-                            onTap: () {
-                              CustomNavigator.push(
-                                context,
-                                LoginScreen(),
-                                transition: TransitionType.slideLeft,
-                              );
-                            },
-                            child: AppFonts.textPoppins(
-                              context,
-                              "Sign in",
+                              "Already have an account?",
                               w * 0.036,
                               FontWeight.w400,
-                              const Color(0xFF439AFE),
+                              AppColors.black.withOpacity(0.7),
                               TextAlign.left,
                               TextOverflow.visible,
                             ),
-                          ),
-                        ],
-                      )
-                      .animate()
-                      .fade(duration: 1300.ms, curve: Curves.easeInOut)
-                      .scale(
-                        begin: const Offset(0.95, 0.95),
-                        end: const Offset(1, 1),
-                      ),
-                ],
+
+                            // Sign in link
+                            InkWell(
+                              onTap: () {
+                                CustomNavigator.push(
+                                  context,
+                                  LoginScreen(),
+                                  transition: TransitionType.slideLeft,
+                                );
+                              },
+                              child: AppFonts.textPoppins(
+                                context,
+                                "Sign in",
+                                w * 0.036,
+                                FontWeight.w400,
+                                const Color(0xFF439AFE),
+                                TextAlign.left,
+                                TextOverflow.visible,
+                              ),
+                            ),
+                          ],
+                        )
+                        .animate()
+                        .fade(duration: 1300.ms, curve: Curves.easeInOut)
+                        .scale(
+                          begin: const Offset(0.95, 0.95),
+                          end: const Offset(1, 1),
+                        ),
+                  ],
+                ),
               ),
-            ),
 
-            //space
-            SizedBox(height: w * 0.00),
+              SizedBox(height: w * 0.04),
+              SizedBox(height: w * 0.09),
 
-            //space
-            SizedBox(height: w * 0.04),
-
-            //space
-            SizedBox(height: w * 0.09),
-
-            //login button
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: w * 0.04),
-              child:
-                  AppButtons.solid(
-                        context: context,
-                        text: "Signup",
-                        onClicked: () {
-                          //login function
-                          CustomNavigator.push(
-                            context,
-                            EnterOtpScreen(typecheck: "new"),
-                            transition: TransitionType.fade,
-                          );
-                        },
-                        isFullWidth: true,
-                        fontSize: w * 0.045,
-                        height: w * 0.140,
-                        radius: 12.0,
-                        isLoading: false,
-                        textColor: AppColors.black,
-                        fontWeight: FontWeight.w500,
-                      )
-                      .animate()
-                      .fade(duration: 1600.ms, curve: Curves.easeInOut)
-                      .scale(
-                        begin: const Offset(0.95, 0.95),
-                        end: const Offset(1, 1),
-                      ),
-            ),
-            SizedBox(height: w * .1),
-          ],
+              // Signup Button
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: w * 0.04),
+                child: Obx(() => AppButtons.solid(
+                      context: context,
+                      text: "Signup",
+                      onClicked: _handleSignup,
+                      isFullWidth: true,
+                      fontSize: w * 0.045,
+                      height: w * 0.140,
+                      radius: 12.0,
+                      isLoading: signupController.isLoading.value,
+                      textColor: AppColors.black,
+                      fontWeight: FontWeight.w500,
+                    )).animate().fade(duration: 1600.ms, curve: Curves.easeInOut).scale(
+                      begin: const Offset(0.95, 0.95),
+                      end: const Offset(1, 1),
+                    ),
+              ),
+              SizedBox(height: w * .1),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  //common widger
+  // Handle signup button click
+  Future<void> _handleSignup() async {
+    // Validate form
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    // Call controller method (handles validation, API call, and navigation)
+    // await signupController.sendOtpAndNavigate(
+    //   context, 
+    //   phone.text.trim(), 
+    //   false
+    // );
+
+
+    CustomNavigator.push(
+          context,
+          EnterOtpScreen(
+            typecheck: "new",
+             phoneNumber: "9908479634",
+            // phoneNumber: mobile,
+            receivedOtp: authApi.receivedOtp.value,
+          ),
+          transition: TransitionType.fade,
+        );
+  }
+
+  // Common widget method (if you still need it)
   Widget commonWidget(
     String icon,
     String text,
     BuildContext context,
-    //on click
     VoidCallback onClicked,
   ) {
     double w = MediaQuery.of(context).size.width;
     return InkWell(
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
-
       onTap: onClicked,
       child: Container(
         height: w * 0.13,

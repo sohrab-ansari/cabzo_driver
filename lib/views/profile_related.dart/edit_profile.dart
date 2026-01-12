@@ -48,6 +48,7 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;

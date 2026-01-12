@@ -266,7 +266,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           //login function
                           CustomNavigator.push(
                             context,
-                            EnterOtpScreen(typecheck: ""),
+                            EnterOtpScreen(typecheck: "",phoneNumber: "66876",receivedOtp: "asgdhj",),
                             transition: TransitionType.fade,
                           );
                         },
