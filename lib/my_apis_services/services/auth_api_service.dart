@@ -493,7 +493,7 @@ static Future<DriverImageUploadRes> uploadNewDriverImage({
   final token = prefs.getString("auth_token");
 
   try {
-    final request = http.MultipartRequest('POST', url)
+    final request = http.MultipartRequest('PUT', url)
       ..headers.addAll({
         "Authorization": "Bearer $token",
         "Accept": "application/json",
