@@ -252,7 +252,9 @@ class _DocumentsState extends State<Documents> {
                                       context,
                                       driverFormController.activeStep.value == 0
                                           ? detailsAbout[index]
-                                          : (index + 1 < detailsAbout.length
+                                          : 
+                                          
+                                          (index + 1 < detailsAbout.length
                                                 ? detailsAbout[index + 1]
                                                 : detailsAbout.last),
                                       w * 0.036,

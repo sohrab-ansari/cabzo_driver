@@ -6,6 +6,7 @@ import 'package:corezap_driver/utilities/custom_font.dart';
 import 'package:corezap_driver/utilities/custom_images.dart';
 import 'package:corezap_driver/utilities/custom_text.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
+import 'package:corezap_driver/views/auth/login_screen.dart';
 import 'package:corezap_driver/views/popups/pop_ups.dart';
 import 'package:corezap_driver/views/profile_related.dart/documents.dart';
 import 'package:corezap_driver/views/profile_related.dart/edit_profile.dart';
@@ -205,7 +206,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   /// LOGOUT
   Widget _logoutButton(double w) {
     return GestureDetector(
-      onTap: () => PopUps().logout(context),
+      onTap: () => {
+
+
+  CustomNavigator.removeUntil(
+        context,
+        const LoginScreen(),
+        transition: TransitionType.fade,
+      ),
+
+      },
       child: Card(
         elevation: 1,
         child: Padding(

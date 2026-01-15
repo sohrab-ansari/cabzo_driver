@@ -540,7 +540,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
  ]else ...[
 
    Image.asset(
-                      "assets/icons/moneys.png",
+                      "assets/images/moneyss.png",
                       height: w * 0.05,
                       width: w * 0.05,
                     ),
@@ -550,7 +550,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                       " Cash",
                       w * 0.035,
                       FontWeight.w600,
-                      AppColors.black,
+                      Color(0xFf4CAF50),
                       TextAlign.center,
                       TextOverflow.ellipsis,
                       maxLines: 1,

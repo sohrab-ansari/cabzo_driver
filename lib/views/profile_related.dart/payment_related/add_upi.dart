@@ -125,7 +125,7 @@ class _AddUpiState extends State<AddUpi> {
               ),
 
               // remove Spacer() to avoid unbounded height inside scroll view
-              SizedBox(height: w * .65),
+              SizedBox(height: w * .45),
               AppButtons.solid(
                 context: context,
                 text: "Update",

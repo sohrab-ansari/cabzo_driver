@@ -29,8 +29,8 @@ class _SignupScreenState extends State<SignupScreen> {
   late final DriverFormController driverFormController;
   late final TextEditingController phone;
   late final LoginController loginController;
-  late final AuthApi authApi;
-  late final SignupController signupController;
+  // late final AuthApi authApi;
+  // late final SignupController signupController;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -40,20 +40,20 @@ class _SignupScreenState extends State<SignupScreen> {
     
     // Initialize controllers in correct order
     // 1. First initialize AuthApi (base dependency)
-    authApi = Get.put(AuthApi(), permanent: true);
+    // authApi = Get.put(AuthApi(), permanent: true);
     
     // 2. Then initialize other controllers
     driverFormController = Get.put(DriverFormController());
     loginController = Get.put(LoginController());
     
     // 3. Finally initialize SignupController (depends on AuthApi)
-    signupController = Get.put(SignupController());
+    // signupController = Get.put(SignupController());
     
     // 4. Initialize text controllers
     phone = TextEditingController();
     
     // 5. Sync terms agreement between controllers
-    signupController.termsAgreed.value = loginController.isChecked.value;
+    // signupController.termsAgreed.value = loginController.isChecked.value;
   }
 
   @override
@@ -160,7 +160,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           maxLength: 10,
                           keyboardType: TextInputType.number,
                           validator: (value) {
-                            return signupController.validatePhoneNumber(value);
+                            // return signupController.validatePhoneNumber(value);
                           },
                         )
                         .animate()
@@ -178,23 +178,23 @@ class _SignupScreenState extends State<SignupScreen> {
                 padding: EdgeInsets.symmetric(horizontal: w * .010),
                 child: Row(
                       children: [
-                        // Checkbox using SignupController
-                        Obx(
-                          () => Checkbox(
-                            value: signupController.termsAgreed.value,
-                            activeColor: AppColors.primaryRed,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            onChanged: (value) {
-                              if (value != null) {
-                                signupController.toggleTermsAgreement(value);
-                                // Also update login controller for consistency
-                                loginController.isChecked.value = value;
-                              }
-                            },
-                          ),
-                        ),
+                        // // Checkbox using SignupController
+                        // Obx(
+                        //   () => Checkbox(
+                        //     value: 
+                        //     activeColor: AppColors.primaryRed,
+                        //     shape: RoundedRectangleBorder(
+                        //       borderRadius: BorderRadius.circular(4),
+                        //     ),
+                        //     onChanged: (value) {
+                        //       if (value != null) {
+                        //         signupController.toggleTermsAgreement(value);
+                        //         // Also update login controller for consistency
+                        //         loginController.isChecked.value = value;
+                        //       }
+                        //     },
+                        //   ),
+                        // ),
 
                         // Terms text
                         AppFonts.textPoppins(
@@ -293,24 +293,24 @@ class _SignupScreenState extends State<SignupScreen> {
               SizedBox(height: w * 0.09),
 
               // Signup Button
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: w * 0.04),
-                child: Obx(() => AppButtons.solid(
-                      context: context,
-                      text: "Signup",
-                      onClicked: _handleSignup,
-                      isFullWidth: true,
-                      fontSize: w * 0.045,
-                      height: w * 0.140,
-                      radius: 12.0,
-                      isLoading: signupController.isLoading.value,
-                      textColor: AppColors.black,
-                      fontWeight: FontWeight.w500,
-                    )).animate().fade(duration: 1600.ms, curve: Curves.easeInOut).scale(
-                      begin: const Offset(0.95, 0.95),
-                      end: const Offset(1, 1),
-                    ),
-              ),
+              // Padding(
+              //   padding: EdgeInsets.symmetric(horizontal: w * 0.04),
+              //   child: Obx(() => AppButtons.solid(
+              //         context: context,
+              //         text: "Signup",
+              //         onClicked: _handleSignup,
+              //         isFullWidth: true,
+              //         fontSize: w * 0.045,
+              //         height: w * 0.140,
+              //         radius: 12.0,
+              //         isLoading: ,
+              //         textColor: AppColors.black,
+              //         fontWeight: FontWeight.w500,
+              //       )).animate().fade(duration: 1600.ms, curve: Curves.easeInOut).scale(
+              //         begin: const Offset(0.95, 0.95),
+              //         end: const Offset(1, 1),
+              //       ),
+              // ),
               SizedBox(height: w * .1),
             ],
           ),
@@ -334,16 +334,16 @@ class _SignupScreenState extends State<SignupScreen> {
     // );
 
 
-    CustomNavigator.push(
-          context,
-          EnterOtpScreen(
-            typecheck: "new",
-             phoneNumber: "9908479634",
-            // phoneNumber: mobile,
-            receivedOtp: authApi.receivedOtp.value,
-          ),
-          transition: TransitionType.fade,
-        );
+    // CustomNavigator.push(
+    //       context,
+    //       EnterOtpScreen(
+    //         typecheck: "new",
+    //          phoneNumber: "9908479634",
+    //         // phoneNumber: mobile,
+    //         receivedOtp: 
+    //       ),
+    //       transition: TransitionType.fade,
+    //     );
   }
 
   // Common widget method (if you still need it)

@@ -33,7 +33,7 @@ void main()   async {
     ),
   );
 
-    await SharedPrefService.getInstance();
+    // await SharedPrefService.getInstance();
 
   runApp(const MyApp());
 }
@@ -42,27 +42,24 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'Nzcu Driver',
-      debugShowCheckedModeBanner: false,
-      initialBinding: AppBindings(),
-      builder: (context, child) {
-        return SafeArea(
-          top: false,
-          bottom: true,
-          child: child ?? const SizedBox(),
-        );
-      },
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.white),
+    return SafeArea(
+      top: false,
+      bottom: true,
+      child: GetMaterialApp(
+        title: 'Nzcu Driver',
+        debugShowCheckedModeBanner: false,
+        initialBinding: AppBindings(),
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: AppColors.white),
+        ),
+        home: const SplashScreen(),
+
+        // home: BottomnavmainScreen(),
+
+        // home: NotificationScreen(),
+
+            // home: const ArrivedOtpScreen(),
       ),
-      home: const SplashScreen(),
-
-      // home: BottomnavmainScreen(),
-
-      // home: NotificationScreen(),
-
-          // home: const ArrivedOtpScreen(),
     );
   }
 }
@@ -70,8 +67,8 @@ class MyApp extends StatelessWidget {
 class AppBindings extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => AuthApi(), fenix: true);
-    Get.lazyPut(() => SignupController(), fenix: true);
+    // Get.lazyPut(() => AuthApi(), fenix: true);
+    // Get.lazyPut(() => SignupController(), fenix: true);
     Get.lazyPut(() => LoginController(), fenix: true);
     Get.lazyPut(() => DriverFormController(), fenix: true);
     // Get.lazyPut(() => OtpController(), fenix: true);

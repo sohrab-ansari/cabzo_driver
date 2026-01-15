@@ -107,21 +107,21 @@ class _DriverAgreementState extends State<DriverAgreement> {
                   // mainAxisSize: MainAxisSize.min,
                   children: [
                     //checkBox
-                    Obx(
-                      () => Checkbox(
-                        value: loginController.isCheckedAgreement.value,
-                        activeColor: AppColors.primaryRed,
-                        visualDensity: VisualDensity.compact,
+                    // Obx(
+                    //   () => Checkbox(
+                    //     value: loginController.isCheckedAgreement.value,
+                    //     activeColor: AppColors.primaryRed,
+                    //     visualDensity: VisualDensity.compact,
 
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        onChanged: (value) {
-                          loginController.isCheckedAgreement.value = value!;
-                        },
-                      ),
-                    ),
+                    //     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(4),
+                    //     ),
+                    //     onChanged: (value) {
+                    //       loginController.isCheckedAgreement.value = value!;
+                    //     },
+                    //   ),
+                    // ),
 
                     //text
                     AppFonts.textPoppins(
@@ -145,38 +145,40 @@ class _DriverAgreementState extends State<DriverAgreement> {
                   end: const Offset(1, 1),
                 ),
             Spacer(),
-            Obx(
-              () =>
-                  AppButtons.solid(
-                        context: context,
-                        text: "Submit",
-                        onClicked: () {
-                          //login function
-                          // CustomNavigator.push(
-                          //   context,
-                          //   EnterOtpScreen(),
-                          //   transition: TransitionType.fade,
-                          // );
-                        },
-                        textColor: loginController.isCheckedAgreement.value
-                            ? AppColors.white
-                            : AppColors.mediumGray,
-                        backgroundColor:
-                            loginController.isCheckedAgreement.value
-                            ? AppColors.primaryRed
-                            : AppColors.lightGray,
-                        isFullWidth: true,
-                        fontSize: w * 0.045,
-                        height: w * 0.140,
-                        radius: 12.0,
-                      )
-                      .animate()
-                      .fade(duration: 1600.ms, curve: Curves.easeInOut)
-                      .scale(
-                        begin: const Offset(0.95, 0.95),
-                        end: const Offset(1, 1),
-                      ),
-            ),
+            // Obx(
+            //   () =>
+            //       AppButtons.solid(
+            //             context: context,
+            //             text: "Submit",
+            //             onClicked: () {
+            //               //login function
+            //               // CustomNavigator.push(
+            //               //   context,
+            //               //   EnterOtpScreen(),
+            //               //   transition: TransitionType.fade,
+            //               // );
+            //             },
+            //             textColor: loginController.isCheckedAgreement.value
+            //                 ? AppColors.white
+            //                 : AppColors.mediumGray,
+            //             backgroundColor:
+            //                 loginController.isCheckedAgreement.value
+            //                 ? AppColors.primaryRed
+            //                 : AppColors.lightGray,
+            //             isFullWidth: true,
+            //             fontSize: w * 0.045,
+            //             height: w * 0.140,
+            //             radius: 12.0,
+            //           )
+            //           .animate()
+            //           .fade(duration: 1600.ms, curve: Curves.easeInOut)
+            //           .scale(
+            //             begin: const Offset(0.95, 0.95),
+            //             end: const Offset(1, 1),
+            //           ),
+            // ),
+            
+            
             SizedBox(height: w * .1),
           ],
         ),
