@@ -22,6 +22,7 @@ import 'package:corezap_driver/views/profile_related.dart/terms_condition.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -204,41 +205,86 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   /// LOGOUT
+  /// 
   Widget _logoutButton(double w) {
-    return GestureDetector(
-      onTap: () => {
+  return GestureDetector(
+    onTap: () async {
+      // 1️⃣ Get SharedPreferences instance
+      final prefs = await SharedPreferences.getInstance();
 
+      // 2️⃣ Clear all stored data
+      await prefs.clear();
+      // OR remove specific keys:
+      // await prefs.remove("user_id");
+      // await prefs.remove("auth_token");
 
-  CustomNavigator.removeUntil(
+      // 3️⃣ Navigate to Login screen (remove all previous routes)
+      CustomNavigator.removeUntil(
         context,
         const LoginScreen(),
         transition: TransitionType.fade,
-      ),
-
-      },
-      child: Card(
-        elevation: 1,
-        child: Padding(
-          padding: EdgeInsets.all(w * .04),
-          child: Row(
-            children: [
-              CustomImages.images(
-                "assets/icons/Sign_Out.png",
-                w * .06,
-                w * .06,
-              ),
-              SizedBox(width: w * .03),
-              CustomText(
-                text: "Logout",
-                textFontSize: w * .04,
-                textFontWeight: FontWeight.w500,
-              ),
-            ],
-          ),
+      );
+    },
+    child: Card(
+      elevation: 1,
+      child: Padding(
+        padding: EdgeInsets.all(w * .04),
+        child: Row(
+          children: [
+            CustomImages.images(
+              "assets/icons/Sign_Out.png",
+              w * .06,
+              w * .06,
+            ),
+            SizedBox(width: w * .03),
+            CustomText(
+              text: "Logout",
+              textFontSize: w * .04,
+              textFontWeight: FontWeight.w500,
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+  // Widget _logoutButton(double w) {
+  //   return GestureDetector(
+  //     onTap: () => {
+
+
+  // CustomNavigator.removeUntil(
+  //       context,
+  //       const LoginScreen(),
+  //       transition: TransitionType.fade,
+  //     ),
+
+
+  //     },
+  //     child: Card(
+  //       elevation: 1,
+  //       child: Padding(
+  //         padding: EdgeInsets.all(w * .04),
+  //         child: Row(
+  //           children: [
+  //             CustomImages.images(
+  //               "assets/icons/Sign_Out.png",
+  //               w * .06,
+  //               w * .06,
+  //             ),
+  //             SizedBox(width: w * .03),
+  //             CustomText(
+  //               text: "Logout",
+  //               textFontSize: w * .04,
+  //               textFontWeight: FontWeight.w500,
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   /// COMMON MENU ITEM
   Widget customMenuItemsButton(String imagePath, String title) {

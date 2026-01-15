@@ -4,8 +4,11 @@
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
 import 'package:corezap_driver/views/auth/login_screen.dart';
+import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
+import 'package:corezap_driver/views/bottomNavigation/home_screen.dart';
 import 'package:corezap_driver/views/onboarding/onboarding_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // class SplashScreen extends StatefulWidget {
 //   const SplashScreen({super.key});
@@ -151,6 +154,36 @@ class _SplashScreenState extends State<SplashScreen> {
         transition: TransitionType.fade,
       );
     });
+
+    tokenbasednav();
+  }
+
+  Future<void> tokenbasednav() async {
+     final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+
+    print("splashtokennnn ${token}");
+
+   if(token !=null) {
+
+
+   CustomNavigator.removeUntil(
+        context,
+        const BottomnavmainScreen(),
+        transition: TransitionType.fade,
+      );
+
+   }else {
+
+    CustomNavigator.removeUntil(
+        context,
+        const LoginScreen(),
+        transition: TransitionType.fade,
+      );
+
+   }
+  
+
   }
 
   @override

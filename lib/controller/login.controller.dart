@@ -19,6 +19,7 @@ class LoginController extends GetxController {
   var receivedOtp = ''.obs;
   RxBool isProfileCompleted = false.obs;
 
+  RxBool isProfileCompleted22 = false.obs;
   // For storing user data after successful login
   var userData = {}.obs;
 
@@ -72,6 +73,9 @@ class LoginController extends GetxController {
   }
 
   Future<void> verifyOtp({String? otp, String? phoneNumber}) async {
+
+    print("my_Sended_number_came ${phoneNumber}");
+     print("my_Sended_number_came_otp ${otp}");
     try {
       // Validate OTP
       if (otp!.isEmpty || otp.length != 4) {
@@ -85,12 +89,14 @@ class LoginController extends GetxController {
       // Call API
       final OtpverifyRes res = await AuthApiService.verifyOtp(
         otp: otp,
-        // phoneNumber: phoneNumber,
+        phoneNumber: phoneNumber,
       );
 
       if (res.success == true) {
         // IMPORTANT: Update isOtpVerified to true
         isOtpVerified.value = true;
+
+        isProfileCompleted22.value = res.driver!.isProfileCompleted;
 
         // Store user data if available
         if (res.driver != null) {

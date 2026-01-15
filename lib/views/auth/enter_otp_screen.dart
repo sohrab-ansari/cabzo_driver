@@ -95,8 +95,9 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
       // Wait a bit for the controller to update
       await Future.delayed(Duration(milliseconds: 100));
       
+      print("hellowwww>>>> ${loginController.isProfileCompleted22.value}");
       // Check if OTP was verified successfully
-      if (loginController.isOtpVerified.value) {
+      if (loginController.isProfileCompleted22.value) {
         // Navigate based on type
         navigateBasedOnType();
       } else {
