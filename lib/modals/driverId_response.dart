@@ -1,0 +1,571 @@
+// // class DriverIdResponse {
+// //   bool? success;
+// //   String? message;
+// //   Driver? driver;
+
+// //   DriverIdResponse({
+// //     this.success,
+// //     this.message,
+// //     this.driver,
+// //   });
+
+// //   factory DriverIdResponse.fromJson(Map<String, dynamic> json) {
+// //     return DriverIdResponse(
+// //       success: json['success'],
+// //       message: json['message'],
+// //       driver: json['driver'] != null
+// //           ? Driver.fromJson(json['driver'])
+// //           : null,
+// //     );
+// //   }
+
+// //   Map<String, dynamic> toJson() {
+// //     return {
+// //       'success': success,
+// //       'message': message,
+// //       'driver': driver?.toJson(),
+// //     };
+// //   }
+// // }
+
+
+// // class Driver {
+// //   String? id;
+// //   String? name;
+// //   String? image;
+// //   String? phone;
+// //   bool? startDuty;
+// //   String? verificationStatus;
+// //   String? imageVerificationStatus;
+// //   bool? isProfileCompleted;
+// //   double? rating;
+
+// //   Driver({
+// //     this.id,
+// //     this.name,
+// //     this.image,
+// //     this.phone,
+// //     this.startDuty,
+// //     this.verificationStatus,
+// //     this.imageVerificationStatus,
+// //     this.isProfileCompleted,
+// //     this.rating,
+// //   });
+
+// //   factory Driver.fromJson(Map<String, dynamic> json) {
+// //     return Driver(
+// //       id: json['_id'],
+// //       name: json['name'],
+// //       image: json['image'],
+// //       phone: json['phone'],
+// //       startDuty: json['startDuty'],
+// //       verificationStatus: json['verificationStatus'],
+// //       imageVerificationStatus: json['imageVerificationStatus'],
+// //       isProfileCompleted: json['isProfileCompleted'],
+// //       rating: (json['rating'] as num?)?.toDouble(),
+// //     );
+// //   }
+
+// //   Map<String, dynamic> toJson() {
+// //     return {
+// //       '_id': id,
+// //       'name': name,
+// //       'image': image,
+// //       'phone': phone,
+// //       'startDuty': startDuty,
+// //       'verificationStatus': verificationStatus,
+// //       'imageVerificationStatus': imageVerificationStatus,
+// //       'isProfileCompleted': isProfileCompleted,
+// //       'rating': rating,
+// //     };
+// //   }
+// // }
+
+
+// class DriverIdResponse {
+//     bool? success;
+//     String? message;
+//     Driver? driver;
+
+//     DriverIdResponse({
+//         this.success,
+//         this.message,
+//         this.driver,
+//     });
+
+// }
+
+// class Driver {
+//     dynamic phoneOtp;
+//     String? id;
+//     String? phone;
+//     bool? startDuty;
+//     int? rating;
+//     String? verificationStatus;
+//     bool? isCancelledAnyOrder;
+//     bool? disable;
+//     bool? isProfileCompleted;
+//     DateTime? createdAt;
+//     DateTime? updatedAt;
+//     int? v;
+//     String? dlImage;
+//     String? panImage;
+//     String? aadharImageBack;
+//     String? aadharImageFront;
+//     String? aadharNumber;
+//     String? email;
+//     String? name;
+//     String? panNumber;
+//     String? image;
+//     String? imageVerificationStatus;
+//     String? preference;
+//     int? platformCommission;
+//     FleetId? fleetId;
+//     String? commissionCityId;
+//     DateTime? lastCommissionCityUpdate;
+//     String? gender;
+//     DateTime? dateOfBirth;
+//     int? totalRating;
+//     Vehicle? vehicle;
+//     String? driverId;
+
+//     Driver({
+//         this.phoneOtp,
+//         this.id,
+//         this.phone,
+//         this.startDuty,
+//         this.rating,
+//         this.verificationStatus,
+//         this.isCancelledAnyOrder,
+//         this.disable,
+//         this.isProfileCompleted,
+//         this.createdAt,
+//         this.updatedAt,
+//         this.v,
+//         this.dlImage,
+//         this.panImage,
+//         this.aadharImageBack,
+//         this.aadharImageFront,
+//         this.aadharNumber,
+//         this.email,
+//         this.name,
+//         this.panNumber,
+//         this.image,
+//         this.imageVerificationStatus,
+//         this.preference,
+//         this.platformCommission,
+//         this.fleetId,
+//         this.commissionCityId,
+//         this.lastCommissionCityUpdate,
+//         this.gender,
+//         this.dateOfBirth,
+//         this.totalRating,
+//         this.vehicle,
+//         this.driverId,
+//     });
+
+// }
+
+// class FleetId {
+//     dynamic phoneOtp;
+//     String? id;
+//     String? name;
+//     int? phone;
+//     String? email;
+//     bool? disable;
+//     int? driverCommision;
+//     DateTime? createdAt;
+//     DateTime? updatedAt;
+//     int? v;
+
+//     FleetId({
+//         this.phoneOtp,
+//         this.id,
+//         this.name,
+//         this.phone,
+//         this.email,
+//         this.disable,
+//         this.driverCommision,
+//         this.createdAt,
+//         this.updatedAt,
+//         this.v,
+//     });
+
+// }
+
+// class Vehicle {
+//     String? id;
+//     String? vehicleName;
+//     String? vehicleNumber;
+//     String? vehicleType;
+//     String? vehicleColor;
+//     String? vehicleModel;
+//     int? vehicleYear;
+//     int? vehicleCapacity;
+//     String? vehicleStatus;
+//     String? driverId;
+//     String? createdBy;
+//     String? createdByModel;
+//     bool? disable;
+//     String? verificationStatus;
+//     DateTime? createdAt;
+//     DateTime? updatedAt;
+//     int? v;
+
+//     Vehicle({
+//         this.id,
+//         this.vehicleName,
+//         this.vehicleNumber,
+//         this.vehicleType,
+//         this.vehicleColor,
+//         this.vehicleModel,
+//         this.vehicleYear,
+//         this.vehicleCapacity,
+//         this.vehicleStatus,
+//         this.driverId,
+//         this.createdBy,
+//         this.createdByModel,
+//         this.disable,
+//         this.verificationStatus,
+//         this.createdAt,
+//         this.updatedAt,
+//         this.v,
+//     });
+
+// }
+
+
+class DriverIdResponse {
+  bool? success;
+  String? message;
+  Driver? driver;
+
+  DriverIdResponse({
+    this.success,
+    this.message,
+    this.driver,
+  });
+
+  factory DriverIdResponse.fromJson(Map<String, dynamic> json) {
+    return DriverIdResponse(
+      success: json['success'],
+      message: json['message'],
+      driver: json['driver'] != null
+          ? Driver.fromJson(json['driver'])
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'success': success,
+      'message': message,
+      'driver': driver?.toJson(),
+    };
+  }
+}
+
+class Driver {
+  dynamic phoneOtp;
+  String? id;
+  String? phone;
+  bool? startDuty;
+  int? rating;
+  String? verificationStatus;
+  bool? isCancelledAnyOrder;
+  bool? disable;
+  bool? isProfileCompleted;
+  DateTime? createdAt;
+  DateTime? updatedAt;
+  int? v;
+  String? dlImage;
+  String? panImage;
+  String? aadharImageBack;
+  String? aadharImageFront;
+  String? aadharNumber;
+  String? email;
+  String? name;
+  String? panNumber;
+  String? image;
+  String? imageVerificationStatus;
+  String? preference;
+  int? platformCommission;
+  FleetId? fleetId;
+  String? commissionCityId;
+  DateTime? lastCommissionCityUpdate;
+  String? gender;
+  DateTime? dateOfBirth;
+  int? totalRating;
+  Vehicle? vehicle;
+  String? driverId;
+
+  Driver({
+    this.phoneOtp,
+    this.id,
+    this.phone,
+    this.startDuty,
+    this.rating,
+    this.verificationStatus,
+    this.isCancelledAnyOrder,
+    this.disable,
+    this.isProfileCompleted,
+    this.createdAt,
+    this.updatedAt,
+    this.v,
+    this.dlImage,
+    this.panImage,
+    this.aadharImageBack,
+    this.aadharImageFront,
+    this.aadharNumber,
+    this.email,
+    this.name,
+    this.panNumber,
+    this.image,
+    this.imageVerificationStatus,
+    this.preference,
+    this.platformCommission,
+    this.fleetId,
+    this.commissionCityId,
+    this.lastCommissionCityUpdate,
+    this.gender,
+    this.dateOfBirth,
+    this.totalRating,
+    this.vehicle,
+    this.driverId,
+  });
+
+  factory Driver.fromJson(Map<String, dynamic> json) {
+    return Driver(
+      phoneOtp: json['phoneOtp'],
+      id: json['_id'],
+      phone: json['phone'],
+      startDuty: json['startDuty'],
+      rating: json['rating'],
+      verificationStatus: json['verificationStatus'],
+      isCancelledAnyOrder: json['isCancelledAnyOrder'],
+      disable: json['disable'],
+      isProfileCompleted: json['isProfileCompleted'],
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : null,
+      v: json['__v'],
+      dlImage: json['DLImage'],
+      panImage: json['PANImage'],
+      aadharImageBack: json['aadharImageBack'],
+      aadharImageFront: json['aadharImageFront'],
+      aadharNumber: json['aadharNumber'],
+      email: json['email'],
+      name: json['name'],
+      panNumber: json['panNumber'],
+      image: json['image'],
+      imageVerificationStatus: json['imageVerificationStatus'],
+      preference: json['preference'],
+      platformCommission: json['platformCommission'],
+      fleetId: json['fleetId'] != null
+          ? FleetId.fromJson(json['fleetId'])
+          : null,
+      commissionCityId: json['commissionCityId'],
+      lastCommissionCityUpdate: json['lastCommissionCityUpdate'] != null
+          ? DateTime.parse(json['lastCommissionCityUpdate'])
+          : null,
+      gender: json['gender'],
+      dateOfBirth: json['dateOfBirth'] != null
+          ? DateTime.parse(json['dateOfBirth'])
+          : null,
+      totalRating: json['totalRating'],
+      vehicle: json['vehicle'] != null
+          ? Vehicle.fromJson(json['vehicle'])
+          : null,
+      driverId: json['driverId'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'phoneOtp': phoneOtp,
+      '_id': id,
+      'phone': phone,
+      'startDuty': startDuty,
+      'rating': rating,
+      'verificationStatus': verificationStatus,
+      'isCancelledAnyOrder': isCancelledAnyOrder,
+      'disable': disable,
+      'isProfileCompleted': isProfileCompleted,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+      '__v': v,
+      'DLImage': dlImage,
+      'PANImage': panImage,
+      'aadharImageBack': aadharImageBack,
+      'aadharImageFront': aadharImageFront,
+      'aadharNumber': aadharNumber,
+      'email': email,
+      'name': name,
+      'panNumber': panNumber,
+      'image': image,
+      'imageVerificationStatus': imageVerificationStatus,
+      'preference': preference,
+      'platformCommission': platformCommission,
+      'fleetId': fleetId?.toJson(),
+      'commissionCityId': commissionCityId,
+      'lastCommissionCityUpdate':
+          lastCommissionCityUpdate?.toIso8601String(),
+      'gender': gender,
+      'dateOfBirth': dateOfBirth?.toIso8601String(),
+      'totalRating': totalRating,
+      'vehicle': vehicle?.toJson(),
+      'driverId': driverId,
+    };
+  }
+}
+
+class FleetId {
+  dynamic phoneOtp;
+  String? id;
+  String? name;
+  int? phone;
+  String? email;
+  bool? disable;
+  int? driverCommision;
+  DateTime? createdAt;
+  DateTime? updatedAt;
+  int? v;
+
+  FleetId({
+    this.phoneOtp,
+    this.id,
+    this.name,
+    this.phone,
+    this.email,
+    this.disable,
+    this.driverCommision,
+    this.createdAt,
+    this.updatedAt,
+    this.v,
+  });
+
+  factory FleetId.fromJson(Map<String, dynamic> json) {
+    return FleetId(
+      phoneOtp: json['phoneOtp'],
+      id: json['_id'],
+      name: json['name'],
+      phone: json['phone'],
+      email: json['email'],
+      disable: json['disable'],
+      driverCommision: json['driverCommision'],
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : null,
+      v: json['__v'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'phoneOtp': phoneOtp,
+      '_id': id,
+      'name': name,
+      'phone': phone,
+      'email': email,
+      'disable': disable,
+      'driverCommision': driverCommision,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+      '__v': v,
+    };
+  }
+}
+
+class Vehicle {
+  String? id;
+  String? vehicleName;
+  String? vehicleNumber;
+  String? vehicleType;
+  String? vehicleColor;
+  String? vehicleModel;
+  int? vehicleYear;
+  int? vehicleCapacity;
+  String? vehicleStatus;
+  String? driverId;
+  String? createdBy;
+  String? createdByModel;
+  bool? disable;
+  String? verificationStatus;
+  DateTime? createdAt;
+  DateTime? updatedAt;
+  int? v;
+
+  Vehicle({
+    this.id,
+    this.vehicleName,
+    this.vehicleNumber,
+    this.vehicleType,
+    this.vehicleColor,
+    this.vehicleModel,
+    this.vehicleYear,
+    this.vehicleCapacity,
+    this.vehicleStatus,
+    this.driverId,
+    this.createdBy,
+    this.createdByModel,
+    this.disable,
+    this.verificationStatus,
+    this.createdAt,
+    this.updatedAt,
+    this.v,
+  });
+
+  factory Vehicle.fromJson(Map<String, dynamic> json) {
+    return Vehicle(
+      id: json['_id'],
+      vehicleName: json['vehicleName'],
+      vehicleNumber: json['vehicleNumber'],
+      vehicleType: json['vehicleType'],
+      vehicleColor: json['vehicleColor'],
+      vehicleModel: json['vehicleModel'],
+      vehicleYear: json['vehicleYear'],
+      vehicleCapacity: json['vehicleCapacity'],
+      vehicleStatus: json['vehicleStatus'],
+      driverId: json['driverId'],
+      createdBy: json['createdBy'],
+      createdByModel: json['createdByModel'],
+      disable: json['disable'],
+      verificationStatus: json['verificationStatus'],
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : null,
+      v: json['__v'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'vehicleName': vehicleName,
+      'vehicleNumber': vehicleNumber,
+      'vehicleType': vehicleType,
+      'vehicleColor': vehicleColor,
+      'vehicleModel': vehicleModel,
+      'vehicleYear': vehicleYear,
+      'vehicleCapacity': vehicleCapacity,
+      'vehicleStatus': vehicleStatus,
+      'driverId': driverId,
+      'createdBy': createdBy,
+      'createdByModel': createdByModel,
+      'disable': disable,
+      'verificationStatus': verificationStatus,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+      '__v': v,
+    };
+  }
+}

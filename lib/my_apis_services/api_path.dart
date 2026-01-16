@@ -16,4 +16,12 @@ class ApiPath {
   //profile end points
 
   static String edit_profile = "$baseUri/driver/update";
+
+  static String wallet_api = "$baseUri/wallet";
+
+  static String transactions_api = "$baseUri/transactions";
+
+ 
+
+   static String ratings_api = "$baseUri/rating/getDriver";
 }
