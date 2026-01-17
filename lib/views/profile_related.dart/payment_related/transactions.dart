@@ -403,11 +403,11 @@ class _TransactionsState extends State<Transactions> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(
-                  "assets/icons/no_transactions.png",
-                  width: w * 0.4,
-                  height: w * 0.4,
-                ),
+                // Image.asset(
+                //   "assets/icons/no_transactions.png",
+                //   width: w * 0.4,
+                //   height: w * 0.4,
+                // ),
                 SizedBox(height: w * 0.05),
                 Text(
                   'No transactions found',

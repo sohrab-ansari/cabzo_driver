@@ -24,4 +24,15 @@ class ApiPath {
  
 
    static String ratings_api = "$baseUri/rating/getDriver";
+
+
+
+static String bank_account_add = "$baseUri/bank-accounts/add";
+
+
+
+
+static String withdrawMoney = "$baseUri/payments/withdraw";
+
+
 }
