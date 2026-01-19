@@ -58,8 +58,9 @@ dependencies:
   device_info_plus: ^12.3.0
   uuid: ^4.5.2
   dio: ^5.9.0
-  fluttertoast: ^9.0.0
+  fluttertoast: any
   socket_io_client: ^3.1.4
+  razorpay_flutter: ^1.4.0
 
 
 dev_dependencies:

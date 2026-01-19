@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:corezap_driver/modals/add_money_wallet_response.dart';
 import 'package:corezap_driver/modals/bank_account_add_Res.dart';
 import 'package:corezap_driver/modals/driverId_response.dart';
 import 'package:corezap_driver/modals/driver_Image_upload_res.dart';
@@ -10,9 +11,12 @@ import 'package:corezap_driver/modals/home_modal_response.dart';
 import 'package:corezap_driver/modals/payments_withdraw_response.dart';
 import 'package:corezap_driver/modals/review_rating_response.dart';
 import 'package:corezap_driver/modals/ride_history_response.dart';
+import 'package:corezap_driver/modals/ride_history_response2.dart';
+import 'package:corezap_driver/modals/terms_and_policy_response.dart';
 import 'package:corezap_driver/modals/transactions_response.dart';
 import 'package:corezap_driver/modals/wallet_response.dart';
 import 'package:corezap_driver/views/profile_related.dart/edit_profile.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -888,6 +892,138 @@ static Future<PaymentsWithdrawResponse> money_transfer({
     }
   }
 
+
+
+
+   static Future<AddMoneyWalletResponse> initializeWalletTopUp({
+    required dynamic amount
+   }) async {
+    /// 🔐 GET TOKEN
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+
+    final String? userId = prefs.getString("driver_userid");
+
+    print("theeeee____ useriddddd ${userId}");
+
+    print("theeeee____ amount gott ${amount}");
+
+    final Uri url = 
+
+     Uri.parse(ApiPath.addwalletapi);
+
+    print("========== CREATE VEHICLE API ==========");
+    print("URL : $url");
+    print("Token : $token");
+    // print("Request Body : ${jsonEncode(requestBody)}");
+    print("my_tokennnn ${token}");
+
+    try {
+    
+
+
+  final response = await http.post(
+        Uri.parse(ApiPath.addwalletapi),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          // "driverId": userId,
+
+          "amount" : amount
+         
+        }),
+      );
+      print("Status Code : ${response.statusCode}");
+      print("total__Response Body : ${response.body}");
+
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      final AddMoneyWalletResponse walletResponse = AddMoneyWalletResponse.fromJson(data);
+
+      return walletResponse;
+    } catch (e) {
+      print("❌ Exception in Create Vehicle : $e");
+      return AddMoneyWalletResponse(success: false, message: "Connection error: $e");
+    }
+  }
+
+
+
+
+   static Future<bool> verifyAndAddMoneydata({
+      required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+   }) async {
+    /// 🔐 GET TOKEN
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+
+    final String? userId = prefs.getString("driver_userid");
+
+    print("theeeee____ razorpayOrderId ${razorpayOrderId}");
+
+    print("theeeee____ razorpayPaymentId ${razorpayPaymentId}");
+
+  print("theeeee____ razorpaySignature ${razorpaySignature}");
+    final Uri url = 
+
+     Uri.parse(ApiPath.addwalletapi);
+
+    print("========== CREATE VEHICLE API ==========");
+    print("URL : $url");
+    print("Token : $token");
+    // print("Request Body : ${jsonEncode(requestBody)}");
+    print("my_tokennnn ${token}");
+
+    try {
+    
+
+
+  final response = await http.post(
+        Uri.parse(ApiPath.payments_verify_api),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          // "driverId": userId,
+
+          
+
+          "razorpay_order_id" :razorpayOrderId,
+          "razorpay_payment_id" :razorpayPaymentId,
+          "razorpay_signature" :razorpaySignature
+         
+        }),
+      );
+      print("Status Code : ${response.statusCode}");
+      print("total__Response Body : ${response.body}");
+  final Map<String, dynamic> data = jsonDecode(response.body);
+      
+  Fluttertoast.showToast(
+      msg: data['message'] ?? "Something went wrong",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+    );
+       
+
+  return true;
+
+    
+    } catch (e) {
+      print("❌ Exception in Create Vehicle : $e");
+
+      return false;
+      // return AddMoneyWalletResponse(success: false, message: "Connection error: $e");
+    }
+  }
+
+
+
   static Future<GetBankAccountsResponse> get_bankdetails_data() async {
     /// 🔐 GET TOKEN
     final prefs = await SharedPreferences.getInstance();
@@ -978,6 +1114,50 @@ static Future<PaymentsWithdrawResponse> money_transfer({
     }
   }
 
+
+  static Future<Termsandpolicyresponse> get_terams_and_policy_data() async {
+    /// 🔐 GET TOKEN
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+
+    final String? userId = prefs.getString("driver_userid");
+
+    print("theeeee____ useriddddd ${userId}");
+
+    final Uri url = Uri.parse("${ApiPath.privacy_terms_api}");
+    print("========== CREATE VEHICLE API ==========");
+    print("URL : $url");
+    print("Token : $token");
+    // print("Request Body : ${jsonEncode(requestBody)}");
+    print("my_tokennnn ${token}");
+
+    try {
+      final http.Response response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token", // ✅ BEARER TOKEN
+        },
+        // body: jsonEncode(requestBody),
+      );
+
+      print("Status Code : ${response.statusCode}");
+      print("Response Body : ${response.body}");
+
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      final Termsandpolicyresponse walletResponse = Termsandpolicyresponse.fromJson(
+        data,
+      );
+
+      return walletResponse;
+    } catch (e) {
+      print("❌ Exception in Create Vehicle : $e");
+      return Termsandpolicyresponse(
+        success: false,
+        message: "Connection error: $e",
+      );
+    }
+  }
   static Future<RideHistoryResponse> get_rides_history_data() async {
     // final Uri url = Uri.parse(ApiPath.createVehicle);
     final Uri url = Uri.parse("${ApiPath.transactions_api}");
@@ -1019,4 +1199,65 @@ static Future<PaymentsWithdrawResponse> money_transfer({
       );
     }
   }
+
+
+  
+  static Future<RideHistoryResponse2> get_rides_history_data2({required String  status}) async {
+    // final Uri url = Uri.parse(ApiPath.createVehicle);
+  //  final Uri url = Uri.parse(
+  //     "${ApiPath.baseUri}/order/driver/history?status=${userId}",
+  //   );
+
+print("myyyyyy>>>>status ${status}");
+final Uri url = Uri.parse(
+      "${ApiPath.baseUri}/order/driver/history?status=${status}",
+    );
+    /// 🔐 GET TOKEN
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+
+    print("========== CREATE VEHICLE API ==========");
+    print("URL : $url");
+    print("Token : $token");
+    // print("Request Body : ${jsonEncode(requestBody)}");
+    print("my_tokennnn ${token}");
+
+    try {
+      final http.Response response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token", // ✅ BEARER TOKEN
+        },
+
+        //  headers: {
+        //   "Content-Type": "application/json",
+        //   "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NGU2OTkzMTFiYTMwYjk2YzVlZWI4OSIsInJvbGUiOiJEcml2ZXIiLCJpYXQiOjE3Njg4MjE1NzgsImV4cCI6MTc3MTQxMzU3OH0.B9hPpBJGQCac8dFGCN2_aWb1lJCJ7KKsoVtXM-7tLSE", // ✅ BEARER TOKEN
+        // },
+
+        // /getCompany
+        // body: jsonEncode(requestBody),
+      );
+
+      print("Status Code : ${response.statusCode}");
+      print("Response Body : ${response.body}");
+
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      final RideHistoryResponse2 walletResponse = RideHistoryResponse2.fromJson(
+        data,
+      );
+
+      return walletResponse;
+    } catch (e) {
+      print("❌ Exception in Create Vehicle : $e");
+      return RideHistoryResponse2(
+        success: false,
+        message: "Connection error: $e",
+      );
+    }
+  }
+
+
+// privacy_terms_api
+
 }

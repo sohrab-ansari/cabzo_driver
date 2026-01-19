@@ -552,20 +552,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
 
                       // Error message for phone number
-                      Obx(
-                        () => loginController.phoneError.isNotEmpty
-                            ? Padding(
-                                padding: EdgeInsets.only(top: w * 0.01),
-                                child: Text(
-                                  loginController.phoneError.value,
-                                  style: TextStyle(
-                                    color: Colors.red,
-                                    fontSize: w * 0.03,
-                                  ),
-                                ),
-                              )
-                            : SizedBox.shrink(),
-                      ),
+                      // Obx(
+                      //   () => loginController.phoneError.isNotEmpty
+                      //       ? Padding(
+                      //           padding: EdgeInsets.only(top: w * 0.01),
+                      //           child: Text(
+                      //             loginController.phoneError.value,
+                      //             style: TextStyle(
+                      //               color: Colors.red,
+                      //               fontSize: w * 0.03,
+                      //             ),
+                      //           ),
+                      //         )
+                      //       : SizedBox.shrink(),
+                      // ),
                     ],
                   ),
                 ],
@@ -641,20 +641,103 @@ class _LoginScreenState extends State<LoginScreen> {
             // Space
             SizedBox(height: w * 0.00),
 
+
+
+ Padding(
+                padding: EdgeInsets.symmetric(horizontal: w * 0.04),
+                child: Column(
+                  children: [
+                    Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            AppFonts.textPoppins(
+                              context,
+                              "Already have an account? ",
+                              w * 0.036,
+                              FontWeight.w400,
+                              AppColors.black.withOpacity(0.7),
+                              TextAlign.left,
+                              TextOverflow.visible,
+                            ),
+
+                            // Sign in link
+                            InkWell(
+                              onTap: () {
+                                CustomNavigator.push(
+                                  context,
+                                  SignupScreen(),
+                                  transition: TransitionType.slideLeft,
+                                );
+                              },
+                              child: AppFonts.textPoppins(
+                                context,
+                                "Sign Up",
+                                w * 0.036,
+                                FontWeight.w400,
+                                const Color(0xFF439AFE),
+                                TextAlign.left,
+                                TextOverflow.visible,
+                              ),
+                            ),
+                          ],
+                        )
+                        .animate()
+                        .fade(duration: 1300.ms, curve: Curves.easeInOut)
+                        .scale(
+                          begin: const Offset(0.95, 0.95),
+                          end: const Offset(1, 1),
+                        ),
+                  ],
+                ),
+              ),
+
             // Space
             SizedBox(height: w * 0.04),
 
             // Space
             SizedBox(height: w * 0.09),
+           
 
             // Login button
-            Padding(
+  //           Padding(
+  //             padding: EdgeInsets.symmetric(horizontal: w * 0.04),
+  //             child:
+  //                 Obx(
+  //                       () => AppButtons.solid2(
+  //                         context: context,
+  //                         text: "Send OTP",
+  //                           onClicked: _handleSendOtp,  // Your click handler method
+  // isButtonEnabled: isButtonEnabled,  // 
+  //                         // onClicked: isButtonEnabled ? () {
+  //                         //   // Call the async function without await
+  //                         //   _handleSendOtp();
+  //                         // } : null,
+  //                         isFullWidth: true,
+  //                         fontSize: w * 0.045,
+  //                         height: w * 0.140,
+  //                         radius: 12.0,
+  //                         isLoading: loginController.isLoading.value,
+  //                         textColor: isButtonEnabled ? AppColors.black : AppColors.darkGray.withOpacity(0.5),
+  //                         fontWeight: FontWeight.w500,
+  //                       ),
+  //                     )
+  //                     .animate()
+  //                     .fade(duration: 1600.ms, curve: Curves.easeInOut)
+  //                     .scale(
+  //                       begin: const Offset(0.95, 0.95),
+  //                       end: const Offset(1, 1),
+  //                     ),
+  //           ),
+            
+            
+
+              Padding(
               padding: EdgeInsets.symmetric(horizontal: w * 0.04),
               child:
                   Obx(
                         () => AppButtons.solid2(
                           context: context,
-                          text: "Send OTP",
+                          text: "Login",
                             onClicked: _handleSendOtp,  // Your click handler method
   isButtonEnabled: isButtonEnabled,  // 
                           // onClicked: isButtonEnabled ? () {
@@ -677,6 +760,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         end: const Offset(1, 1),
                       ),
             ),
+            
+            
             SizedBox(height: w * .1),
           ],
         ),

@@ -1,7 +1,407 @@
 
 
 
-import 'package:corezap_driver/views/auth/enter_otp_screen.dart';
+// import 'package:corezap_driver/views/auth/enter_otp_screen.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_animate/flutter_animate.dart';
+// import 'package:get/get.dart';
+// import 'package:corezap_driver/apis/auth.api.dart';
+// import 'package:corezap_driver/controller/signup_controller.dart';
+// import 'package:corezap_driver/controller/login.controller.dart';
+// import 'package:corezap_driver/controller/stepper_controller.dart';
+// import 'package:corezap_driver/utilities/Custom_Snackbar.dart';
+// import 'package:corezap_driver/utilities/app_buttons.dart';
+// import 'package:corezap_driver/utilities/colors.dart';
+// import 'package:corezap_driver/utilities/custom_font.dart';
+// import 'package:corezap_driver/utilities/form_field.dart';
+// import 'package:corezap_driver/utilities/navigator.dart';
+// import 'package:corezap_driver/views/auth/login_screen.dart';
+// import 'package:corezap_driver/views/profile_related.dart/terms_condition.dart';
+
+// class SignupScreen extends StatefulWidget {
+//   const SignupScreen({super.key});
+
+//   @override
+//   State<SignupScreen> createState() => _SignupScreenState();
+// }
+
+// class _SignupScreenState extends State<SignupScreen> {
+//   late final DriverFormController driverFormController;
+//   late final TextEditingController phoneController;
+//   late final LoginController loginController;
+//   // late final AuthApi authApi;
+//   // late final SignupController signupController;
+
+//   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+//   @override
+//   void initState() {
+//     super.initState();
+    
+//     // Initialize controllers in correct order
+//     // 1. First initialize AuthApi (base dependency)
+//     // authApi = Get.put(AuthApi(), permanent: true);
+    
+//     // 2. Then initialize other controllers
+//     driverFormController = Get.put(DriverFormController());
+//     loginController = Get.put(LoginController());
+    
+//     // 3. Finally initialize SignupController (depends on AuthApi)
+//     // signupController = Get.put(SignupController());
+    
+//     // 4. Initialize text controllers
+//     phoneController = TextEditingController();
+    
+//     // 5. Sync terms agreement between controllers
+//     // signupController.termsAgreed.value = loginController.isChecked.value;
+//   }
+
+//   @override
+//   void dispose() {
+//     // Clean up text controllers
+//     phoneController.dispose();
+//     super.dispose();
+//   }
+//  bool isButtonEnabled = phoneController.text.length == 10 && 
+//                           loginController.isChecked.value;
+//   @override
+//   Widget build(BuildContext context) {
+//     double w = MediaQuery.of(context).size.width;
+//     double h = MediaQuery.of(context).size.height;
+    
+//     return Scaffold(
+//       backgroundColor: AppColors.white,
+//       body: SingleChildScrollView(
+//         child: Form(
+//           key: _formKey,
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               SizedBox(height: h * 0.05),
+              
+//               // Login screen Image
+//               Image.asset("assets/images/image7.png", fit: BoxFit.fill)
+//                   .animate()
+//                   .fade(duration: 800.ms, curve: Curves.easeInOut)
+//                   .scale(
+//                     begin: const Offset(0.95, 0.95),
+//                     end: const Offset(1, 1),
+//                   ),
+
+//               // Column with form fields
+//               Padding(
+//                 padding: EdgeInsets.symmetric(horizontal: w * 0.04),
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     SizedBox(height: w * 0.04),
+                    
+//                     // Heading
+//                     AppFonts.textPoppins(
+//                           context,
+//                           "Join NZCU Today",
+//                           w * 0.06,
+//                           FontWeight.w600,
+//                           AppColors.black,
+//                           TextAlign.left,
+//                           TextOverflow.visible,
+//                         )
+//                         .animate()
+//                         .fade(duration: 900.ms, curve: Curves.easeInOut)
+//                         .scale(
+//                           begin: const Offset(0.95, 0.95),
+//                           end: const Offset(1, 1),
+//                         ),
+
+//                     // Subheading
+//                     SizedBox(height: w * 0.02),
+//                     AppFonts.textPoppins(
+//                           context,
+//                           "Let's get started! Enter your phone number to create your account.",
+//                           w * 0.038,
+//                           FontWeight.w400,
+//                           AppColors.darkGray.withOpacity(0.6),
+//                           TextAlign.left,
+//                           TextOverflow.visible,
+//                           maxLines: 2,
+//                         )
+//                         .animate()
+//                         .fade(duration: 1000.ms, curve: Curves.easeInOut)
+//                         .scale(
+//                           begin: const Offset(0.95, 0.95),
+//                           end: const Offset(1, 1),
+//                         ),
+
+//                     SizedBox(height: w * 0.04),
+
+//                     // Phone Number Label
+//                     AppFonts.textPoppins(
+//                           context,
+//                           "Phone Number",
+//                           w * 0.038,
+//                           FontWeight.w500,
+//                           AppColors.black.withOpacity(0.8),
+//                           TextAlign.left,
+//                           TextOverflow.visible,
+//                         )
+//                         .animate()
+//                         .fade(duration: 1100.ms, curve: Curves.easeInOut)
+//                         .scale(
+//                           begin: const Offset(0.95, 0.95),
+//                           end: const Offset(1, 1),
+//                         ),
+
+//                     SizedBox(height: w * 0.02),
+
+//                     // Phone Number Text Field
+//                     AppFormFields.custTextFormOther(
+//                           context: context,
+//                           hintText: "Enter 10-digit mobile number",
+//                           controller: phoneController,
+//                           maxLength: 10,
+//                           keyboardType: TextInputType.number,
+//                           validator: (value) {
+//                             // return signupController.validatePhoneNumber(value);
+//                           },
+//                         )
+//                         .animate()
+//                         .fade(duration: 1200.ms, curve: Curves.easeInOut)
+//                         .scale(
+//                           begin: const Offset(0.95, 0.95),
+//                           end: const Offset(1, 1),
+//                         ),
+//                   ],
+//                 ),
+//               ),
+
+//               // Terms and Conditions Checkbox
+//               Padding(
+//                 padding: EdgeInsets.symmetric(horizontal: w * .010),
+//                 child: Row(
+//                       children: [
+//                         // // Checkbox using SignupController
+//                         // Obx(
+//                         //   () => Checkbox(
+//                         //     value: 
+//                         //     activeColor: AppColors.primaryRed,
+//                         //     shape: RoundedRectangleBorder(
+//                         //       borderRadius: BorderRadius.circular(4),
+//                         //     ),
+//                         //     onChanged: (value) {
+//                         //       if (value != null) {
+//                         //         signupController.toggleTermsAgreement(value);
+//                         //         // Also update login controller for consistency
+//                         //         loginController.isChecked.value = value;
+//                         //       }
+//                         //     },
+//                         //   ),
+//                         // ),
+
+//                         // Terms text
+//                         AppFonts.textPoppins(
+//                           context,
+//                           "I agree to Indrive ",
+//                           w * 0.032,
+//                           FontWeight.w500,
+//                           AppColors.black.withOpacity(0.7),
+//                           TextAlign.left,
+//                           TextOverflow.visible,
+//                           maxLines: 2,
+//                         ),
+
+//                         // Terms link
+//                         InkWell(
+//                           onTap: () {
+//                             CustomNavigator.push(
+//                               context,
+//                               TermsCondition(),
+//                               transition: TransitionType.slideTop,
+//                             );
+//                           },
+//                           child: AppFonts.textPoppins(
+//                             context,
+//                             "Terms & Conditions",
+//                             w * 0.032,
+//                             FontWeight.w400,
+//                             const Color(0xFF439AFE),
+//                             TextAlign.left,
+//                             TextOverflow.visible,
+//                             maxLines: 2,
+//                           ),
+//                         ),
+//                       ],
+//                     )
+//                     .animate()
+//                     .fade(duration: 1300.ms, curve: Curves.easeInOut)
+//                     .scale(
+//                       begin: const Offset(0.95, 0.95),
+//                       end: const Offset(1, 1),
+//                     ),
+//               ),
+
+//               SizedBox(height: w * 0.07),
+
+//               // Already have an account section
+//               Padding(
+//                 padding: EdgeInsets.symmetric(horizontal: w * 0.04),
+//                 child: Column(
+//                   children: [
+//                     Row(
+//                           mainAxisAlignment: MainAxisAlignment.center,
+//                           children: [
+//                             AppFonts.textPoppins(
+//                               context,
+//                               "Already have an account?",
+//                               w * 0.036,
+//                               FontWeight.w400,
+//                               AppColors.black.withOpacity(0.7),
+//                               TextAlign.left,
+//                               TextOverflow.visible,
+//                             ),
+
+//                             // Sign in link
+//                             InkWell(
+//                               onTap: () {
+//                                 CustomNavigator.push(
+//                                   context,
+//                                   LoginScreen(),
+//                                   transition: TransitionType.slideLeft,
+//                                 );
+//                               },
+//                               child: AppFonts.textPoppins(
+//                                 context,
+//                                 "Sign in",
+//                                 w * 0.036,
+//                                 FontWeight.w400,
+//                                 const Color(0xFF439AFE),
+//                                 TextAlign.left,
+//                                 TextOverflow.visible,
+//                               ),
+//                             ),
+//                           ],
+//                         )
+//                         .animate()
+//                         .fade(duration: 1300.ms, curve: Curves.easeInOut)
+//                         .scale(
+//                           begin: const Offset(0.95, 0.95),
+//                           end: const Offset(1, 1),
+//                         ),
+//                   ],
+//                 ),
+//               ),
+
+//               SizedBox(height: w * 0.04),
+//               SizedBox(height: w * 0.09),
+
+//               // Signup Button
+             
+
+//                Padding(
+//               padding: EdgeInsets.symmetric(horizontal: w * 0.04),
+//               child:
+//                   Obx(
+//                         () => AppButtons.solid2(
+//                           context: context,
+//                           text: "Signup",
+//                             onClicked: _handleSignup,  // Your click handler method
+//   isButtonEnabled: isButtonEnabled,  // 
+//                           // onClicked: isButtonEnabled ? () {
+//                           //   // Call the async function without await
+//                           //   _handleSendOtp();
+//                           // } : null,
+//                           isFullWidth: true,
+//                           fontSize: w * 0.045,
+//                           height: w * 0.140,
+//                           radius: 12.0,
+//                           isLoading: loginController.isLoading.value,
+//                           textColor: isButtonEnabled ? AppColors.black : AppColors.darkGray.withOpacity(0.5),
+//                           fontWeight: FontWeight.w500,
+//                         ),
+//                       )
+//                       .animate()
+//                       .fade(duration: 1600.ms, curve: Curves.easeInOut)
+//                       .scale(
+//                         begin: const Offset(0.95, 0.95),
+//                         end: const Offset(1, 1),
+//                       ),
+//             ),
+//               SizedBox(height: w * .1),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   // Handle signup button click
+//   Future<void> _handleSignup() async {
+//     // Validate form
+//     if (!_formKey.currentState!.validate()) {
+//       return;
+//     }
+
+//     // Call controller method (handles validation, API call, and navigation)
+//     // await signupController.sendOtpAndNavigate(
+//     //   context, 
+//     //   phone.text.trim(), 
+//     //   false
+//     // );
+
+
+//     // CustomNavigator.push(
+//     //       context,
+//     //       EnterOtpScreen(
+//     //         typecheck: "new",
+//     //          phoneNumber: "9908479634",
+//     //         // phoneNumber: mobile,
+//     //         receivedOtp: 
+//     //       ),
+//     //       transition: TransitionType.fade,
+//     //     );
+//   }
+
+//   // Common widget method (if you still need it)
+//   Widget commonWidget(
+//     String icon,
+//     String text,
+//     BuildContext context,
+//     VoidCallback onClicked,
+//   ) {
+//     double w = MediaQuery.of(context).size.width;
+//     return InkWell(
+//       splashColor: Colors.transparent,
+//       highlightColor: Colors.transparent,
+//       onTap: onClicked,
+//       child: Container(
+//         height: w * 0.13,
+//         width: w * 0.45,
+//         decoration: BoxDecoration(
+//           border: Border.all(color: AppColors.black.withOpacity(0.1), width: 1),
+//           borderRadius: BorderRadius.circular(w * 0.03),
+//           color: AppColors.white,
+//         ),
+//         child: Row(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Image.asset(icon, height: w * 0.05, width: w * 0.05),
+//             SizedBox(width: w * 0.03),
+//             AppFonts.textPoppins(
+//               context,
+//               text,
+//               w * 0.036,
+//               FontWeight.w600,
+//               AppColors.black.withOpacity(0.7),
+//               TextAlign.left,
+//               TextOverflow.visible,
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -17,6 +417,7 @@ import 'package:corezap_driver/utilities/form_field.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
 import 'package:corezap_driver/views/auth/login_screen.dart';
 import 'package:corezap_driver/views/profile_related.dart/terms_condition.dart';
+import 'package:corezap_driver/views/auth/enter_otp_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -27,9 +428,8 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   late final DriverFormController driverFormController;
-  late final TextEditingController phone;
+  late final TextEditingController phoneController;
   late final LoginController loginController;
-  // late final AuthApi authApi;
   // late final SignupController signupController;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -38,31 +438,77 @@ class _SignupScreenState extends State<SignupScreen> {
   void initState() {
     super.initState();
     
-    // Initialize controllers in correct order
-    // 1. First initialize AuthApi (base dependency)
-    // authApi = Get.put(AuthApi(), permanent: true);
-    
-    // 2. Then initialize other controllers
-    driverFormController = Get.put(DriverFormController());
-    loginController = Get.put(LoginController());
-    
-    // 3. Finally initialize SignupController (depends on AuthApi)
+    // Initialize controllers
+    driverFormController = Get.find<DriverFormController>();
+    loginController = Get.find<LoginController>();
     // signupController = Get.put(SignupController());
     
-    // 4. Initialize text controllers
-    phone = TextEditingController();
+    // Initialize text controller
+    phoneController = TextEditingController();
     
-    // 5. Sync terms agreement between controllers
-    // signupController.termsAgreed.value = loginController.isChecked.value;
+    // Add listener to update button state when phone number changes
+    phoneController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
   void dispose() {
-    // Clean up text controllers
-    phone.dispose();
+    phoneController.dispose();
     super.dispose();
   }
 
+  bool get isButtonEnabled {
+    return phoneController.text.length == 10 && 
+           loginController.isChecked.value;
+  }
+
+
+ Future<void> _handleSendOtp() async {
+    // Validate terms checkbox
+    if (!loginController.isChecked.value) {
+      Get.snackbar(
+        'Error',
+        'Please accept Terms & Conditions',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    // Validate phone number length
+    if (phoneController.text.length != 10) {
+      Get.snackbar(
+        'Error',
+        'Please enter a valid 10-digit phone number',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    // Send OTP
+    await loginController.sendOtp(
+      phoneController.text.trim(),
+    );
+
+    // If OTP sent successfully, navigate to OTP screen
+    if (loginController.isOtpSent.value) {
+      CustomNavigator.push(
+        context,
+        EnterOtpScreen(
+          typecheck: "new",
+          phoneNumber: phoneController.text,
+          receivedOtp: "",
+        ),
+        transition: TransitionType.fade,
+      );
+    }
+  }
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
@@ -156,11 +602,20 @@ class _SignupScreenState extends State<SignupScreen> {
                     AppFormFields.custTextFormOther(
                           context: context,
                           hintText: "Enter 10-digit mobile number",
-                          controller: phone,
+                          controller: phoneController,
                           maxLength: 10,
                           keyboardType: TextInputType.number,
                           validator: (value) {
-                            // return signupController.validatePhoneNumber(value);
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter phone number';
+                            }
+                            if (value.length != 10) {
+                              return 'Phone number must be 10 digits';
+                            }
+                            if (!RegExp(r'^[6-9]\d{9}$').hasMatch(value)) {
+                              return 'Please enter a valid phone number';
+                            }
+                            return null;
                           },
                         )
                         .animate()
@@ -175,26 +630,24 @@ class _SignupScreenState extends State<SignupScreen> {
 
               // Terms and Conditions Checkbox
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: w * .010),
+                padding: EdgeInsets.symmetric(horizontal: w * 0.04),
                 child: Row(
                       children: [
-                        // // Checkbox using SignupController
-                        // Obx(
-                        //   () => Checkbox(
-                        //     value: 
-                        //     activeColor: AppColors.primaryRed,
-                        //     shape: RoundedRectangleBorder(
-                        //       borderRadius: BorderRadius.circular(4),
-                        //     ),
-                        //     onChanged: (value) {
-                        //       if (value != null) {
-                        //         signupController.toggleTermsAgreement(value);
-                        //         // Also update login controller for consistency
-                        //         loginController.isChecked.value = value;
-                        //       }
-                        //     },
-                        //   ),
-                        // ),
+                        // Checkbox using LoginController
+                        Obx(
+                          () => Checkbox(
+                            value: loginController.isChecked.value,
+                            activeColor: AppColors.primaryRed,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            onChanged: (value) {
+                              if (value != null) {
+                                loginController.isChecked.value = value;
+                              }
+                            },
+                          ),
+                        ),
 
                         // Terms text
                         AppFonts.textPoppins(
@@ -213,7 +666,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           onTap: () {
                             CustomNavigator.push(
                               context,
-                              TermsCondition(),
+                              const TermsCondition(),
                               transition: TransitionType.slideTop,
                             );
                           },
@@ -250,7 +703,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           children: [
                             AppFonts.textPoppins(
                               context,
-                              "Already have an account?",
+                              "Already have an account? ",
                               w * 0.036,
                               FontWeight.w400,
                               AppColors.black.withOpacity(0.7),
@@ -263,7 +716,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               onTap: () {
                                 CustomNavigator.push(
                                   context,
-                                  LoginScreen(),
+                                  const LoginScreen(),
                                   transition: TransitionType.slideLeft,
                                 );
                               },
@@ -293,25 +746,31 @@ class _SignupScreenState extends State<SignupScreen> {
               SizedBox(height: w * 0.09),
 
               // Signup Button
-              // Padding(
-              //   padding: EdgeInsets.symmetric(horizontal: w * 0.04),
-              //   child: Obx(() => AppButtons.solid(
-              //         context: context,
-              //         text: "Signup",
-              //         onClicked: _handleSignup,
-              //         isFullWidth: true,
-              //         fontSize: w * 0.045,
-              //         height: w * 0.140,
-              //         radius: 12.0,
-              //         isLoading: ,
-              //         textColor: AppColors.black,
-              //         fontWeight: FontWeight.w500,
-              //       )).animate().fade(duration: 1600.ms, curve: Curves.easeInOut).scale(
-              //         begin: const Offset(0.95, 0.95),
-              //         end: const Offset(1, 1),
-              //       ),
-              // ),
-              SizedBox(height: w * .1),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: w * 0.04),
+                child: Obx(
+                      () => AppButtons.solid2(
+                        context: context,
+                        text: "Sign Up",
+                        onClicked:  _handleSendOtp,
+                        isButtonEnabled:isButtonEnabled ,
+                        isFullWidth: true,
+                        fontSize: w * 0.045,
+                        height: w * 0.140,
+                        radius: 12.0,
+                        isLoading: loginController.isLoading.value,
+                        textColor: isButtonEnabled ? AppColors.black : AppColors.darkGray.withOpacity(0.5),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    )
+                    .animate()
+                    .fade(duration: 1600.ms, curve: Curves.easeInOut)
+                    .scale(
+                      begin: const Offset(0.95, 0.95),
+                      end: const Offset(1, 1),
+                    ),
+              ),
+              SizedBox(height: w * 0.1),
             ],
           ),
         ),
@@ -326,24 +785,45 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    // Call controller method (handles validation, API call, and navigation)
-    // await signupController.sendOtpAndNavigate(
-    //   context, 
-    //   phone.text.trim(), 
-    //   false
-    // );
+    // Check if terms are agreed
+    if (!loginController.isChecked.value) {
+      // CustomSnackbar.showError('Please agree to Terms & Conditions');
+      return;
+    }
 
+    final phoneNumber = phoneController.text.trim();
+    
+    try {
+      loginController.isLoading.value = true;
+      
+      // Simulate API call delay
+      await Future.delayed(const Duration(seconds: 2));
+      
+      // For demo purposes, generate a random OTP
+      // In production, call your actual API
+      final String otp = _generateRandomOtp();
+      
+      // Navigate to OTP screen
+      CustomNavigator.push(
+        context,
+        EnterOtpScreen(
+          typecheck: "new",
+          phoneNumber: phoneNumber,
+          receivedOtp: otp,
+        ),
+        transition: TransitionType.fade,
+      );
+      
+    } catch (e) {
+      // CustomSnackbar.showError('Failed to sign up: ${e.toString()}');
+    } finally {
+      loginController.isLoading.value = false;
+    }
+  }
 
-    // CustomNavigator.push(
-    //       context,
-    //       EnterOtpScreen(
-    //         typecheck: "new",
-    //          phoneNumber: "9908479634",
-    //         // phoneNumber: mobile,
-    //         receivedOtp: 
-    //       ),
-    //       transition: TransitionType.fade,
-    //     );
+  String _generateRandomOtp() {
+    // Generate a random 6-digit OTP
+    return (100000 + DateTime.now().millisecondsSinceEpoch % 900000).toString();
   }
 
   // Common widget method (if you still need it)

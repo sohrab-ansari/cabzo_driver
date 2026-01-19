@@ -1,3 +1,4 @@
+import 'package:corezap_driver/controller/profilecontoller/add_money_wallet_controller.dart';
 import 'package:corezap_driver/utilities/app_buttons.dart';
 import 'package:corezap_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
 import 'package:corezap_driver/utilities/colors.dart';
@@ -11,6 +12,8 @@ import 'package:corezap_driver/views/popups/pop_ups.dart';
 import 'package:corezap_driver/views/profile_related.dart/payment_related/money_transfer_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
 
 class AddMoney extends StatefulWidget {
   const AddMoney({super.key});
@@ -21,6 +24,12 @@ class AddMoney extends StatefulWidget {
 
 class _AddMoneyState extends State<AddMoney> {
   final TextEditingController _amountController = TextEditingController();
+
+
+  
+
+final AddMoneyWalletController addMoneyWalletController = Get.put(AddMoneyWalletController());
+
 
   @override
   void dispose() {
@@ -299,7 +308,10 @@ class _AddMoneyState extends State<AddMoney> {
               child: AppButtons.solid(
                 context: context,
                 text: "Pay(50)",
-                onClicked: () {},
+                onClicked: () {
+
+                  addMoneyWalletController.add_wallet_method(amount:_amountController.text );
+                },
                 isFullWidth: true,
                 backgroundColor: const Color(0xFFE0E4E7),
                 textColor: AppColors.mediumGray,

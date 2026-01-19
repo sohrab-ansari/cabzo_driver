@@ -1225,11 +1225,11 @@ class _HomeScreenState extends State<HomeScreen> {
           .setReconnectionDelay(1000)
           .setTimeout(20000)
           .setAuth({'token': _token})
-          .setQuery({
-            'userRole': 'Driver',
-            'platform': 'flutter',
-            'driverId': _driverId
-          })
+          // .setQuery({
+          //   'userRole': 'Driver',
+          //   'platform': 'flutter',
+          //   'driverId': _driverId
+          // })
           .build(),
       );
 
@@ -1436,6 +1436,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _showToast('Cannot connect to server');
         return;
       }
+          
     }
 
     // Now emit driver online
@@ -1474,6 +1475,26 @@ class _HomeScreenState extends State<HomeScreen> {
       
       print('✅ Driver online event emitted');
       _showToast('Going online...');
+
+
+  Future.delayed(const Duration(seconds: 2), () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) =>
+          const BottomnavmainScreen(startWithMaps: true),
+    ),
+  );
+});
+
+    
+      // Navigator.push(
+      //               context,
+      //               MaterialPageRoute(
+      //                 builder: (context) =>
+      //                     const BottomnavmainScreen(startWithMaps: true),
+      //               ),
+      //             );
 
     } catch (error) {
       print('❌ Error emitting driver online: $error');
@@ -1719,35 +1740,37 @@ class _HomeScreenState extends State<HomeScreen> {
                       SizedBox(height: w * 0.01),
                       
                       // Socket status
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: w * 0.02, vertical: w * 0.005),
-                        decoration: BoxDecoration(
-                          color: _isSocketConnected ? Colors.green : Colors.red,
-                          borderRadius: BorderRadius.circular(w * 0.01),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: w * 0.015,
-                              height: w * 0.015,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            SizedBox(width: w * 0.01),
-                            Text(
-                              _socketStatus,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: w * 0.02,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      // Container(
+                      //   padding: EdgeInsets.symmetric(horizontal: w * 0.02, vertical: w * 0.005),
+                      //   decoration: BoxDecoration(
+                      //     color: _isSocketConnected ? Colors.green : Colors.red,
+                      //     borderRadius: BorderRadius.circular(w * 0.01),
+                      //   ),
+                      //   child: Row(
+                      //     mainAxisSize: MainAxisSize.min,
+                      //     children: [
+                      //       Container(
+                      //         width: w * 0.015,
+                      //         height: w * 0.015,
+                      //         decoration: BoxDecoration(
+                      //           color: Colors.white,
+                      //           shape: BoxShape.circle,
+                      //         ),
+                      //       ),
+                      //       SizedBox(width: w * 0.01),
+                      //       Text(
+                      //         _socketStatus,
+                      //         style: TextStyle(
+                      //           color: Colors.white,
+                      //           fontSize: w * 0.02,
+                      //           fontWeight: FontWeight.w500,
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+                    
+                    
                     ],
                   ),
                 ],
@@ -1770,94 +1793,94 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Socket Info
-              Container(
-                margin: EdgeInsets.only(bottom: w * 0.02),
-                padding: EdgeInsets.all(w * 0.02),
-                decoration: BoxDecoration(
-                  color: Colors.grey[50],
-                  borderRadius: BorderRadius.circular(w * 0.02),
-                  border: Border.all(color: Colors.grey[300]!),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              _isSocketConnected ? Icons.wifi : Icons.wifi_off,
-                              color: _isSocketConnected ? Colors.green : Colors.red,
-                              size: w * 0.04,
-                            ),
-                            SizedBox(width: w * 0.01),
-                            Text(
-                              _isSocketConnected ? 'Socket Connected' : 'Socket Disconnected',
-                              style: TextStyle(
-                                fontSize: w * 0.03,
-                                color: _isSocketConnected ? Colors.green : Colors.red,
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (_socketId.isNotEmpty)
-                          Text(
-                            'ID: ${_socketId.substring(0, min(_socketId.length, 8))}...',
-                            style: TextStyle(
-                              fontSize: w * 0.025,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                      ],
-                    ),
+              // Container(
+              //   margin: EdgeInsets.only(bottom: w * 0.02),
+              //   padding: EdgeInsets.all(w * 0.02),
+              //   decoration: BoxDecoration(
+              //     color: Colors.grey[50],
+              //     borderRadius: BorderRadius.circular(w * 0.02),
+              //     border: Border.all(color: Colors.grey[300]!),
+              //   ),
+              //   child: Column(
+              //     children: [
+              //       Row(
+              //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //         children: [
+              //           Row(
+              //             children: [
+              //               Icon(
+              //                 _isSocketConnected ? Icons.wifi : Icons.wifi_off,
+              //                 color: _isSocketConnected ? Colors.green : Colors.red,
+              //                 size: w * 0.04,
+              //               ),
+              //               SizedBox(width: w * 0.01),
+              //               Text(
+              //                 _isSocketConnected ? 'Socket Connected' : 'Socket Disconnected',
+              //                 style: TextStyle(
+              //                   fontSize: w * 0.03,
+              //                   color: _isSocketConnected ? Colors.green : Colors.red,
+              //                 ),
+              //               ),
+              //             ],
+              //           ),
+              //           if (_socketId.isNotEmpty)
+              //             Text(
+              //               'ID: ${_socketId.substring(0, min(_socketId.length, 8))}...',
+              //               style: TextStyle(
+              //                 fontSize: w * 0.025,
+              //                 color: Colors.grey[600],
+              //               ),
+              //             ),
+              //         ],
+              //       ),
                     
-                    SizedBox(height: w * 0.01),
+              //       SizedBox(height: w * 0.01),
                     
-                    // Connection Test Button
-                    ElevatedButton.icon(
-                      onPressed: _toggleConnection,
-                      icon: Icon(
-                        _isSocketConnected ? Icons.power_settings_new : Icons.power,
-                        size: w * 0.03,
-                      ),
-                      label: Text(
-                        _isSocketConnected ? 'Disconnect Socket' : 'Connect Socket',
-                        style: TextStyle(fontSize: w * 0.028),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _isSocketConnected ? Colors.red : Colors.green,
-                        minimumSize: Size(double.infinity, w * 0.08),
-                      ),
-                    ),
+              //       // Connection Test Button
+              //       ElevatedButton.icon(
+              //         onPressed: _toggleConnection,
+              //         icon: Icon(
+              //           _isSocketConnected ? Icons.power_settings_new : Icons.power,
+              //           size: w * 0.03,
+              //         ),
+              //         label: Text(
+              //           _isSocketConnected ? 'Disconnect Socket' : 'Connect Socket',
+              //           style: TextStyle(fontSize: w * 0.028),
+              //         ),
+              //         style: ElevatedButton.styleFrom(
+              //           backgroundColor: _isSocketConnected ? Colors.red : Colors.green,
+              //           minimumSize: Size(double.infinity, w * 0.08),
+              //         ),
+              //       ),
                     
-                    if (_currentRide != null) ...[
-                      SizedBox(height: w * 0.01),
-                      Container(
-                        padding: EdgeInsets.all(w * 0.015),
-                        decoration: BoxDecoration(
-                          color: Colors.blue[50],
-                          borderRadius: BorderRadius.circular(w * 0.01),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.directions_car, size: w * 0.035, color: Colors.blue),
-                            SizedBox(width: w * 0.01),
-                            Expanded(
-                              child: Text(
-                                'Active Ride: ${_currentRide!['rider']?['name'] ?? 'Rider'}',
-                                style: TextStyle(
-                                  fontSize: w * 0.03,
-                                  color: Colors.blue[800],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
+              //       if (_currentRide != null) ...[
+              //         SizedBox(height: w * 0.01),
+              //         Container(
+              //           padding: EdgeInsets.all(w * 0.015),
+              //           decoration: BoxDecoration(
+              //             color: Colors.blue[50],
+              //             borderRadius: BorderRadius.circular(w * 0.01),
+              //           ),
+              //           child: Row(
+              //             children: [
+              //               Icon(Icons.directions_car, size: w * 0.035, color: Colors.blue),
+              //               SizedBox(width: w * 0.01),
+              //               Expanded(
+              //                 child: Text(
+              //                   'Active Ride: ${_currentRide!['rider']?['name'] ?? 'Rider'}',
+              //                   style: TextStyle(
+              //                     fontSize: w * 0.03,
+              //                     color: Colors.blue[800],
+              //                   ),
+              //                 ),
+              //               ),
+              //             ],
+              //           ),
+              //         ),
+              //       ],
+              //     ],
+              //   ),
+              // ),
 
               // driver agreement
               SizedBox(height: w * 0.04),
@@ -1903,26 +1926,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // Second button for navigation (keep your original functionality)
               SizedBox(height: w * 0.02),
-              ElevatedButton(
-                onPressed: () {
-                  print("Navigate to map screen");
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const BottomnavmainScreen(startWithMaps: true),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                child: Text(
-                  "View Map",
-                  style: TextStyle(fontSize: w * 0.04, color: Colors.white),
-                ),
-              ),
+              // ElevatedButton(
+              //   onPressed: () {
+              //     print("Navigate to map screen");
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(
+              //         builder: (context) =>
+              //             const BottomnavmainScreen(startWithMaps: true),
+              //       ),
+              //     );
+              //   },
+              //   style: ElevatedButton.styleFrom(
+              //     backgroundColor: Colors.blue,
+              //     minimumSize: const Size(double.infinity, 50),
+              //   ),
+              //   child: Text(
+              //     "View Map",
+              //     style: TextStyle(fontSize: w * 0.04, color: Colors.white),
+              //   ),
+              // ),
 
               //text todays's update
               SizedBox(height: w * 0.05),
@@ -2133,32 +2156,34 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       
       // Floating action buttons for socket control
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton.small(
-            onPressed: _toggleConnection,
-            backgroundColor: _isSocketConnected ? Colors.green : Colors.red,
-            child: Icon(
-              _isSocketConnected ? Icons.link : Icons.link_off,
-              size: w * 0.04,
-            ),
-          ),
-          SizedBox(height: w * 0.01),
-          if (_isRideInProgress)
-            FloatingActionButton.extended(
-              onPressed: () {
-                // Complete current ride
-                if (_activeRideId != null) {
-                  _completeRide(_activeRideId!);
-                }
-              },
-              backgroundColor: Colors.orange,
-              icon: Icon(Icons.directions_car_filled, size: w * 0.04),
-              label: Text('End Ride', style: TextStyle(fontSize: w * 0.03)),
-            ),
-        ],
-      ),
+      // floatingActionButton: Column(
+      //   mainAxisAlignment: MainAxisAlignment.end,
+      //   children: [
+      //     FloatingActionButton.small(
+      //       onPressed: _toggleConnection,
+      //       backgroundColor: _isSocketConnected ? Colors.green : Colors.red,
+      //       child: Icon(
+      //         _isSocketConnected ? Icons.link : Icons.link_off,
+      //         size: w * 0.04,
+      //       ),
+      //     ),
+      //     SizedBox(height: w * 0.01),
+      //     if (_isRideInProgress)
+      //       FloatingActionButton.extended(
+      //         onPressed: () {
+      //           // Complete current ride
+      //           if (_activeRideId != null) {
+      //             _completeRide(_activeRideId!);
+      //           }
+      //         },
+      //         backgroundColor: Colors.orange,
+      //         icon: Icon(Icons.directions_car_filled, size: w * 0.04),
+      //         label: Text('End Ride', style: TextStyle(fontSize: w * 0.03)),
+      //       ),
+      //   ],
+      // ),
+    
+    
     );
   }
 

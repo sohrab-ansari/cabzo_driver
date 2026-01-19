@@ -1634,7 +1634,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
   // Vehicle details controllers
   final TextEditingController vehicleNameController = TextEditingController();
   final TextEditingController vehicleNumberController = TextEditingController();
-  final TextEditingController vehicleTypeController = TextEditingController();
+  final TextEditingController vehicleTypeController = TextEditingController(text: "691581132fbb2cbdd65fbd8d");
   final TextEditingController modelController = TextEditingController();
   final TextEditingController yearController = TextEditingController();
   final TextEditingController colorController = TextEditingController();
@@ -1781,7 +1781,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
         vehicleNumber: vehicleNumberController.text,
         vehicleStatus: "",
         vehicleType: vehicleTypeController.text,
-        vehicleYear: yearController.text,
+        vehicleYear:int.tryParse(yearController.text),
         // registrationCertImage: _registrationCertificateImage,
         // licencePlateImage: _licencePlateImage,
         // vehicleInsuranceImage: _vehicleInsuranceImage,

@@ -72,85 +72,172 @@ class LoginController extends GetxController {
     }
   }
 
-  Future<void> verifyOtp({String? otp, String? phoneNumber}) async {
 
-    print("my_Sended_number_came ${phoneNumber}");
-     print("my_Sended_number_came_otp ${otp}");
-    try {
-      // Validate OTP
-      if (otp!.isEmpty || otp.length != 4) {
-        otpError.value = 'Please enter a valid 4-digit OTP';
-        return;
-      }
+Future<void> verifyOtp({String? otp, String? phoneNumber}) async {
+  print("my_Sended_number_came $phoneNumber");
+  print("my_Sended_number_came_otp $otp");
 
-      otpError.value = '';
-      isLoading.value = true;
+  // 🔐 OTP validation
+  if (otp == null || otp.isEmpty || otp.length != 4) {
+    otpError.value = 'Please enter a valid 4-digit OTP';
+    return;
+  }
 
-      // Call API
-      final OtpverifyRes res = await AuthApiService.verifyOtp(
-        otp: otp,
-        phoneNumber: phoneNumber,
-      );
+  try {
+    otpError.value = '';
+    isLoading.value = true;
 
-      if (res.success == true) {
-        // IMPORTANT: Update isOtpVerified to true
-        isOtpVerified.value = true;
+    final OtpverifyRes res = await AuthApiService.verifyOtp(
+      otp: otp,
+      phoneNumber: phoneNumber,
+    );
 
-        isProfileCompleted22.value = res.driver!.isProfileCompleted;
-
-        // Store user data if available
-        if (res.driver != null) {
-          userData.value = {
-            'id': res.driver!.id,
-            'phone': res.driver!.phone,
-            'imageVerificationStatus': res.driver!.imageVerificationStatus,
-            'isProfileCompleted': res.driver!.isProfileCompleted,
-          };
-
-          // Check profile completion status
-          if (res.driver!.isProfileCompleted == "false" ||
-              res.driver!.isProfileCompleted == false) {
-            isProfileCompleted.value = false;
-          } else {
-            isProfileCompleted.value = true;
-          }
-        } else {
-          // If driver data is null but OTP was verified
-          isProfileCompleted.value = false;
-        }
-
-        Get.snackbar(
-          'Success',
-          'OTP verified successfully',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-      } else {
-        isOtpVerified.value = false;
-        otpError.value = res.message ?? 'Invalid OTP. Please try again.';
-        Get.snackbar(
-          'Error',
-          res.message ?? 'Invalid OTP',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-      }
-    } catch (e) {
+    /// ❌ CASE: INVALID OTP / API FAILURE
+    if (res.success != true) {
       isOtpVerified.value = false;
-      otpError.value = 'An error occurred. Please try again.';
+      isProfileCompleted.value = false;
+
+      otpError.value = res.message ?? 'Invalid OTP. Please try again.';
+
       Get.snackbar(
         'Error',
-        'An error occurred: $e',
+        otpError.value,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-    } finally {
-      isLoading.value = false;
+      return;
     }
+
+    /// ✅ CASE: OTP VERIFIED
+    isOtpVerified.value = true;
+
+    /// Driver data may still be null
+    if (res.driver == null) {
+      isProfileCompleted.value = false;
+      return;
+    }
+
+    /// Save user data
+    userData.value = {
+      'id': res.driver!.id,
+      'phone': res.driver!.phone,
+      'imageVerificationStatus': res.driver!.imageVerificationStatus,
+      'isProfileCompleted': res.driver!.isProfileCompleted,
+    };
+
+    /// Normalize isProfileCompleted (bool safe)
+    final bool profileCompleted =
+        res.driver!.isProfileCompleted == true ||
+        res.driver!.isProfileCompleted == "true";
+
+    isProfileCompleted.value = profileCompleted;
+    isProfileCompleted22.value = profileCompleted;
+
+    Get.snackbar(
+      'Success',
+      'OTP verified successfully',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+    );
+  } catch (e) {
+    isOtpVerified.value = false;
+    isProfileCompleted.value = false;
+
+    otpError.value = 'Something went wrong. Please try again.';
+
+    Get.snackbar(
+      'Error',
+      otpError.value,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
+  } finally {
+    isLoading.value = false;
   }
+}
+
+  // Future<void> verifyOtp({String? otp, String? phoneNumber}) async {
+
+  //   print("my_Sended_number_came ${phoneNumber}");
+  //    print("my_Sended_number_came_otp ${otp}");
+  //   try {
+  //     // Validate OTP
+  //     if (otp!.isEmpty || otp.length != 4) {
+  //       otpError.value = 'Please enter a valid 4-digit OTP';
+  //       return;
+  //     }
+
+  //     otpError.value = '';
+  //     isLoading.value = true;
+
+  //     // Call API
+  //     final OtpverifyRes res = await AuthApiService.verifyOtp(
+  //       otp: otp,
+  //       phoneNumber: phoneNumber,
+  //     );
+
+  //     if (res.success == true) {
+  //       // IMPORTANT: Update isOtpVerified to true
+  //       isOtpVerified.value = true;
+
+  //       isProfileCompleted22.value = res.driver!.isProfileCompleted;
+
+  //       // Store user data if available
+  //       if (res.driver != null) {
+  //         userData.value = {
+  //           'id': res.driver!.id,
+  //           'phone': res.driver!.phone,
+  //           'imageVerificationStatus': res.driver!.imageVerificationStatus,
+  //           'isProfileCompleted': res.driver!.isProfileCompleted,
+  //         };
+
+  //         // Check profile completion status
+  //         if (res.driver!.isProfileCompleted == "false" ||
+  //             res.driver!.isProfileCompleted == false) {
+  //           isProfileCompleted.value = false;
+  //         } else {
+  //           isProfileCompleted.value = true;
+  //         }
+  //       } else {
+  //         // If driver data is null but OTP was verified
+  //         isProfileCompleted.value = false;
+  //       }
+
+  //       Get.snackbar(
+  //         'Success',
+  //         'OTP verified successfully',
+  //         snackPosition: SnackPosition.BOTTOM,
+  //         backgroundColor: Colors.green,
+  //         colorText: Colors.white,
+  //       );
+  //     } else {
+  //       isOtpVerified.value = false;
+  //       otpError.value = res.message ?? 'Invalid OTP. Please try again.';
+  //       Get.snackbar(
+  //         'Error',
+  //         res.message ?? 'Invalid OTP',
+  //         snackPosition: SnackPosition.BOTTOM,
+  //         backgroundColor: Colors.red,
+  //         colorText: Colors.white,
+  //       );
+  //     }
+  //   } catch (e) {
+  //     isOtpVerified.value = false;
+  //     otpError.value = 'An error occurred. Please try again.';
+  //     Get.snackbar(
+  //       'Error',
+  //       'An error occurred: $e',
+  //       snackPosition: SnackPosition.BOTTOM,
+  //       backgroundColor: Colors.red,
+  //       colorText: Colors.white,
+  //     );
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
 
   Future<void> createVehicleMethod({
     required String vehicleName,
@@ -167,7 +254,7 @@ class LoginController extends GetxController {
 
     String? driverId,
 
-    String? vehicleYear,
+    int? vehicleYear,
   }) async {
     try {
       // Validate OTP

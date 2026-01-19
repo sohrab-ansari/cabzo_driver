@@ -36,7 +36,7 @@ class AuthApiService {
       print("Status Code : ${response.statusCode}");
       print("Response Body : ${response.body}");
 
-
+print("Response Body222 : ${response.body}");
     final Map<String, dynamic> data = jsonDecode(response.body);
 
   Fluttertoast.showToast(
@@ -44,18 +44,26 @@ class AuthApiService {
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
     );
-     Fluttertoast.showToast(
-      msg: data['error'] ?? "Something went wrong",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-    );
+    //  Fluttertoast.showToast(
+    //   msg: data['error'] ?? "Something went wrong",
+    //   toastLength: Toast.LENGTH_SHORT,
+    //   gravity: ToastGravity.BOTTOM,
+    // );
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
 
         print("Parsed Response : $data");
 
+         print(">>>>>>helloooooo2222  ");
+
         return data["success"] == true;
       } else {
+        print(">>>>>>helloooooo  ");
+         Fluttertoast.showToast(
+      msg: data['error'] ?? "Something went wrong",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+    );
         print("❌ Server error");
         return false;
       }
@@ -64,7 +72,6 @@ class AuthApiService {
       return false;
     }
   }
-
 
 static Future<OtpverifyRes> verifyOtp({
   required String otp,
@@ -90,28 +97,22 @@ static Future<OtpverifyRes> verifyOtp({
 
     print("Status Code : ${response.statusCode}");
     print("Response Message : ${data['message']}");
+    print("Full Driver Object : ${data['driver']}");
 
-    /// 🔔 SHOW TOAST MESSAGE
-    Fluttertoast.showToast(
-      msg: data['message'] ?? "Something went wrong",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-    );
-     Fluttertoast.showToast(
-      msg: data['error'] ?? "Something went wrong",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-    );
-
-    // "error": "Maximum OTP attempts exceeded. Please request a new OTP"
-
+    final String? driverId = data['driver']?['id']?.toString();
+    print("Driver ID : $driverId");
 
     final OtpverifyRes otpResponse = OtpverifyRes.fromJson(data);
 
-    /// ✅ SAVE TOKEN IF EXISTS
-    if (otpResponse.token != null && otpResponse.token!.isNotEmpty) {
+    /// ✅ SAVE TOKEN & DRIVER ID
+    if (otpResponse.token != null &&
+        otpResponse.token!.isNotEmpty &&
+        driverId != null &&
+        driverId.isNotEmpty) {
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString("auth_token", otpResponse.token!);
+      await prefs.setString("driver_userid", driverId);
     }
 
     return otpResponse;
@@ -120,6 +121,73 @@ static Future<OtpverifyRes> verifyOtp({
     return OtpverifyRes(success: false, message: "Connection error");
   }
 }
+
+
+// static Future<OtpverifyRes> verifyOtp({
+//   required String otp,
+//   String? phoneNumber,
+// }) async {
+//   final Uri url = Uri.parse(ApiPath.verifyOtp);
+
+//   final Map<String, dynamic> requestBody = {
+//     "otp": otp,
+//     "phone": phoneNumber ?? "9908479999",
+//     "fcmToken": "test-fcm-token-123",
+//     "deviceId": "device-001",
+//   };
+
+//   try {
+//     final http.Response response = await http.post(
+//       url,
+//       headers: {"Content-Type": "application/json"},
+//       body: jsonEncode(requestBody),
+//     );
+
+//     final Map<String, dynamic> data = jsonDecode(response.body);
+
+//     print("Status Code : ${response.statusCode}");
+//     print("Response Message : ${data['message']}");
+
+//  print("Response Message otp verify full respsone  : ${data['driver']}");
+//  print("Response Message otp verify full respsone  : ${data['driver']['id']}");
+
+//  print("Driver ID : ${data['driver']['id']}");
+
+
+//     /// 🔔 SHOW TOAST MESSAGE
+//     // Fluttertoast.showToast(
+//     //   msg: data['message'] ?? "Something went wrong",
+//     //   toastLength: Toast.LENGTH_SHORT,
+//     //   gravity: ToastGravity.BOTTOM,
+//     // );
+//     //  Fluttertoast.showToast(
+//     //   msg: data['error'] ?? "Something went wrong",
+//     //   toastLength: Toast.LENGTH_SHORT,
+//     //   gravity: ToastGravity.BOTTOM,
+//     // );
+
+//     // "error": "Maximum OTP attempts exceeded. Please request a new OTP"
+
+
+//     final OtpverifyRes otpResponse = OtpverifyRes.fromJson(data);
+
+//     /// ✅ SAVE TOKEN IF EXISTS
+//     if (otpResponse.token != null && otpResponse.token!.isNotEmpty) {
+//       final prefs = await SharedPreferences.getInstance();
+//       await prefs.setString("auth_token", otpResponse.token!);
+//    await prefs.setString("driver_userid", data['driver']['id']);
+
+
+
+//       // prefs.getString("driver_userid");
+//     }
+
+//     return otpResponse;
+//   } catch (e) {
+//     Fluttertoast.showToast(msg: "Connection error");
+//     return OtpverifyRes(success: false, message: "Connection error");
+//   }
+// }
 
 
 
@@ -132,7 +200,7 @@ static Future<OtpverifyRes> verifyOtp({
     String? vehicleModel,
     String? vehicleCapacity,
     String? driverId,
-    String? vehicleYear,
+    int? vehicleYear,
   }) async {
     final Uri url = Uri.parse(ApiPath.createVehicle);
 
@@ -140,18 +208,48 @@ static Future<OtpverifyRes> verifyOtp({
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
 
-    final Map<String, dynamic> requestBody = {
-      "vehicleName": "honda civic",
-      "vehicleNumber":
-          "MH12sdsfsdddddddAsafdsSsdssdsansasslkdjskjfdsandsjkakjkhjhasjhfkjdfsdddsdddssafasdB112ddfsSDsas4adssd39adasdasasadvfgw" ??
-          "",
-      "vehicleColor": "Blue",
-      "vehicleType": "691581132fbb2cbdd65fbd8d",
+final String? userId = prefs.getString("driver_userid");
+
+
+
+print("hhhhhh>>>>>useridddddddddddddd   ${userId}");
+
+    print("hhhhh>>>> vehicleName ${vehicleName} ");
+    print("hhhhh>>>> vehicleNumber ${vehicleNumber} ");
+    print("hhhhh>>>> vehicleColor ${vehicleColor} ");
+    print("hhhhh>>>> vehicleType ${vehicleType} ");
+    print("hhhhh>>>> vehicleStatus ${vehicleStatus} ");
+    print("hhhhh>>>> vehicleModel ${vehicleModel} ");
+    print("hhhhh>>>> vehicleCapacity ${vehicleCapacity} ");
+    print("hhhhh>>>> driverId ${driverId} ");
+      print("hhhhh>>>> driverId>>>>>>>>> ${userId} ");
+    print("hhhhh>>>> vehicleYear ${vehicleYear} ");
+
+    // final Map<String, dynamic> requestBody = {
+    //   "vehicleName": "honda civic",
+      // "vehicleNumber":
+      //     "MH12sdsfsdddddddAsafdsSsdssdsansasslkdjskjfdsandsjkakjkhjhasjhfkjdfsdddsdddssafasdB112ddfsSDsas4adssd39adasdasasadvfgw" ??
+      //     "",
+    //   "vehicleColor": "Blue",
+    //   "vehicleType": "691581132fbb2cbdd65fbd8d",
+    //   "vehicleStatus": "Active",
+    //   "vehicleModel": "VXI",
+    //   "vehicleCapacity": "4",
+    //   "vehicleYear": "2019",
+    //   "driverId": "695907abb30f1d4e3c7ce75c",
+    // };
+
+     final Map<String, dynamic> requestBody = {
+      "vehicleName": vehicleName,
+      "vehicleNumber": vehicleNumber,
+        
+      "vehicleColor": vehicleColor,
+      "vehicleType": vehicleType,
       "vehicleStatus": "Active",
-      "vehicleModel": "VXI",
+      "vehicleModel": vehicleModel,
       "vehicleCapacity": "4",
-      "vehicleYear": "2019",
-      "driverId": "695907abb30f1d4e3c7ce75c",
+      "vehicleYear": vehicleYear,
+      "driverId": userId,
     };
 
     print("========== CREATE VEHICLE API ==========");
