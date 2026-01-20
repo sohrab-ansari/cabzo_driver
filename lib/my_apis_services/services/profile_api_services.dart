@@ -1225,15 +1225,15 @@ final Uri url = Uri.parse(
     try {
       final http.Response response = await http.get(
         url,
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token", // ✅ BEARER TOKEN
-        },
-
-        //  headers: {
+        // headers: {
         //   "Content-Type": "application/json",
-        //   "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NGU2OTkzMTFiYTMwYjk2YzVlZWI4OSIsInJvbGUiOiJEcml2ZXIiLCJpYXQiOjE3Njg4MjE1NzgsImV4cCI6MTc3MTQxMzU3OH0.B9hPpBJGQCac8dFGCN2_aWb1lJCJ7KKsoVtXM-7tLSE", // ✅ BEARER TOKEN
+        //   "Authorization": "Bearer $token", // ✅ BEARER TOKEN
         // },
+
+         headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NGU2OTkzMTFiYTMwYjk2YzVlZWI4OSIsInJvbGUiOiJEcml2ZXIiLCJpYXQiOjE3Njg4MjE1NzgsImV4cCI6MTc3MTQxMzU3OH0.B9hPpBJGQCac8dFGCN2_aWb1lJCJ7KKsoVtXM-7tLSE", // ✅ BEARER TOKEN
+        },
 
         // /getCompany
         // body: jsonEncode(requestBody),

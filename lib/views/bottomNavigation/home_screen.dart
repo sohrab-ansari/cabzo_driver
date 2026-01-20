@@ -1170,9 +1170,12 @@ class _HomeScreenState extends State<HomeScreen> {
   final int _maxReconnectAttempts = 5;
   
   // Driver data
-  final String _driverId = '695217e9257d2163ca119fa4';
-  final String _token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NTIxN2U5MjU3ZDIxNjNjYTExOWZhNCIsInJvbGUiOiJEcml2ZXIiLCJpYXQiOjE3Njg1NDUzMDksImV4cCI6MTc3MTEzNzMwOX0.wEFxUzeInhgmej3RT3w-8_dpPVJZd0QeHBHsWVTbRGg';
+  // final String _driverId = '695217e9257d2163ca119fa4';
+  // final String _token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NTIxN2U5MjU3ZDIxNjNjYTExOWZhNCIsInJvbGUiOiJEcml2ZXIiLCJpYXQiOjE3Njg1NDUzMDksImV4cCI6MTc3MTEzNzMwOX0.wEFxUzeInhgmej3RT3w-8_dpPVJZd0QeHBHsWVTbRGg';
   
+
+     final String _driverId = '6968ab566bf2182c63438143';
+   final String _token ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NjhhYjU2NmJmMjE4MmM2MzQzODE0MyIsInJvbGUiOiJEcml2ZXIiLCJpYXQiOjE3Njg4ODQ0NjAsImV4cCI6MTc3MTQ3NjQ2MH0.TTHqv0QpsdCG-K0zCYrvDAsqOkoktcaUsHHSOZjasHc';
   // Ride variables
   Map<String, dynamic>? _currentRide;
   String? _activeRideId;
@@ -1296,6 +1299,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
       _showToast('Driver is now online');
     });
+
 
     socket!.on('driver:online_failed', (dynamic data) {
       print('❌ Driver online failed: $data');

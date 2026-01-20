@@ -9,7 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
 class TermsAndPolicyController extends GetxController {
-  Rx<Termsandpolicyresponse?> reviewRatingResponse = Rx<Termsandpolicyresponse?>(null);
+  Rx<Termsandpolicyresponse?> termspolicyres = Rx<Termsandpolicyresponse?>(null);
   
  
   RxBool isLoading = false.obs;
@@ -21,7 +21,7 @@ class TermsAndPolicyController extends GetxController {
     // You can add any initialization logic here
   }
 
-  Future<void> ratings_method() async {
+  Future<void> terms_pricy_method() async {
     print("Fetching reviews...");
 
     // Set loading state
@@ -40,7 +40,7 @@ class TermsAndPolicyController extends GetxController {
         print("Reviews fetched successfully");
         
         // Update the response
-        reviewRatingResponse.value = res;
+        termspolicyres.value = res;
         
         // Show success message only if there are new reviews
         // if (res.data != null && res.data!.isNotEmpty) {
@@ -55,7 +55,7 @@ class TermsAndPolicyController extends GetxController {
         print("Error: ${errorMessage.value}");
         
         // Only show snackbar if there's no existing data
-        if (reviewRatingResponse.value == null) {
+        if (termspolicyres.value == null) {
           Get.snackbar(
             'Error',
             errorMessage.value,
@@ -70,7 +70,7 @@ class TermsAndPolicyController extends GetxController {
       print("Exception: $e");
       
       // Only show snackbar if there's no existing data
-      if (reviewRatingResponse.value == null) {
+      if (termspolicyres.value == null) {
         Get.snackbar(
           'Error',
           errorMessage.value,

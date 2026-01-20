@@ -1165,32 +1165,39 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
             ),
 
             // Ride details
-            SizedBox(height: w * 0.04),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildRideDetail(
-                  "Distance",
-                  "${ride.distance?.toStringAsFixed(1) ?? "0.0"} km",
-                  Icons.directions_car,
-                  w,
-                ),
-                _buildRideDetail(
-                  "Duration",
-                  "${ride.duration?.toStringAsFixed(0) ?? "0"} min",
-                  Icons.access_time,
-                  w,
-                ),
-                if (ride.orderType == "rental" && ride.rentalBillingDetails != null)
-                  _buildRideDetail(
-                    "Rental",
-                    "Package",
-                    Icons.card_membership,
-                    w,
-                  ),
-              ],
-            ),
-          ],
+          SizedBox(height: w * 0.04),
+
+
+
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+            //   children: [
+            //     _buildRideDetail(
+            //       "Distance",
+            //       "${ride.distance?.toStringAsFixed(1) ?? "0.0"} km",
+            //       Icons.directions_car,
+            //       w,
+            //     ),
+            //     _buildRideDetail(
+            //       "Duration",
+            //       "${ride.duration?.toStringAsFixed(0) ?? "0"} min",
+            //       Icons.access_time,
+            //       w,
+            //     ),
+            //     if (ride.orderType == "rental" && ride.rentalBillingDetails != null)
+            //       _buildRideDetail(
+            //         "Rental",
+            //         "Package",
+            //         Icons.card_membership,
+            //         w,
+            //       ),
+            //   ],
+            // ),
+          
+          
+          ]
+          
+          ,
         ),
       ),
     );
