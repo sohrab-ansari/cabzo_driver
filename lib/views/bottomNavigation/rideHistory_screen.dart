@@ -563,8 +563,8 @@
 
 
 
-import 'package:corezap_driver/controller/controllers.dart';
-import 'package:corezap_driver/controller/ridescontroller/rieds_history_controller2.dart';
+import 'package:corezap_driver/controllers/controllers.dart';
+import 'package:corezap_driver/controllers/rides_controllers/rieds_history_controller.dart';
 import 'package:corezap_driver/modals/ride_history_response2.dart';
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/custom_font.dart';
@@ -582,8 +582,12 @@ class RidehistoryScreen extends StatefulWidget {
 
 class _RidehistoryScreenState extends State<RidehistoryScreen>
     with TickerProviderStateMixin {
-  final RiedsHistoryController2 riedsHistoryController =
-      Get.put(RiedsHistoryController2());
+
+
+
+      final RiedsHistoryController riedsHistoryController = Get.find<RiedsHistoryController>();
+
+
   final Controllers currentTabBar = Get.find<Controllers>();
 
   late TabController _tabController;

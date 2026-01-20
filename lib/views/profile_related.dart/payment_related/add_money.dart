@@ -1,4 +1,4 @@
-import 'package:corezap_driver/controller/profilecontoller/add_money_wallet_controller.dart';
+import 'package:corezap_driver/controllers/profile_controllers/add_money_wallet_controller.dart';
 import 'package:corezap_driver/utilities/app_buttons.dart';
 import 'package:corezap_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
 import 'package:corezap_driver/utilities/colors.dart';

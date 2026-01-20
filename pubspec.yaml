@@ -62,6 +62,11 @@ dependencies:
   socket_io_client: ^3.1.4
   razorpay_flutter: ^1.4.0
   flutter_html: ^3.0.0
+  # geolocator: ^11.0.1
+  geolocator: ^14.0.2
+  # flutter_polyline_points: ^1.0.0
+  flutter_polyline_points: ^3.1.0
+
 
 
 dev_dependencies:

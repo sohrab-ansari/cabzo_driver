@@ -2,9 +2,9 @@
 
 
 import 'dart:io';
-import 'package:corezap_driver/controller/home_controller.dart';
-import 'package:corezap_driver/controller/profilecontoller/driverid_controller.dart';
-import 'package:corezap_driver/controller/profilecontoller/edit_profile_controller.dart';
+import 'package:corezap_driver/controllers/home_controllers/home_controller.dart';
+import 'package:corezap_driver/controllers/profile_controllers/driverid_controller.dart';
+import 'package:corezap_driver/controllers/profile_controllers/edit_profile_controller.dart';
 import 'package:corezap_driver/utilities/app_buttons.dart';
 import 'package:corezap_driver/utilities/colors/colors_list.dart';
 import 'package:corezap_driver/utilities/custom_images.dart';

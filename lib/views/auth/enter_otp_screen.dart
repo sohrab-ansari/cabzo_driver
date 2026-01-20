@@ -486,13 +486,13 @@
 // }
 
 
-import 'package:corezap_driver/controller/login.controller.dart';
+import 'package:corezap_driver/controllers/auth_controllers/login.controller.dart';
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/views/profile_related.dart/documents_related/driver_registration.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:corezap_driver/controller/controllers.dart';
-import 'package:corezap_driver/controller/otp_controller.dart';
+import 'package:corezap_driver/controllers/controllers.dart';
+import 'package:corezap_driver/controllers/auth_controllers/otp_controller.dart';
 import 'package:corezap_driver/utilities/colors/colors_list.dart';
 import 'package:corezap_driver/utilities/custom_text.dart';
 import 'package:corezap_driver/utilities/navigator.dart';

@@ -189,7 +189,7 @@
 //   }
 // }
 
-import 'package:corezap_driver/controller/profilecontoller/transaction_controller.dart';
+import 'package:corezap_driver/controllers/profile_controllers/transaction_controller.dart';
 import 'package:corezap_driver/modals/transactions_response.dart';
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/colors/colors_list.dart';
@@ -209,10 +209,10 @@ class Transactions extends StatefulWidget {
 }
 
 class _TransactionsState extends State<Transactions> {
-  final TransactionController transactionController = Get.put(
-    TransactionController(),
-  );
+ 
 
+
+final TransactionController transactionController = Get.find<TransactionController>();
   @override
   void initState() {
     super.initState();

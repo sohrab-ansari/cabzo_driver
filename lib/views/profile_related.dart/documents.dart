@@ -1,5 +1,5 @@
-import 'package:corezap_driver/controller/stepper_controller.dart';
-import 'package:corezap_driver/controller/vehicle_form_controller.dart';
+import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
+import 'package:corezap_driver/controllers/auth_controllers/vehicle_form_controller.dart';
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/colors/colors_list.dart';
 import 'package:corezap_driver/utilities/custom_font.dart';

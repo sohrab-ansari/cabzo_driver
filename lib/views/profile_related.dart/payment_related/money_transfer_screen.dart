@@ -915,8 +915,8 @@
 // }
 
 
-import 'package:corezap_driver/controller/profilecontoller/get_bank_accounts_controller.dart';
-import 'package:corezap_driver/controller/profilecontoller/payments_withdraw_controller.dart';
+import 'package:corezap_driver/controllers/profile_controllers/get_bank_accounts_controller.dart';
+import 'package:corezap_driver/controllers/profile_controllers/payments_withdraw_controller.dart';
 import 'package:corezap_driver/modals/get_bank_accounts_response.dart';
 import 'package:corezap_driver/utilities/app_buttons.dart';
 import 'package:corezap_driver/utilities/colors.dart';

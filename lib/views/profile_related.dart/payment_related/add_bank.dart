@@ -436,8 +436,8 @@
 // }
 
 
-import 'package:corezap_driver/controller/controllers.dart';
-import 'package:corezap_driver/controller/profilecontoller/bank_account_add_controller.dart';
+import 'package:corezap_driver/controllers/controllers.dart';
+import 'package:corezap_driver/controllers/profile_controllers/bank_account_add_controller.dart';
 import 'package:corezap_driver/utilities/app_buttons.dart';
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/colors/colors_list.dart';
@@ -465,8 +465,8 @@ class _AddBankState extends State<AddBank> {
   TextEditingController ifscController = TextEditingController();
   TextEditingController bankNameController = TextEditingController();
 
-  final BankAccountAddController bankAccountAddController =
-      Get.put(BankAccountAddController());
+ 
+      final BankAccountAddController bankAccountAddController = Get.find<BankAccountAddController>();
 
   @override
   void dispose() {

@@ -165,7 +165,7 @@
 
 
 
-import 'package:corezap_driver/controller/profilecontoller/terms_and_policy_controller.dart';
+import 'package:corezap_driver/controllers/profile_controllers/terms_and_policy_controller.dart';
 import 'package:corezap_driver/utilities/colors/colors_list.dart';
 import 'package:corezap_driver/utilities/custom_text.dart';
 import 'package:corezap_driver/utilities/navigator.dart';

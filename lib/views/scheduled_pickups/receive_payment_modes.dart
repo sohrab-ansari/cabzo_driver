@@ -180,7 +180,7 @@
 // }
 
 
-import 'package:corezap_driver/controller/controllers.dart';
+import 'package:corezap_driver/controllers/controllers.dart';
 import 'package:corezap_driver/utilities/app_buttons.dart';
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/colors/colors_list.dart';

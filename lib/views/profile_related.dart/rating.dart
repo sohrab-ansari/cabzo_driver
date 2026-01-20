@@ -589,7 +589,7 @@
 // }
 
 
-import 'package:corezap_driver/controller/profilecontoller/review_and_rating_controller.dart';
+import 'package:corezap_driver/controllers/profile_controllers/review_and_rating_controller.dart';
 import 'package:corezap_driver/utilities/app_buttons.dart';
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/custom_font.dart';
@@ -607,8 +607,13 @@ class Review extends StatefulWidget {
 class _ReviewState extends State<Review> {
   String imagePath = "";
   
-  final ReviewAndRatingController reviewAndRatingController = 
-      Get.put(ReviewAndRatingController());
+  
+
+
+  
+final ReviewAndRatingController reviewAndRatingController = Get.find<ReviewAndRatingController>();
+
+
 
   @override
   void initState() {

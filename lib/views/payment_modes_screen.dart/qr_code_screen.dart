@@ -1,4 +1,4 @@
-import 'package:corezap_driver/controller/controllers.dart';
+import 'package:corezap_driver/controllers/controllers.dart';
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/custom_font.dart';
 import 'package:flutter/material.dart';

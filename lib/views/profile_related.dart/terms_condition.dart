@@ -159,7 +159,7 @@
 // }
 
 
-import 'package:corezap_driver/controller/profilecontoller/terms_and_policy_controller.dart';
+import 'package:corezap_driver/controllers/profile_controllers/terms_and_policy_controller.dart';
 import 'package:corezap_driver/utilities/colors/colors_list.dart';
 import 'package:corezap_driver/utilities/custom_text.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
@@ -175,8 +175,9 @@ class TermsCondition extends StatefulWidget {
 }
 
 class _TermsConditionState extends State<TermsCondition> {
-  final TermsAndPolicyController termsAndPolicyController =
-      Get.put(TermsAndPolicyController());
+ 
+final TermsAndPolicyController termsAndPolicyController = Get.find<TermsAndPolicyController>();
+
 
   @override
   void initState() {
@@ -223,7 +224,7 @@ class _TermsConditionState extends State<TermsCondition> {
         if (termsAndPolicyController.termspolicyres.value!.data == null) {
           return _errorView(w, "Unable to load terms & conditions");
         }
-  
+
         final String termAndCondition =
             termsAndPolicyController
                     .termspolicyres.value!.data!.termAndCondition ??

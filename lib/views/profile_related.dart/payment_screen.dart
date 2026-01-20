@@ -653,7 +653,7 @@
 // }
 
 
-import 'package:corezap_driver/controller/profilecontoller/wallet_controller.dart';
+import 'package:corezap_driver/controllers/profile_controllers/wallet_controller.dart';
 import 'package:corezap_driver/utilities/app_buttons.dart';
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/colors/colors_list.dart';
@@ -679,7 +679,10 @@ class PaymentScreen extends StatefulWidget {
 
 class _PaymentScreenState extends State<PaymentScreen> {
   // Use Get.find instead of Get.put to avoid creating multiple instances
-  final WalletController walletController = Get.put(WalletController());
+  // final WalletController walletController = Get.put(WalletController());
+
+  final WalletController walletController = Get.find<WalletController>();
+
   
   // Track if this is the first build
   bool _isFirstBuild = true;
