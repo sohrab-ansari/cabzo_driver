@@ -9,8 +9,11 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
 class BottomnavmainScreen extends StatefulWidget {
+  dynamic  rideData;
+
+
   final bool startWithMaps;
-  const BottomnavmainScreen({super.key, this.startWithMaps = false});
+   BottomnavmainScreen({super.key, this.startWithMaps = false,  this.rideData});
 
   @override
   State<BottomnavmainScreen> createState() => _BottomnavmainScreenState();
@@ -35,7 +38,7 @@ class _BottomnavmainScreenState extends State<BottomnavmainScreen> {
 
     // Widget options for each tab
     List<Widget> _widgetOptions = <Widget>[
-      widget.startWithMaps ? HomeMapsScreen() : HomeScreen(),
+      widget.startWithMaps ? HomeMapsScreen(rideData: widget.rideData,) : HomeScreen(),
       RidehistoryScreen(),
       Earnings(),
       ProfileScreen(),

@@ -1,0 +1,2346 @@
+// // // // // import 'package:corezap_driver/controller/controllers.dart';
+// // // // // import 'package:corezap_driver/controller/stepper_controller.dart';
+// // // // // import 'package:corezap_driver/utilities/app_buttons.dart';
+// // // // // import 'package:corezap_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
+// // // // // import 'package:corezap_driver/utilities/colors.dart';
+// // // // // import 'package:corezap_driver/utilities/colors/colors_list.dart';
+// // // // // import 'package:corezap_driver/utilities/custom_appbar.dart';
+// // // // // import 'package:corezap_driver/utilities/custom_font.dart';
+// // // // // import 'package:corezap_driver/utilities/custom_images.dart';
+// // // // // import 'package:corezap_driver/utilities/navigator.dart';
+// // // // // import 'package:corezap_driver/views/home_related/circular_timer.dart';
+// // // // // import 'package:corezap_driver/views/scheduled_pickups/accepted_screen.dart';
+// // // // // import 'package:dotted_line/dotted_line.dart';
+// // // // // import 'package:flutter/material.dart';
+// // // // // import 'package:flutter/widgets.dart';
+// // // // // import 'package:flutter_animate/flutter_animate.dart';
+// // // // // import 'package:get/instance_manager.dart';
+// // // // // import 'package:get/route_manager.dart';
+// // // // // import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+// // // // // class LiveRide extends StatefulWidget {
+// // // // //   const LiveRide({super.key});
+
+// // // // //   @override
+// // // // //   State<LiveRide> createState() => _LiveRideState();
+// // // // // }
+
+// // // // // class _LiveRideState extends State<LiveRide> {
+// // // // //   StepperController stepperController = Get.find<StepperController>();
+// // // // //   Controllers cancelRideController = Get.find<Controllers>();
+// // // // //   // pickup drop time
+// // // // //   // List detailsAbout = ["Pick up", "Drop", "Time"];
+// // // // //    List detailsAbout = ["Pick up", "Drhghop", ];
+// // // // //   List details = ["1.1 Km", "4 km",];
+// // // // //   @override
+// // // // //   void initState() {
+// // // // //     super.initState();
+// // // // //     WidgetsBinding.instance.addPostFrameCallback((_) {
+// // // // //       cancelRideController.cancelRideReasonIndex.value = -1;
+// // // // //     });
+// // // // //   }
+
+// // // // //   @override
+// // // // //   Widget build(BuildContext context) {
+// // // // //     double w = MediaQuery.of(context).size.width;
+
+// // // // //     return Scaffold(
+// // // // //       backgroundColor: AppColors.white,
+// // // // //       body: SafeArea(
+// // // // //         child: Padding(
+// // // // //           padding: EdgeInsets.symmetric(horizontal: w * .04, vertical: w * .04),
+// // // // //           child: Column(
+// // // // //             crossAxisAlignment: CrossAxisAlignment.start,
+// // // // //             children: [
+
+// // // // //               SizedBox(height: w * .05),
+// // // // //                AppFonts.textPoppins(
+// // // // //                             context,
+// // // // //                             "30, August, 2025",
+// // // // //                             w * 0.03,
+// // // // //                             FontWeight.w500,
+// // // // //                             AppColors.black,
+// // // // //                             TextAlign.center,
+// // // // //                             TextOverflow.visible,
+// // // // //                           ),
+// // // // //               Container(
+// // // // //                     width: w,
+// // // // //                     height: w * 0.40,
+// // // // //                     decoration: BoxDecoration(
+// // // // //                       color: AppColors.white,
+// // // // //                       boxShadow: [
+// // // // //                         BoxShadow(
+// // // // //                           color: Colors.grey.withOpacity(0.2),
+// // // // //                           spreadRadius: 2,
+// // // // //                           blurRadius: 3,
+// // // // //                           // changes position of shadow
+// // // // //                         ),
+// // // // //                       ],
+// // // // //                       borderRadius: BorderRadius.circular(w * 0.03),
+// // // // //                     ),
+// // // // //                     child: Padding(
+// // // // //                       padding: EdgeInsets.only(left: w * 0.04),
+// // // // //                       child: Column(
+// // // // //                         mainAxisAlignment: MainAxisAlignment.center,
+// // // // //                         crossAxisAlignment: CrossAxisAlignment.center,
+// // // // //                         children: [
+
+// // // // //                           Row(
+// // // // //                             mainAxisAlignment: MainAxisAlignment.center,
+// // // // //                             children: [
+
+// // // // //                               Row(
+// // // // //                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+// // // // //                                 children: [
+// // // // //                                   Image.asset("assets/images/profil.png",height: 20,width: 30,),
+// // // // //                                   Text("Rohan")
+// // // // //                                 ],
+// // // // //                               ),
+// // // // //                               Icon(
+// // // // //                                 Icons.currency_rupee,
+// // // // //                                 color: AppColors.green,
+// // // // //                                 size: w * .063,
+// // // // //                                 fontWeight: FontWeight.bold,
+// // // // //                               ),
+// // // // //                               AppFonts.textPoppins(
+// // // // //                                 context,
+// // // // //                                 "100.0",
+// // // // //                                 w * 0.08,
+// // // // //                                 FontWeight.bold,
+// // // // //                                 AppColors.green,
+// // // // //                                 TextAlign.center,
+// // // // //                                 TextOverflow.visible,
+// // // // //                               ),
+// // // // //                             ],
+// // // // //                           ),
+
+// // // // //                         ],
+// // // // //                       ),
+// // // // //                     ),
+// // // // //                   )
+// // // // //                   .animate()
+// // // // //                   .fade(duration: 820.ms, curve: Curves.easeInOut)
+// // // // //                   .scale(
+// // // // //                     begin: const Offset(0.95, 0.95),
+// // // // //                     end: const Offset(1, 1),
+// // // // //                   ),
+
+// // // // //              GoogleMap(initialCameraPosition: initialCameraPosition),
+// // // // //               AppFonts.textPoppins(
+// // // // //                 context,
+// // // // //                 "Location",
+// // // // //                 w * 0.035,
+// // // // //                 FontWeight.w500,
+// // // // //                 AppColors.black,
+// // // // //                 TextAlign.left,
+// // // // //                 TextOverflow.visible,
+// // // // //               ),
+// // // // //               Padding(
+// // // // //                 padding: EdgeInsets.symmetric(vertical: w * .03),
+// // // // //                 child: Row(
+// // // // //                   crossAxisAlignment: CrossAxisAlignment.start,
+// // // // //                   children: [
+// // // // //                     Column(
+// // // // //                       children: [
+// // // // //                         CustomImages.images(
+// // // // //                           "assets/icons/greenDot.png",
+// // // // //                           w * .05,
+// // // // //                           w * .05,
+// // // // //                         ),
+// // // // //                         SizedBox(
+// // // // //                           height: w * .1,
+// // // // //                           child: DottedLine(
+// // // // //                             direction: Axis.vertical,
+// // // // //                             lineLength: double.infinity,
+// // // // //                             dashLength: 4,
+// // // // //                             dashColor: AppColors.green,
+// // // // //                           ),
+// // // // //                         ),
+// // // // //                         CustomImages.images(
+// // // // //                           "assets/icons/redDot.png",
+// // // // //                           w * .05,
+// // // // //                           w * .05,
+// // // // //                         ),
+// // // // //                       ],
+// // // // //                     ),
+// // // // //                     SizedBox(width: w * .01),
+// // // // //                     Column(
+// // // // //                       crossAxisAlignment: CrossAxisAlignment.start,
+// // // // //                       children: [
+// // // // //                         AppFonts.textPoppins(
+// // // // //                           context,
+// // // // //                           "Pickup",
+// // // // //                           w * 0.035,
+// // // // //                           FontWeight.w500,
+// // // // //                           AppColors.mediumGray,
+// // // // //                           TextAlign.left,
+// // // // //                           TextOverflow.visible,
+// // // // //                         ),
+// // // // //                         SizedBox(
+// // // // //                           width: w * .85,
+// // // // //                           // color: Colors.amber,
+// // // // //                           child: AppFonts.textPoppins(
+// // // // //                             context,
+// // // // //                             "C95F+J2M, Manikonda Jagir, Hyderabad, Telangana 500089",
+// // // // //                             w * 0.039,
+// // // // //                             FontWeight.w500,
+// // // // //                             AppColors.black,
+// // // // //                             TextAlign.left,
+// // // // //                             TextOverflow.ellipsis,
+// // // // //                           ),
+// // // // //                         ),
+// // // // //                         SizedBox(height: w * .048),
+// // // // //                         AppFonts.textPoppins(
+// // // // //                           context,
+// // // // //                           "Drop",
+// // // // //                           w * 0.035,
+// // // // //                           FontWeight.w500,
+// // // // //                           AppColors.mediumGray,
+// // // // //                           TextAlign.left,
+// // // // //                           TextOverflow.visible,
+// // // // //                         ),
+// // // // //                         SizedBox(
+// // // // //                           width: w * .85,
+// // // // //                           //  color: Colors.amber,
+// // // // //                           child: AppFonts.textPoppins(
+// // // // //                             context,
+// // // // //                             "C95F+J2M, Manikonda Jagir, Hyderabad, Telangana 500089",
+// // // // //                             w * 0.039,
+// // // // //                             FontWeight.w500,
+// // // // //                             AppColors.black,
+// // // // //                             TextAlign.left,
+// // // // //                             TextOverflow.ellipsis,
+// // // // //                           ),
+// // // // //                         ),
+// // // // //                       ],
+// // // // //                     ),
+// // // // //                   ],
+// // // // //                 ),
+// // // // //               ),
+
+// // // // //                Padding(
+// // // // //                 padding: EdgeInsets.symmetric(vertical: w * .04),
+// // // // //                 child:
+// // // // //                     Container(
+// // // // //                           width: w,
+// // // // //                           height: w * 0.28,
+// // // // //                           decoration: BoxDecoration(
+// // // // //                             color: AppColors.white,
+// // // // //                             boxShadow: [
+// // // // //                               BoxShadow(
+// // // // //                                 color: Colors.grey.withOpacity(0.2),
+// // // // //                                 spreadRadius: 2,
+// // // // //                                 blurRadius: 3,
+// // // // //                                 // changes position of shadow
+// // // // //                               ),
+// // // // //                             ],
+// // // // //                             borderRadius: BorderRadius.circular(w * 0.03),
+// // // // //                           ),
+// // // // //                           child: Padding(
+// // // // //                             padding: EdgeInsets.symmetric(
+// // // // //                               horizontal: w * .04,
+// // // // //                               vertical: w * .04,
+// // // // //                             ),
+// // // // //                             child: Row(
+// // // // //                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+// // // // //                               children: List.generate(2, (index) {
+// // // // //                                 return Row(
+// // // // //                                   children: [
+// // // // //                                     Container(
+// // // // //                                       width: w * .25,
+// // // // //                                       color: AppColors.white,
+// // // // //                                       child: Column(
+// // // // //                                         mainAxisAlignment:
+// // // // //                                             MainAxisAlignment.center,
+// // // // //                                         crossAxisAlignment:
+// // // // //                                             CrossAxisAlignment.center,
+// // // // //                                         children: [
+// // // // //                                           AppFonts.textPoppins(
+// // // // //                                             context,
+// // // // //                                             detailsAbout[index],
+// // // // //                                             w * 0.035,
+// // // // //                                             FontWeight.w600,
+// // // // //                                             AppColors.mediumGray,
+// // // // //                                             TextAlign.center,
+// // // // //                                             TextOverflow.visible,
+// // // // //                                           ),
+
+// // // // //                                           AppFonts.textPoppins(
+// // // // //                                             context,
+// // // // //                                             details[index],
+// // // // //                                             w * 0.035,
+// // // // //                                             FontWeight.bold,
+// // // // //                                             AppColors.black,
+// // // // //                                             TextAlign.center,
+// // // // //                                             TextOverflow.visible,
+// // // // //                                           ),
+// // // // //                                         ],
+// // // // //                                       ),
+// // // // //                                     ),
+
+// // // // //                                     index < 2
+// // // // //                                         ? VerticalDivider(
+// // // // //                                             color: AppColors.mediumGray,
+// // // // //                                             thickness: 1,
+// // // // //                                             // width: w * .1,
+// // // // //                                           )
+// // // // //                                         : SizedBox(),
+// // // // //                                   ],
+// // // // //                                 );
+// // // // //                               }),
+// // // // //                             ),
+// // // // //                           ),
+// // // // //                         )
+// // // // //                         .animate()
+// // // // //                         .fade(duration: 820.ms, curve: Curves.easeInOut)
+// // // // //                         .scale(
+// // // // //                           begin: const Offset(0.95, 0.95),
+// // // // //                           end: const Offset(1, 1),
+// // // // //                         ),
+// // // // //               ),
+
+// // // // //               //? timer for except ride
+// // // // //               // Center(child: CircularTimer(size: w * .5)),
+// // // // //               Padding(
+// // // // //                 padding: EdgeInsets.symmetric(vertical: w * .05),
+// // // // //                 child: Row(
+// // // // //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+// // // // //                   children: [
+// // // // //                     AppButtons.outlined(
+// // // // //                       width: w * .43,
+// // // // //                       context: context,
+// // // // //                       text: "Cancel",
+// // // // //                       onClicked: () {
+// // // // //                         CustomBottomSheets().cancelRide(context);
+// // // // //                         // CustomNavigator.push(
+// // // // //                         //   context,
+// // // // //                         //   LiveRide(),
+// // // // //                         //   transition: TransitionType.fade,
+// // // // //                         // );
+// // // // //                       },
+// // // // //                       isFullWidth: false,
+// // // // //                       backgroundColor: AppColors.lightGray,
+// // // // //                       textColor: AppColors.mediumGray,
+// // // // //                       borderColor: Colors.transparent,
+// // // // //                       fontSize: w * .045,
+// // // // //                       height: w * .140,
+// // // // //                       radius: 10,
+// // // // //                     ),
+// // // // //                     AppButtons.outlined(
+// // // // //                       width: w * .43,
+// // // // //                       context: context,
+// // // // //                       text: "Accept",
+// // // // //                       onClicked: () {
+// // // // //                         stepperController.resetSteps();
+// // // // //                         // stepperController.activeStep.value = 1;
+// // // // //                         CustomNavigator.push(
+// // // // //                           context,
+
+// // // // //                           ArrivingClient(),
+// // // // //                           transition: TransitionType.slideLeft,
+// // // // //                         );
+// // // // //                       },
+// // // // //                       isFullWidth: false,
+// // // // //                       backgroundColor: ColorsList.mainButtonColor,
+// // // // //                       textColor: ColorsList.mainButtonTextColor,
+// // // // //                       fontSize: w * .045,
+// // // // //                       height: w * .140,
+// // // // //                       radius: 10.0,
+// // // // //                     ),
+// // // // //                   ],
+// // // // //                 ),
+// // // // //               ),
+// // // // //             ],
+// // // // //           ),
+// // // // //         ),
+// // // // //       ),
+// // // // //     );
+// // // // //   }
+// // // // // }
+
+// // // // import 'package:corezap_driver/controller/controllers.dart';
+// // // // import 'package:corezap_driver/controller/stepper_controller.dart';
+// // // // import 'package:corezap_driver/utilities/app_buttons.dart';
+// // // // import 'package:corezap_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
+// // // // import 'package:corezap_driver/utilities/colors.dart';
+// // // // import 'package:corezap_driver/utilities/colors/colors_list.dart';
+// // // // import 'package:corezap_driver/utilities/custom_font.dart';
+// // // // import 'package:corezap_driver/utilities/custom_images.dart';
+// // // // import 'package:corezap_driver/utilities/navigator.dart';
+// // // // import 'package:corezap_driver/views/scheduled_pickups/accepted_screen.dart';
+// // // // import 'package:dotted_line/dotted_line.dart';
+// // // // import 'package:flutter/material.dart';
+// // // // import 'package:flutter_animate/flutter_animate.dart';
+// // // // import 'package:get/get.dart';
+// // // // import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+// // // // /// ─────────────────────────────────────────────────────────
+// // // // /// INITIAL CAMERA POSITION (FIXED ERROR)
+// // // // /// ─────────────────────────────────────────────────────────
+// // // // const CameraPosition initialCameraPosition = CameraPosition(
+// // // //   target: LatLng(17.4065, 78.4772), // Hyderabad
+// // // //   zoom: 14.5,
+// // // // );
+
+// // // // class LiveRide extends StatefulWidget {
+// // // //   const LiveRide({super.key});
+
+// // // //   @override
+// // // //   State<LiveRide> createState() => _LiveRideState();
+// // // // }
+
+// // // // class _LiveRideState extends State<LiveRide> {
+// // // //   final StepperController stepperController = Get.find();
+// // // //   final Controllers cancelRideController = Get.find();
+
+// // // //   final List<String> detailsTitle = ["Pickup", "Drop"];
+// // // //   final List<String> detailsValue = ["1.1 Km", "4 Km"];
+
+// // // //   @override
+// // // //   void initState() {
+// // // //     super.initState();
+// // // //     WidgetsBinding.instance.addPostFrameCallback((_) {
+// // // //       cancelRideController.cancelRideReasonIndex.value = -1;
+// // // //     });
+// // // //   }
+
+// // // //   @override
+// // // //   Widget build(BuildContext context) {
+// // // //     final double w = MediaQuery.of(context).size.width;
+
+// // // //     return Scaffold(
+// // // //       backgroundColor: AppColors.white,
+// // // //       body: SafeArea(
+// // // //         child: SingleChildScrollView(
+// // // //           padding: EdgeInsets.all(w * 0.04),
+// // // //           child: Column(
+// // // //             // crossAxisAlignment: CrossAxisAlignment.start,
+// // // //             children: [
+// // // //               _dateText(context, w),
+// // // //               SizedBox(height: w * 0.04),
+
+// // // //               SizedBox(height: w * 0.04),
+
+// // // //               Stack(children :[
+// // // // _mapView(w),
+
+// // // //                  _fareCard(context, w),
+// // // //               ] ),
+// // // //               SizedBox(height: w * 0.04),
+
+// // // //               _locationInfo(context, w),
+// // // //               SizedBox(height: w * 0.04),
+
+// // // //               _distanceCard(context, w),
+// // // //               SizedBox(height: w * 0.06),
+
+// // // //               _actionButtons(context, w),
+// // // //             ],
+// // // //           ),
+// // // //         ),
+// // // //       ),
+// // // //     );
+// // // //   }
+
+// // // //   //──────────────── DATE ────────────────
+// // // //   Widget _dateText(BuildContext context, double w) {
+// // // //     return AppFonts.textPoppins(
+// // // //       context,
+// // // //       "30 August, 2025",
+// // // //       w * 0.04,
+// // // //       FontWeight.w500,
+// // // //       AppColors.black,
+// // // //       TextAlign.center,
+// // // //       TextOverflow.visible,
+// // // //     );
+// // // //   }
+
+// // // //   //──────────────── FARE CARD ────────────────
+// // // //   // Widget _fareCard(BuildContext context, double w) {
+// // // //   //   return Container(
+// // // //   //     height: w * 0.2,
+// // // //   //     decoration: _cardDecoration(w),
+// // // //   //     child: Center(
+// // // //   //       child: Row(
+// // // //   //         mainAxisAlignment: MainAxisAlignment.start,
+// // // //   //         children: [
+// // // //   //           SizedBox(width: 5,),
+// // // //   //           Image.asset("assets/images/profil.png", height:  w * 0.12),
+// // // //   //           SizedBox(width: w * 0.05),
+// // // //   //           AppFonts.textPoppins(
+// // // //   //             context,
+// // // //   //             "Rohan",
+// // // //   //             w * 0.05,
+// // // //   //             FontWeight.w600,
+// // // //   //             AppColors.black,
+// // // //   //             TextAlign.center,
+// // // //   //             TextOverflow.visible,
+// // // //   //           ),
+// // // //   //           SizedBox(width: w * 0.25),
+// // // //   //           Icon(Icons.currency_rupee,
+// // // //   //               color: AppColors.green, size: w * 0.07),
+// // // //   //           AppFonts.textPoppins(
+// // // //   //             context,
+// // // //   //             "100.0",
+// // // //   //             w * 0.06,
+// // // //   //             FontWeight.w500,
+// // // //   //             AppColors.green,
+// // // //   //             TextAlign.center,
+// // // //   //             TextOverflow.visible,
+// // // //   //           ),
+// // // //   //         ],
+// // // //   //       ),
+// // // //   //     ),
+// // // //   //   ).animate().fade(duration: 700.ms).scale();
+// // // //   // }
+
+// // // // Widget _fareCard(BuildContext context, double w) {
+// // // //   return Container(
+// // // //     padding: EdgeInsets.symmetric(
+// // // //       horizontal: w * 0.04,
+// // // //       vertical: w * 0.03,
+// // // //     ),
+// // // //     decoration: BoxDecoration(
+// // // //       color: Colors.white,
+// // // //       borderRadius: BorderRadius.circular(w * 0.035),
+// // // //       boxShadow: [
+// // // //         BoxShadow(
+// // // //           color: Colors.black.withOpacity(0.08),
+// // // //           blurRadius: 10,
+// // // //           offset: const Offset(0, 4),
+// // // //         ),
+// // // //       ],
+// // // //       border: Border.all(
+// // // //         color: AppColors.mediumGray.withOpacity(0.3),
+// // // //       ),
+// // // //     ),
+// // // //     child: Row(
+// // // //       children: [
+// // // //         /// Profile image
+// // // //         Container(
+// // // //           padding: EdgeInsets.all(w * 0.01),
+// // // //           decoration: BoxDecoration(
+// // // //             shape: BoxShape.circle,
+// // // //             // border: Border.all(
+// // // //             //   // color: AppColors.primary.withOpacity(0.3),
+// // // //             //   width: 1.5,
+// // // //             // ),
+// // // //           ),
+// // // //           child: Image.asset(
+// // // //             "assets/images/profil.png",
+// // // //             height: w * 0.12,
+// // // //             width: w * 0.12,
+// // // //             fit: BoxFit.cover,
+// // // //           ),
+// // // //         ),
+
+// // // //         SizedBox(width: w * 0.04),
+
+// // // //         /// Name
+// // // //         Expanded(
+// // // //           child: AppFonts.textPoppins(
+// // // //             context,
+// // // //             "Rohan",
+// // // //             w * 0.048,
+// // // //             FontWeight.w600,
+// // // //             AppColors.black,
+// // // //             TextAlign.start,
+// // // //             TextOverflow.ellipsis,
+// // // //           ),
+// // // //         ),
+
+// // // //         /// Fare
+// // // //         Row(
+// // // //           children: [
+// // // //             Icon(
+// // // //               Icons.currency_rupee,
+// // // //               color: AppColors.green,
+// // // //               size: w * 0.065,
+// // // //             ),
+// // // //             AppFonts.textPoppins(
+// // // //               context,
+// // // //               "100.0",
+// // // //               w * 0.055,
+// // // //               FontWeight.w600,
+// // // //               AppColors.green,
+// // // //               TextAlign.center,
+// // // //               TextOverflow.visible,
+// // // //             ),
+// // // //           ],
+// // // //         ),
+// // // //       ],
+// // // //     ),
+// // // //   ).animate().fade(duration: 700.ms).scale();
+// // // // }
+
+// // // //   //──────────────── MAP ────────────────
+// // // //   Widget _mapView(double w) {
+// // // //     return SizedBox(
+// // // //       height: w * 0.95,
+// // // //       child: ClipRRect(
+// // // //         borderRadius: BorderRadius.circular(w * 0.03),
+// // // //         child: GoogleMap(
+// // // //           initialCameraPosition: initialCameraPosition,
+// // // //           myLocationEnabled: true,
+// // // //           zoomControlsEnabled: false,
+// // // //         ),
+// // // //       ),
+// // // //     );
+// // // //   }
+
+// // // //   //──────────────── LOCATION ────────────────
+// // // //   Widget _locationInfo(BuildContext context, double w) {
+// // // //     return Column(
+// // // //       children: [
+
+// // // //         Row(
+// // // //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+// // // //           children: [
+// // // //             Text("Location",style: TextStyle(fontWeight: FontWeight.w500),),
+// // // //             Text("Time  10 min",style: TextStyle(fontWeight: FontWeight.w500))
+// // // //           ],
+// // // //         ),
+// // // //         SizedBox(height: 10,),
+// // // //         Row(
+// // // //           crossAxisAlignment: CrossAxisAlignment.start,
+// // // //           children: [
+// // // //             Column(
+// // // //               children: [
+// // // //                 CustomImages.images("assets/icons/greenDot.png", w * 0.05, w * 0.05),
+// // // //                 SizedBox(
+// // // //                   height: w * 0.1,
+// // // //                   child: DottedLine(
+// // // //                     direction: Axis.vertical,
+// // // //                     dashLength: 4,
+// // // //                     dashColor: AppColors.green,
+// // // //                   ),
+// // // //                 ),
+// // // //                 CustomImages.images("assets/icons/redDot.png", w * 0.05, w * 0.05),
+// // // //               ],
+// // // //             ),
+// // // //             SizedBox(width: w * 0.03),
+// // // //             Expanded(
+// // // //               child: Column(
+// // // //                 crossAxisAlignment: CrossAxisAlignment.start,
+// // // //                 children: [
+// // // //                   _locationText(
+// // // //                     context,
+// // // //                     "Pickup",
+// // // //                     "Manikonda Jagir, Hyderabad, Telangana",
+// // // //                   ),
+// // // //                   SizedBox(height: w * 0.05),
+// // // //                   _locationText(
+// // // //                     context,
+// // // //                     "Drop",
+// // // //                     "Manikonda Jagir, Hyderabad, Telangana",
+// // // //                   ),
+// // // //                 ],
+// // // //               ),
+// // // //             ),
+// // // //           ],
+// // // //         ),
+// // // //       ],
+// // // //     );
+// // // //   }
+
+// // // //   Widget _locationText(
+// // // //       BuildContext context, String title, String address) {
+// // // //     final double w = MediaQuery.of(context).size.width;
+// // // //     return Column(
+// // // //       crossAxisAlignment: CrossAxisAlignment.start,
+// // // //       children: [
+// // // //         AppFonts.textPoppins(
+// // // //           context,
+// // // //           title,
+// // // //           w * 0.035,
+// // // //           FontWeight.w500,
+// // // //           AppColors.mediumGray,
+// // // //           TextAlign.left,
+// // // //           TextOverflow.visible,
+// // // //         ),
+// // // //         AppFonts.textPoppins(
+// // // //           context,
+// // // //           address,
+// // // //           w * 0.039,
+// // // //           FontWeight.w500,
+// // // //           AppColors.black,
+// // // //           TextAlign.left,
+// // // //           TextOverflow.ellipsis,
+// // // //         ),
+// // // //       ],
+// // // //     );
+// // // //   }
+
+// // // //   //──────────────── DISTANCE ────────────────
+
+// // // //   Widget _distanceCard(BuildContext context, double w) {
+// // // //   return Container(
+// // // //     height: w * 0.20,
+// // // //     width: w * 02,
+// // // //     // padding: EdgeInsets.all(w * 0.02),
+// // // //     // decoration: _cardDecoration(w),
+// // // //     child: Row(
+// // // //       children: List.generate(detailsTitle.length, (index) {
+// // // //         return Expanded(
+// // // //           child: Container(
+// // // //             margin: EdgeInsets.symmetric(horizontal: w * 0.015),
+// // // //             padding: EdgeInsets.symmetric(
+// // // //               vertical: w * 0.03,
+// // // //               horizontal: w * 0.02,
+// // // //             ),
+// // // //             decoration: BoxDecoration(
+// // // //               color: Colors.white,
+// // // //               borderRadius: BorderRadius.circular(w * 0.025),
+// // // //               boxShadow: [
+// // // //                 BoxShadow(
+// // // //                   color: Colors.black.withOpacity(0.08),
+// // // //                   blurRadius: 6,
+// // // //                   offset: const Offset(0, 3),
+// // // //                 ),
+// // // //               ],
+// // // //               border: Border.all(
+// // // //                 color: AppColors.mediumGray.withOpacity(0.3),
+// // // //               ),
+// // // //             ),
+// // // //             child: Column(
+// // // //               mainAxisAlignment: MainAxisAlignment.center,
+// // // //               children: [
+// // // //                 AppFonts.textPoppins(
+// // // //                   context,
+// // // //                   detailsTitle[index],
+// // // //                   w * 0.032,
+// // // //                   FontWeight.w600,
+// // // //                   AppColors.mediumGray,
+// // // //                   TextAlign.center,
+// // // //                   TextOverflow.visible,
+// // // //                 ),
+// // // //                 SizedBox(height: w * 0.012),
+// // // //                 AppFonts.textPoppins(
+// // // //                   context,
+// // // //                   detailsValue[index],
+// // // //                   w * 0.042,
+// // // //                   FontWeight.bold,
+// // // //                   AppColors.black,
+// // // //                   TextAlign.center,
+// // // //                   TextOverflow.visible,
+// // // //                 ),
+// // // //               ],
+// // // //             ),
+// // // //           ),
+// // // //         );
+// // // //       }),
+// // // //     ),
+// // // //   ).animate().fade(duration: 700.ms).scale();
+// // // // }
+
+// // // //   // Widget _distanceCard(BuildContext context, double w) {
+// // // //   //   return Container(
+// // // //   //     height: w * 0.28,
+// // // //   //     decoration: _cardDecoration(w),
+// // // //   //     child: Row(
+// // // //   //       children: List.generate(detailsTitle.length, (index) {
+// // // //   //         return Expanded(
+// // // //   //           child: Column(
+// // // //   //             mainAxisAlignment: MainAxisAlignment.center,
+// // // //   //             children: [
+// // // //   //               AppFonts.textPoppins(
+// // // //   //                 context,
+// // // //   //                 detailsTitle[index],
+// // // //   //                 w * 0.035,
+// // // //   //                 FontWeight.w600,
+// // // //   //                 AppColors.mediumGray,
+// // // //   //                 TextAlign.center,
+// // // //   //                 TextOverflow.visible,
+// // // //   //               ),
+// // // //   //               SizedBox(height: w * 0.01),
+// // // //   //               AppFonts.textPoppins(
+// // // //   //                 context,
+// // // //   //                 detailsValue[index],
+// // // //   //                 w * 0.04,
+// // // //   //                 FontWeight.bold,
+// // // //   //                 AppColors.black,
+// // // //   //                 TextAlign.center,
+// // // //   //                 TextOverflow.visible,
+// // // //   //               ),
+// // // //   //             ],
+// // // //   //           ),
+// // // //   //         );
+// // // //   //       }),
+// // // //   //     ),
+// // // //   //   ).animate().fade(duration: 700.ms).scale();
+// // // //   // }
+
+// // // //   //──────────────── BUTTONS ────────────────
+// // // //   Widget _actionButtons(BuildContext context, double w) {
+// // // //     return Row(
+// // // //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+// // // //       children: [
+// // // //         AppButtons.outlined(
+// // // //           width: w * 0.43,
+// // // //           context: context,
+// // // //           text: "Cancel",
+// // // //           onClicked: () => CustomBottomSheets().cancelRide(context),
+// // // //           backgroundColor: AppColors.lightGray,
+// // // //           textColor: AppColors.mediumGray,
+// // // //           height: w * 0.14,
+// // // //           radius: 10,
+// // // //         ),
+// // // //         AppButtons.outlined(
+// // // //           width: w * 0.43,
+// // // //           context: context,
+// // // //           text: "Accept",
+// // // //           onClicked: () {
+// // // //             stepperController.resetSteps();
+// // // //             CustomNavigator.push(
+// // // //               context,
+// // // //               ArrivingClient(),
+// // // //               transition: TransitionType.slideLeft,
+// // // //             );
+// // // //           },
+// // // //           backgroundColor: ColorsList.mainButtonColor,
+// // // //           textColor: ColorsList.mainButtonTextColor,
+// // // //           height: w * 0.14,
+// // // //           radius: 10,
+// // // //         ),
+// // // //       ],
+// // // //     );
+// // // //   }
+
+// // // //   //──────────────── COMMON CARD STYLE ────────────────
+// // // //   BoxDecoration _cardDecoration(double w) {
+// // // //     return BoxDecoration(
+// // // //       color: AppColors.white,
+// // // //       borderRadius: BorderRadius.circular(w * 0.03),
+// // // //       boxShadow: [
+// // // //         BoxShadow(
+// // // //           color: Colors.black.withOpacity(0.08),
+// // // //           blurRadius: 8,
+// // // //           offset: const Offset(0, 4),
+// // // //         ),
+// // // //       ],
+// // // //     );
+// // // //   }
+// // // // }
+
+// // // import 'package:corezap_driver/controller/controllers.dart';
+// // // import 'package:corezap_driver/controller/stepper_controller.dart';
+// // // import 'package:corezap_driver/utilities/app_buttons.dart';
+// // // import 'package:corezap_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
+// // // import 'package:corezap_driver/utilities/colors.dart';
+// // // import 'package:corezap_driver/utilities/colors/colors_list.dart';
+// // // import 'package:corezap_driver/utilities/custom_font.dart';
+// // // import 'package:corezap_driver/utilities/custom_images.dart';
+// // // import 'package:corezap_driver/utilities/navigator.dart';
+// // // import 'package:corezap_driver/views/scheduled_pickups/accepted_screen.dart';
+// // // import 'package:dotted_line/dotted_line.dart';
+// // // import 'package:flutter/material.dart';
+// // // import 'package:flutter_animate/flutter_animate.dart';
+// // // import 'package:get/get.dart';
+// // // import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+// // // /// ─────────────────────────────────────────────────────────
+// // // /// INITIAL CAMERA POSITION
+// // // /// ─────────────────────────────────────────────────────────
+// // // const CameraPosition initialCameraPosition = CameraPosition(
+// // //   target: LatLng(17.4065, 78.4772), // Hyderabad
+// // //   zoom: 14.5,
+// // // );
+
+// // // class LiveRide extends StatefulWidget {
+// // //   const LiveRide({super.key});
+
+// // //   @override
+// // //   State<LiveRide> createState() => _LiveRideState();
+// // // }
+
+// // // class _LiveRideState extends State<LiveRide> {
+// // //   final StepperController stepperController = Get.find();
+// // //   final Controllers cancelRideController = Get.find();
+
+// // //   final List<String> detailsTitle = ["Pickup", "Drop"];
+// // //   final List<String> detailsValue = ["1.1 Km", "4 Km"];
+
+// // //   /// 📍 Pickup & Drop Locations
+// // //   final LatLng pickupLatLng = const LatLng(17.4065, 78.4772);
+// // //   final LatLng dropLatLng = const LatLng(17.4120, 78.4850);
+
+// // //   /// 🟢🔴 Markers
+// // //   Set<Marker> _markers = {};
+
+// // //   @override
+// // //   void initState() {
+// // //     super.initState();
+
+// // //     WidgetsBinding.instance.addPostFrameCallback((_) {
+// // //       cancelRideController.cancelRideReasonIndex.value = -1;
+// // //     });
+
+// // //     _setMarkers();
+// // //   }
+
+// // //   void _setMarkers() {
+// // //     _markers = {
+// // //       /// GREEN PICKUP MARKER
+// // //       Marker(
+// // //         markerId: const MarkerId("pickup"),
+// // //         position: pickupLatLng,
+// // //         infoWindow: const InfoWindow(title: "Pickup Location"),
+// // //         icon: BitmapDescriptor.defaultMarkerWithHue(
+// // //           BitmapDescriptor.hueGreen,
+// // //         ),
+// // //       ),
+
+// // //       /// RED DROP MARKER
+// // //       Marker(
+// // //         markerId: const MarkerId("drop"),
+// // //         position: dropLatLng,
+// // //         infoWindow: const InfoWindow(title: "Drop Location"),
+// // //         icon: BitmapDescriptor.defaultMarkerWithHue(
+// // //           BitmapDescriptor.hueRed,
+// // //         ),
+// // //       ),
+// // //     };
+// // //   }
+
+// // //   @override
+// // //   Widget build(BuildContext context) {
+// // //     final double w = MediaQuery.of(context).size.width;
+
+// // //     return Scaffold(
+// // //       backgroundColor: AppColors.white,
+// // //       body: SafeArea(
+// // //         child: SingleChildScrollView(
+// // //           padding: EdgeInsets.all(w * 0.04),
+// // //           child: Column(
+// // //             children: [
+// // //               _dateText(context, w),
+// // //               SizedBox(height: w * 0.04),
+
+// // //               Stack(
+// // //                 children: [
+// // //                   _mapView(w),
+// // //                   Positioned(
+// // //                     top: w * 0.04,
+// // //                     left: w * 0.04,
+// // //                     right: w * 0.04,
+// // //                     child: _fareCard(context, w),
+// // //                   ),
+// // //                 ],
+// // //               ),
+
+// // //               SizedBox(height: w * 0.04),
+// // //               _locationInfo(context, w),
+// // //               SizedBox(height: w * 0.04),
+// // //               _distanceCard(context, w),
+// // //               SizedBox(height: w * 0.06),
+// // //               _actionButtons(context, w),
+// // //             ],
+// // //           ),
+// // //         ),
+// // //       ),
+// // //     );
+// // //   }
+
+// // //   //──────────────── DATE ────────────────
+// // //   Widget _dateText(BuildContext context, double w) {
+// // //     return AppFonts.textPoppins(
+// // //       context,
+// // //       "30 August, 2025",
+// // //       w * 0.04,
+// // //       FontWeight.w500,
+// // //       AppColors.black,
+// // //       TextAlign.center,
+// // //       TextOverflow.visible,
+// // //     );
+// // //   }
+
+// // //   //──────────────── FARE CARD ────────────────
+// // //   Widget _fareCard(BuildContext context, double w) {
+// // //     return Container(
+// // //       padding: EdgeInsets.symmetric(horizontal: w * 0.04, vertical: w * 0.03),
+// // //       decoration: BoxDecoration(
+// // //         color: Colors.white,
+// // //         borderRadius: BorderRadius.circular(w * 0.035),
+// // //         boxShadow: [
+// // //           BoxShadow(
+// // //             color: Colors.black.withOpacity(0.08),
+// // //             blurRadius: 10,
+// // //             offset: const Offset(0, 4),
+// // //           ),
+// // //         ],
+// // //         border: Border.all(color: AppColors.mediumGray.withOpacity(0.3)),
+// // //       ),
+// // //       child: Row(
+// // //         children: [
+// // //           Image.asset(
+// // //             "assets/images/profil.png",
+// // //             height: w * 0.12,
+// // //             width: w * 0.12,
+// // //           ),
+// // //           SizedBox(width: w * 0.04),
+// // //           Expanded(
+// // //             child: AppFonts.textPoppins(
+// // //               context,
+// // //               "Rohan",
+// // //               w * 0.048,
+// // //               FontWeight.w600,
+// // //               AppColors.black,
+// // //               TextAlign.start,
+// // //               TextOverflow.ellipsis,
+// // //             ),
+// // //           ),
+// // //           Icon(Icons.currency_rupee, color: AppColors.green, size: w * 0.065),
+// // //           AppFonts.textPoppins(
+// // //             context,
+// // //             "100.0",
+// // //             w * 0.055,
+// // //             FontWeight.w600,
+// // //             AppColors.green,
+// // //             TextAlign.center,
+// // //             TextOverflow.visible,
+// // //           ),
+// // //         ],
+// // //       ),
+// // //     ).animate().fade(duration: 700.ms).scale();
+// // //   }
+
+// // //   //──────────────── MAP ────────────────
+// // //   Widget _mapView(double w) {
+// // //     return SizedBox(
+// // //       height: w * 0.95,
+// // //       child: ClipRRect(
+// // //         borderRadius: BorderRadius.circular(w * 0.03),
+// // //         child: GoogleMap(
+// // //           initialCameraPosition: initialCameraPosition,
+// // //           myLocationEnabled: true,
+// // //           zoomControlsEnabled: false,
+// // //           markers: _markers, // ✅ MARKERS ADDED
+// // //         ),
+// // //       ),
+// // //     );
+// // //   }
+
+// // //   //──────────────── LOCATION INFO ────────────────
+// // //   Widget _locationInfo(BuildContext context, double w) {
+// // //     return Column(
+// // //       children: [
+// // //         Row(
+// // //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+// // //           children: const [
+// // //             Text("Location", style: TextStyle(fontWeight: FontWeight.w500)),
+// // //             Text("Time 10 min", style: TextStyle(fontWeight: FontWeight.w500)),
+// // //           ],
+// // //         ),
+// // //         SizedBox(height: 10),
+// // //         Row(
+// // //           crossAxisAlignment: CrossAxisAlignment.start,
+// // //           children: [
+// // //             Column(
+// // //               children: [
+// // //                 CustomImages.images("assets/icons/greenDot.png", w * 0.05, w * 0.05),
+// // //                 SizedBox(
+// // //                   height: w * 0.1,
+// // //                   child: DottedLine(
+// // //                     direction: Axis.vertical,
+// // //                     dashLength: 4,
+// // //                     dashColor: AppColors.green,
+// // //                   ),
+// // //                 ),
+// // //                 CustomImages.images("assets/icons/redDot.png", w * 0.05, w * 0.05),
+// // //               ],
+// // //             ),
+// // //             SizedBox(width: w * 0.03),
+// // //             Expanded(
+// // //               child: Column(
+// // //                 crossAxisAlignment: CrossAxisAlignment.start,
+// // //                 children: [
+// // //                   _locationText(context, "Pickup",
+// // //                       "Manikonda Jagir, Hyderabad, Telangana"),
+// // //                   SizedBox(height: w * 0.05),
+// // //                   _locationText(context, "Drop",
+// // //                       "Manikonda Jagir, Hyderabad, Telangana"),
+// // //                 ],
+// // //               ),
+// // //             ),
+// // //           ],
+// // //         ),
+// // //       ],
+// // //     );
+// // //   }
+
+// // //   Widget _locationText(BuildContext context, String title, String address) {
+// // //     final double w = MediaQuery.of(context).size.width;
+// // //     return Column(
+// // //       crossAxisAlignment: CrossAxisAlignment.start,
+// // //       children: [
+// // //         AppFonts.textPoppins(
+// // //           context,
+// // //           title,
+// // //           w * 0.035,
+// // //           FontWeight.w500,
+// // //           AppColors.mediumGray,
+// // //           TextAlign.left,
+// // //           TextOverflow.visible,
+// // //         ),
+// // //         AppFonts.textPoppins(
+// // //           context,
+// // //           address,
+// // //           w * 0.039,
+// // //           FontWeight.w500,
+// // //           AppColors.black,
+// // //           TextAlign.left,
+// // //           TextOverflow.ellipsis,
+// // //         ),
+// // //       ],
+// // //     );
+// // //   }
+
+// // //   //──────────────── DISTANCE CARD ────────────────
+// // //   Widget _distanceCard(BuildContext context, double w) {
+// // //     return Container(
+// // //       height: w * 0.20,
+// // //       child: Row(
+// // //         children: List.generate(detailsTitle.length, (index) {
+// // //           return Expanded(
+// // //             child: Container(
+// // //               margin: EdgeInsets.symmetric(horizontal: w * 0.015),
+// // //               padding: EdgeInsets.symmetric(
+// // //                 vertical: w * 0.03,
+// // //                 horizontal: w * 0.02,
+// // //               ),
+// // //               decoration: BoxDecoration(
+// // //                 color: Colors.white,
+// // //                 borderRadius: BorderRadius.circular(w * 0.025),
+// // //                 boxShadow: [
+// // //                   BoxShadow(
+// // //                     color: Colors.black.withOpacity(0.08),
+// // //                     blurRadius: 6,
+// // //                     offset: const Offset(0, 3),
+// // //                   ),
+// // //                 ],
+// // //                 border: Border.all(
+// // //                   color: AppColors.mediumGray.withOpacity(0.3),
+// // //                 ),
+// // //               ),
+// // //               child: Column(
+// // //                 mainAxisAlignment: MainAxisAlignment.center,
+// // //                 children: [
+// // //                   AppFonts.textPoppins(
+// // //                     context,
+// // //                     detailsTitle[index],
+// // //                     w * 0.032,
+// // //                     FontWeight.w600,
+// // //                     AppColors.mediumGray,
+// // //                     TextAlign.center,
+// // //                     TextOverflow.visible,
+// // //                   ),
+// // //                   SizedBox(height: w * 0.012),
+// // //                   AppFonts.textPoppins(
+// // //                     context,
+// // //                     detailsValue[index],
+// // //                     w * 0.042,
+// // //                     FontWeight.bold,
+// // //                     AppColors.black,
+// // //                     TextAlign.center,
+// // //                     TextOverflow.visible,
+// // //                   ),
+// // //                 ],
+// // //               ),
+// // //             ),
+// // //           );
+// // //         }),
+// // //       ),
+// // //     ).animate().fade(duration: 700.ms).scale();
+// // //   }
+
+// // //   //──────────────── BUTTONS ────────────────
+// // //   Widget _actionButtons(BuildContext context, double w) {
+// // //     return Row(
+// // //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+// // //       children: [
+// // //         AppButtons.outlined(
+// // //           width: w * 0.43,
+// // //           context: context,
+// // //           text: "Cancel",
+// // //           onClicked: () => CustomBottomSheets().cancelRide(context),
+// // //           backgroundColor: AppColors.lightGray,
+// // //           textColor: AppColors.mediumGray,
+// // //           height: w * 0.14,
+// // //           radius: 10,
+// // //         ),
+// // //         AppButtons.outlined(
+// // //           width: w * 0.43,
+// // //           context: context,
+// // //           text: "Accept",
+// // //           onClicked: () {
+// // //             stepperController.resetSteps();
+// // //             CustomNavigator.push(
+// // //               context,
+// // //               ArrivingClient(),
+// // //               transition: TransitionType.slideLeft,
+// // //             );
+// // //           },
+// // //           backgroundColor: ColorsList.mainButtonColor,
+// // //           textColor: ColorsList.mainButtonTextColor,
+// // //           height: w * 0.14,
+// // //           radius: 10,
+// // //         ),
+// // //       ],
+// // //     );
+// // //   }
+// // // }
+
+// // import 'package:corezap_driver/controllers/controllers.dart';
+// // import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
+// // import 'package:corezap_driver/utilities/app_buttons.dart';
+// // import 'package:corezap_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
+// // import 'package:corezap_driver/utilities/colors.dart';
+// // import 'package:corezap_driver/utilities/colors/colors_list.dart';
+// // import 'package:corezap_driver/utilities/custom_font.dart';
+// // import 'package:corezap_driver/utilities/custom_images.dart';
+// // import 'package:corezap_driver/utilities/navigator.dart';
+// // import 'package:corezap_driver/views/scheduled_pickups/accepted_screen.dart';
+
+// // import 'package:dotted_line/dotted_line.dart';
+// // import 'package:flutter/material.dart';
+// // import 'package:flutter_animate/flutter_animate.dart';
+// // import 'package:get/get.dart';
+// // import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+// // class LiveRide extends StatefulWidget {
+
+// //   const LiveRide({super.key});
+
+// //   @override
+// //   State<LiveRide> createState() => _LiveRideState();
+// // }
+
+// // class _LiveRideState extends State<LiveRide> {
+// //   final StepperController stepperController = Get.find();
+// //   final Controllers cancelRideController = Get.find();
+
+// //   final List<String> detailsTitle = ["Pickup", "Drop"];
+// //   final List<String> detailsValue = ["1.1 Km", "4 Km"];
+
+// //   // Pickup & Drop LatLng
+// //   final LatLng pickupLatLng = const LatLng(17.4065, 78.4772);
+// //   final LatLng dropLatLng = const LatLng(17.4120, 78.4850);
+
+// //   final Set<Marker> _markers = {};
+
+// //   GoogleMapController? _mapController;
+
+// //   @override
+// //   void initState() {
+// //     super.initState();
+
+// //     WidgetsBinding.instance.addPostFrameCallback((_) {
+// //       cancelRideController.cancelRideReasonIndex.value = -1;
+// //     });
+
+// //     _setMarkers();
+// //   }
+
+// //   void _setMarkers() {
+// //     _markers.addAll([
+// //       Marker(
+// //         markerId: const MarkerId("pickup"),
+// //         position: pickupLatLng,
+// //         infoWindow: const InfoWindow(title: "Pickup Location"),
+// //         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+// //       ),
+// //       Marker(
+// //         markerId: const MarkerId("drop"),
+// //         position: dropLatLng,
+// //         infoWindow: const InfoWindow(title: "Drop Location"),
+// //         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+// //       ),
+// //     ]);
+// //   }
+
+// //   void _fitMapToMarkers() async {
+// //     if (_mapController == null) return;
+
+// //     LatLngBounds bounds;
+// //     if (pickupLatLng.latitude > dropLatLng.latitude &&
+// //         pickupLatLng.longitude > dropLatLng.longitude) {
+// //       bounds = LatLngBounds(southwest: dropLatLng, northeast: pickupLatLng);
+// //     } else if (pickupLatLng.longitude > dropLatLng.longitude) {
+// //       bounds = LatLngBounds(
+// //         southwest: LatLng(pickupLatLng.latitude, dropLatLng.longitude),
+// //         northeast: LatLng(dropLatLng.latitude, pickupLatLng.longitude),
+// //       );
+// //     } else if (pickupLatLng.latitude > dropLatLng.latitude) {
+// //       bounds = LatLngBounds(
+// //         southwest: LatLng(dropLatLng.latitude, pickupLatLng.longitude),
+// //         northeast: LatLng(pickupLatLng.latitude, dropLatLng.longitude),
+// //       );
+// //     } else {
+// //       bounds = LatLngBounds(southwest: pickupLatLng, northeast: dropLatLng);
+// //     }
+
+// //     CameraUpdate cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 100);
+// //     _mapController!.animateCamera(cameraUpdate);
+// //   }
+
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     final double w = MediaQuery.of(context).size.width;
+
+// //     return Scaffold(
+// //       backgroundColor: AppColors.white,
+// //       body: SafeArea(
+// //         child: SingleChildScrollView(
+// //           padding: EdgeInsets.all(w * 0.04),
+// //           child: Column(
+// //             children: [
+// //               _dateText(context, w),
+// //               SizedBox(height: w * 0.02),
+// //               _fareCard(context, w),
+// //               SizedBox(height: w * 0.03),
+// //               _mapView(w),
+
+// //               SizedBox(height: w * 0.04),
+// //               _locationInfo(context, w),
+// //               SizedBox(height: w * 0.04),
+// //               _distanceCard(context, w),
+// //               SizedBox(height: w * 0.03),
+// //               _actionButtons(context, w),
+// //             ],
+// //           ),
+// //         ),
+// //       ),
+// //     );
+// //   }
+
+// //   Widget _dateText(BuildContext context, double w) {
+// //     return AppFonts.textPoppins(
+// //       context,
+// //       "30 August, 2025",
+// //       w * 0.04,
+// //       FontWeight.w500,
+// //       const Color(0xFF5F6165),
+// //       TextAlign.center,
+// //       TextOverflow.visible,
+// //     );
+// //   }
+
+// //   Widget _fareCard(BuildContext context, double w) {
+// //     return Container(
+// //       padding: EdgeInsets.symmetric(horizontal: w * 0.04, vertical: w * 0.03),
+// //       decoration: BoxDecoration(
+// //         color: Colors.white,
+// //         borderRadius: BorderRadius.circular(w * 0.035),
+// //         boxShadow: [
+// //           BoxShadow(
+// //             color: Colors.black.withOpacity(0.08),
+// //             blurRadius: 10,
+// //             offset: const Offset(0, 4),
+// //           ),
+// //         ],
+// //         border: Border.all(color: AppColors.mediumGray.withOpacity(0.3)),
+// //       ),
+// //       child: Row(
+// //         children: [
+// //           Image.asset(
+// //             "assets/images/profil.png",
+// //             height: w * 0.12,
+// //             width: w * 0.12,
+// //           ),
+// //           SizedBox(width: w * 0.04),
+// //           Expanded(
+// //             child: AppFonts.textPoppins(
+// //               context,
+// //               "Rohan",
+// //               w * 0.048,
+// //               FontWeight.w600,
+// //               AppColors.black,
+// //               TextAlign.start,
+// //               TextOverflow.ellipsis,
+// //             ),
+// //           ),
+// //           Icon(Icons.currency_rupee, color: AppColors.green, size: w * 0.065),
+// //           AppFonts.textPoppins(
+// //             context,
+// //             "100.0",
+// //             w * 0.055,
+// //             FontWeight.w600,
+// //             AppColors.green,
+// //             TextAlign.center,
+// //             TextOverflow.visible,
+// //           ),
+// //         ],
+// //       ),
+// //     ).animate().fade(duration: 700.ms).scale();
+// //   }
+
+// //   Widget _mapView(double w) {
+// //     return SizedBox(
+// //       height: w * 0.95,
+// //       child: ClipRRect(
+// //         borderRadius: BorderRadius.circular(w * 0.03),
+// //         child: GoogleMap(
+// //           initialCameraPosition: CameraPosition(
+// //             target: pickupLatLng,
+// //             zoom: 14.5,
+// //           ),
+// //           myLocationEnabled: true,
+// //           zoomControlsEnabled: false,
+// //           markers: _markers,
+// //           onMapCreated: (GoogleMapController controller) {
+// //             _mapController = controller;
+// //             _fitMapToMarkers(); // fit camera to both markers
+// //           },
+// //         ),
+// //       ),
+// //     );
+// //   }
+
+// //   Widget _locationInfo(BuildContext context, double w) {
+// //     return Column(
+// //       children: [
+// //         Row(
+// //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+// //           children: [
+// //             Text(
+// //               "Location",
+// //               style: TextStyle(fontSize: w * 0.04, fontWeight: FontWeight.w500),
+// //             ),
+// //             // Text("Time 10 min", style: TextStyle(fontWeight: FontWeight.w500)),
+// //             Text.rich(
+// //               TextSpan(
+// //                 text: "Time ",
+// //                 style: TextStyle(
+// //                   fontSize: w * 0.029,
+// //                   fontWeight: FontWeight.w500,
+// //                   color: const Color(0xFF7C7C8D),
+// //                 ),
+// //                 children: [
+// //                   TextSpan(
+// //                     text: "10 min",
+// //                     style: TextStyle(
+// //                       fontSize: w * 0.04,
+// //                       fontWeight: FontWeight.w600,
+// //                       color: AppColors.black,
+// //                     ),
+// //                   ),
+// //                 ],
+// //               ),
+// //             ),
+// //           ],
+// //         ),
+// //         SizedBox(height: 10),
+// //         Row(
+// //           crossAxisAlignment: CrossAxisAlignment.start,
+// //           children: [
+// //             Column(
+// //               children: [
+// //                 CustomImages.images(
+// //                   "assets/icons/greenDot.png",
+// //                   w * 0.05,
+// //                   w * 0.05,
+// //                 ),
+// //                 SizedBox(
+// //                   height: w * 0.1,
+// //                   child: DottedLine(
+// //                     direction: Axis.vertical,
+// //                     dashLength: 4,
+// //                     dashColor: AppColors.green,
+// //                   ),
+// //                 ),
+// //                 CustomImages.images(
+// //                   "assets/icons/redDot.png",
+// //                   w * 0.05,
+// //                   w * 0.05,
+// //                 ),
+// //               ],
+// //             ),
+// //             SizedBox(width: w * 0.03),
+// //             Expanded(
+// //               child: Column(
+// //                 crossAxisAlignment: CrossAxisAlignment.start,
+// //                 children: [
+// //                   _locationText(
+// //                     context,
+// //                     "Pickup",
+// //                     "Manikonda Jagir, Hyderabad, Telangana",
+// //                   ),
+// //                   SizedBox(height: w * 0.05),
+// //                   _locationText(
+// //                     context,
+// //                     "Drop",
+// //                     "Manikonda Jagir, Hyderabad, Telangana",
+// //                   ),
+// //                 ],
+// //               ),
+// //             ),
+// //           ],
+// //         ),
+// //       ],
+// //     );
+// //   }
+
+// //   Widget _locationText(BuildContext context, String title, String address) {
+// //     final double w = MediaQuery.of(context).size.width;
+// //     return Column(
+// //       crossAxisAlignment: CrossAxisAlignment.start,
+// //       children: [
+// //         AppFonts.textPoppins(
+// //           context,
+// //           title,
+// //           w * 0.035,
+// //           FontWeight.w500,
+// //           AppColors.mediumGray,
+// //           TextAlign.left,
+// //           TextOverflow.visible,
+// //         ),
+// //         AppFonts.textPoppins(
+// //           context,
+// //           address,
+// //           w * 0.039,
+// //           FontWeight.w500,
+// //           AppColors.black,
+// //           TextAlign.left,
+// //           TextOverflow.ellipsis,
+// //         ),
+// //       ],
+// //     );
+// //   }
+
+// //   Widget _distanceCard(BuildContext context, double w) {
+// //     return SizedBox(
+// //       height: w * 0.18,
+// //       child: Row(
+// //         children: List.generate(detailsTitle.length, (index) {
+// //           return Expanded(
+// //             child: Container(
+// //               margin: EdgeInsets.symmetric(horizontal: w * 0.015),
+// //               padding: EdgeInsets.symmetric(
+// //                 vertical: w * 0.02,
+// //                 horizontal: w * 0.02,
+// //               ),
+// //               decoration: BoxDecoration(
+// //                 color: Colors.white,
+// //                 borderRadius: BorderRadius.circular(w * 0.025),
+// //                 boxShadow: [
+// //                   BoxShadow(
+// //                     color: Colors.black.withOpacity(0.08),
+// //                     blurRadius: 6,
+// //                     offset: const Offset(0, 3),
+// //                   ),
+// //                 ],
+// //                 border: Border.all(
+// //                   color: AppColors.mediumGray.withOpacity(0.3),
+// //                 ),
+// //               ),
+// //               child: Column(
+// //                 mainAxisAlignment: MainAxisAlignment.center,
+// //                 children: [
+// //                   AppFonts.textPoppins(
+// //                     context,
+// //                     detailsTitle[index],
+// //                     w * 0.037,
+// //                     FontWeight.w600,
+// //                     AppColors.mediumGray,
+// //                     TextAlign.center,
+// //                     TextOverflow.visible,
+// //                   ),
+
+// //                   AppFonts.textPoppins(
+// //                     context,
+// //                     detailsValue[index],
+// //                     w * 0.042,
+// //                     FontWeight.bold,
+// //                     AppColors.black,
+// //                     TextAlign.center,
+// //                     TextOverflow.visible,
+// //                   ),
+// //                 ],
+// //               ),
+// //             ),
+// //           );
+// //         }),
+// //       ),
+// //     ).animate().fade(duration: 700.ms).scale();
+// //   }
+
+// //   Widget _actionButtons(BuildContext context, double w) {
+// //     return Row(
+// //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+// //       children: [
+// //         AppButtons.outlined(
+// //           width: w * 0.43,
+// //           context: context,
+// //           text: "Cancel",
+// //           onClicked: () => CustomBottomSheets().cancelRide(context),
+// //           backgroundColor: AppColors.lightGray,
+// //           textColor: AppColors.mediumGray,
+// //           height: w * 0.14,
+// //           radius: 10,
+// //         ),
+// //         AppButtons.outlined(
+// //           width: w * 0.43,
+// //           context: context,
+// //           text: "Accept",
+// //           onClicked: () {
+// //             stepperController.resetSteps();
+// //             CustomNavigator.push(
+// //               context,
+// //               ArrivingClient(),
+// //               transition: TransitionType.slideLeft,
+// //             );
+// //           },
+// //           backgroundColor: ColorsList.mainButtonColor,
+// //           textColor: ColorsList.mainButtonTextColor,
+// //           height: w * 0.14,
+// //           radius: 10,
+// //         ),
+// //       ],
+// //     );
+// //   }
+// // }
+
+
+
+// import 'package:corezap_driver/controllers/controllers.dart';
+// import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
+// import 'package:corezap_driver/utilities/app_buttons.dart';
+// import 'package:corezap_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
+// import 'package:corezap_driver/utilities/colors.dart';
+// import 'package:corezap_driver/utilities/colors/colors_list.dart';
+// import 'package:corezap_driver/utilities/custom_font.dart';
+// import 'package:corezap_driver/utilities/custom_images.dart';
+// import 'package:corezap_driver/utilities/navigator.dart';
+// import 'package:corezap_driver/views/scheduled_pickups/accepted_screen.dart';
+
+// import 'package:dotted_line/dotted_line.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_animate/flutter_animate.dart';
+// import 'package:get/get.dart';
+// import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+// import 'dart:convert';
+// import 'package:http/http.dart' as http;
+// import 'package:shared_preferences/shared_preferences.dart';
+
+// class LiveRide extends StatefulWidget {
+//   final Map<String, dynamic> rideData;
+  
+//   const LiveRide({super.key, required this.rideData});
+
+//   @override
+//   State<LiveRide> createState() => _LiveRideState();
+// }
+
+// class _LiveRideState extends State<LiveRide> {
+//   final StepperController stepperController = Get.find();
+//   final Controllers cancelRideController = Get.find();
+
+//   // Pickup & Drop LatLng
+//   LatLng? pickupLatLng;
+//   LatLng? dropLatLng;
+
+//   final Set<Marker> _markers = {};
+
+//   GoogleMapController? _mapController;
+
+//   @override
+//   void initState() {
+//     super.initState();
+
+//     // Print received data for debugging
+//     print("================ LIVE RIDE DATA ================");
+//     print("Full ride data received in LiveRide: ${widget.rideData}");
+    
+//     // Extract data from rideData
+//     _extractRideData();
+
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       cancelRideController.cancelRideReasonIndex.value = -1;
+//     });
+
+//     if (pickupLatLng != null && dropLatLng != null) {
+//       _setMarkers();
+//     }
+//   }
+
+//   void _extractRideData() {
+//     try {
+//       // Extract pickup coordinates
+//       if (widget.rideData['pickup'] != null) {
+//         final pickup = widget.rideData['pickup'];
+//         pickupLatLng = LatLng(
+//           pickup['latitude']?.toDouble() ?? 0.0,
+//           pickup['longitude']?.toDouble() ?? 0.0,
+//         );
+//       } else if (widget.rideData['startLocation'] != null) {
+//         final startLocation = widget.rideData['startLocation'];
+//         if (startLocation['coordinates'] != null &&
+//             startLocation['coordinates'].length >= 2) {
+//           pickupLatLng = LatLng(
+//             startLocation['coordinates'][1]?.toDouble() ?? 0.0,
+//             startLocation['coordinates'][0]?.toDouble() ?? 0.0,
+//           );
+//         }
+//       }
+
+//       // Extract drop coordinates
+//       if (widget.rideData['destination'] != null) {
+//         final destination = widget.rideData['destination'];
+//         dropLatLng = LatLng(
+//           destination['latitude']?.toDouble() ?? 0.0,
+//           destination['longitude']?.toDouble() ?? 0.0,
+//         );
+//       } else if (widget.rideData['endLocation'] != null) {
+//         final endLocation = widget.rideData['endLocation'];
+//         if (endLocation['coordinates'] != null &&
+//             endLocation['coordinates'].length >= 2) {
+//           dropLatLng = LatLng(
+//             endLocation['coordinates'][1]?.toDouble() ?? 0.0,
+//             endLocation['coordinates'][0]?.toDouble() ?? 0.0,
+//           );
+//         }
+//       } else if (widget.rideData['dropoff'] != null) {
+//         final dropoff = widget.rideData['dropoff'];
+//         dropLatLng = LatLng(
+//           dropoff['latitude']?.toDouble() ?? 0.0,
+//           dropoff['longitude']?.toDouble() ?? 0.0,
+//         );
+//       }
+
+//       print("Pickup LatLng: $pickupLatLng");
+//       print("Drop LatLng: $dropLatLng");
+//       print("==============================================");
+//     } catch (e) {
+//       print("Error extracting ride data: $e");
+//       // Set default values if extraction fails
+//       pickupLatLng = const LatLng(17.4065, 78.4772);
+//       dropLatLng = const LatLng(17.4120, 78.4850);
+//     }
+//   }
+
+//   void _setMarkers() {
+//     if (pickupLatLng != null) {
+//       _markers.add(Marker(
+//         markerId: const MarkerId("pickup"),
+//         position: pickupLatLng!,
+//         infoWindow: const InfoWindow(title: "Pickup Location"),
+//         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+//       ));
+//     }
+
+//     if (dropLatLng != null) {
+//       _markers.add(Marker(
+//         markerId: const MarkerId("drop"),
+//         position: dropLatLng!,
+//         infoWindow: const InfoWindow(title: "Drop Location"),
+//         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+//       ));
+//     }
+//   }
+
+//   void _fitMapToMarkers() async {
+//     if (_mapController == null || pickupLatLng == null || dropLatLng == null) {
+//       return;
+//     }
+
+//     LatLngBounds bounds;
+//     if (pickupLatLng!.latitude > dropLatLng!.latitude &&
+//         pickupLatLng!.longitude > dropLatLng!.longitude) {
+//       bounds = LatLngBounds(southwest: dropLatLng!, northeast: pickupLatLng!);
+//     } else if (pickupLatLng!.longitude > dropLatLng!.longitude) {
+//       bounds = LatLngBounds(
+//         southwest: LatLng(pickupLatLng!.latitude, dropLatLng!.longitude),
+//         northeast: LatLng(dropLatLng!.latitude, pickupLatLng!.longitude),
+//       );
+//     } else if (pickupLatLng!.latitude > dropLatLng!.latitude) {
+//       bounds = LatLngBounds(
+//         southwest: LatLng(dropLatLng!.latitude, pickupLatLng!.longitude),
+//         northeast: LatLng(pickupLatLng!.latitude, dropLatLng!.longitude),
+//       );
+//     } else {
+//       bounds = LatLngBounds(southwest: pickupLatLng!, northeast: dropLatLng!);
+//     }
+
+//     CameraUpdate cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 100);
+//     _mapController!.animateCamera(cameraUpdate);
+//   }
+
+//   // Helper method to format timestamp
+//   String _formatDateFromTimestamp(int timestamp) {
+//     try {
+//       final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
+//       return "${date.day} ${_getMonthName(date.month)}, ${date.year}";
+//     } catch (e) {
+//       return "30 August, 2025"; // Default fallback
+//     }
+//   }
+
+//   String _getMonthName(int month) {
+//     const months = [
+//       'January', 'February', 'March', 'April', 'May', 'June',
+//       'July', 'August', 'September', 'October', 'November', 'December'
+//     ];
+//     return months[month - 1];
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final double w = MediaQuery.of(context).size.width;
+
+//     // Extract ride information with null safety
+//     final riderName = widget.rideData['riderName']?.toString() ?? 'Rohan';
+//     final riderPhone = widget.rideData['riderNumber']?.toString() ?? 'N/A';
+//     final totalFare = widget.rideData['totalFare']?.toString() ?? '100.0';
+//     final distance = widget.rideData['distance']?.toString() ?? '0';
+//     final rideType = widget.rideData['rideType']?.toString() ?? 'immediate';
+    
+//     // Extract addresses
+//     final pickupAddress = widget.rideData['startLocation']?['address']?.toString() ?? 
+//                          'Manikonda Jagir, Hyderabad, Telangana';
+//     final dropAddress = widget.rideData['endLocation']?['address']?.toString() ?? 
+//                        'Manikonda Jagir, Hyderabad, Telangana';
+    
+//     // Format date from timestamp
+//     final timestamp = widget.rideData['timestamp'];
+//     final formattedDate = timestamp != null 
+//         ? _formatDateFromTimestamp(timestamp is String ? int.parse(timestamp) : timestamp)
+//         : "30 August, 2025";
+
+//     return Scaffold(
+//       backgroundColor: AppColors.white,
+//       body: SafeArea(
+//         child: SingleChildScrollView(
+//           padding: EdgeInsets.all(w * 0.04),
+//           child: Column(
+//             children: [
+//               _dateText(context, w, formattedDate),
+//               SizedBox(height: w * 0.02),
+//               _fareCard(context, w, riderName, totalFare, riderPhone),
+//               SizedBox(height: w * 0.03),
+//               _mapView(w),
+//               SizedBox(height: w * 0.04),
+//               _locationInfo(context, w, pickupAddress, dropAddress),
+//               SizedBox(height: w * 0.04),
+//               _distanceCard(context, w, distance),
+//               SizedBox(height: w * 0.03),
+//               _actionButtons(context, w, widget.rideData),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _dateText(BuildContext context, double w, String date) {
+//     return AppFonts.textPoppins(
+//       context,
+//       date,
+//       w * 0.04,
+//       FontWeight.w500,
+//       const Color(0xFF5F6165),
+//       TextAlign.center,
+//       TextOverflow.visible,
+//     );
+//   }
+
+//   Widget _fareCard(BuildContext context, double w, String riderName, String totalFare, String riderPhone) {
+//     return Container(
+//       padding: EdgeInsets.symmetric(horizontal: w * 0.04, vertical: w * 0.03),
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         borderRadius: BorderRadius.circular(w * 0.035),
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.black.withOpacity(0.08),
+//             blurRadius: 10,
+//             offset: const Offset(0, 4),
+//           ),
+//         ],
+//         border: Border.all(color: AppColors.mediumGray.withOpacity(0.3)),
+//       ),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Row(
+//             children: [
+//               Image.asset(
+//                 "assets/images/profil.png",
+//                 height: w * 0.12,
+//                 width: w * 0.12,
+//               ),
+//               SizedBox(width: w * 0.04),
+//               Expanded(
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     AppFonts.textPoppins(
+//                       context,
+//                       riderName,
+//                       w * 0.048,
+//                       FontWeight.w600,
+//                       AppColors.black,
+//                       TextAlign.start,
+//                       TextOverflow.ellipsis,
+//                     ),
+//                     SizedBox(height: w * 0.01),
+//                     AppFonts.textPoppins(
+//                       context,
+//                       riderPhone,
+//                       w * 0.035,
+//                       FontWeight.w500,
+//                       AppColors.mediumGray,
+//                       TextAlign.start,
+//                       TextOverflow.ellipsis,
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//               Column(
+//                 crossAxisAlignment: CrossAxisAlignment.end,
+//                 children: [
+//                   Row(
+//                     children: [
+//                       Icon(Icons.currency_rupee, color: AppColors.green, size: w * 0.065),
+//                       AppFonts.textPoppins(
+//                         context,
+//                         totalFare,
+//                         w * 0.055,
+//                         FontWeight.w600,
+//                         AppColors.green,
+//                         TextAlign.center,
+//                         TextOverflow.visible,
+//                       ),
+//                     ],
+//                   ),
+//                   SizedBox(height: w * 0.01),
+//                   Container(
+//                     padding: EdgeInsets.symmetric(horizontal: w * 0.03, vertical: w * 0.01),
+//                     decoration: BoxDecoration(
+//                       color: AppColors.green.withOpacity(0.1),
+//                       borderRadius: BorderRadius.circular(w * 0.02),
+//                     ),
+//                     child: AppFonts.textPoppins(
+//                       context,
+//                       widget.rideData['rideType']?.toString().toUpperCase() ?? 'IMMEDIATE',
+//                       w * 0.03,
+//                       FontWeight.w600,
+//                       AppColors.green,
+//                       TextAlign.center,
+//                       TextOverflow.visible,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ],
+//           ),
+//           SizedBox(height: w * 0.02),
+//           // Additional ride info
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             children: [
+//               _rideInfoItem(context, w, "Ride ID", widget.rideData['rideId']?.toString() ?? 'N/A'),
+//               _rideInfoItem(context, w, "Order ID", widget.rideData['orderId']?.toString() ?? 'N/A'),
+//             ],
+//           ),
+//         ],
+//       ),
+//     ).animate().fade(duration: 700.ms).scale();
+//   }
+
+//   Widget _rideInfoItem(BuildContext context, double w, String title, String value) {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         AppFonts.textPoppins(
+//           context,
+//           title,
+//           w * 0.03,
+//           FontWeight.w500,
+//           AppColors.mediumGray,
+//           TextAlign.start,
+//           TextOverflow.ellipsis,
+//         ),
+//         SizedBox(height: w * 0.005),
+//         AppFonts.textPoppins(
+//           context,
+//           value,
+//           w * 0.035,
+//           FontWeight.w600,
+//           AppColors.black,
+//           TextAlign.start,
+//           TextOverflow.ellipsis,
+//         ),
+//       ],
+//     );
+//   }
+
+//   Widget _mapView(double w) {
+//     final initialPosition = pickupLatLng ?? const LatLng(17.4065, 78.4772);
+    
+//     return SizedBox(
+//       height: w * 0.95,
+//       child: ClipRRect(
+//         borderRadius: BorderRadius.circular(w * 0.03),
+//         child: GoogleMap(
+//           initialCameraPosition: CameraPosition(
+//             target: initialPosition,
+//             zoom: 14.5,
+//           ),
+//           myLocationEnabled: true,
+//           zoomControlsEnabled: false,
+//           markers: _markers,
+//           onMapCreated: (GoogleMapController controller) {
+//             _mapController = controller;
+//             if (pickupLatLng != null && dropLatLng != null) {
+//               _fitMapToMarkers(); // fit camera to both markers
+//             }
+//           },
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _locationInfo(BuildContext context, double w, String pickupAddress, String dropAddress) {
+//     return Column(
+//       children: [
+//         Row(
+//           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//           children: [
+//             Text(
+//               "Location",
+//               style: TextStyle(fontSize: w * 0.04, fontWeight: FontWeight.w500),
+//             ),
+//             Text.rich(
+//               TextSpan(
+//                 text: "Time ",
+//                 style: TextStyle(
+//                   fontSize: w * 0.029,
+//                   fontWeight: FontWeight.w500,
+//                   color: const Color(0xFF7C7C8D),
+//                 ),
+//                 children: [
+//                   TextSpan(
+//                     text: "10 min",
+//                     style: TextStyle(
+//                       fontSize: w * 0.04,
+//                       fontWeight: FontWeight.w600,
+//                       color: AppColors.black,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ],
+//         ),
+//         SizedBox(height: 10),
+//         Row(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Column(
+//               children: [
+//                 CustomImages.images(
+//                   "assets/icons/greenDot.png",
+//                   w * 0.05,
+//                   w * 0.05,
+//                 ),
+//                 SizedBox(
+//                   height: w * 0.1,
+//                   child: DottedLine(
+//                     direction: Axis.vertical,
+//                     dashLength: 4,
+//                     dashColor: AppColors.green,
+//                   ),
+//                 ),
+//                 CustomImages.images(
+//                   "assets/icons/redDot.png",
+//                   w * 0.05,
+//                   w * 0.05,
+//                 ),
+//               ],
+//             ),
+//             SizedBox(width: w * 0.03),
+//             Expanded(
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   _locationText(
+//                     context,
+//                     "Pickup",
+//                     pickupAddress,
+//                   ),
+//                   SizedBox(height: w * 0.05),
+//                   _locationText(
+//                     context,
+//                     "Drop",
+//                     dropAddress,
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ],
+//         ),
+//       ],
+//     );
+//   }
+
+//   Widget _locationText(BuildContext context, String title, String address) {
+//     final double w = MediaQuery.of(context).size.width;
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         AppFonts.textPoppins(
+//           context,
+//           title,
+//           w * 0.035,
+//           FontWeight.w500,
+//           AppColors.mediumGray,
+//           TextAlign.left,
+//           TextOverflow.visible,
+//         ),
+//         AppFonts.textPoppins(
+//           context,
+//           address,
+//           w * 0.039,
+//           FontWeight.w500,
+//           AppColors.black,
+//           TextAlign.left,
+//           TextOverflow.ellipsis,
+//           maxLines: 2,
+//         ),
+//       ],
+//     );
+//   }
+
+//   Widget _distanceCard(BuildContext context, double w, String distance) {
+//     // Calculate pickup and drop distances (you might want to calculate actual distances)
+//     final pickupDistance = "${widget.rideData['driverDistance']?.toString() ?? '1.1'} Km";
+//     final dropDistance = "$distance Km";
+
+//     return SizedBox(
+//       height: w * 0.18,
+//       child: Row(
+//         children: [
+//           _distanceItem(context, w, "Pickup", pickupDistance),
+//           SizedBox(width: w * 0.03),
+//           _distanceItem(context, w, "Drop", dropDistance),
+//           SizedBox(width: w * 0.03),
+//           _distanceItem(context, w, "Fare", "₹${widget.rideData['totalFare'] ?? '100'}"),
+//         ],
+//       ),
+//     ).animate().fade(duration: 700.ms).scale();
+//   }
+
+//   Widget _distanceItem(BuildContext context, double w, String title, String value) {
+//     return Expanded(
+//       child: Container(
+//         padding: EdgeInsets.symmetric(
+//           vertical: w * 0.02,
+//           horizontal: w * 0.02,
+//         ),
+//         decoration: BoxDecoration(
+//           color: Colors.white,
+//           borderRadius: BorderRadius.circular(w * 0.025),
+//           boxShadow: [
+//             BoxShadow(
+//               color: Colors.black.withOpacity(0.08),
+//               blurRadius: 6,
+//               offset: const Offset(0, 3),
+//             ),
+//           ],
+//           border: Border.all(
+//             color: AppColors.mediumGray.withOpacity(0.3),
+//           ),
+//         ),
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             AppFonts.textPoppins(
+//               context,
+//               title,
+//               w * 0.037,
+//               FontWeight.w600,
+//               AppColors.mediumGray,
+//               TextAlign.center,
+//               TextOverflow.visible,
+//             ),
+//             AppFonts.textPoppins(
+//               context,
+//               value,
+//               w * 0.042,
+//               FontWeight.bold,
+//               AppColors.black,
+//               TextAlign.center,
+//               TextOverflow.visible,
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _actionButtons(BuildContext context, double w, Map<String, dynamic> rideData) {
+//     return Row(
+//       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//       children: [
+//         AppButtons.outlined(
+//           width: w * 0.43,
+//           context: context,
+//           text: "Cancel",
+//           onClicked: () => CustomBottomSheets().cancelRide(context),
+//           backgroundColor: AppColors.lightGray,
+//           textColor: AppColors.mediumGray,
+//           height: w * 0.14,
+//           radius: 10,
+//         ),
+
+//         AppButtons.outlined(
+//   width: w * 0.43,
+//   context: context,
+//   text: "Accept",
+//   onClicked: () async {
+//     final orderId = rideData['rideId'];
+
+//     print("🚗 Accepting ride with ID: $orderId");
+
+//     stepperController.resetSteps();
+
+//    print("myyyyy_orderid_iss>>>>> ${orderId}");
+
+//     await OrderService.acceptOrder(
+//       orderId: orderId,
+//     );
+
+//     // Navigate after success if needed
+//     // CustomNavigator.push(
+//     //   context,
+//     //   ArrivingClient(),
+//     //   transition: TransitionType.slideLeft,
+//     // );
+//   },
+//   backgroundColor: ColorsList.mainButtonColor,
+//   textColor: ColorsList.mainButtonTextColor,
+//   height: w * 0.14,
+//   radius: 10,
+// ),
+
+//         // AppButtons.outlined(
+//         //   width: w * 0.43,
+//         //   context: context,
+//         //   text: "Accept",
+//         //   onClicked: () {
+//         //     print("Accepting ride with ID: ${rideData['rideId']}");
+//         //     stepperController.resetSteps();
+
+
+
+//         //     // CustomNavigator.push(
+//         //     //   context,
+//         //     //   // AcceptedScreen(rideData: rideData),
+//         //     //   ArrivingClient(),
+//         //     //   transition: TransitionType.slideLeft,
+//         //     // );
+//         //   },
+//         //   backgroundColor: ColorsList.mainButtonColor,
+//         //   textColor: ColorsList.mainButtonTextColor,
+//         //   height: w * 0.14,
+//         //   radius: 10,
+//         // ),
+//       ],
+//     );
+//   }
+// }
+
+
+
+
+// class OrderService {
+//   static Future<void> acceptOrder({
+//     required String orderId,
+//   }) async {
+
+//       final prefs = await SharedPreferences.getInstance();
+//     final String? token = prefs.getString("auth_token");
+
+  
+//   print("my___token_here ${token}");
+//     print("myyyyy_orderid_iss ${orderId}");
+//     // final String token =
+//     //     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NjhhYjU2NmJmMjE4MmM2MzQzODE0MyIsInJvbGUiOiJEcml2ZXIiLCJpYXQiOjE3Njg5MDQ1NjQsImV4cCI6MTc3MTQ5NjU2NH0.bmq23toClwmbhocTc4ERX5qX-R5x9ogiSCC2N4siM-0";
+
+//     final Uri url = Uri.parse(
+//       "https://corezap.smarttechbros.com/api/v1/order/update/$orderId",
+//     );
+
+//     print("🔵 ACCEPT ORDER API");
+//     print("URL : $url");
+
+//     try {
+//       final response = await http.patch(
+//         url,
+//         headers: {
+//           "Authorization": "Bearer $token",
+//           "Content-Type": "application/json",
+//         },
+//         body: jsonEncode({
+//           "orderStatus": "Accepted",
+//         }),
+//       );
+
+//       print("✅ Status Code : ${response.statusCode}");
+//       print("📦 Raw Response : ${response.body}");
+
+//       final decoded = jsonDecode(response.body);
+//       print("🎯 Decoded Response : $decoded");
+//     } catch (e) {
+//       print("❌ Error accepting order : $e");
+//     }
+//   }
+
+
+
+//   static Future<void> declineOrder({
+//     required String orderId,
+//   }) async {
+
+//       final prefs = await SharedPreferences.getInstance();
+//     final String? token = prefs.getString("auth_token");
+
+  
+//   print("my___token_here ${token}");
+//     print("myyyyy_orderid_iss ${orderId}");
+//     // final String token =
+//     //     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NjhhYjU2NmJmMjE4MmM2MzQzODE0MyIsInJvbGUiOiJEcml2ZXIiLCJpYXQiOjE3Njg5MDQ1NjQsImV4cCI6MTc3MTQ5NjU2NH0.bmq23toClwmbhocTc4ERX5qX-R5x9ogiSCC2N4siM-0";
+
+//     final Uri url = Uri.parse(
+//       "https://corezap.smarttechbros.com/api/v1/order/decline//$orderId",
+//     );
+
+//     print("🔵 ACCEPT ORDER API");
+//     print("URL : $url");
+
+//     try {
+//       final response = await http.patch(
+//         url,
+//         headers: {
+//           "Authorization": "Bearer $token",
+//           "Content-Type": "application/json",
+//         },
+//         body: jsonEncode({
+//           "orderStatus": "Accepted",
+//         }),
+//       );
+
+//       print("✅ Status Code : ${response.statusCode}");
+//       print("📦 Raw Response : ${response.body}");
+
+//       final decoded = jsonDecode(response.body);
+//       print("🎯 Decoded Response : $decoded");
+//     } catch (e) {
+//       print("❌ Error accepting order : $e");
+//     }
+//   }
+
+  
+// }
+

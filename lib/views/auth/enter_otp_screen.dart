@@ -611,7 +611,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
         print("✅ Profile is completed, navigating to main screen");
         CustomNavigator.push(
           context,
-          const BottomnavmainScreen(),
+           BottomnavmainScreen(),
           transition: TransitionType.fade,
         );
       } else {

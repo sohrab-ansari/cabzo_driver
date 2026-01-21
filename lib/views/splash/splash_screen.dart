@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (token != null) {
       CustomNavigator.removeUntil(
         context,
-        const BottomnavmainScreen(),
+         BottomnavmainScreen(),
         transition: TransitionType.fade,
       );
     } else {

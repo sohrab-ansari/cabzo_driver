@@ -362,7 +362,7 @@ class _ReceivePaymentModesState extends State<ReceivePaymentModes> {
 
   CustomNavigator.removeUntil(
         context,
-        const BottomnavmainScreen(),
+         BottomnavmainScreen(),
         transition: TransitionType.fade,
       );
 

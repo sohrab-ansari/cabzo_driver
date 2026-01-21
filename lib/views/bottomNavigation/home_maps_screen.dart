@@ -10,7 +10,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:corezap_driver/views/home_related/live_ride.dart';
 
 class HomeMapsScreen extends StatefulWidget {
-  const HomeMapsScreen({super.key});
+  Map<String, dynamic> rideData;
+   HomeMapsScreen({super.key, required this.rideData});
 
   @override
   State<HomeMapsScreen> createState() => _HomeMapsScreenState();
@@ -26,20 +27,17 @@ class _HomeMapsScreenState extends State<HomeMapsScreen> {
     ///
     ///**** this need to modify */
     //this will navigate to live ride screen after 2 seconds when home map screen is loaded for demo purpose
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(seconds: 2), () {
-        // fake user live ride after 2 seconds
-        if (!mounted) return;
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => const LiveRide()));
-      });
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   Future.delayed(const Duration(seconds: 2), () {
+    //     // fake user live ride after 2 seconds
+    //     if (!mounted) return;
+    //     Navigator.of(
+    //       context,
+    //     ).push(MaterialPageRoute(builder: (_) => const LiveRide()));
+    //   });
+    // });
   }
 
-  ///
-  ///
-  ///
 
   String _selectedTab = "Driver"; // Tracks selected tab
 
@@ -224,7 +222,7 @@ class _HomeMapsScreenState extends State<HomeMapsScreen> {
           height: 48,
           child: ElevatedButton(
             onPressed: () {
-              Get.to(() => const BottomnavmainScreen());
+              Get.to(() =>  BottomnavmainScreen());
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
