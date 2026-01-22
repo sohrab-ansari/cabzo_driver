@@ -1,18 +1,34 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- ===== ALL PERMISSIONS MUST BE HERE (under <manifest>) ===== -->
     <!-- Internet permission -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+    
+    <!-- For Foreground Service (required for continuous location updates) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    
+    <!-- Post notifications permission for Android 13+ -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- For loading images/media -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    
+    <!-- Keep screen on permission (optional for driver app) -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    
+    <!-- Optional: For network state (if you check connectivity) -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
         android:label="NZCU Driver"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true"> <!-- Add this for development/testing -->
 
         <activity
             android:name=".MainActivity"
@@ -43,6 +59,23 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2"/>
+            
+        <!-- Geolocator background service for Android 10+ -->
+        <service
+            android:name="com.baseflow.geolocator.location.BackgroundLocationService"
+            android:enabled="true"
+            android:exported="false" />
+            
+        <!-- Foreground Service for continuous location updates -->
+        <service
+            android:name="com.baseflow.geolocator.location.ForegroundNotificationService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+            
+        <!-- Socket.IO connection policies (optional but recommended) -->
+        
+            
     </application>
 
     <queries>
