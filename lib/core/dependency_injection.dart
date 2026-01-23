@@ -1,3 +1,5 @@
+import 'package:corezap_driver/controllers/home_controllers/cash_controller.dart';
+import 'package:corezap_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:corezap_driver/controllers/profile_controllers/bank_account_add_controller.dart';
 import 'package:corezap_driver/controllers/profile_controllers/review_and_rating_controller.dart';
 import 'package:corezap_driver/controllers/profile_controllers/terms_and_policy_controller.dart';
@@ -20,5 +22,10 @@ class DependencyInjection {
     Get.put(BankAccountAddController(), permanent: true);
     Get.put(ReviewAndRatingController(), permanent: true);
     Get.put(TermsAndPolicyController(), permanent: true);
+     Get.put(OrderUpdateController(), permanent: true);
+
+Get.put(CashController(), permanent: true);
+     
+    
   }
 }

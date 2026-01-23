@@ -1,3 +1,4 @@
+import 'package:corezap_driver/controllers/profile_controllers/bank_account_add_controller.dart';
 import 'package:corezap_driver/utilities/app_buttons.dart';
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/colors/colors_list.dart';
@@ -7,6 +8,8 @@ import 'package:corezap_driver/utilities/custom_text.dart';
 import 'package:corezap_driver/utilities/form_field.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
 
 class AddUpi extends StatefulWidget {
   const AddUpi({super.key});
@@ -16,7 +19,14 @@ class AddUpi extends StatefulWidget {
 }
 
 class _AddUpiState extends State<AddUpi> {
+
+
+      final BankAccountAddController bankAccountAddController = Get.find<BankAccountAddController>();
+
+
   TextEditingController textEditingController = TextEditingController();
+
+
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;

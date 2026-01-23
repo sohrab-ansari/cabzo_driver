@@ -1,6 +1,7 @@
 
 
 
+import 'package:corezap_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
 import 'package:corezap_driver/views/home_related/live_ride.dart';
@@ -21,6 +22,9 @@ class ArrivedOtpScreen extends StatefulWidget {
 class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
   String enteredOtp = "";
   final StepperController stepperController = Get.find<StepperController>();
+
+
+  final OrderUpdateController orderUpdateController = Get.find<OrderUpdateController>();
 
   @override
   void initState() {
@@ -328,6 +332,8 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
                   }
                   
                   stepperController.nextStep();
+
+
                   await OrderService.VerifyOtpOrder(orderId: "",rideOtpEnter: enteredOtp);
                   Navigator.pop(context);
                   print("OTP Verified: $enteredOtp");

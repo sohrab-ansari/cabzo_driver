@@ -510,6 +510,9 @@ class DriverSocketService {
 
     // RIDE REQUEST EVENTS
     _socket!.on('ride:newRide', (data) {
+
+
+      print("howwwwww_manyyyyyyyyyyyyyyyyyyyy");
       final rideData = _mapRideData(data);
       _log('🚕 NEW RIDE REQUEST RECEIVED:', rideData);
       _notifyListeners('ride:newRequest', rideData);
