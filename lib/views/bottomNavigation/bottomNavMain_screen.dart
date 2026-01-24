@@ -38,7 +38,7 @@ class _BottomnavmainScreenState extends State<BottomnavmainScreen> {
 
     // Widget options for each tab
     List<Widget> _widgetOptions = <Widget>[
-      widget.startWithMaps ? HomeMapsScreen(rideData: widget.rideData,) : HomeScreen(),
+      widget.startWithMaps ? HomeMapsScreen() : HomeScreen(),
       RidehistoryScreen(),
       Earnings(),
       ProfileScreen(),

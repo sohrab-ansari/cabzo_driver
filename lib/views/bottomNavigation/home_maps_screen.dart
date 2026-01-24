@@ -10,8 +10,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:corezap_driver/views/home_related/live_ride.dart';
 
 class HomeMapsScreen extends StatefulWidget {
-  Map<String, dynamic> rideData;
-   HomeMapsScreen({super.key, required this.rideData});
+
+   HomeMapsScreen({super.key, });
 
   @override
   State<HomeMapsScreen> createState() => _HomeMapsScreenState();
@@ -48,8 +48,11 @@ class _HomeMapsScreenState extends State<HomeMapsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
+    return 
+    
+    Scaffold(
+      body: 
+      SafeArea(
         child: Stack(
           children: [
             /// 1️⃣ Google Map (BOTTOM)
@@ -133,6 +136,8 @@ class _HomeMapsScreenState extends State<HomeMapsScreen> {
       /// Bottom Navigation
       // bottomNavigationBar: BottomnavmainScreen(),
     );
+ 
+ 
   }
 
   /// 🧱 Bottom Offline UI

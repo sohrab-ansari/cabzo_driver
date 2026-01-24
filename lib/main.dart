@@ -1,5 +1,6 @@
 import 'package:corezap_driver/core/dependency_injection.dart';
 import 'package:corezap_driver/utilities/colors.dart';
+import 'package:corezap_driver/views/bottomNavigation/home_maps_screen.dart';
 
 import 'package:corezap_driver/views/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +38,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: AppColors.white),
         ),
         home: const SplashScreen(),
+        // home: HomeMapsScreen(),
       ),
     );
   }

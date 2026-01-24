@@ -2683,13 +2683,13 @@ class _LiveRideState extends State<LiveRide> {
           ),
           SizedBox(height: w * 0.02),
           // Additional ride info
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _rideInfoItem(context, w, "Ride ID", rideId),
-              _rideInfoItem(context, w, "Order ID", orderId),
-            ],
-          ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //   children: [
+          //     _rideInfoItem(context, w, "Ride ID", rideId),
+          //     _rideInfoItem(context, w, "Order ID", orderId),
+          //   ],
+          // ),
         ],
       ),
     ).animate().fade(duration: 700.ms).scale();

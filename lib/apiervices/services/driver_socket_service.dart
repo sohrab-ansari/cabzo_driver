@@ -35,6 +35,11 @@ class DriverSocketService {
   StreamSubscription<Position>? _positionStreamSubscription;
   Timer? _locationUpdateTimer;
   
+  // Location optimization
+  double? _lastSentLatitude;
+  double? _lastSentLongitude;
+  static const double LOCATION_CHANGE_THRESHOLD = 0.0001; // ~11 meters
+  
   // Ride tracking
   Map<String, dynamic>? _currentRide;
   String? _activeRideId;
@@ -44,9 +49,10 @@ class DriverSocketService {
   
   // Configuration
   static const String SOCKET_URL = 'https://corezap.smarttechbros.com';
-  static const int LOCATION_UPDATE_INTERVAL = 3000; // 3 seconds
-  static const int LOCATION_TIMEOUT = 30000; // 30 seconds
-  static const int MAX_RECONNECT_ATTEMPTS = 10;
+  static const int LOCATION_UPDATE_INTERVAL = 5000; // 5 seconds (optimized from 3)
+  static const int LOCATION_TIMEOUT = 15000; // 15 seconds (reduced from 30)
+  static const int MAX_RECONNECT_ATTEMPTS = 5; // Reduced from 10
+  static const int CONNECTION_TIMEOUT = 10000; // 10 seconds
   int _reconnectAttempts = 0;
   
   // App state
@@ -72,22 +78,13 @@ class DriverSocketService {
       final prefs = await SharedPreferences.getInstance();
       _driverId = prefs.getString('driver_userid');
 
-
-
-
-      print("driverrrrrrriddd>>>>>  ${_driverId}");
-
       if (_driverId == null || _driverId!.isEmpty) {
         _logError('No driver ID found');
         return false;
       }
 
-
       // Get token
       final token = prefs.getString('auth_token');
-
-
-            print("_tooookennnnnnnnnnnn>>>>>  ${token}");
 
       if (token == null || token.isEmpty) {
         _logError('No authentication token found');
@@ -102,45 +99,24 @@ class DriverSocketService {
 
       _log('🔌 Connecting driver socket...');
 
-      // Create socket connection
-
+      // Create socket connection with optimized settings
       _socket = IO.io(
-        'https://corezap.smarttechbros.com',
+        SOCKET_URL,
         IO.OptionBuilder()
             .setTransports(['websocket', 'polling'])
             .enableAutoConnect()
-            // .setReconnectionAttempts(_maxReconnectAttempts)
-             .setReconnectionAttempts(MAX_RECONNECT_ATTEMPTS)
+            .setReconnectionAttempts(MAX_RECONNECT_ATTEMPTS)
             .setReconnectionDelay(1000)
-            .setTimeout(20000)
+            .setReconnectionDelayMax(5000)
+            .setTimeout(CONNECTION_TIMEOUT) // Faster timeout
             .setAuth({'token': token})
-             .setQuery({
-            'userRole': 'Driver',
-            'platform': 'flutter',
-            'driverId': _driverId,
-          })
+            .setQuery({
+              'userRole': 'Driver',
+              'platform': 'flutter',
+              'driverId': _driverId,
+            })
             .build(),
       );
-      // _socket = IO.io(
-      //   SOCKET_URL,
-      //   IO.OptionBuilder()
-      //     .setTransports(['websocket', 'polling'])
-      //     .enableReconnection()
-      //     .setReconnectionAttempts(MAX_RECONNECT_ATTEMPTS)
-      //     .setReconnectionDelay(1000)
-      //     .setTimeout(20000)
-      //     .setQuery({
-      //       'userRole': 'Driver',
-      //       'platform': 'flutter',
-      //       'driverId': _driverId,
-      //     })
-      //     .build(),
-      // );
-
-      // // Set auth token
-      // _socket!.io.options?['extraHeaders'] = {
-      //   'Authorization': 'Bearer $token',
-      // };
 
       // Setup event listeners
       _setupEventListeners();
@@ -148,7 +124,7 @@ class DriverSocketService {
       // Connect
       _socket!.connect();
 
-      // Wait for connection
+      // Wait for connection with timeout
       return await _waitForConnection();
     } catch (error) {
       _logError('Socket connection error: $error');
@@ -223,11 +199,31 @@ class DriverSocketService {
     try {
       if (_socket != null && _isConnected) {
         _log('🔴 Going offline');
+        
+        // Emit offline event to backend
+        final payload = {
+          'driverId': _driverId,
+          'timestamp': DateTime.now().toIso8601String(),
+        };
+        _socket!.emit('user:offline', payload);
+        _log('📡 Emitted user:offline event:', payload);
+        
+        // Stop location updates immediately
         _stopLocationWatch();
         _stopLocationUpdates();
         _isOnDuty = false;
+        
+        // Disconnect socket completely (instantly, no delay)
+        _socket!.disconnect();
+        _socket!.dispose();
+        _socket = null;
+        _isConnected = false;
+        _socketId = null;
+        
+        _log('✅ Socket completely disconnected');
+        
         _notifyListeners('driver:offline', {
-          'message': 'Driver is now offline',
+          'message': 'Driver is now offline and socket disconnected',
           'timestamp': DateTime.now().toIso8601String(),
         });
       }
@@ -510,9 +506,6 @@ class DriverSocketService {
 
     // RIDE REQUEST EVENTS
     _socket!.on('ride:newRide', (data) {
-
-
-      print("howwwwww_manyyyyyyyyyyyyyyyyyyyy");
       final rideData = _mapRideData(data);
       _log('🚕 NEW RIDE REQUEST RECEIVED:', rideData);
       _notifyListeners('ride:newRequest', rideData);
@@ -658,7 +651,8 @@ class DriverSocketService {
   Future<bool> _waitForConnection() async {
     final completer = Completer<bool>();
     
-    final timeout = Timer(const Duration(seconds: 10), () {
+    // Faster timeout for connection (5 seconds instead of 10)
+    final timeout = Timer(const Duration(seconds: 5), () {
       if (!completer.isCompleted) {
         _logError('Connection timeout');
         completer.complete(false);
@@ -668,7 +662,16 @@ class DriverSocketService {
     _socket!.once('connect', (_) {
       timeout.cancel();
       if (!completer.isCompleted) {
+        _log('✅ Socket connected!');
         completer.complete(true);
+      }
+    });
+    
+    _socket!.once('connect_error', (error) {
+      timeout.cancel();
+      if (!completer.isCompleted) {
+        _logError('Connection error: $error');
+        completer.complete(false);
       }
     });
     
@@ -783,6 +786,9 @@ class DriverSocketService {
 
     _log('📍 Starting continuous location watch');
 
+    // Get initial location immediately
+    _getInitialLocation();
+
     _positionStreamSubscription = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.best,
@@ -792,6 +798,7 @@ class DriverSocketService {
       _currentLatitude = position.latitude;
       _currentLongitude = position.longitude;
       _lastLocationUpdate = DateTime.now();
+      _log('📍 Location updated: $_currentLatitude, $_currentLongitude');
       
       // Send location update if on duty
       if (_isOnDuty && _socket != null && _isConnected) {
@@ -800,6 +807,32 @@ class DriverSocketService {
     }, onError: (error) {
       _log('⚠️ Location watch error: $error');
     });
+  }
+
+  Future<void> _getInitialLocation() async {
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        forceAndroidLocationManager: false,
+        timeLimit: const Duration(seconds: 5),
+      );
+      _currentLatitude = position.latitude;
+      _currentLongitude = position.longitude;
+      _lastLocationUpdate = DateTime.now();
+      _log('✅ Initial location obtained: $_currentLatitude, $_currentLongitude');
+    } catch (e) {
+      _log('⚠️ Error getting initial location: $e');
+      // Try to get last known location as fallback
+      try {
+        final lastPosition = await Geolocator.getLastKnownPosition();
+        if (lastPosition != null) {
+          _currentLatitude = lastPosition.latitude;
+          _currentLongitude = lastPosition.longitude;
+          _log('📍 Using last known location: $_currentLatitude, $_currentLongitude');
+        }
+      } catch (e) {
+        _log('⚠️ Could not get last known position: $e');
+      }
+    }
   }
 
   void _stopLocationWatch() {
@@ -813,6 +846,18 @@ class DriverSocketService {
   void _sendLocationUpdate() {
     if (_socket == null || !_isConnected) return;
 
+    // Only send if location has changed significantly
+    final latDiff = (_currentLatitude - (_lastSentLatitude ?? _currentLatitude)).abs();
+    final lngDiff = (_currentLongitude - (_lastSentLongitude ?? _currentLongitude)).abs();
+    
+    if (latDiff < LOCATION_CHANGE_THRESHOLD && lngDiff < LOCATION_CHANGE_THRESHOLD) {
+      return; // Skip sending if location change is too small
+    }
+
+    // Update last sent coordinates
+    _lastSentLatitude = _currentLatitude;
+    _lastSentLongitude = _currentLongitude;
+
     // 1. General driver location update
     final driverPayload = {
       'latitude': _currentLatitude,
@@ -825,10 +870,6 @@ class DriverSocketService {
     };
 
     _socket!.emit('driver:location:update', driverPayload);
-
-     print("loaction__update123");
-       print("loaction__update123 lat sending ${_currentLatitude}");
-         print("loaction__update123 long sending ${_currentLongitude}");
 
     // 2. Specific ride location update (if in a ride)
     final rideId = _activeRideId ?? _currentRide?['orderId'] ?? _currentRide?['rideId'];
@@ -848,8 +889,6 @@ class DriverSocketService {
       };
 
       _socket!.emit('ride:location:update', ridePayload);
-
-      print("loaction__update");
     }
   }
 
