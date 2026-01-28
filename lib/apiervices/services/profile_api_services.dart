@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:corezap_driver/apiervices/api_path.dart';
 import 'package:corezap_driver/modals/add_money_wallet_response.dart';
 import 'package:corezap_driver/modals/bank_account_add_Res.dart';
+import 'package:corezap_driver/modals/chartid_response.dart';
 import 'package:corezap_driver/modals/driverId_response.dart';
 import 'package:corezap_driver/modals/driver_Image_upload_res.dart';
 import 'package:corezap_driver/modals/get_bank_accounts_response.dart';
@@ -19,6 +20,8 @@ import 'package:corezap_driver/modals/transactions_response.dart';
 import 'package:corezap_driver/modals/update_order_response.dart';
 import 'package:corezap_driver/modals/wallet_response.dart';
 import 'package:corezap_driver/views/profile_related.dart/edit_profile.dart';
+import 'package:corezap_driver/views/scheduled_pickups/otp_and_Declined_files/verify_Otp_Order_response.dart';
+import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:http/http.dart' as http;
@@ -169,8 +172,6 @@ class ProfileApiServices {
     }
   }
 
-
-
   static Future<WalletResponse> get_wallet_data() async {
     // final Uri url = Uri.parse(ApiPath.createVehicle);
     final Uri url = Uri.parse("${ApiPath.wallet_api}");
@@ -316,6 +317,7 @@ class ProfileApiServices {
           "Accept": "application/json",
           "Content-Type": "application/json",
         },
+
         // body: jsonEncode({
         //   "driverId": userId,
         //   "bankName": bankName,
@@ -323,15 +325,14 @@ class ProfileApiServices {
         //   "accountHolderName": accountHolderName,
         //   "ifscCode": ifscCode,
         // }),
-
-          body: jsonEncode({
+        body: jsonEncode({
           "driverId": userId,
           "bankName": bankName,
           "accountNumber": accountNumber,
           "accountHolderName": accountHolderName,
           "ifscCode": ifscCode,
-          "type":"UPI",
-          "upiId":"d",
+          "type": "UPI",
+          "upiId": "d",
         }),
       );
 
@@ -442,7 +443,6 @@ class ProfileApiServices {
       );
     }
   }
-
 
   static Future<DriverIdResponse> get_driverid_data() async {
     /// 🔐 GET TOKEN
@@ -730,132 +730,363 @@ class ProfileApiServices {
   }
 
   static Future<Updateorderresposne> order_update_data({
-  required dynamic orderstatus,
-  required dynamic orderid,
-}) async {
-  final prefs = await SharedPreferences.getInstance();
-  final String? token = prefs.getString("auth_token");
-  final String? userId = prefs.getString("driver_userid");
+    required dynamic orderstatus,
+    required dynamic orderid,
+    BuildContext? context,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+    final String? userId = prefs.getString("driver_userid");
 
-  print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> User ID : $userId");
-  print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID : $orderid");
-  print(">>>>>>>>>>>>>>>>>>>>>>>>>>>> Order Status : $orderstatus");
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> User ID : $userId");
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID : $orderid");
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>> Order Status : $orderstatus");
 
-  final Uri url = Uri.parse(
-    "${ApiPath.baseUri}/order/update/$orderid",
-  );
+    final Uri url = Uri.parse("${ApiPath.baseUri}/order/update/$orderid");
 
-  print("========== 🔵 ORDER UPDATE API ==========");
-  print("URL : $url");
-  print("Token : $token");
+    print("========== 🔵 ORDER UPDATE API ==========");
+    print("URL : $url");
+    print("Token : $token");
 
-  try {
-    final http.Response response = await http.patch(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-      body: jsonEncode({
-        "orderStatus": orderstatus,
-      }),
-    );
+    try {
+      final http.Response response = await http.patch(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({"orderStatus": orderstatus}),
+      );
 
-    print("✅ Status Code : ${response.statusCode}");
+      print("✅ Status Code : ${response.statusCode}");
 
-    /// 🔥 PRETTY PRINT FULL RESPONSE
-    final decodedJson = jsonDecode(response.body);
-    final prettyJson =
-        const JsonEncoder.withIndent('  ').convert(decodedJson);
+      final decodedJson = jsonDecode(response.body);
 
-    print("📦 FULL RESPONSE (Pretty Print) 👇");
-    print(prettyJson);
+      /// 🔥 PRETTY PRINT
+      final prettyJson = const JsonEncoder.withIndent(
+        '  ',
+      ).convert(decodedJson);
+      print("📦 FULL RESPONSE 👇");
+      print(prettyJson);
 
-    final Updateorderresposne updateorderresposne =
-        Updateorderresposne.fromJson(decodedJson);
+      /// 🔹 HANDLE SUCCESS TRUE / FALSE
+      if (decodedJson["success"] == true) {
+        print("🎉 ORDER UPDATE SUCCESS");
 
-    print("🎯 Parsed Model Object 👇");
-    print(updateorderresposne);
+        return Updateorderresposne.fromJson(decodedJson);
+      } else {
+        print("⚠️ ORDER UPDATE FAILED");
 
-    return updateorderresposne;
-  } catch (e) {
-    print("❌ Exception in order_update_data");
-    print(e);
+        return Updateorderresposne(
+          success: false,
+          message: decodedJson["message"] ?? "Order update failed",
+        );
+      }
+    } catch (e) {
+      print("❌ Exception in order_update_data");
+      print(e);
 
-    return Updateorderresposne(
-      success: false,
-      message: "Connection error: $e",
-    );
+      return Updateorderresposne(
+        success: false,
+        message: "Connection error: $e",
+      );
+    }
   }
-}
 
+  // static Future<Updateorderresposne> order_update_data({
+  //   required dynamic orderstatus,
+  //   required dynamic orderid,
+  // }) async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final String? token = prefs.getString("auth_token");
+  //   final String? userId = prefs.getString("driver_userid");
 
+  //   print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> User ID : $userId");
+  //   print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID : $orderid");
+  //   print(">>>>>>>>>>>>>>>>>>>>>>>>>>>> Order Status : $orderstatus");
 
+  //   final Uri url = Uri.parse("${ApiPath.baseUri}/order/update/$orderid");
+
+  //   print("========== 🔵 ORDER UPDATE API ==========");
+  //   print("URL : $url");
+  //   print("Token : $token");
+
+  //   try {
+  //     final http.Response response = await http.patch(
+  //       url,
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "Authorization": "Bearer $token",
+  //       },
+  //       body: jsonEncode({"orderStatus": orderstatus}),
+  //     );
+
+  //     print("✅ Status Code : ${response.statusCode}");
+
+  //     /// 🔥 PRETTY PRINT FULL RESPONSE
+  //     final decodedJson = jsonDecode(response.body);
+  //     final prettyJson = const JsonEncoder.withIndent(
+  //       '  ',
+  //     ).convert(decodedJson);
+
+  //     print("📦 FULL RESPONSE (Pretty Print) 👇");
+  //     print(prettyJson);
+
+  //     final Updateorderresposne updateorderresposne =
+  //         Updateorderresposne.fromJson(decodedJson);
+
+  //     print("🎯 Parsed Model Object 👇");
+  //     print(updateorderresposne);
+
+  //     return updateorderresposne;
+  //   } catch (e) {
+  //     print("❌ Exception in order_update_data");
+  //     print(e);
+
+  //     return Updateorderresposne(
+  //       success: false,
+  //       message: "Connection error: $e",
+  //     );
+  //   }
+  // }
 
   static Future<Ordercompletecashresponse> cash_update_data({
-  required dynamic orderstatus,
-  required dynamic orderid,
-}) async {
-  final prefs = await SharedPreferences.getInstance();
-  final String? token = prefs.getString("auth_token");
-  final String? userId = prefs.getString("driver_userid");
+    required dynamic orderstatus,
+    required dynamic orderid,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+    final String? userId = prefs.getString("driver_userid");
 
-  print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> User ID : $userId");
-  print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID : $orderid");
-  print(">>>>>>>>>>>>>>>>>>>>>>>>>>>> Order Status : $orderstatus");
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> User ID : $userId");
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID : $orderid");
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>> Order Status : $orderstatus");
 
-  // final Uri url = Uri.parse(
-  //   "${ApiPath.baseUri}/order/update/$orderid",
-  // );
+    // final Uri url = Uri.parse(
+    //   "${ApiPath.baseUri}/order/update/$orderid",
+    // );
 
-  final Uri url = Uri.parse(
-    "${ApiPath.baseUri}/payments/cash",
-  );
+    final Uri url = Uri.parse("${ApiPath.baseUri}/payments/cash");
 
+    print("========== 🔵 ORDER UPDATE API ==========");
+    print("URL : $url");
+    print("Token : $token");
 
-  print("========== 🔵 ORDER UPDATE API ==========");
-  print("URL : $url");
-  print("Token : $token");
+    try {
+      final http.Response response = await http.patch(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({"orderId": orderid}),
+      );
 
-  try {
-    final http.Response response = await http.patch(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-      body: jsonEncode({
-        "orderId": orderid,
-      }),
-    );
+      print("✅ Status Code : ${response.statusCode}");
 
-    print("✅ Status Code : ${response.statusCode}");
+      /// 🔥 PRETTY PRINT FULL RESPONSE
+      final decodedJson = jsonDecode(response.body);
+      final prettyJson = const JsonEncoder.withIndent(
+        '  ',
+      ).convert(decodedJson);
 
-    /// 🔥 PRETTY PRINT FULL RESPONSE
-    final decodedJson = jsonDecode(response.body);
-    final prettyJson =
-        const JsonEncoder.withIndent('  ').convert(decodedJson);
+      print("📦 FULL RESPONSE (Pretty Print) 👇");
+      print(prettyJson);
 
-    print("📦 FULL RESPONSE (Pretty Print) 👇");
-    print(prettyJson);
+      final Ordercompletecashresponse ordercompletecashresponse =
+          Ordercompletecashresponse.fromJson(decodedJson);
 
-    final Ordercompletecashresponse ordercompletecashresponse =
-        Ordercompletecashresponse.fromJson(decodedJson);
+      print("🎯 Parsed Model Object 👇");
+      print(ordercompletecashresponse);
 
-    print("🎯 Parsed Model Object 👇");
-    print(ordercompletecashresponse);
+      return ordercompletecashresponse;
+    } catch (e) {
+      print("❌ Exception in order_update_data");
+      print(e);
 
-    return ordercompletecashresponse;
-  } catch (e) {
-    print("❌ Exception in order_update_data");
-    print(e);
-
-    return Ordercompletecashresponse(
-      success: false,
-      message: "Connection error: $e",
-    );
+      return Ordercompletecashresponse(
+        success: false,
+        message: "Connection error: $e",
+      );
+    }
   }
-}
+
+  static Future<ChatResponse> chartidmethod({required dynamic orderid}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+    final String? userId = prefs.getString("driver_userid");
+
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> User ID : $userId");
+    print(
+      ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID  form chartid : $orderid",
+    );
+    // print(">>>>>>>>>>>>>>>>>>>>>>>>>>>> Order Status : $orderstatus");
+
+    // final Uri url = Uri.parse(
+    //   "${ApiPath.baseUri}/order/update/$orderid",
+    // );
+
+    // final Uri url = Uri.parse("${ApiPath.baseUri}/payments/cash");
+
+    final Uri url = Uri.parse("${ApiPath.baseUri}/chat/ride/$orderid");
+
+    print("========== 🔵 ORDER UPDATE API ==========");
+    print("URL : $url");
+    print("Token : $token");
+
+    try {
+      final http.Response response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      print("✅ Status Code : ${response.statusCode}");
+
+      /// 🔥 PRETTY PRINT FULL RESPONSE
+      final decodedJson = jsonDecode(response.body);
+      final prettyJson = const JsonEncoder.withIndent(
+        '  ',
+      ).convert(decodedJson);
+
+      print("📦 FULL RESPONSE (Pretty Print) 👇");
+      print(prettyJson);
+
+      final ChatResponse getchatidresposne = ChatResponse.fromJson(decodedJson);
+
+      print("🎯 Parsed Model Object 👇");
+      print(getchatidresposne);
+
+      return getchatidresposne;
+    } catch (e) {
+      print("❌ Exception in order_update_data");
+      print(e);
+
+      return ChatResponse(success: false);
+    }
+  }
+
+  static Future<VerifyOtpResponse> verify_order_otp_data({
+    required dynamic enteredOtp,
+    required dynamic orderid,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+    final String? userId = prefs.getString("driver_userid");
+
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> User ID : $userId");
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID : $orderid");
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>> enteredOtp Status : $enteredOtp");
+
+    // final Uri url = Uri.parse(
+    //   "${ApiPath.baseUri}/order/update/$orderid",
+    // );
+
+    final Uri url = Uri.parse("${ApiPath.order_verify_otp}");
+
+    print("========== 🔵 ORDER UPDATE API ==========");
+    print("URL : $url");
+    print("Token : $token");
+
+    try {
+      final http.Response response = await http.patch(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({"orderId": orderid, "rideOtp": enteredOtp}),
+      );
+
+      print("✅ Status Code : ${response.statusCode}");
+
+      /// 🔥 PRETTY PRINT FULL RESPONSE
+      final decodedJson = jsonDecode(response.body);
+      final prettyJson = const JsonEncoder.withIndent(
+        '  ',
+      ).convert(decodedJson);
+
+      print("📦 FULL RESPONSE (Pretty Print) 👇");
+      print(prettyJson);
+
+      final VerifyOtpResponse verifyOtpResponse = VerifyOtpResponse.fromJson(
+        decodedJson,
+      );
+
+      print("🎯 Parsed Model Object 👇");
+      print(verifyOtpResponse);
+
+      return verifyOtpResponse;
+    } catch (e) {
+      print("❌ Exception in order_update_data");
+      print(e);
+
+      return VerifyOtpResponse(success: false, message: "Connection error: $e");
+    }
+  }
+
+  static Future<Ordercompletecashresponse> declined_order_data({
+    required dynamic orderstatus,
+    required dynamic orderid,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+    final String? userId = prefs.getString("driver_userid");
+
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> User ID : $userId");
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID : $orderid");
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>> Order Status : $orderstatus");
+
+    final Uri url = Uri.parse("${ApiPath.baseUri}/order/decline/$orderid");
+
+    // final Uri url = Uri.parse("${ApiPath.baseUri}/payments/cash");
+
+    // order/decline/$orderId
+
+    print("========== 🔵 ORDER UPDATE API ==========");
+    print("URL : $url");
+    print("Token : $token");
+
+    try {
+      final http.Response response = await http.patch(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({"orderId": orderid}),
+      );
+
+      print("✅ Status Code : ${response.statusCode}");
+
+      /// 🔥 PRETTY PRINT FULL RESPONSE
+      final decodedJson = jsonDecode(response.body);
+      final prettyJson = const JsonEncoder.withIndent(
+        '  ',
+      ).convert(decodedJson);
+
+      print("📦 FULL RESPONSE (Pretty Print) 👇");
+      print(prettyJson);
+
+      final Ordercompletecashresponse ordercompletecashresponse =
+          Ordercompletecashresponse.fromJson(decodedJson);
+
+      print("🎯 Parsed Model Object 👇");
+      print(ordercompletecashresponse);
+
+      return ordercompletecashresponse;
+    } catch (e) {
+      print("❌ Exception in order_update_data");
+      print(e);
+
+      return Ordercompletecashresponse(
+        success: false,
+        message: "Connection error: $e",
+      );
+    }
+  }
 
   // static Future<Updateorderresposne> order_update_data({required dynamic orderstatus, required dynamic orderid}) async {
   //   /// 🔐 GET TOKEN
@@ -865,7 +1096,6 @@ class ProfileApiServices {
   //   final String? userId = prefs.getString("driver_userid");
 
   //   print("theeeee____ useriddddd ${userId}");
-
 
   //   print("theee_orderrrr_gottttttt>>>>>>>>> ${orderid}");
 
@@ -892,7 +1122,7 @@ class ProfileApiServices {
 
   //        body: jsonEncode({
   //         "orderStatus": orderstatus,
-         
+
   //       }),
   //     );
 
@@ -915,7 +1145,6 @@ class ProfileApiServices {
   //     );
   //   }
   // }
-
 
   static Future<RideHistoryResponse2> get_rides_history_data({
     required String status,
@@ -944,14 +1173,9 @@ class ProfileApiServices {
       final http.Response response = await http.get(
         url,
 
-        // headers: {
-        //   "Content-Type": "application/json",
-        //   "Authorization": "Bearer $token", // ✅ BEARER TOKEN
-        // },
         headers: {
           "Content-Type": "application/json",
-          "Authorization":
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NGU2OTkzMTFiYTMwYjk2YzVlZWI4OSIsInJvbGUiOiJEcml2ZXIiLCJpYXQiOjE3Njg4MjE1NzgsImV4cCI6MTc3MTQxMzU3OH0.B9hPpBJGQCac8dFGCN2_aWb1lJCJ7KKsoVtXM-7tLSE", // ✅ BEARER TOKEN
+          "Authorization": "Bearer $token", // ✅ BEARER TOKEN
         },
 
         // /getCompany
@@ -975,6 +1199,4 @@ class ProfileApiServices {
       );
     }
   }
-
- 
 }

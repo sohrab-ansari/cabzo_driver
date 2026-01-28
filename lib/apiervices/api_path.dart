@@ -1,14 +1,9 @@
 class ApiPath {
-  static const String baseUri = "https://corezap.smarttechbros.com/api/v1";  // asad server
-
-
-
-
-  
+  // static const String baseUri = "https://corezap.smarttechbros.com/api/v1";  // asad server
 
   // static const String baseUri = "http://api.corezap.framekarts.com:7000/api/v1";
 
-  // static const String baseUri = "https://api.corezap.framekarts.com/api/v1"; //
+  static const String baseUri = "https://api.corezap.framekarts.com/api/v1"; //
 
   // https://api.corezap.framekarts.com
 
@@ -40,16 +35,17 @@ class ApiPath {
 
   static String addwalletapi = "$baseUri/payments/wallet";
 
-// static String addwalletapi = "http://34.14.209.4:8000/api/v1/payments/wallet";
-  
+  // static String addwalletapi = "http://34.14.209.4:8000/api/v1/payments/wallet";
 
   static String payments_verify_api = "$baseUri/payments/verify";
-
-
 
   // static String payments_verify_api = "http://34.14.209.4:8000/api/v1/payments/verify";
 
   static String rider_History = "$baseUri/payments/verify";
 
   static String privacy_terms_api = "$baseUri/company/getCompany";
+
+  static String order_verify_otp = "$baseUri/order/verifyOtp";
+
+  // static String order_declined = "$baseUri/order/verify-otp";
 }

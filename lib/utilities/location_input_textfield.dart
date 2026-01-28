@@ -60,7 +60,7 @@ class _LocationInputTextfieldState extends State<LocationInputTextfield> {
         decoration: InputDecoration(
           hintText: widget.hintText ?? "",
           hintStyle: GoogleFonts.blinker(
-            color: Colors.grey.shade400,
+            color: Colors.black,
             fontSize: widget.hintFontSize ?? w * .04,
             fontWeight: FontWeight.w400,
           ),

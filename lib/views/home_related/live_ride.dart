@@ -1,2754 +1,1622 @@
+import 'dart:ui';
 
-
-
-
-// // import 'package:corezap_driver/controllers/controllers.dart';
-// // import 'package:corezap_driver/controllers/home_controllers/order_update_controller.dart';
-// // import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
-// // import 'package:corezap_driver/utilities/app_buttons.dart';
-// // import 'package:corezap_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
-// // import 'package:corezap_driver/utilities/colors.dart';
-// // import 'package:corezap_driver/utilities/colors/colors_list.dart';
-// // import 'package:corezap_driver/utilities/custom_font.dart';
-// // import 'package:corezap_driver/utilities/custom_images.dart';
-// // import 'package:corezap_driver/utilities/navigator.dart';
-// // import 'package:corezap_driver/views/scheduled_pickups/accepted_screen.dart';
-
-// // import 'package:dotted_line/dotted_line.dart';
-// // import 'package:flutter/material.dart';
-// // import 'package:flutter_animate/flutter_animate.dart';
-// // import 'package:fluttertoast/fluttertoast.dart';
-// // import 'package:get/get.dart';
-// // import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-// // import 'dart:async';
-// // import 'dart:convert';
-// // import 'package:http/http.dart' as http;
-// // import 'package:shared_preferences/shared_preferences.dart';
-
-// // class LiveRide extends StatefulWidget {
-// //   final Map<String, dynamic> rideData;
-  
-// //   const LiveRide({super.key, required this.rideData});
-
-// //   @override
-// //   State<LiveRide> createState() => _LiveRideState();
-// // }
-
-// // class _LiveRideState extends State<LiveRide> {
-// //   final StepperController stepperController = Get.find();
-// //   final Controllers cancelRideController = Get.find();
-
-// //   final OrderUpdateController orderUpdateController = Get.find<OrderUpdateController>();
-
-// //   // Pickup & Drop LatLng
-// //   LatLng? pickupLatLng;
-// //   LatLng? dropLatLng;
-
-// //   final Set<Marker> _markers = {};
-
-// //   GoogleMapController? _mapController;
-
-// //   // Timer for auto-cancel
-// //   Timer? _autoCancelTimer;
-// //   int _secondsRemaining = 10;
-// //   bool _isTimerRunning = true;
-// //   bool _hasAccepted = false;
-// //   bool _hasCancelled = false;
-
-// //   @override
-// //   void initState() {
-// //     super.initState();
-
-// //     // Print received data for debugging
-// //     print("================ LIVE RIDE DATA ================");
-// //     print("Full ride data received in LiveRide: ${widget.rideData}");
-    
-// //     // Extract data from rideData
-// //     _extractRideData();
-
-// //     WidgetsBinding.instance.addPostFrameCallback((_) {
-// //       cancelRideController.cancelRideReasonIndex.value = -1;
-// //     });
-
-// //     if (pickupLatLng != null && dropLatLng != null) {
-// //       _setMarkers();
-// //     }
-
-// //     // Start auto-cancel timer
-// //     _startAutoCancelTimer();
-// //   }
-
-// //   @override
-// //   void dispose() {
-// //     // Cancel timer when widget is disposed
-// //     _autoCancelTimer?.cancel();
-// //     super.dispose();
-// //   }
-
-// //   void _startAutoCancelTimer() {
-// //     _autoCancelTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-// //       if (_secondsRemaining > 0 && _isTimerRunning) {
-// //         setState(() {
-// //           _secondsRemaining--;
-// //         });
-// //       } else if (_secondsRemaining <= 0 && _isTimerRunning && !_hasAccepted) {
-// //         // Auto-cancel after 10 seconds
-// //         timer.cancel();
-// //         _autoCancelRide();
-// //       }
-// //     });
-// //   }
-
-// //   Future<void> _autoCancelRide() async {
-// //     if (_hasCancelled || _hasAccepted) return;
-    
-// //     _hasCancelled = true;
-// //     _isTimerRunning = false;
-    
-// //     print("⏰ Auto-cancelling ride after 10 seconds...");
-    
-// //     final orderId = widget.rideData['rideId'];
-// //     await OrderService.declineOrder(orderId: orderId);
-    
-// //     // Navigate back or show message
-// //     if (mounted) {
-// //       Get.back(); // Navigate back to previous screen
-// //       Get.snackbar(
-// //         'Ride Auto-Cancelled',
-// //         'You did not accept the ride in time',
-// //         backgroundColor: Colors.orange,
-// //         colorText: Colors.white,
-// //       );
-// //     }
-// //   }
-
-// //   void _extractRideData() {
-// //     try {
-// //       // Extract pickup coordinates
-// //       if (widget.rideData['pickup'] != null) {
-// //         final pickup = widget.rideData['pickup'];
-// //         pickupLatLng = LatLng(
-// //           pickup['latitude']?.toDouble() ?? 0.0,
-// //           pickup['longitude']?.toDouble() ?? 0.0,
-// //         );
-// //       } else if (widget.rideData['startLocation'] != null) {
-// //         final startLocation = widget.rideData['startLocation'];
-// //         if (startLocation['coordinates'] != null &&
-// //             startLocation['coordinates'].length >= 2) {
-// //           pickupLatLng = LatLng(
-// //             startLocation['coordinates'][1]?.toDouble() ?? 0.0,
-// //             startLocation['coordinates'][0]?.toDouble() ?? 0.0,
-// //           );
-// //         }
-// //       }
-
-// //       // Extract drop coordinates
-// //       if (widget.rideData['destination'] != null) {
-// //         final destination = widget.rideData['destination'];
-// //         dropLatLng = LatLng(
-// //           destination['latitude']?.toDouble() ?? 0.0,
-// //           destination['longitude']?.toDouble() ?? 0.0,
-// //         );
-// //       } else if (widget.rideData['endLocation'] != null) {
-// //         final endLocation = widget.rideData['endLocation'];
-// //         if (endLocation['coordinates'] != null &&
-// //             endLocation['coordinates'].length >= 2) {
-// //           dropLatLng = LatLng(
-// //             endLocation['coordinates'][1]?.toDouble() ?? 0.0,
-// //             endLocation['coordinates'][0]?.toDouble() ?? 0.0,
-// //           );
-// //         }
-// //       } else if (widget.rideData['dropoff'] != null) {
-// //         final dropoff = widget.rideData['dropoff'];
-// //         dropLatLng = LatLng(
-// //           dropoff['latitude']?.toDouble() ?? 0.0,
-// //           dropoff['longitude']?.toDouble() ?? 0.0,
-// //         );
-// //       }
-
-// //       print("Pickup LatLng: $pickupLatLng");
-// //       print("Drop LatLng: $dropLatLng");
-// //       print("==============================================");
-// //     } catch (e) {
-// //       print("Error extracting ride data: $e");
-// //       // Set default values if extraction fails
-// //       pickupLatLng = const LatLng(17.4065, 78.4772);
-// //       dropLatLng = const LatLng(17.4120, 78.4850);
-// //     }
-// //   }
-
-// //   void _setMarkers() {
-// //     if (pickupLatLng != null) {
-// //       _markers.add(Marker(
-// //         markerId: const MarkerId("pickup"),
-// //         position: pickupLatLng!,
-// //         infoWindow: const InfoWindow(title: "Pickup Location"),
-// //         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-// //       ));
-// //     }
-
-// //     if (dropLatLng != null) {
-// //       _markers.add(Marker(
-// //         markerId: const MarkerId("drop"),
-// //         position: dropLatLng!,
-// //         infoWindow: const InfoWindow(title: "Drop Location"),
-// //         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-// //       ));
-// //     }
-// //   }
-
-// //   void _fitMapToMarkers() async {
-// //     if (_mapController == null || pickupLatLng == null || dropLatLng == null) {
-// //       return;
-// //     }
-
-// //     LatLngBounds bounds;
-// //     if (pickupLatLng!.latitude > dropLatLng!.latitude &&
-// //         pickupLatLng!.longitude > dropLatLng!.longitude) {
-// //       bounds = LatLngBounds(southwest: dropLatLng!, northeast: pickupLatLng!);
-// //     } else if (pickupLatLng!.longitude > dropLatLng!.longitude) {
-// //       bounds = LatLngBounds(
-// //         southwest: LatLng(pickupLatLng!.latitude, dropLatLng!.longitude),
-// //         northeast: LatLng(dropLatLng!.latitude, pickupLatLng!.longitude),
-// //       );
-// //     } else if (pickupLatLng!.latitude > dropLatLng!.latitude) {
-// //       bounds = LatLngBounds(
-// //         southwest: LatLng(dropLatLng!.latitude, pickupLatLng!.longitude),
-// //         northeast: LatLng(pickupLatLng!.latitude, dropLatLng!.longitude),
-// //       );
-// //     } else {
-// //       bounds = LatLngBounds(southwest: pickupLatLng!, northeast: dropLatLng!);
-// //     }
-
-// //     CameraUpdate cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 100);
-// //     _mapController!.animateCamera(cameraUpdate);
-// //   }
-
-// //   // Helper method to format timestamp
-// //   String _formatDateFromTimestamp(int timestamp) {
-// //     try {
-// //       final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-// //       return "${date.day} ${_getMonthName(date.month)}, ${date.year}";
-// //     } catch (e) {
-// //       return "30 August, 2025"; // Default fallback
-// //     }
-// //   }
-
-// //   String _getMonthName(int month) {
-// //     const months = [
-// //       'January', 'February', 'March', 'April', 'May', 'June',
-// //       'July', 'August', 'September', 'October', 'November', 'December'
-// //     ];
-// //     return months[month - 1];
-// //   }
-
-// //   Future<void> _acceptRide() async {
-// //     if (_hasAccepted || _hasCancelled) return;
-    
-// //     _hasAccepted = true;
-// //     _isTimerRunning = false;
-// //     _autoCancelTimer?.cancel();
-    
-// //     final orderId = widget.rideData['rideId'];
-// //     print("🚗 Accepting ride with ID: $orderId");
-
-// //     stepperController.resetSteps();
-    
-// //     // // Pass context and rideData as parameters
-// //     // await OrderService.acceptOrder(
-// //     //   orderId: orderId, 
-// //     //   status: "Accepted",
-// //     //   context: context,
-// //     //   rideData: widget.rideData,
-// //     // );
-
-// //    await orderUpdateController.update_order_method(orderstatus: "Accepted",orderid: orderId);
-// //    CustomNavigator.push(
-// //             context,
-// //             ArrivingClient(
-// //               // typeCheck: rideData['rideType'] == 'scheduled',
-// //               rideData: widget.rideData,
-// //             ),
-// //             transition: TransitionType.slideLeft,
-// //           );
-// //   }
-
-// //   Future<void> _cancelRide() async {
-// //     if (_hasCancelled || _hasAccepted) return;
-    
-// //     _hasCancelled = true;
-// //     _isTimerRunning = false;
-// //     _autoCancelTimer?.cancel();
-    
-// //     final orderId = widget.rideData['rideId'];
-// //     await OrderService.declineOrder(orderId: orderId);
-    
-// //     Get.back(); // Navigate back
-// //     Get.snackbar(
-// //       'Ride Cancelled',
-// //       'You have cancelled the ride',
-// //       backgroundColor: Colors.orange,
-// //       colorText: Colors.white,
-// //     );
-// //   }
-
-// //   @override
-// //   Widget build(BuildContext context) {
-// //     final double w = MediaQuery.of(context).size.width;
-
-// //     // Extract ride information with null safety
-// //     final riderName = widget.rideData['riderName']?.toString() ?? 'N/A';
-// //     final riderPhone = widget.rideData['riderNumber']?.toString() ?? 'N/A';
-// //     final totalFare = widget.rideData['totalFare']?.toString() ?? 'N/A';
-// //     final distance = widget.rideData['distance']?.toString() ?? 'N/A';
-    
-// //     // Extract addresses
-// //     final pickupAddress = widget.rideData['startLocation']?['address']?.toString() ?? 
-// //                          'Manikonda Jagir, Hyderabad, Telangana';
-// //     final dropAddress = widget.rideData['endLocation']?['address']?.toString() ?? 
-// //                        'Manikonda Jagir, Hyderabad, Telangana';
-    
-// //     // Format date from timestamp
-// //     final timestamp = widget.rideData['timestamp'];
-// //     final formattedDate = timestamp != null 
-// //         ? _formatDateFromTimestamp(timestamp is String ? int.parse(timestamp) : timestamp)
-// //         : "30 August, 2025";
-
-// //     return Scaffold(
-// //       backgroundColor: AppColors.white,
-// //       body: SafeArea(
-// //         child: SingleChildScrollView(
-// //           padding: EdgeInsets.all(w * 0.04),
-// //           child: Column(
-// //             children: [
-// //               // Timer display
-// //               _timerWidget(context, w),
-// //               SizedBox(height: w * 0.02),
-// //               _dateText(context, w, formattedDate),
-// //               SizedBox(height: w * 0.02),
-// //               _fareCard(context, w, riderName, totalFare, riderPhone),
-// //               SizedBox(height: w * 0.03),
-// //               _mapView(w),
-// //               SizedBox(height: w * 0.04),
-// //               _locationInfo(context, w, pickupAddress, dropAddress),
-// //               SizedBox(height: w * 0.04),
-// //               _distanceCard(context, w, distance),
-// //               SizedBox(height: w * 0.03),
-// //               _actionButtons(context, w),
-// //             ],
-// //           ),
-// //         ),
-// //       ),
-// //     );
-// //   }
-
-// //   Widget _timerWidget(BuildContext context, double w) {
-// //     return Container(
-// //       padding: EdgeInsets.symmetric(horizontal: w * 0.04, vertical: w * 0.02),
-// //       decoration: BoxDecoration(
-// //         color: _secondsRemaining <= 3 ? Colors.red.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
-// //         borderRadius: BorderRadius.circular(w * 0.02),
-// //         border: Border.all(
-// //           color: _secondsRemaining <= 3 ? Colors.red : Colors.orange,
-// //         ),
-// //       ),
-// //       child: Row(
-// //         mainAxisAlignment: MainAxisAlignment.center,
-// //         children: [
-// //           Icon(
-// //             Icons.timer,
-// //             size: w * 0.05,
-// //             color: _secondsRemaining <= 3 ? Colors.red : Colors.orange,
-// //           ),
-// //           SizedBox(width: w * 0.02),
-// //           Text(
-// //             'Auto-cancel in: $_secondsRemaining seconds',
-// //             style: TextStyle(
-// //               fontSize: w * 0.04,
-// //               fontWeight: FontWeight.w600,
-// //               color: _secondsRemaining <= 3 ? Colors.red : Colors.orange,
-// //             ),
-// //           ),
-// //         ],
-// //       ),
-// //     );
-// //   }
-
-// //   Widget _dateText(BuildContext context, double w, String date) {
-// //     return AppFonts.textPoppins(
-// //       context,
-// //       date,
-// //       w * 0.04,
-// //       FontWeight.w500,
-// //       const Color(0xFF5F6165),
-// //       TextAlign.center,
-// //       TextOverflow.visible,
-// //     );
-// //   }
-
-// //   Widget _fareCard(BuildContext context, double w, String riderName, String totalFare, String riderPhone) {
-// //     return Container(
-// //       padding: EdgeInsets.symmetric(horizontal: w * 0.04, vertical: w * 0.03),
-// //       decoration: BoxDecoration(
-// //         color: Colors.white,
-// //         borderRadius: BorderRadius.circular(w * 0.035),
-// //         boxShadow: [
-// //           BoxShadow(
-// //             color: Colors.black.withOpacity(0.08),
-// //             blurRadius: 10,
-// //             offset: const Offset(0, 4),
-// //           ),
-// //         ],
-// //         border: Border.all(color: AppColors.mediumGray.withOpacity(0.3)),
-// //       ),
-// //       child: Column(
-// //         crossAxisAlignment: CrossAxisAlignment.start,
-// //         children: [
-// //           Row(
-// //             children: [
-// //               Image.asset(
-// //                 "assets/images/profil.png",
-// //                 height: w * 0.12,
-// //                 width: w * 0.12,
-// //               ),
-// //               SizedBox(width: w * 0.04),
-// //               Expanded(
-// //                 child: Column(
-// //                   crossAxisAlignment: CrossAxisAlignment.start,
-// //                   children: [
-// //                     AppFonts.textPoppins(
-// //                       context,
-// //                       riderName,
-// //                       w * 0.048,
-// //                       FontWeight.w600,
-// //                       AppColors.black,
-// //                       TextAlign.start,
-// //                       TextOverflow.ellipsis,
-// //                     ),
-// //                     SizedBox(height: w * 0.01),
-// //                     AppFonts.textPoppins(
-// //                       context,
-// //                       riderPhone,
-// //                       w * 0.035,
-// //                       FontWeight.w500,
-// //                       AppColors.mediumGray,
-// //                       TextAlign.start,
-// //                       TextOverflow.ellipsis,
-// //                     ),
-// //                   ],
-// //                 ),
-// //               ),
-// //               Column(
-// //                 crossAxisAlignment: CrossAxisAlignment.end,
-// //                 children: [
-// //                   Row(
-// //                     children: [
-// //                       Icon(Icons.currency_rupee, color: AppColors.green, size: w * 0.065),
-// //                       AppFonts.textPoppins(
-// //                         context,
-// //                         totalFare,
-// //                         w * 0.055,
-// //                         FontWeight.w600,
-// //                         AppColors.green,
-// //                         TextAlign.center,
-// //                         TextOverflow.visible,
-// //                       ),
-// //                     ],
-// //                   ),
-// //                   SizedBox(height: w * 0.01),
-// //                   Container(
-// //                     padding: EdgeInsets.symmetric(horizontal: w * 0.03, vertical: w * 0.01),
-// //                     decoration: BoxDecoration(
-// //                       color: AppColors.green.withOpacity(0.1),
-// //                       borderRadius: BorderRadius.circular(w * 0.02),
-// //                     ),
-// //                     child: AppFonts.textPoppins(
-// //                       context,
-// //                       widget.rideData['rideType']?.toString().toUpperCase() ?? 'IMMEDIATE',
-// //                       w * 0.03,
-// //                       FontWeight.w600,
-// //                       AppColors.green,
-// //                       TextAlign.center,
-// //                       TextOverflow.visible,
-// //                     ),
-// //                   ),
-// //                 ],
-// //               ),
-// //             ],
-// //           ),
-// //           // SizedBox(height: w * 0.02),
-// //           // Additional ride info
-// //           // Row(
-// //           //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-// //           //   children: [
-// //           //     _rideInfoItem(context, w, "Ride ID", widget.rideData['rideId']?.toString() ?? 'N/A'),
-// //           //     _rideInfoItem(context, w, "Order ID", widget.rideData['orderId']?.toString() ?? 'N/A'),
-// //           //   ],
-// //           // ),
-// //         ],
-// //       ),
-// //     ).animate().fade(duration: 700.ms).scale();
-// //   }
-
-// //   Widget _rideInfoItem(BuildContext context, double w, String title, String value) {
-// //     return Column(
-// //       crossAxisAlignment: CrossAxisAlignment.start,
-// //       children: [
-// //         AppFonts.textPoppins(
-// //           context,
-// //           title,
-// //           w * 0.03,
-// //           FontWeight.w500,
-// //           AppColors.mediumGray,
-// //           TextAlign.start,
-// //           TextOverflow.ellipsis,
-// //         ),
-// //         SizedBox(height: w * 0.005),
-// //         AppFonts.textPoppins(
-// //           context,
-// //           value,
-// //           w * 0.035,
-// //           FontWeight.w600,
-// //           AppColors.black,
-// //           TextAlign.start,
-// //           TextOverflow.ellipsis,
-// //         ),
-// //       ],
-// //     );
-// //   }
-
-// //   Widget _mapView(double w) {
-// //     final initialPosition = pickupLatLng ?? const LatLng(17.4065, 78.4772);
-    
-// //     return SizedBox(
-// //       height: w * 0.95,
-// //       child: ClipRRect(
-// //         borderRadius: BorderRadius.circular(w * 0.03),
-// //         child: GoogleMap(
-// //           initialCameraPosition: CameraPosition(
-// //             target: initialPosition,
-// //             zoom: 14.5,
-// //           ),
-// //           myLocationEnabled: true,
-// //           zoomControlsEnabled: false,
-// //           markers: _markers,
-// //           onMapCreated: (GoogleMapController controller) {
-// //             _mapController = controller;
-// //             if (pickupLatLng != null && dropLatLng != null) {
-// //               _fitMapToMarkers(); // fit camera to both markers
-// //             }
-// //           },
-// //         ),
-// //       ),
-// //     );
-// //   }
-
-// //   Widget _locationInfo(BuildContext context, double w, String pickupAddress, String dropAddress) {
-// //     return Column(
-// //       children: [
-// //         Row(
-// //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-// //           children: [
-// //             Text(
-// //               "Location",
-// //               style: TextStyle(fontSize: w * 0.04, fontWeight: FontWeight.w500),
-// //             ),
-// //             Text.rich(
-// //               TextSpan(
-// //                 text: "Time ",
-// //                 style: TextStyle(
-// //                   fontSize: w * 0.029,
-// //                   fontWeight: FontWeight.w500,
-// //                   color: const Color(0xFF7C7C8D),
-// //                 ),
-// //                 children: [
-// //                   TextSpan(
-// //                     text: "10 min",
-// //                     style: TextStyle(
-// //                       fontSize: w * 0.04,
-// //                       fontWeight: FontWeight.w600,
-// //                       color: AppColors.black,
-// //                     ),
-// //                   ),
-// //                 ],
-// //               ),
-// //             ),
-// //           ],
-// //         ),
-// //         SizedBox(height: 10),
-// //         Row(
-// //           crossAxisAlignment: CrossAxisAlignment.start,
-// //           children: [
-// //             Column(
-// //               children: [
-// //                 CustomImages.images(
-// //                   "assets/icons/greenDot.png",
-// //                   w * 0.05,
-// //                   w * 0.05,
-// //                 ),
-// //                 SizedBox(
-// //                   height: w * 0.1,
-// //                   child: DottedLine(
-// //                     direction: Axis.vertical,
-// //                     dashLength: 4,
-// //                     dashColor: AppColors.green,
-// //                   ),
-// //                 ),
-// //                 CustomImages.images(
-// //                   "assets/icons/redDot.png",
-// //                   w * 0.05,
-// //                   w * 0.05,
-// //                 ),
-// //               ],
-// //             ),
-// //             SizedBox(width: w * 0.03),
-// //             Expanded(
-// //               child: Column(
-// //                 crossAxisAlignment: CrossAxisAlignment.start,
-// //                 children: [
-// //                   _locationText(
-// //                     context,
-// //                     "Pickup",
-// //                     pickupAddress,
-// //                   ),
-// //                   SizedBox(height: w * 0.05),
-// //                   _locationText(
-// //                     context,
-// //                     "Drop",
-// //                     dropAddress,
-// //                   ),
-// //                 ],
-// //               ),
-// //             ),
-// //           ],
-// //         ),
-// //       ],
-// //     );
-// //   }
-
-// //   Widget _locationText(BuildContext context, String title, String address) {
-// //     final double w = MediaQuery.of(context).size.width;
-// //     return Column(
-// //       crossAxisAlignment: CrossAxisAlignment.start,
-// //       children: [
-// //         AppFonts.textPoppins(
-// //           context,
-// //           title,
-// //           w * 0.035,
-// //           FontWeight.w500,
-// //           AppColors.mediumGray,
-// //           TextAlign.left,
-// //           TextOverflow.visible,
-// //         ),
-// //         AppFonts.textPoppins(
-// //           context,
-// //           address,
-// //           w * 0.039,
-// //           FontWeight.w500,
-// //           AppColors.black,
-// //           TextAlign.left,
-// //           TextOverflow.ellipsis,
-// //           maxLines: 2,
-// //         ),
-// //       ],
-// //     );
-// //   }
-
-// //   Widget _distanceCard(BuildContext context, double w, String distance) {
-// //     // Calculate pickup and drop distances (you might want to calculate actual distances)
-// //     final pickupDistance = "${widget.rideData['driverDistance']?.toString() ?? '1.1'} Km";
-// //     final dropDistance = "$distance Km";
-
-// //     return SizedBox(
-// //       height: w * 0.18,
-// //       child: Row(
-// //         children: [
-// //           _distanceItem(context, w, "Pickup", pickupDistance),
-// //           SizedBox(width: w * 0.03),
-// //           _distanceItem(context, w, "Drop", dropDistance),
-// //           SizedBox(width: w * 0.03),
-// //           _distanceItem(context, w, "Fare", "₹${widget.rideData['totalFare'] ?? '100'}"),
-// //         ],
-// //       ),
-// //     ).animate().fade(duration: 700.ms).scale();
-// //   }
-
-// //   Widget _distanceItem(BuildContext context, double w, String title, String value) {
-// //     return Expanded(
-// //       child: Container(
-// //         padding: EdgeInsets.symmetric(
-// //           vertical: w * 0.02,
-// //           horizontal: w * 0.02,
-// //         ),
-// //         decoration: BoxDecoration(
-// //           color: Colors.white,
-// //           borderRadius: BorderRadius.circular(w * 0.025),
-// //           boxShadow: [
-// //             BoxShadow(
-// //               color: Colors.black.withOpacity(0.08),
-// //               blurRadius: 6,
-// //               offset: const Offset(0, 3),
-// //             ),
-// //           ],
-// //           border: Border.all(
-// //             color: AppColors.mediumGray.withOpacity(0.3),
-// //           ),
-// //         ),
-// //         child: Column(
-// //           mainAxisAlignment: MainAxisAlignment.center,
-// //           children: [
-// //             AppFonts.textPoppins(
-// //               context,
-// //               title,
-// //               w * 0.037,
-// //               FontWeight.w600,
-// //               AppColors.mediumGray,
-// //               TextAlign.center,
-// //               TextOverflow.visible,
-// //             ),
-// //             AppFonts.textPoppins(
-// //               context,
-// //               value,
-// //               w * 0.042,
-// //               FontWeight.bold,
-// //               AppColors.black,
-// //               TextAlign.center,
-// //               TextOverflow.visible,
-// //             ),
-// //           ],
-// //         ),
-// //       ),
-// //     );
-// //   }
-
-// //   Widget _actionButtons(BuildContext context, double w) {
-// //     return Row(
-// //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-// //       children: [
-// //         // Cancel Button
-// //         ElevatedButton(
-// //           onPressed: _hasAccepted || _hasCancelled ? null : _cancelRide,
-// //           style: ElevatedButton.styleFrom(
-// //             backgroundColor: AppColors.lightGray,
-// //             foregroundColor: AppColors.mediumGray,
-// //             minimumSize: Size(w * 0.43, w * 0.14),
-// //             shape: RoundedRectangleBorder(
-// //               borderRadius: BorderRadius.circular(10),
-// //               side: BorderSide(color: AppColors.mediumGray.withOpacity(0.5)),
-// //             ),
-// //             elevation: 0,
-// //             disabledBackgroundColor: AppColors.lightGray.withOpacity(0.5),
-// //             disabledForegroundColor: AppColors.mediumGray.withOpacity(0.5),
-// //           ),
-// //           child: Text(
-// //             "Cancel",
-// //             style: TextStyle(
-// //               fontSize: w * 0.045,
-// //               fontWeight: FontWeight.w600,
-// //             ),
-// //           ),
-// //         ),
-
-// //         // Accept Button
-// //         ElevatedButton(
-// //           onPressed: _hasAccepted || _hasCancelled ? null : _acceptRide,
-// //           style: ElevatedButton.styleFrom(
-// //             backgroundColor: ColorsList.mainButtonColor,
-// //             foregroundColor: ColorsList.mainButtonTextColor,
-// //             minimumSize: Size(w * 0.43, w * 0.14),
-// //             shape: RoundedRectangleBorder(
-// //               borderRadius: BorderRadius.circular(10),
-// //             ),
-// //             elevation: 2,
-// //             shadowColor: ColorsList.mainButtonColor.withOpacity(0.3),
-// //             disabledBackgroundColor: ColorsList.mainButtonColor.withOpacity(0.5),
-// //             disabledForegroundColor: ColorsList.mainButtonTextColor.withOpacity(0.5),
-// //           ),
-// //           child: Text(
-// //             "Accept",
-// //             style: TextStyle(
-// //               fontSize: w * 0.045,
-// //               fontWeight: FontWeight.w600,
-// //             ),
-// //           ),
-// //         ),
-// //       ],
-// //     );
-// //   }
-// // }
-
-// // class OrderService {
-
-
-// //   // static Future<void> acceptOrder({
-// //   //   required String orderId,
-// //   //   required String status,
-// //   //   required BuildContext context,
-// //   //   required Map<String, dynamic> rideData,
-// //   // }) async {
-// //   //   final prefs = await SharedPreferences.getInstance();
-// //   //   final String? token = prefs.getString("auth_token");
-
-// //   //   // Save orderId
-// //   //   await prefs.setString("order_id", orderId);
-
-// //   //   if (token == null || token.isEmpty) {
-// //   //     Fluttertoast.showToast(
-// //   //       msg: "Authentication token missing",
-// //   //       toastLength: Toast.LENGTH_SHORT,
-// //   //       gravity: ToastGravity.BOTTOM,
-// //   //       backgroundColor: Colors.red,
-// //   //       textColor: Colors.white,
-// //   //     );
-// //   //     return;
-// //   //   }
-
-// //   //   final Uri url = Uri.parse(
-// //   //     "https://corezap.smarttechbros.com/api/v1/order/update/$orderId",
-// //   //   );
-
-// //   //   print("🔵 ACCEPT ORDER API");
-// //   //   print("URL : $url");
-// //   //   print("Order ID : $orderId");
-// //   //   print("Status : $status");
-
-// //   //   try {
-// //   //     final response = await http.patch(
-// //   //       url,
-// //   //       headers: {
-// //   //         "Authorization": "Bearer $token",
-// //   //         "Content-Type": "application/json",
-// //   //       },
-// //   //       body: jsonEncode({
-// //   //         "orderStatus": status,
-// //   //       }),
-// //   //     );
-
-// //   //     print("✅ Status Code : ${response.statusCode}");
-// //   //     print("📦 Raw Response : ${response.body}");
-
-// //   //     final decoded = jsonDecode(response.body);
-// //   //     print("🎯 Decoded Response : $decoded");
-
-// //   //     /// ✅ SUCCESS / FAILURE HANDLING
-// //   //     if (decoded['success'] == true) {
-// //   //       // Navigate to ArrivingClient screen on success
-// //   //       if (context.mounted) {
-// //   //         CustomNavigator.push(
-// //   //           context,
-// //   //           ArrivingClient(
-// //   //             typeCheck: rideData['rideType'] == 'scheduled',
-// //   //             rideData: rideData,
-// //   //           ),
-// //   //           transition: TransitionType.slideLeft,
-// //   //         );
-// //   //       }
-        
-// //   //       Fluttertoast.showToast(
-// //   //         msg: decoded['message'] ?? "Order accepted successfully",
-// //   //         toastLength: Toast.LENGTH_SHORT,
-// //   //         gravity: ToastGravity.BOTTOM,
-// //   //         backgroundColor: Colors.green,
-// //   //         textColor: Colors.white,
-// //   //       );
-// //   //     } else {
-// //   //       Fluttertoast.showToast(
-// //   //         msg: decoded['message'] ?? "Order accept failed",
-// //   //         toastLength: Toast.LENGTH_LONG,
-// //   //         gravity: ToastGravity.BOTTOM,
-// //   //         backgroundColor: Colors.red,
-// //   //         textColor: Colors.white,
-// //   //       );
-// //   //     }
-// //   //   } catch (e) {
-// //   //     print("❌ Error accepting order : $e");
-
-// //   //     Fluttertoast.showToast(
-// //   //       msg: "Something went wrong. Please try again.",
-// //   //       toastLength: Toast.LENGTH_LONG,
-// //   //       gravity: ToastGravity.BOTTOM,
-// //   //       backgroundColor: Colors.red,
-// //   //       textColor: Colors.white,
-// //   //     );
-// //   //   }
-// //   // }
-
-// //   // static Future<void> ArrivingOrder({
-// //   //   required String orderId,
-// //   //   required String status,
-// //   // }) async {
-// //   //   final prefs = await SharedPreferences.getInstance();
-// //   //   final String? token = prefs.getString("auth_token");
-
-// //   //     final String? order_id = prefs.getString("order_id");
-
-// //   //   print("🔑 Token: $token");
-// //   //   print("📦 Order ID: $orderId");
-
-// //   //   print("checkkkkk_the_ariving_status  ${status}");
-
-// //   //   final Uri url = Uri.parse(
-// //   //     "https://corezap.smarttechbros.com/api/v1/order/update/$order_id",
-// //   //   );
-
-// //   //   print("🔵 ARRIVING ORDER API");
-// //   //   print("URL : $url");
-
-// //   //   try {
-// //   //     final response = await http.patch(
-// //   //       url,
-// //   //       headers: {
-// //   //         "Authorization": "Bearer $token",
-// //   //         "Content-Type": "application/json",
-// //   //       },
-// //   //       body: jsonEncode({
-// //   //         "orderStatus": status,
-// //   //       }),
-// //   //     );
-
-// //   //     print("✅ Status Code : ${response.statusCode}");
-// //   //     print("📦 Raw Response : ${response.body}");
-
-// //   //     final decoded = jsonDecode(response.body);
-// //   //     print("🎯 Decoded Response : $decoded");
-
-// //   //     /// ✅ SHOW TOAST IF API FAILS
-// //   //     if (decoded['success'] == false) {
-// //   //       Fluttertoast.showToast(
-// //   //         msg: decoded['message'],
-// //   //         toastLength: Toast.LENGTH_LONG,
-// //   //         gravity: ToastGravity.BOTTOM,
-// //   //         backgroundColor: Colors.red,
-// //   //         textColor: Colors.white,
-// //   //       );
-// //   //     }
-// //   //   } catch (e) {
-// //   //     print("❌ Error arriving order : $e");
-
-// //   //     Fluttertoast.showToast(
-// //   //       msg: "Something went wrong",
-// //   //       toastLength: Toast.LENGTH_SHORT,
-// //   //       gravity: ToastGravity.BOTTOM,
-// //   //     );
-// //   //   }
-// //   // }
-
-// //   static Future<void> declineOrder({
-// //     String? orderId,
-// //   }) async {
-// //     final prefs = await SharedPreferences.getInstance();
-// //     final String? token = prefs.getString("auth_token");
-
-// //     final String? order_id = prefs.getString("order_id");
-
-// //     print("my___token_here ${token}");
-// //     print("declineddddd__myyyyy_orderid_iss ${orderId}");
-
-// //     final Uri url = Uri.parse(
-// //       "https://corezap.smarttechbros.com/api/v1/order/decline/$order_id",
-// //     );
-
-// //     print("🔵 DECLINE ORDER API");
-// //     print("URL : $url");
-
-// //     try {
-// //       final response = await http.patch(
-// //         url,
-// //         headers: {
-// //           "Authorization": "Bearer $token",
-// //           "Content-Type": "application/json",
-// //         },
-// //       );
-
-// //       print("✅ Status Code : ${response.statusCode}");
-// //       print("📦 Raw Response : ${response.body}");
-
-// //       final decoded = jsonDecode(response.body);
-// //       print("🎯 Decoded Response : $decoded");
-// //         Fluttertoast.showToast(
-// //           msg: decoded['message'] ?? "start   successfully",
-// //           toastLength: Toast.LENGTH_SHORT,
-// //           gravity: ToastGravity.BOTTOM,
-// //           backgroundColor: Colors.green,
-// //           textColor: Colors.white,
-// //         );
-// //     } catch (e) {
-// //       print("❌ Error declining order : $e");
-// //     }
-// //   }
-
-//   // static Future<void> VerifyOtpOrder({
-//   //   required String orderId,
-//   //   required String rideOtpEnter,
-//   // }) async {
-//   //   final prefs = await SharedPreferences.getInstance();
-//   //   final String? token = prefs.getString("auth_token");
-
-//   //   final String? order_id = prefs.getString("order_id");
-
-//   //   print("my___token_here ${token}");
-//   //   print("myyyyy_orderid_iss in verifyOtpppp>>>>> ${order_id}");
-
-//   //   final Uri url = Uri.parse(
-//   //     "https://corezap.smarttechbros.com/api/v1/order/verifyOtp",
-//   //   );
-
-//   //   print("🔵 ACCEPT ORDER API");
-//   //   print("URL : $url");
-
-//   //   try {
-//   //     final response = await http.post(
-//   //       url,
-//   //       headers: {
-//   //         "Authorization": "Bearer $token",
-//   //         "Content-Type": "application/json",
-//   //       },
-//   //       body: jsonEncode({
-//   //         "orderId": order_id,
-//   //         "rideOtp": rideOtpEnter
-//   //       }),
-//   //     );
-
-//   //     print("arriivinngggggggggggggggggggggggg");
-//   //     print("✅ Status Code : ${response.statusCode}");
-//   //     print("📦 Raw Response arrivinggggggggg : ${response.body}");
-//   //     print("arriivinngggggggggggggggggggggggg");
-
-//   //     final decoded = jsonDecode(response.body);
-//   //     print("🎯 Decoded Response : $decoded");
-//   //   } catch (e) {
-//   //     print("❌ Error accepting order : $e");
-//   //   }
-//   // }
-
-
-
-
-
-// //   //   static Future<void> startStripOrder({
-// //   //   required String orderId,
-// //   //   required String status,
-// //   //   required BuildContext context,
-    
-// //   // }) async {
-// //   //   final prefs = await SharedPreferences.getInstance();
-// //   //   final String? token = prefs.getString("auth_token");
-
-// //   //   // Save orderId
-// //   //   // await prefs.setString("order_id", orderId);
-
-// //   //   final String? order_id = prefs.getString("order_id");
-
-
-// //   //   print("myyyyy>>>>start_trip_orderiddd>>>>>>sharedpref  ${order_id}");
-
-// //   //   if (token == null || token.isEmpty) {
-// //   //     Fluttertoast.showToast(
-// //   //       msg: "Authentication token missing",
-// //   //       toastLength: Toast.LENGTH_SHORT,
-// //   //       gravity: ToastGravity.BOTTOM,
-// //   //       backgroundColor: Colors.red,
-// //   //       textColor: Colors.white,
-// //   //     );
-// //   //     return;
-// //   //   }
-
-// //   //   final Uri url = Uri.parse(
-// //   //     "https://corezap.smarttechbros.com/api/v1/order/update/$order_id",
-// //   //   );
-
-// //   //   print("🔵 ACCEPT ORDER API");
-// //   //   print("URL : $url");
-// //   //   print("Order ID : $orderId");
-// //   //   print("Status : $status");
-
-// //   //   try {
-// //   //     final response = await http.patch(
-// //   //       url,
-// //   //       headers: {
-// //   //         "Authorization": "Bearer $token",
-// //   //         "Content-Type": "application/json",
-// //   //       },
-// //   //       // body: jsonEncode({
-// //   //       //   "orderStatus": status,
-// //   //       // }),
-
-// //   //        body: jsonEncode({
-// //   //         "orderStatus": "Progress",
-// //   //       }),
-// //   //     );
-
-// //   //  print("starttripppppp_progresss>>>>>>> Status Code : ${response.statusCode}");
-// //   //     print("starttripppppp_progresss >>>>>>>>>>Raw Response : ${response.body}");
-
-// //   //     final decoded = jsonDecode(response.body);
-// //   //     print("starttripppppp_progresss resposneeeeee Decoded Response : $decoded");
-
-// //   //     /// ✅ SUCCESS / FAILURE HANDLING
-// //   //     if (decoded['success'] == true) {
-// //   //       final data = decoded['data'];
-        
-// //   //       Fluttertoast.showToast(
-// //   //         msg: "Trip started successfully",
-// //   //         toastLength: Toast.LENGTH_SHORT,
-// //   //         gravity: ToastGravity.BOTTOM,
-// //   //         backgroundColor: Colors.green,
-// //   //         textColor: Colors.white,
-// //   //       );
-// //   //     } else {
-// //   //       Fluttertoast.showToast(
-// //   //         msg: decoded['message'] ?? "Failed to start trip",
-// //   //         toastLength: Toast.LENGTH_LONG,
-// //   //         gravity: ToastGravity.BOTTOM,
-// //   //         backgroundColor: Colors.red,
-// //   //         textColor: Colors.white,
-// //   //       );
-// //   //     }
-// //   //   } catch (e) {
-// //   //     print("❌ Error accepting order : $e");
-
-// //   //     Fluttertoast.showToast(
-// //   //       msg: "Something went wrong. Please try again.",
-// //   //       toastLength: Toast.LENGTH_LONG,
-// //   //       gravity: ToastGravity.BOTTOM,
-// //   //       backgroundColor: Colors.red,
-// //   //       textColor: Colors.white,
-// //   //     );
-// //   //   }
-// //   // }
-
-
-
-// //   //    static Future<void> CompleteOrder({
-// //   //   required String orderId,
-// //   //   required String status,
-// //   //   required BuildContext context,
-   
-// //   // }) async {
-// //   //   final prefs = await SharedPreferences.getInstance();
-// //   //   final String? token = prefs.getString("auth_token");
-
-// //   //   // Save orderId
-// //   //   // await prefs.setString("order_id", orderId);
-
-// //   //   final String? order_id = prefs.getString("order_id");
-
-
-// //   //       print("myyyyy>>>>completeeeee_trip_orderiddd>>>>>>sharedpref  ${order_id}");
-
-
-// //   //   if (token == null || token.isEmpty) {
-// //   //     Fluttertoast.showToast(
-// //   //       msg: "Authentication token missing",
-// //   //       toastLength: Toast.LENGTH_SHORT,
-// //   //       gravity: ToastGravity.BOTTOM,
-// //   //       backgroundColor: Colors.red,
-// //   //       textColor: Colors.white,
-// //   //     );
-// //   //     return;
-// //   //   }
-
-// //   //   final Uri url = Uri.parse(
-// //   //     "https://corezap.smarttechbros.com/api/v1/order/update/$order_id",
-// //   //   );
-
-// //   //   print("🔵 ACCEPT ORDER API");
-// //   //   print("URL : $url");
-// //   //   print("Order ID : $orderId");
-// //   //   print("Status : $status");
-
-// //   //   try {
-// //   //     final response = await http.patch(
-// //   //       url,
-// //   //       headers: {
-// //   //         "Authorization": "Bearer $token",
-// //   //         "Content-Type": "application/json",
-// //   //       },
-// //   //       // body: jsonEncode({
-// //   //       //   "orderStatus": status,
-// //   //       // }),
-
-// //   //        body: jsonEncode({
-// //   //         "orderStatus": "Completed",
-// //   //       }),
-// //   //     );
-
-
-// //   //     print("completeddddddd>>>>>>> Status Code : ${response.statusCode}");
-// //   //     print("completeddddd rideeee >>>>>>>>>>Raw Response : ${response.body}");
-
-// //   //     final decoded = jsonDecode(response.body);
-// //   //     print("completeddddd resposneeeeee Decoded Response : $decoded");
-
-// //   //     /// ✅ SUCCESS / FAILURE HANDLING
-// //   //     if (decoded['success'] == true) {
-// //   //       final data = decoded['data'];
-        
-// //   //       Fluttertoast.showToast(
-// //   //         msg: "Trip completed successfully",
-// //   //         toastLength: Toast.LENGTH_SHORT,
-// //   //         gravity: ToastGravity.BOTTOM,
-// //   //         backgroundColor: Colors.green,
-// //   //         textColor: Colors.white,
-// //   //       );
-// //   //     } else {
-// //   //       Fluttertoast.showToast(
-// //   //         msg: decoded['message'] ?? "Failed to complete trip",
-// //   //         toastLength: Toast.LENGTH_LONG,
-// //   //         gravity: ToastGravity.BOTTOM,
-// //   //         backgroundColor: Colors.red,
-// //   //         textColor: Colors.white,
-// //   //       );
-// //   //     }
-// //   //   } catch (e) {
-// //   //     print("❌ Error accepting order : $e");
-
-// //   //     Fluttertoast.showToast(
-// //   //       msg: "Something went wrong. Please try again.",
-// //   //       toastLength: Toast.LENGTH_LONG,
-// //   //       gravity: ToastGravity.BOTTOM,
-// //   //       backgroundColor: Colors.red,
-// //   //       textColor: Colors.white,
-// //   //     );
-// //   //   }
-// //   // }
-
-// // }
-
-
-
-// import 'package:corezap_driver/controllers/controllers.dart';
-// import 'package:corezap_driver/controllers/home_controllers/order_update_controller.dart';
-// import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
-// import 'package:corezap_driver/utilities/app_buttons.dart';
-// import 'package:corezap_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
-// import 'package:corezap_driver/utilities/colors.dart';
-// import 'package:corezap_driver/utilities/colors/colors_list.dart';
-// import 'package:corezap_driver/utilities/custom_font.dart';
-// import 'package:corezap_driver/utilities/custom_images.dart';
-// import 'package:corezap_driver/utilities/navigator.dart';
-// import 'package:corezap_driver/views/scheduled_pickups/accepted_screen.dart';
-
-// import 'package:dotted_line/dotted_line.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_animate/flutter_animate.dart';
-// import 'package:fluttertoast/fluttertoast.dart';
-// import 'package:get/get.dart';
-// import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-// import 'dart:async';
-// import 'dart:convert';
-// import 'package:http/http.dart' as http;
-// import 'package:shared_preferences/shared_preferences.dart';
-
-// class LiveRide extends StatefulWidget {
-//   final Map<String, dynamic> rideData;
-  
-//   const LiveRide({super.key, required this.rideData});
-
-//   @override
-//   State<LiveRide> createState() => _LiveRideState();
-// }
-
-// class _LiveRideState extends State<LiveRide> {
-//   final StepperController stepperController = Get.find();
-//   final Controllers cancelRideController = Get.find();
-//   final OrderUpdateController orderUpdateController = Get.find<OrderUpdateController>();
-
-//   // Pickup & Drop LatLng
-//   LatLng? pickupLatLng;
-//   LatLng? dropLatLng;
-
-//   final Set<Marker> _markers = {};
-//   GoogleMapController? _mapController;
-
-//   // Timer for auto-cancel
-//   Timer? _autoCancelTimer;
-//   int _secondsRemaining = 10;
-//   bool _isTimerRunning = true;
-//   bool _hasAccepted = false;
-//   bool _hasCancelled = false;
-
-//   // Local variables to store ride data
-//   late String _riderName;
-//   late String _riderPhone;
-//   late String _totalFare;
-//   late String _distance;
-//   late String _pickupAddress;
-//   late String _dropAddress;
-//   late String _formattedDate;
-//   late String _rideId;
-//   late String _orderId;
-
-//   @override
-//   void initState() {
-//     super.initState();
-
-//     // Extract and store ride data locally
-//     _extractAndStoreRideData();
-
-//     // Print received data for debugging
-//     print("\n================ LIVE RIDE INITIALIZED ================");
-//     print("📦 Full ride data received: ${widget.rideData}");
-//     print("📊 Stored local data:");
-//     print("├─ Rider Name: $_riderName");
-//     print("├─ Rider Phone: $_riderPhone");
-//     print("├─ Total Fare: $_totalFare");
-//     print("├─ Distance: $_distance");
-//     print("├─ Ride ID: $_rideId");
-//     print("└─ Order ID: $_orderId");
-
-//     WidgetsBinding.instance.addPostFrameCallback((_) {
-//       cancelRideController.cancelRideReasonIndex.value = -1;
-//     });
-
-//     if (pickupLatLng != null && dropLatLng != null) {
-//       _setMarkers();
-//     }
-
-//     // Start auto-cancel timer
-//     _startAutoCancelTimer();
-//   }
-
-//   void _extractAndStoreRideData() {
-//     try {
-//       // Store all data locally
-//       _riderName = widget.rideData['riderName']?.toString() ?? 'Customer';
-//       _riderPhone = widget.rideData['riderNumber']?.toString() ?? 'N/A';
-//       _totalFare = widget.rideData['totalFare']?.toString() ?? '0';
-//       _distance = widget.rideData['distance']?.toString() ?? '0';
-//       _rideId = widget.rideData['rideId']?.toString() ?? widget.rideData['orderId']?.toString() ?? 'N/A';
-//       _orderId = widget.rideData['orderId']?.toString() ?? 'N/A';
-      
-//       // Extract addresses with multiple fallbacks
-//       _pickupAddress = widget.rideData['startLocation']?['address']?.toString() ??
-//                       widget.rideData['pickup']?['address']?.toString() ??
-//                       'Manikonda Jagir, Hyderabad, Telangana';
-      
-//       _dropAddress = widget.rideData['endLocation']?['address']?.toString() ??
-//                     widget.rideData['destination']?['address']?.toString() ??
-//                     widget.rideData['dropoff']?['address']?.toString() ??
-//                     'Manikonda Jagir, Hyderabad, Telangana';
-      
-//       // Format date from timestamp
-//       final timestamp = widget.rideData['timestamp'];
-//       _formattedDate = timestamp != null 
-//           ? _formatDateFromTimestamp(timestamp is String ? int.parse(timestamp) : timestamp)
-//           : "30 August, 2025";
-
-//       // Extract coordinates
-//       _extractCoordinates();
-
-//     } catch (e) {
-//       print("❌ Error extracting ride data: $e");
-//       // Set default values if extraction fails
-//       _riderName = 'Customer';
-//       _riderPhone = 'N/A';
-//       _totalFare = '0';
-//       _distance = '0';
-//       _pickupAddress = 'Manikonda Jagir, Hyderabad, Telangana';
-//       _dropAddress = 'Manikonda Jagir, Hyderabad, Telangana';
-//       _formattedDate = "30 August, 2025";
-//       _rideId = 'N/A';
-//       _orderId = 'N/A';
-//       pickupLatLng = const LatLng(17.4065, 78.4772);
-//       dropLatLng = const LatLng(17.4120, 78.4850);
-//     }
-//   }
-
-//   void _extractCoordinates() {
-//     try {
-//       print("📍 Extracting coordinates...");
-      
-//       // Extract pickup coordinates - check multiple possible keys
-//       if (widget.rideData['pickup'] != null) {
-//         final pickup = widget.rideData['pickup'];
-//         pickupLatLng = LatLng(
-//           pickup['latitude']?.toDouble() ?? 0.0,
-//           pickup['longitude']?.toDouble() ?? 0.0,
-//         );
-//         print("📍 Pickup from 'pickup' key: $pickupLatLng");
-//       } 
-//       else if (widget.rideData['startLocation'] != null) {
-//         final startLocation = widget.rideData['startLocation'];
-//         if (startLocation['coordinates'] != null && startLocation['coordinates'].length >= 2) {
-//           pickupLatLng = LatLng(
-//             startLocation['coordinates'][1]?.toDouble() ?? 0.0,
-//             startLocation['coordinates'][0]?.toDouble() ?? 0.0,
-//           );
-//           print("📍 Pickup from 'startLocation' coordinates: $pickupLatLng");
-//         }
-//         else if (startLocation['latitude'] != null && startLocation['longitude'] != null) {
-//           pickupLatLng = LatLng(
-//             startLocation['latitude']?.toDouble() ?? 0.0,
-//             startLocation['longitude']?.toDouble() ?? 0.0,
-//           );
-//           print("📍 Pickup from 'startLocation' lat/lng: $pickupLatLng");
-//         }
-//       }
-
-//       // Extract drop coordinates - check multiple possible keys
-//       if (widget.rideData['destination'] != null) {
-//         final destination = widget.rideData['destination'];
-//         dropLatLng = LatLng(
-//           destination['latitude']?.toDouble() ?? 0.0,
-//           destination['longitude']?.toDouble() ?? 0.0,
-//         );
-//         print("📍 Drop from 'destination' key: $dropLatLng");
-//       } 
-//       else if (widget.rideData['endLocation'] != null) {
-//         final endLocation = widget.rideData['endLocation'];
-//         if (endLocation['coordinates'] != null && endLocation['coordinates'].length >= 2) {
-//           dropLatLng = LatLng(
-//             endLocation['coordinates'][1]?.toDouble() ?? 0.0,
-//             endLocation['coordinates'][0]?.toDouble() ?? 0.0,
-//           );
-//           print("📍 Drop from 'endLocation' coordinates: $dropLatLng");
-//         }
-//         else if (endLocation['latitude'] != null && endLocation['longitude'] != null) {
-//           dropLatLng = LatLng(
-//             endLocation['latitude']?.toDouble() ?? 0.0,
-//             endLocation['longitude']?.toDouble() ?? 0.0,
-//           );
-//           print("📍 Drop from 'endLocation' lat/lng: $dropLatLng");
-//         }
-//       }
-//       else if (widget.rideData['dropoff'] != null) {
-//         final dropoff = widget.rideData['dropoff'];
-//         dropLatLng = LatLng(
-//           dropoff['latitude']?.toDouble() ?? 0.0,
-//           dropoff['longitude']?.toDouble() ?? 0.0,
-//         );
-//         print("📍 Drop from 'dropoff' key: $dropLatLng");
-//       }
-
-//       // Fallback coordinates if none found
-//       if (pickupLatLng == null) {
-//         pickupLatLng = const LatLng(17.4065, 78.4772);
-//         print("⚠️ Using default pickup coordinates");
-//       }
-      
-//       if (dropLatLng == null) {
-//         dropLatLng = const LatLng(17.4120, 78.4850);
-//         print("⚠️ Using default drop coordinates");
-//       }
-
-//       print("✅ Final coordinates - Pickup: $pickupLatLng, Drop: $dropLatLng");
-      
-//     } catch (e) {
-//       print("❌ Error extracting coordinates: $e");
-//       pickupLatLng = const LatLng(17.4065, 78.4772);
-//       dropLatLng = const LatLng(17.4120, 78.4850);
-//     }
-//   }
-
-//   @override
-//   void dispose() {
-//     // Cancel timer when widget is disposed
-//     _autoCancelTimer?.cancel();
-//     super.dispose();
-//   }
-
-//   void _startAutoCancelTimer() {
-//     _autoCancelTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-//       if (_secondsRemaining > 0 && _isTimerRunning) {
-//         setState(() {
-//           _secondsRemaining--;
-//         });
-//       } else if (_secondsRemaining <= 0 && _isTimerRunning && !_hasAccepted) {
-//         // Auto-cancel after 10 seconds
-//         timer.cancel();
-//         _autoCancelRide();
-//       }
-//     });
-//   }
-
-//   Future<void> _autoCancelRide() async {
-//     if (_hasCancelled || _hasAccepted) return;
-    
-//     _hasCancelled = true;
-//     _isTimerRunning = false;
-    
-//     print("⏰ Auto-cancelling ride after 10 seconds...");
-    
-//     await OrderService.declineOrder(orderId: _orderId);
-    
-//     // Navigate back or show message
-//     if (mounted) {
-//       Get.back(); // Navigate back to previous screen
-//       Get.snackbar(
-//         'Ride Auto-Cancelled',
-//         'You did not accept the ride in time',
-//         backgroundColor: Colors.orange,
-//         colorText: Colors.white,
-//       );
-//     }
-//   }
-
-//   void _setMarkers() {
-//     if (pickupLatLng != null) {
-//       _markers.add(Marker(
-//         markerId: const MarkerId("pickup"),
-//         position: pickupLatLng!,
-//         infoWindow: const InfoWindow(title: "Pickup Location"),
-//         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-//       ));
-//     }
-
-//     if (dropLatLng != null) {
-//       _markers.add(Marker(
-//         markerId: const MarkerId("drop"),
-//         position: dropLatLng!,
-//         infoWindow: const InfoWindow(title: "Drop Location"),
-//         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-//       ));
-//     }
-//   }
-
-//   void _fitMapToMarkers() async {
-//     if (_mapController == null || pickupLatLng == null || dropLatLng == null) {
-//       return;
-//     }
-
-//     LatLngBounds bounds;
-//     if (pickupLatLng!.latitude > dropLatLng!.latitude &&
-//         pickupLatLng!.longitude > dropLatLng!.longitude) {
-//       bounds = LatLngBounds(southwest: dropLatLng!, northeast: pickupLatLng!);
-//     } else if (pickupLatLng!.longitude > dropLatLng!.longitude) {
-//       bounds = LatLngBounds(
-//         southwest: LatLng(pickupLatLng!.latitude, dropLatLng!.longitude),
-//         northeast: LatLng(dropLatLng!.latitude, pickupLatLng!.longitude),
-//       );
-//     } else if (pickupLatLng!.latitude > dropLatLng!.latitude) {
-//       bounds = LatLngBounds(
-//         southwest: LatLng(dropLatLng!.latitude, pickupLatLng!.longitude),
-//         northeast: LatLng(pickupLatLng!.latitude, dropLatLng!.longitude),
-//       );
-//     } else {
-//       bounds = LatLngBounds(southwest: pickupLatLng!, northeast: dropLatLng!);
-//     }
-
-//     CameraUpdate cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 100);
-//     _mapController!.animateCamera(cameraUpdate);
-//   }
-
-//   // Helper method to format timestamp
-//   String _formatDateFromTimestamp(int timestamp) {
-//     try {
-//       final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-//       return "${date.day} ${_getMonthName(date.month)}, ${date.year}";
-//     } catch (e) {
-//       return "30 August, 2025"; // Default fallback
-//     }
-//   }
-
-//   String _getMonthName(int month) {
-//     const months = [
-//       'January', 'February', 'March', 'April', 'May', 'June',
-//       'July', 'August', 'September', 'October', 'November', 'December'
-//     ];
-//     return months[month - 1];
-//   }
-
-//   Future<void> _acceptRide() async {
-//     if (_hasAccepted || _hasCancelled) return;
-    
-//     _hasAccepted = true;
-//     _isTimerRunning = false;
-//     _autoCancelTimer?.cancel();
-    
-//     print("🚗 Accepting ride with ID: $_orderId");
-
-//     stepperController.resetSteps();
-    
-//     await orderUpdateController.update_order_method(orderstatus: "Accepted", orderid: _orderId);
-    
-//     CustomNavigator.push(
-//       context,
-//       ArrivingClient(
-//         rideData: widget.rideData,
-//       ),
-//       transition: TransitionType.slideLeft,
-//     );
-//   }
-
-//   Future<void> _cancelRide() async {
-//     if (_hasCancelled || _hasAccepted) return;
-    
-//     _hasCancelled = true;
-//     _isTimerRunning = false;
-//     _autoCancelTimer?.cancel();
-    
-//     await OrderService.declineOrder(orderId: _orderId);
-    
-//     Get.back(); // Navigate back
-//     Get.snackbar(
-//       'Ride Cancelled',
-//       'You have cancelled the ride',
-//       backgroundColor: Colors.orange,
-//       colorText: Colors.white,
-//     );
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final double w = MediaQuery.of(context).size.width;
-
-//     // Debug: Print current values
-//     print("\n🎨 BUILDING LiveRide WIDGET 🎨");
-//     print("📊 Using local stored data:");
-//     print("├─ riderName: $_riderName");
-//     print("├─ riderPhone: $_riderPhone");
-//     print("├─ totalFare: $_totalFare");
-//     print("├─ distance: $_distance");
-//     print("├─ pickupAddress: $_pickupAddress");
-//     print("├─ dropAddress: $_dropAddress");
-//     print("└─ formattedDate: $_formattedDate");
-
-//     return Scaffold(
-//       backgroundColor: AppColors.white,
-//       body: SafeArea(
-//         child: SingleChildScrollView(
-//           padding: EdgeInsets.all(w * 0.04),
-//           child: Column(
-//             children: [
-//               // Timer display
-//               _timerWidget(context, w),
-//               SizedBox(height: w * 0.02),
-//               _dateText(context, w, _formattedDate),
-//               SizedBox(height: w * 0.02),
-//               _fareCard(context, w, _riderName, _totalFare, _riderPhone, _rideId, _orderId),
-//               SizedBox(height: w * 0.03),
-//               _mapView(w),
-//               SizedBox(height: w * 0.04),
-//               _locationInfo(context, w, _pickupAddress, _dropAddress),
-//               SizedBox(height: w * 0.04),
-//               _distanceCard(context, w, _distance),
-//               SizedBox(height: w * 0.03),
-//               _actionButtons(context, w),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _timerWidget(BuildContext context, double w) {
-//     return Container(
-//       padding: EdgeInsets.symmetric(horizontal: w * 0.04, vertical: w * 0.02),
-//       decoration: BoxDecoration(
-//         color: _secondsRemaining <= 3 ? Colors.red.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
-//         borderRadius: BorderRadius.circular(w * 0.02),
-//         border: Border.all(
-//           color: _secondsRemaining <= 3 ? Colors.red : Colors.orange,
-//         ),
-//       ),
-//       child: Row(
-//         mainAxisAlignment: MainAxisAlignment.center,
-//         children: [
-//           Icon(
-//             Icons.timer,
-//             size: w * 0.05,
-//             color: _secondsRemaining <= 3 ? Colors.red : Colors.orange,
-//           ),
-//           SizedBox(width: w * 0.02),
-//           Text(
-//             'Auto-cancel in: $_secondsRemaining seconds',
-//             style: TextStyle(
-//               fontSize: w * 0.04,
-//               fontWeight: FontWeight.w600,
-//               color: _secondsRemaining <= 3 ? Colors.red : Colors.orange,
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   Widget _dateText(BuildContext context, double w, String date) {
-//     return AppFonts.textPoppins(
-//       context,
-//       date,
-//       w * 0.04,
-//       FontWeight.w500,
-//       const Color(0xFF5F6165),
-//       TextAlign.center,
-//       TextOverflow.visible,
-//     );
-//   }
-
-//   Widget _fareCard(BuildContext context, double w, String riderName, String totalFare, String riderPhone, String rideId, String orderId) {
-//     return Container(
-//       padding: EdgeInsets.symmetric(horizontal: w * 0.04, vertical: w * 0.03),
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.circular(w * 0.035),
-//         boxShadow: [
-//           BoxShadow(
-//             color: Colors.black.withOpacity(0.08),
-//             blurRadius: 10,
-//             offset: const Offset(0, 4),
-//           ),
-//         ],
-//         border: Border.all(color: AppColors.mediumGray.withOpacity(0.3)),
-//       ),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Row(
-//             children: [
-//               Image.asset(
-//                 "assets/images/profil.png",
-//                 height: w * 0.12,
-//                 width: w * 0.12,
-//               ),
-//               SizedBox(width: w * 0.04),
-//               Expanded(
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     AppFonts.textPoppins(
-//                       context,
-//                       riderName,
-//                       w * 0.048,
-//                       FontWeight.w600,
-//                       AppColors.black,
-//                       TextAlign.start,
-//                       TextOverflow.ellipsis,
-//                     ),
-//                     SizedBox(height: w * 0.01),
-//                     AppFonts.textPoppins(
-//                       context,
-//                       riderPhone,
-//                       w * 0.035,
-//                       FontWeight.w500,
-//                       AppColors.mediumGray,
-//                       TextAlign.start,
-//                       TextOverflow.ellipsis,
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//               Column(
-//                 crossAxisAlignment: CrossAxisAlignment.end,
-//                 children: [
-//                   Row(
-//                     children: [
-//                       Icon(Icons.currency_rupee, color: AppColors.green, size: w * 0.065),
-//                       AppFonts.textPoppins(
-//                         context,
-//                         totalFare,
-//                         w * 0.055,
-//                         FontWeight.w600,
-//                         AppColors.green,
-//                         TextAlign.center,
-//                         TextOverflow.visible,
-//                       ),
-//                     ],
-//                   ),
-//                   SizedBox(height: w * 0.01),
-//                   Container(
-//                     padding: EdgeInsets.symmetric(horizontal: w * 0.03, vertical: w * 0.01),
-//                     decoration: BoxDecoration(
-//                       color: AppColors.green.withOpacity(0.1),
-//                       borderRadius: BorderRadius.circular(w * 0.02),
-//                     ),
-//                     child: AppFonts.textPoppins(
-//                       context,
-//                       widget.rideData['rideType']?.toString().toUpperCase() ?? 'IMMEDIATE',
-//                       w * 0.03,
-//                       FontWeight.w600,
-//                       AppColors.green,
-//                       TextAlign.center,
-//                       TextOverflow.visible,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ],
-//           ),
-//           SizedBox(height: w * 0.02),
-//           // Additional ride info
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             children: [
-//               _rideInfoItem(context, w, "Ride ID", rideId),
-//               _rideInfoItem(context, w, "Order ID", orderId),
-//             ],
-//           ),
-//         ],
-//       ),
-//     ).animate().fade(duration: 700.ms).scale();
-//   }
-
-//   Widget _rideInfoItem(BuildContext context, double w, String title, String value) {
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         AppFonts.textPoppins(
-//           context,
-//           title,
-//           w * 0.03,
-//           FontWeight.w500,
-//           AppColors.mediumGray,
-//           TextAlign.start,
-//           TextOverflow.ellipsis,
-//         ),
-//         SizedBox(height: w * 0.005),
-//         AppFonts.textPoppins(
-//           context,
-//           value,
-//           w * 0.035,
-//           FontWeight.w600,
-//           AppColors.black,
-//           TextAlign.start,
-//           TextOverflow.ellipsis,
-//         ),
-//       ],
-//     );
-//   }
-
-//   Widget _mapView(double w) {
-//     final initialPosition = pickupLatLng ?? const LatLng(17.4065, 78.4772);
-    
-//     return SizedBox(
-//       height: w * 0.95,
-//       child: ClipRRect(
-//         borderRadius: BorderRadius.circular(w * 0.03),
-//         child: GoogleMap(
-//           initialCameraPosition: CameraPosition(
-//             target: initialPosition,
-//             zoom: 14.5,
-//           ),
-//           myLocationEnabled: true,
-//           zoomControlsEnabled: false,
-//           markers: _markers,
-//           onMapCreated: (GoogleMapController controller) {
-//             _mapController = controller;
-//             if (pickupLatLng != null && dropLatLng != null) {
-//               _fitMapToMarkers(); // fit camera to both markers
-//             }
-//           },
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _locationInfo(BuildContext context, double w, String pickupAddress, String dropAddress) {
-//     return Column(
-//       children: [
-//         Row(
-//           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//           children: [
-//             Text(
-//               "Location",
-//               style: TextStyle(fontSize: w * 0.04, fontWeight: FontWeight.w500),
-//             ),
-//             Text.rich(
-//               TextSpan(
-//                 text: "Time ",
-//                 style: TextStyle(
-//                   fontSize: w * 0.029,
-//                   fontWeight: FontWeight.w500,
-//                   color: const Color(0xFF7C7C8D),
-//                 ),
-//                 children: [
-//                   TextSpan(
-//                     text: "10 min",
-//                     style: TextStyle(
-//                       fontSize: w * 0.04,
-//                       fontWeight: FontWeight.w600,
-//                       color: AppColors.black,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ],
-//         ),
-//         SizedBox(height: 10),
-//         Row(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Column(
-//               children: [
-//                 CustomImages.images(
-//                   "assets/icons/greenDot.png",
-//                   w * 0.05,
-//                   w * 0.05,
-//                 ),
-//                 SizedBox(
-//                   height: w * 0.1,
-//                   child: DottedLine(
-//                     direction: Axis.vertical,
-//                     dashLength: 4,
-//                     dashColor: AppColors.green,
-//                   ),
-//                 ),
-//                 CustomImages.images(
-//                   "assets/icons/redDot.png",
-//                   w * 0.05,
-//                   w * 0.05,
-//                 ),
-//               ],
-//             ),
-//             SizedBox(width: w * 0.03),
-//             Expanded(
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   _locationText(
-//                     context,
-//                     "Pickup",
-//                     pickupAddress,
-//                   ),
-//                   SizedBox(height: w * 0.05),
-//                   _locationText(
-//                     context,
-//                     "Drop",
-//                     dropAddress,
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ],
-//         ),
-//       ],
-//     );
-//   }
-
-//   Widget _locationText(BuildContext context, String title, String address) {
-//     final double w = MediaQuery.of(context).size.width;
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         AppFonts.textPoppins(
-//           context,
-//           title,
-//           w * 0.035,
-//           FontWeight.w500,
-//           AppColors.mediumGray,
-//           TextAlign.left,
-//           TextOverflow.visible,
-//         ),
-//         AppFonts.textPoppins(
-//           context,
-//           address,
-//           w * 0.039,
-//           FontWeight.w500,
-//           AppColors.black,
-//           TextAlign.left,
-//           TextOverflow.ellipsis,
-//           maxLines: 2,
-//         ),
-//       ],
-//     );
-//   }
-
-//   Widget _distanceCard(BuildContext context, double w, String distance) {
-//     // Calculate pickup and drop distances
-//     final pickupDistance = "${widget.rideData['driverDistance']?.toString() ?? '1.1'} Km";
-//     final dropDistance = "$distance Km";
-
-//     return SizedBox(
-//       height: w * 0.18,
-//       child: Row(
-//         children: [
-//           _distanceItem(context, w, "Pickup", pickupDistance),
-//           SizedBox(width: w * 0.03),
-//           _distanceItem(context, w, "Drop", dropDistance),
-//           SizedBox(width: w * 0.03),
-//           _distanceItem(context, w, "Fare", "₹${_totalFare}"),
-//         ],
-//       ),
-//     ).animate().fade(duration: 700.ms).scale();
-//   }
-
-//   Widget _distanceItem(BuildContext context, double w, String title, String value) {
-//     return Expanded(
-//       child: Container(
-//         padding: EdgeInsets.symmetric(
-//           vertical: w * 0.02,
-//           horizontal: w * 0.02,
-//         ),
-//         decoration: BoxDecoration(
-//           color: Colors.white,
-//           borderRadius: BorderRadius.circular(w * 0.025),
-//           boxShadow: [
-//             BoxShadow(
-//               color: Colors.black.withOpacity(0.08),
-//               blurRadius: 6,
-//               offset: const Offset(0, 3),
-//             ),
-//           ],
-//           border: Border.all(
-//             color: AppColors.mediumGray.withOpacity(0.3),
-//           ),
-//         ),
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             AppFonts.textPoppins(
-//               context,
-//               title,
-//               w * 0.037,
-//               FontWeight.w600,
-//               AppColors.mediumGray,
-//               TextAlign.center,
-//               TextOverflow.visible,
-//             ),
-//             AppFonts.textPoppins(
-//               context,
-//               value,
-//               w * 0.042,
-//               FontWeight.bold,
-//               AppColors.black,
-//               TextAlign.center,
-//               TextOverflow.visible,
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _actionButtons(BuildContext context, double w) {
-//     return Row(
-//       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//       children: [
-//         // Cancel Button
-//         ElevatedButton(
-//           onPressed: _hasAccepted || _hasCancelled ? null : _cancelRide,
-//           style: ElevatedButton.styleFrom(
-//             backgroundColor: AppColors.lightGray,
-//             foregroundColor: AppColors.mediumGray,
-//             minimumSize: Size(w * 0.43, w * 0.14),
-//             shape: RoundedRectangleBorder(
-//               borderRadius: BorderRadius.circular(10),
-//               side: BorderSide(color: AppColors.mediumGray.withOpacity(0.5)),
-//             ),
-//             elevation: 0,
-//             disabledBackgroundColor: AppColors.lightGray.withOpacity(0.5),
-//             disabledForegroundColor: AppColors.mediumGray.withOpacity(0.5),
-//           ),
-//           child: Text(
-//             "Cancel",
-//             style: TextStyle(
-//               fontSize: w * 0.045,
-//               fontWeight: FontWeight.w600,
-//             ),
-//           ),
-//         ),
-
-//         // Accept Button
-//         ElevatedButton(
-//           onPressed: _hasAccepted || _hasCancelled ? null : _acceptRide,
-//           style: ElevatedButton.styleFrom(
-//             backgroundColor: ColorsList.mainButtonColor,
-//             foregroundColor: ColorsList.mainButtonTextColor,
-//             minimumSize: Size(w * 0.43, w * 0.14),
-//             shape: RoundedRectangleBorder(
-//               borderRadius: BorderRadius.circular(10),
-//             ),
-//             elevation: 2,
-//             shadowColor: ColorsList.mainButtonColor.withOpacity(0.3),
-//             disabledBackgroundColor: ColorsList.mainButtonColor.withOpacity(0.5),
-//             disabledForegroundColor: ColorsList.mainButtonTextColor.withOpacity(0.5),
-//           ),
-//           child: Text(
-//             "Accept",
-//             style: TextStyle(
-//               fontSize: w * 0.045,
-//               fontWeight: FontWeight.w600,
-//             ),
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-// }
-
-// class OrderService {
-//   static Future<void> declineOrder({
-//     String? orderId,
-//   }) async {
-//     final prefs = await SharedPreferences.getInstance();
-//     final String? token = prefs.getString("auth_token");
-//     final String? order_id = prefs.getString("order_id");
-
-//     print("my___token_here ${token}");
-//     print("declineddddd__myyyyy_orderid_iss ${orderId}");
-
-//     final Uri url = Uri.parse(
-//       "https://corezap.smarttechbros.com/api/v1/order/decline/$order_id",
-//     );
-
-//     print("🔵 DECLINE ORDER API");
-//     print("URL : $url");
-
-//     try {
-//       final response = await http.patch(
-//         url,
-//         headers: {
-//           "Authorization": "Bearer $token",
-//           "Content-Type": "application/json",
-//         },
-//       );
-
-//       print("✅ Status Code : ${response.statusCode}");
-//       print("📦 Raw Response : ${response.body}");
-
-//       final decoded = jsonDecode(response.body);
-//       print("🎯 Decoded Response : $decoded");
-      
-//       Fluttertoast.showToast(
-//         msg: decoded['message'] ?? "Ride declined successfully",
-//         toastLength: Toast.LENGTH_SHORT,
-//         gravity: ToastGravity.BOTTOM,
-//         backgroundColor: Colors.green,
-//         textColor: Colors.white,
-//       );
-//     } catch (e) {
-//       print("❌ Error declining order : $e");
-//     }
-//   }
-
-
-  //   static Future<void> VerifyOtpOrder({
-  //   required String orderId,
-  //   required String rideOtpEnter,
-  // }) async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final String? token = prefs.getString("auth_token");
-
-  //   final String? order_id = prefs.getString("order_id");
-
-  //   print("my___token_here ${token}");
-  //   print("myyyyy_orderid_iss in verifyOtpppp>>>>> ${order_id}");
-
-  //   final Uri url = Uri.parse(
-  //     "https://corezap.smarttechbros.com/api/v1/order/verifyOtp",
-  //   );
-
-  //   print("🔵 ACCEPT ORDER API");
-  //   print("URL : $url");
-
-  //   try {
-  //     final response = await http.post(
-  //       url,
-  //       headers: {
-  //         "Authorization": "Bearer $token",
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: jsonEncode({
-  //         "orderId": order_id,
-  //         "rideOtp": rideOtpEnter
-  //       }),
-  //     );
-
-  //     print("arriivinngggggggggggggggggggggggg");
-  //     print("✅ Status Code : ${response.statusCode}");
-  //     print("📦 Raw Response arrivinggggggggg : ${response.body}");
-  //     print("arriivinngggggggggggggggggggggggg");
-
-  //     final decoded = jsonDecode(response.body);
-  //     print("🎯 Decoded Response : $decoded");
-  //   } catch (e) {
-  //     print("❌ Error accepting order : $e");
-  //   }
-  // }
-// }
-
-
-import 'package:corezap_driver/controllers/controllers.dart';
 import 'package:corezap_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
-import 'package:corezap_driver/utilities/app_buttons.dart';
-import 'package:corezap_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
 import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/utilities/colors/colors_list.dart';
 import 'package:corezap_driver/utilities/custom_font.dart';
 import 'package:corezap_driver/utilities/custom_images.dart';
+import 'package:corezap_driver/utilities/map_helper.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
 import 'package:corezap_driver/views/scheduled_pickups/accepted_screen.dart';
-
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get_navigation/src/snackbar/snackbar.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:geolocator/geolocator.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
+import 'dart:ui' as ui;
+import 'dart:typed_data';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class LiveRide extends StatefulWidget {
+class RideRequestScreen extends StatefulWidget {
   final Map<String, dynamic> rideData;
-  
-  const LiveRide({super.key, required this.rideData});
+
+  const RideRequestScreen({super.key, required this.rideData});
 
   @override
-  State<LiveRide> createState() => _LiveRideState();
+  _RideRequestScreenState createState() => _RideRequestScreenState();
 }
 
-class _LiveRideState extends State<LiveRide> {
-  final StepperController stepperController = Get.find();
-  final Controllers cancelRideController = Get.find();
-  final OrderUpdateController orderUpdateController = Get.find<OrderUpdateController>();
+class _RideRequestScreenState extends State<RideRequestScreen> {
+  // Google API Key for Directions
+  static const String GOOGLE_API_KEY =
+      'AIzaSyCtM1jo8qzhEn2XZ8SVCoboULcondCjZio';
 
-  // Pickup & Drop LatLng
-  LatLng? pickupLatLng;
-  LatLng? dropLatLng;
+  // Timer - 1 minute = 60 seconds
+  static const int TOTAL_TIME = 60;
+  int _timer = TOTAL_TIME;
+  double _progress = 1.0;
+  Timer? _countdownTimer;
 
-  final Set<Marker> _markers = {};
+  // Map & Location
   GoogleMapController? _mapController;
+  LatLng? _driverLocation;
+  double _driverHeading = 0;
+  double _distanceToPickup = 0;
+  bool _locationError = false;
+  StreamSubscription<Position>? _positionStreamSubscription;
 
-  // Timer for auto-cancel
-  Timer? _autoCancelTimer;
-  int _secondsRemaining = 10;
-  bool _isTimerRunning = true;
+  // Route Information
+  Map<String, String> _routeInfo = {'distance': '', 'duration': ''};
+
+  // Controllers
+  final OrderUpdateController transactionController =
+      Get.find<OrderUpdateController>();
+  final StepperController stepperController = Get.find();
+  final OrderUpdateController orderUpdateController =
+      Get.find<OrderUpdateController>();
+
+  // Ride Data
+  Map<String, dynamic>? _rideData;
+  bool _isLoading = true;
+  List<LatLng> _routeCoordinates = [];
+  List<LatLng> _pickupToDropCoordinates = [];
+
+  // Map Elements
+  Set<Marker> markers = {};
+  Set<Circle> circles = {};
+  Set<Polyline> _polylines = {};
+
+  // Custom Marker Icons
+  BitmapDescriptor? _bikeMarkerIcon;
+  BitmapDescriptor? _pickupIcon;
+  BitmapDescriptor? _dropIcon;
+
+  // Location tracking
+  double? _currentLatitude;
+  double? _currentLongitude;
+  StreamSubscription<Position>? _positionStream;
+
+  // State Flags
   bool _hasAccepted = false;
+  bool _hasDeclined = false;
+  bool _isDeclining = false;
+  bool _isTimerRunning = true;
+  Timer? _autoCancelTimer;
   bool _hasCancelled = false;
 
-  // Local variables to store ride data
-  late String _riderName;
-  late String _riderPhone;
-  late String _totalFare;
-  late String _distance;
-  late String _pickupAddress;
-  late String _dropAddress;
-  late String _formattedDate;
-  late String _rideId;
-  late String _orderId;
+  // Cancel Reasons
+  final List<Map<String, dynamic>> _cancelReasons = [
+    {'id': 1, 'label': 'Too many rides', 'icon': Icons.directions_bike},
+    {'id': 2, 'label': 'Wrong pickup location', 'icon': Icons.location_on},
+    {'id': 3, 'label': 'Waiting too long at pickup', 'icon': Icons.timer},
+    {'id': 4, 'label': "Bad weather / can't travel now", 'icon': Icons.cloud},
+    {'id': 5, 'label': 'Traffic jam near pickup point', 'icon': Icons.traffic},
+    {'id': 6, 'label': 'Other', 'icon': Icons.edit},
+  ];
+  int? _selectedReasonIndex;
+
+  // Cancel Sheet
+  bool _showCancelSheet = false;
+
+  // Ride Data Fields
+  String? _riderName;
+  String? _riderPhone;
+  String? _totalFare;
+  String? _distance;
+  String? _pickupAddress;
+  String? _dropAddress;
+  String? _formattedDate;
+  String? _rideId;
+  String? _orderId;
+
+  LatLng? dropLatLng;
+  LatLng? pickupLatLng;
 
   @override
   void initState() {
     super.initState();
 
-    // Extract and store ride data locally
-    _extractAndStoreRideData();
-
-    // Print received data for debugging
-    print("\n================ LIVE RIDE INITIALIZED ================");
-    print("📦 Full ride data received: ${widget.rideData}");
-    print("📊 Stored local data:");
-    print("├─ Rider Name: $_riderName");
-    print("├─ Rider Phone: $_riderPhone");
-    print("├─ Total Fare: $_totalFare");
-    print("├─ Distance: $_distance");
-    print("├─ Ride ID: $_rideId");
-    print("└─ Order ID: $_orderId");
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      cancelRideController.cancelRideReasonIndex.value = -1;
+    // Initialize everything
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _initializeAll();
     });
+  }
 
-    if (pickupLatLng != null && dropLatLng != null) {
+  Future<void> _initializeAll() async {
+    setState(() => _isLoading = true);
+
+    try {
+      // Extract ride data FIRST
+      _extractAndStoreRideData();
+
+      // Load bike icon only
+      await _loadCustomBikeMarker();
+
+      // Start location tracking and get directions
+      await _startLocationTracking();
+      await _getDirections();
+
+      // Set initial markers
       _setMarkers();
-    }
 
-    // Start auto-cancel timer
-    _startAutoCancelTimer();
-  }
+      // Start timer
+      _startTimer();
 
-  void _extractAndStoreRideData() {
-    try {
-      // Store all data locally
-      _riderName = widget.rideData['riderName']?.toString() ?? 'Customer';
-      _riderPhone = widget.rideData['riderNumber']?.toString() ?? 'N/A';
-      _totalFare = widget.rideData['totalFare']?.toString() ?? '0';
-      _distance = widget.rideData['distance']?.toString() ?? '0';
-      _rideId = widget.rideData['rideId']?.toString() ?? widget.rideData['orderId']?.toString() ?? 'N/A';
-      _orderId = widget.rideData['orderId']?.toString() ?? 'N/A';
-      
-      // Extract addresses with multiple fallbacks
-      _pickupAddress = widget.rideData['startLocation']?['address']?.toString() ??
-                      widget.rideData['pickup']?['address']?.toString() ??
-                      'Manikonda Jagir, Hyderabad, Telangana';
-      
-      _dropAddress = widget.rideData['endLocation']?['address']?.toString() ??
-                    widget.rideData['destination']?['address']?.toString() ??
-                    widget.rideData['dropoff']?['address']?.toString() ??
-                    'Manikonda Jagir, Hyderabad, Telangana';
-      
-      // Format date from timestamp
-      final timestamp = widget.rideData['timestamp'];
-      _formattedDate = timestamp != null 
-          ? _formatDateFromTimestamp(timestamp is String ? int.parse(timestamp) : timestamp)
-          : "30 August, 2025";
-
-      // Extract coordinates
-      _extractCoordinates();
-
+      // Start location listening
+      _listenToLocation();
     } catch (e) {
-      print("❌ Error extracting ride data: $e");
-      // Set default values if extraction fails
-      _riderName = 'Customer';
-      _riderPhone = 'N/A';
-      _totalFare = '0';
-      _distance = '0';
-      _pickupAddress = 'Manikonda Jagir, Hyderabad, Telangana';
-      _dropAddress = 'Manikonda Jagir, Hyderabad, Telangana';
-      _formattedDate = "30 August, 2025";
-      _rideId = 'N/A';
-      _orderId = 'N/A';
-      pickupLatLng = const LatLng(17.4065, 78.4772);
-      dropLatLng = const LatLng(17.4120, 78.4850);
-    }
-  }
-
-  void _extractCoordinates() {
-    try {
-      print("📍 Extracting coordinates...");
-      
-      // Extract pickup coordinates - check multiple possible keys
-      if (widget.rideData['pickup'] != null) {
-        final pickup = widget.rideData['pickup'];
-        pickupLatLng = LatLng(
-          pickup['latitude']?.toDouble() ?? 0.0,
-          pickup['longitude']?.toDouble() ?? 0.0,
-        );
-        print("📍 Pickup from 'pickup' key: $pickupLatLng");
-      } 
-      else if (widget.rideData['startLocation'] != null) {
-        final startLocation = widget.rideData['startLocation'];
-        if (startLocation['coordinates'] != null && startLocation['coordinates'].length >= 2) {
-          pickupLatLng = LatLng(
-            startLocation['coordinates'][1]?.toDouble() ?? 0.0,
-            startLocation['coordinates'][0]?.toDouble() ?? 0.0,
-          );
-          print("📍 Pickup from 'startLocation' coordinates: $pickupLatLng");
-        }
-        else if (startLocation['latitude'] != null && startLocation['longitude'] != null) {
-          pickupLatLng = LatLng(
-            startLocation['latitude']?.toDouble() ?? 0.0,
-            startLocation['longitude']?.toDouble() ?? 0.0,
-          );
-          print("📍 Pickup from 'startLocation' lat/lng: $pickupLatLng");
-        }
-      }
-
-      // Extract drop coordinates - check multiple possible keys
-      if (widget.rideData['destination'] != null) {
-        final destination = widget.rideData['destination'];
-        dropLatLng = LatLng(
-          destination['latitude']?.toDouble() ?? 0.0,
-          destination['longitude']?.toDouble() ?? 0.0,
-        );
-        print("📍 Drop from 'destination' key: $dropLatLng");
-      } 
-      else if (widget.rideData['endLocation'] != null) {
-        final endLocation = widget.rideData['endLocation'];
-        if (endLocation['coordinates'] != null && endLocation['coordinates'].length >= 2) {
-          dropLatLng = LatLng(
-            endLocation['coordinates'][1]?.toDouble() ?? 0.0,
-            endLocation['coordinates'][0]?.toDouble() ?? 0.0,
-          );
-          print("📍 Drop from 'endLocation' coordinates: $dropLatLng");
-        }
-        else if (endLocation['latitude'] != null && endLocation['longitude'] != null) {
-          dropLatLng = LatLng(
-            endLocation['latitude']?.toDouble() ?? 0.0,
-            endLocation['longitude']?.toDouble() ?? 0.0,
-          );
-          print("📍 Drop from 'endLocation' lat/lng: $dropLatLng");
-        }
-      }
-      else if (widget.rideData['dropoff'] != null) {
-        final dropoff = widget.rideData['dropoff'];
-        dropLatLng = LatLng(
-          dropoff['latitude']?.toDouble() ?? 0.0,
-          dropoff['longitude']?.toDouble() ?? 0.0,
-        );
-        print("📍 Drop from 'dropoff' key: $dropLatLng");
-      }
-
-      // Fallback coordinates if none found
-      if (pickupLatLng == null) {
-        pickupLatLng = const LatLng(17.4065, 78.4772);
-        print("⚠️ Using default pickup coordinates");
-      }
-      
-      if (dropLatLng == null) {
-        dropLatLng = const LatLng(17.4120, 78.4850);
-        print("⚠️ Using default drop coordinates");
-      }
-
-      print("✅ Final coordinates - Pickup: $pickupLatLng, Drop: $dropLatLng");
-      
-    } catch (e) {
-      print("❌ Error extracting coordinates: $e");
-      pickupLatLng = const LatLng(17.4065, 78.4772);
-      dropLatLng = const LatLng(17.4120, 78.4850);
+      print('❌ Error initializing: $e');
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
   @override
   void dispose() {
-    // Cancel timer when widget is disposed
-    _autoCancelTimer?.cancel();
+    _countdownTimer?.cancel();
+    _positionStreamSubscription?.cancel();
+    _positionStream?.cancel();
+    _mapController?.dispose();
     super.dispose();
   }
 
-  void _startAutoCancelTimer() {
-    _autoCancelTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_secondsRemaining > 0 && _isTimerRunning) {
-        setState(() {
-          _secondsRemaining--;
-        });
-      } else if (_secondsRemaining <= 0 && _isTimerRunning && !_hasAccepted) {
-        // Auto-cancel after 10 seconds
-        timer.cancel();
-        _autoCancelRide();
-      }
-    });
-  }
-
-  Future<void> _autoCancelRide() async {
-    if (_hasCancelled || _hasAccepted) return;
-    
-    _hasCancelled = true;
-    _isTimerRunning = false;
-    
-    print("⏰ Auto-cancelling ride after 10 seconds...");
-    
-    await OrderService.declineOrder(orderId: _orderId);
-    
-    // Navigate back or show message
-    if (mounted) {
-      Get.back(); // Navigate back to previous screen
-      Get.snackbar(
-        'Ride Auto-Cancelled',
-        'You did not accept the ride in time',
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
-      );
-    }
-  }
-
-  void _setMarkers() {
-    if (pickupLatLng != null) {
-      _markers.add(Marker(
-        markerId: const MarkerId("pickup"),
-        position: pickupLatLng!,
-        infoWindow: const InfoWindow(title: "Pickup Location"),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-      ));
-    }
-
-    if (dropLatLng != null) {
-      _markers.add(Marker(
-        markerId: const MarkerId("drop"),
-        position: dropLatLng!,
-        infoWindow: const InfoWindow(title: "Drop Location"),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-      ));
-    }
-  }
-
-  void _fitMapToMarkers() async {
-    if (_mapController == null || pickupLatLng == null || dropLatLng == null) {
-      return;
-    }
-
-    LatLngBounds bounds;
-    if (pickupLatLng!.latitude > dropLatLng!.latitude &&
-        pickupLatLng!.longitude > dropLatLng!.longitude) {
-      bounds = LatLngBounds(southwest: dropLatLng!, northeast: pickupLatLng!);
-    } else if (pickupLatLng!.longitude > dropLatLng!.longitude) {
-      bounds = LatLngBounds(
-        southwest: LatLng(pickupLatLng!.latitude, dropLatLng!.longitude),
-        northeast: LatLng(dropLatLng!.latitude, pickupLatLng!.longitude),
-      );
-    } else if (pickupLatLng!.latitude > dropLatLng!.latitude) {
-      bounds = LatLngBounds(
-        southwest: LatLng(dropLatLng!.latitude, pickupLatLng!.longitude),
-        northeast: LatLng(pickupLatLng!.latitude, dropLatLng!.longitude),
-      );
-    } else {
-      bounds = LatLngBounds(southwest: pickupLatLng!, northeast: dropLatLng!);
-    }
-
-    CameraUpdate cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 100);
-    _mapController!.animateCamera(cameraUpdate);
-  }
-
-  // Helper method to format timestamp
+  // Helper method to format date from timestamp
   String _formatDateFromTimestamp(int timestamp) {
     try {
       final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-      return "${date.day} ${_getMonthName(date.month)}, ${date.year}";
+      return DateFormat('dd MMMM, yyyy').format(date);
     } catch (e) {
-      return "30 August, 2025"; // Default fallback
+      return DateFormat('dd MMMM, yyyy').format(DateTime.now());
     }
-  }
-
-  String _getMonthName(int month) {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    return months[month - 1];
-  }
-
-  Future<void> _acceptRide() async {
-    if (_hasAccepted || _hasCancelled) return;
-    
-    _hasAccepted = true;
-    _isTimerRunning = false;
-    _autoCancelTimer?.cancel();
-    
-    print("🚗 Accepting ride with ID: $_orderId");
-
-    stepperController.resetSteps();
-    
-    await orderUpdateController.update_order_method(orderstatus: "Accepted", orderid: _orderId);
-    
-    CustomNavigator.push(
-      context,
-      ArrivingClient(
-        rideData: widget.rideData,
-      ),
-      transition: TransitionType.slideLeft,
-    );
   }
 
   Future<void> _cancelRide() async {
     if (_hasCancelled || _hasAccepted) return;
-    
+
+    if (_orderId == null) {
+      print("❌ Order ID is null, cannot cancel ride");
+      Fluttertoast.showToast(
+        msg: "Cannot cancel ride: Order ID not available",
+        toastLength: Toast.LENGTH_SHORT,
+      );
+      return;
+    }
+
     _hasCancelled = true;
     _isTimerRunning = false;
     _autoCancelTimer?.cancel();
-    
-    await OrderService.declineOrder(orderId: _orderId);
-    
-    Get.back(); // Navigate back
-    Get.snackbar(
-      'Ride Cancelled',
-      'You have cancelled the ride',
-      backgroundColor: Colors.orange,
-      colorText: Colors.white,
+
+    // Call the updated controller method
+    final result = await orderUpdateController.updateOrder(
+      orderStatus: "Cancelled",
+      orderId: _orderId!,
+      context: context,
+      rideData: _rideData,
+      stepControl: "Cancelled",
+    );
+
+    if (result?.success == true) {
+      // Only navigate back if API was successful
+      Get.back();
+      Get.snackbar(
+        'Ride Cancelled',
+        'You have cancelled the ride',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+    } else {
+      // Show error message
+      Get.snackbar(
+        'Error',
+        orderUpdateController.errorMessage.value.isNotEmpty
+            ? orderUpdateController.errorMessage.value
+            : 'Failed to cancel ride',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+  // Future<void> _cancelRide() async {
+  //   if (_hasCancelled || _hasAccepted) return;
+
+  //   if (_orderId == null) {
+  //     print("❌ Order ID is null, cannot cancel ride");
+  //     Fluttertoast.showToast(
+  //       msg: "Cannot cancel ride: Order ID not available",
+  //       toastLength: Toast.LENGTH_SHORT,
+  //     );
+  //     return;
+  //   }
+
+  //   _hasCancelled = true;
+  //   _isTimerRunning = false;
+  //   _autoCancelTimer?.cancel();
+
+  //   await OrderService.declineOrder(orderId: _orderId!);
+
+  //   Get.back();
+  //   Get.snackbar(
+  //     'Ride Cancelled',
+  //     'You have cancelled the ride',
+  //     backgroundColor: Colors.orange,
+  //     colorText: Colors.white,
+  //   );
+  // }
+
+  void _startTimer() {
+    _countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_hasAccepted || _hasDeclined) {
+        timer.cancel();
+        return;
+      }
+
+      if (_timer <= 1) {
+        timer.cancel();
+        _handleAutoDecline();
+      } else {
+        setState(() {
+          _timer--;
+          _progress = _timer / TOTAL_TIME;
+        });
+      }
+    });
+  }
+
+  /// Load bike marker (optional)
+  Future<void> _loadCustomBikeMarker() async {
+    try {
+      _bikeMarkerIcon = await MapHelper.loadCustomIcon(
+        assetPath: 'assets/images/bike2.png',
+        width: 150,
+        height: 150,
+      );
+      print('✅ Bike marker icon loaded');
+    } catch (e) {
+      print('❌ Error loading bike marker: $e');
+      _bikeMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(
+        BitmapDescriptor.hueBlue,
+      );
+    }
+  }
+
+  void _listenToLocation() {
+    _positionStream =
+        Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 10,
+          ),
+        ).listen((Position position) {
+          final LatLng newLocation = LatLng(
+            position.latitude,
+            position.longitude,
+          );
+          _updateMarkerOnly(newLocation, position.accuracy);
+          _currentLatitude = position.latitude;
+          _currentLongitude = position.longitude;
+        });
+  }
+
+  void _updateMarkerOnly(LatLng location, double accuracy) {
+    _currentLatitude = location.latitude;
+    _currentLongitude = location.longitude;
+
+    setState(() {
+      // Update driver marker position
+      markers.removeWhere((marker) => marker.markerId.value == 'driver');
+
+      markers.add(
+        Marker(
+          markerId: const MarkerId('driver'),
+          position: location,
+          icon:
+              _bikeMarkerIcon ??
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          anchor: const Offset(0.5, 0.5),
+          rotation: _driverHeading,
+          flat: true,
+          infoWindow: const InfoWindow(
+            title: 'Your Location',
+            snippet: 'You are here',
+          ),
+          zIndex: 2,
+        ),
+      );
+
+      // Update circles
+      circles.clear();
+
+      // Grey outer circle (accuracy shadow)
+      circles.add(
+        Circle(
+          circleId: const CircleId('outer_shadow'),
+          center: location,
+          radius: accuracy + 80,
+          fillColor: Colors.grey.withOpacity(0.25),
+          strokeColor: Colors.transparent,
+        ),
+      );
+
+      // Green inner circle (center)
+      circles.add(
+        Circle(
+          circleId: const CircleId('inner_green'),
+          center: location,
+          radius: 60,
+          fillColor: Colors.green.withOpacity(0.35),
+          strokeColor: Colors.green,
+          strokeWidth: 1,
+        ),
+      );
+    });
+  }
+
+  void _extractAndStoreRideData() {
+    print("my_rideeee_datatatt ${widget.rideData}");
+    try {
+      // Store all data locally
+      _rideData = {
+        'orderId': widget.rideData['orderId']?.toString() ?? 'N/A',
+        'riderId': widget.rideData['riderId'],
+        'riderName': widget.rideData['riderName']?.toString() ?? 'Customer',
+        'riderPhone': widget.rideData['riderNumber']?.toString() ?? 'N/A',
+        'riderImage': 'https://i.pravatar.cc/100',
+        'pickupLocation':
+            widget.rideData['startLocation']?['address']?.toString() ??
+            widget.rideData['pickup']?['address']?.toString() ??
+            '56, Apsara Complex, Sector A, Indrapuri, Bhopal, Madhya Pradesh 462022, India',
+        'dropLocation':
+            widget.rideData['endLocation']?['address']?.toString() ??
+            widget.rideData['destination']?['address']?.toString() ??
+            widget.rideData['dropoff']?['address']?.toString() ??
+            'GVFH+RFR, Agarkar Nagar, Pune, Maharashtra 411001, India',
+        'fare': widget.rideData['totalFare']?.toString() ?? '180',
+        'distance': widget.rideData['distance']?.toString() ?? '6.5',
+        'estimatedTime': '15',
+        'vehicleType': widget.rideData['vehicleType'] ?? 'sedan',
+        'rideOtp': widget.rideData['otp'],
+        'status': 'pending',
+      };
+
+      // Also store in local variables for easy access
+      _riderName = widget.rideData['riderName']?.toString() ?? 'Customer';
+      _riderPhone = widget.rideData['riderNumber']?.toString() ?? 'N/A';
+      _totalFare = widget.rideData['totalFare']?.toString() ?? '0';
+      _distance = widget.rideData['distance']?.toString() ?? '0';
+      _rideId =
+          widget.rideData['rideId']?.toString() ??
+          widget.rideData['orderId']?.toString() ??
+          'N/A';
+      _orderId = widget.rideData['orderId']?.toString() ?? 'N/A';
+
+      // Extract addresses with multiple fallbacks
+      _pickupAddress =
+          widget.rideData['startLocation']?['address']?.toString() ??
+          widget.rideData['pickup']?['address']?.toString() ??
+          '56, Apsara Complex, Sector A, Indrapuri, Bhopal, Madhya Pradesh 462022, India';
+
+      _dropAddress =
+          widget.rideData['endLocation']?['address']?.toString() ??
+          widget.rideData['destination']?['address']?.toString() ??
+          widget.rideData['dropoff']?['address']?.toString() ??
+          'GVFH+RFR, Agarkar Nagar, Pune, Maharashtra 411001, India';
+
+      // Format date from timestamp
+      final timestamp = widget.rideData['timestamp'];
+      _formattedDate = timestamp != null
+          ? _formatDateFromTimestamp(
+              timestamp is String ? int.parse(timestamp) : timestamp,
+            )
+          : DateFormat('dd MMMM, yyyy').format(DateTime.now());
+
+      // Extract coordinates
+      _extractCoordinates();
+
+      // Initialize driver location
+      _initializeDriverLocation();
+
+      // Calculate distance to pickup
+      if (_driverLocation != null && _rideData!['pickupCoordinates'] != null) {
+        _distanceToPickup = _calculateDistance(
+          _driverLocation!.latitude,
+          _driverLocation!.longitude,
+          _rideData!['pickupCoordinates'].latitude,
+          _rideData!['pickupCoordinates'].longitude,
+        );
+      }
+
+      print('✅ Ride data extracted successfully');
+      print('📍 Pickup: ${_pickupAddress}');
+      print('📍 Drop: ${_dropAddress}');
+    } catch (e) {
+      print("❌ Error extracting ride data: $e");
+      // Set default values if extraction fails
+      _rideData = {
+        'orderId': 'N/A',
+        'riderId': 'rider_123',
+        'riderName': 'Bzbsbsb',
+        'riderPhone': '+1234567890',
+        'riderImage': 'https://i.pravatar.cc/100',
+        'pickupLocation':
+            '56, Apsara Complex, Sector A, Indrapuri, Bhopal, Madhya Pradesh 462022, India',
+        'dropLocation':
+            'GVFH+RFR, Agarkar Nagar, Pune, Maharashtra 411001, India',
+        'fare': '180',
+        'distance': '6.5',
+        'estimatedTime': '15',
+        'vehicleType': 'sedan',
+        'rideOtp': '1234',
+        'status': 'pending',
+      };
+
+      // Use coordinates from your image (Bhopal to Pune)
+      _rideData!['pickupCoordinates'] = LatLng(23.2599, 77.4126); // Bhopal
+      _rideData!['dropoffCoordinates'] = LatLng(18.5204, 73.8567); // Pune
+      _driverLocation = LatLng(23.2550, 77.4000); // Near Bhopal
+
+      // Set local variables
+      _riderName = 'Bzbsbsb';
+      _riderPhone = 'N/A';
+      _totalFare = '0';
+      _distance = '973.217'; // From your image
+      _pickupAddress =
+          '56, Apsara Complex, Sector A, Indrapuri, Bhopal, Madhya Pradesh 462022, India';
+      _dropAddress = 'GVFH+RFR, Agarkar Nagar, Pune, Maharashtra 411001, India';
+      _formattedDate = DateFormat('dd MMMM, yyyy').format(DateTime.now());
+      _rideId = 'N/A';
+      _orderId = 'N/A';
+
+      // Calculate distance
+      _distanceToPickup = _calculateDistance(
+        _driverLocation!.latitude,
+        _driverLocation!.longitude,
+        _rideData!['pickupCoordinates'].latitude,
+        _rideData!['pickupCoordinates'].longitude,
+      );
+    }
+  }
+
+  void _extractCoordinates() {
+    try {
+      // Extract pickup coordinates
+      if (widget.rideData['pickup'] != null) {
+        final pickup = widget.rideData['pickup'];
+        _rideData!['pickupCoordinates'] = LatLng(
+          pickup['latitude']?.toDouble() ?? 23.2599,
+          pickup['longitude']?.toDouble() ?? 77.4126,
+        );
+      } else if (widget.rideData['startLocation'] != null) {
+        final startLocation = widget.rideData['startLocation'];
+        if (startLocation['coordinates'] != null &&
+            startLocation['coordinates'].length >= 2) {
+          _rideData!['pickupCoordinates'] = LatLng(
+            startLocation['coordinates'][1]?.toDouble() ?? 23.2599,
+            startLocation['coordinates'][0]?.toDouble() ?? 77.4126,
+          );
+        }
+      }
+
+      // Extract drop coordinates
+      if (widget.rideData['destination'] != null) {
+        final destination = widget.rideData['destination'];
+        _rideData!['dropoffCoordinates'] = LatLng(
+          destination['latitude']?.toDouble() ?? 18.5204,
+          destination['longitude']?.toDouble() ?? 73.8567,
+        );
+      } else if (widget.rideData['endLocation'] != null) {
+        final endLocation = widget.rideData['endLocation'];
+        if (endLocation['coordinates'] != null &&
+            endLocation['coordinates'].length >= 2) {
+          _rideData!['dropoffCoordinates'] = LatLng(
+            endLocation['coordinates'][1]?.toDouble() ?? 18.5204,
+            endLocation['coordinates'][0]?.toDouble() ?? 73.8567,
+          );
+        }
+      }
+
+      // Fallback coordinates if none found
+      if (_rideData!['pickupCoordinates'] == null) {
+        _rideData!['pickupCoordinates'] = LatLng(23.2599, 77.4126); // Bhopal
+      }
+
+      if (_rideData!['dropoffCoordinates'] == null) {
+        _rideData!['dropoffCoordinates'] = LatLng(18.5204, 73.8567); // Pune
+      }
+
+      print('📍 Pickup coordinates: ${_rideData!['pickupCoordinates']}');
+      print('📍 Drop coordinates: ${_rideData!['dropoffCoordinates']}');
+    } catch (e) {
+      print("❌ Error extracting coordinates: $e");
+      _rideData!['pickupCoordinates'] = LatLng(23.2599, 77.4126); // Bhopal
+      _rideData!['dropoffCoordinates'] = LatLng(18.5204, 73.8567); // Pune
+    }
+  }
+
+  /// Initialize driver location
+  void _initializeDriverLocation() {
+    // For Ride Request screen, driver is not at pickup yet
+    // Simulate driver location slightly away from pickup
+    if (_rideData!['pickupCoordinates'] != null) {
+      _driverLocation = LatLng(
+        _rideData!['pickupCoordinates'].latitude - 0.01,
+        _rideData!['pickupCoordinates'].longitude - 0.01,
+      );
+    } else {
+      _driverLocation = LatLng(23.2550, 77.4000); // Near Bhopal
+    }
+    print('📍 Driver location initialized: $_driverLocation');
+  }
+
+  double _calculateDistance(
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+  ) {
+    const R = 6371; // Earth radius in km
+    final dLat = _toRadians(lat2 - lat1);
+    final dLon = _toRadians(lon2 - lon1);
+    final a =
+        sin(dLat / 2) * sin(dLat / 2) +
+        cos(_toRadians(lat1)) *
+            cos(_toRadians(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    return R * c;
+  }
+
+  double _toRadians(double degree) {
+    return degree * pi / 180;
+  }
+
+  Future<bool> _requestLocationPermission() async {
+    try {
+      final status = await Permission.location.request();
+
+      if (status.isGranted) {
+        return true;
+      } else {
+        setState(() => _locationError = true);
+        return false;
+      }
+    } catch (e) {
+      setState(() => _locationError = true);
+      return false;
+    }
+  }
+
+  /// Start real-time location tracking with heading
+  Future<void> _startLocationTracking() async {
+    if (!await _requestLocationPermission()) {
+      print('❌ Location permission denied');
+      return;
+    }
+
+    // Get initial position
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 5,
+        ),
+      );
+
+      setState(() {
+        _driverLocation = LatLng(position.latitude, position.longitude);
+        if (position.heading.isFinite && position.heading >= 0) {
+          _driverHeading = position.heading;
+        }
+        _locationError = false;
+      });
+
+      print('📍 Initial location: ${position.latitude}, ${position.longitude}');
+    } catch (e) {
+      print('❌ Error getting initial position: $e');
+      setState(() => _locationError = true);
+    }
+
+    // Start position stream for continuous updates
+    const locationSettings = LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 5,
+    );
+
+    _positionStreamSubscription =
+        Geolocator.getPositionStream(locationSettings: locationSettings).listen(
+          (Position position) {
+            if (!mounted) return;
+
+            setState(() {
+              _driverLocation = LatLng(position.latitude, position.longitude);
+
+              // Update heading if available
+              if (position.heading.isFinite && position.heading >= 0) {
+                _driverHeading = position.heading;
+              }
+
+              _locationError = false;
+            });
+
+            // Recalculate distance to pickup
+            if (_rideData!['pickupCoordinates'] != null) {
+              final pickupCoords = _rideData!['pickupCoordinates'] as LatLng;
+              _distanceToPickup = _calculateDistance(
+                position.latitude,
+                position.longitude,
+                pickupCoords.latitude,
+                pickupCoords.longitude,
+              );
+            }
+
+            // Update markers
+            _setMarkers();
+          },
+          onError: (error) {
+            print('❌ Location stream error: $error');
+            setState(() => _locationError = true);
+          },
+        );
+  }
+
+  /// SIMPLE MARKER SETUP FUNCTION
+  void _setMarkers() {
+    if (!mounted) return;
+
+    final newMarkers = <Marker>{};
+    final newCircles = <Circle>{};
+
+    print('📍 Setting simple markers...');
+    print('📍 Driver location: $_driverLocation');
+    print('📍 Pickup coordinates: ${_rideData?['pickupCoordinates']}');
+    print('📍 Drop coordinates: ${_rideData?['dropoffCoordinates']}');
+
+    // ✅ 1. Driver marker (blue)
+    if (_driverLocation != null) {
+      print('📍 Adding driver marker at: $_driverLocation');
+      newMarkers.add(
+        Marker(
+          markerId: const MarkerId("driver"),
+          position: _driverLocation!,
+          icon:
+              _bikeMarkerIcon ??
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          anchor: const Offset(0.5, 0.5),
+          rotation: _driverHeading,
+          flat: true,
+          infoWindow: const InfoWindow(
+            title: "Your Location",
+            snippet: "You are here",
+          ),
+          zIndex: 2,
+        ),
+      );
+
+      // Driver accuracy circles
+      newCircles.add(
+        Circle(
+          circleId: const CircleId('outer_shadow'),
+          center: _driverLocation!,
+          radius: 140,
+          fillColor: Colors.grey.withOpacity(0.25),
+          strokeColor: Colors.transparent,
+        ),
+      );
+
+      newCircles.add(
+        Circle(
+          circleId: const CircleId('inner_green'),
+          center: _driverLocation!,
+          radius: 60,
+          fillColor: Colors.green.withOpacity(0.35),
+          strokeColor: Colors.green,
+          strokeWidth: 1,
+        ),
+      );
+    }
+
+    // ✅ 2. Pickup marker (simple blue marker)
+    if (_rideData?['pickupCoordinates'] != null) {
+      print('📍 Adding pickup marker at: ${_rideData!['pickupCoordinates']}');
+      newMarkers.add(
+        Marker(
+          markerId: const MarkerId("pickup"),
+          position: _rideData!['pickupCoordinates'],
+          infoWindow: InfoWindow(
+            title: "Pickup",
+            snippet: _rideData!['pickupLocation'],
+          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          zIndex: 1,
+        ),
+      );
+
+      // Pickup zone circle
+      newCircles.add(
+        Circle(
+          circleId: const CircleId('pickup_zone'),
+          center: _rideData!['pickupCoordinates'],
+          radius: 500,
+          fillColor: Colors.blue.withOpacity(0.15),
+          strokeColor: Colors.blue.withOpacity(0.5),
+          strokeWidth: 2,
+        ),
+      );
+    }
+
+    // ✅ 3. Drop marker (simple red marker)
+    if (_rideData?['dropoffCoordinates'] != null) {
+      print('📍 Adding drop marker at: ${_rideData!['dropoffCoordinates']}');
+      newMarkers.add(
+        Marker(
+          markerId: const MarkerId("drop"),
+          position: _rideData!['dropoffCoordinates'],
+          infoWindow: InfoWindow(
+            title: "Drop",
+            snippet: _rideData!['dropLocation'],
+          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          zIndex: 1,
+        ),
+      );
+    }
+
+    setState(() {
+      markers = newMarkers;
+      circles = newCircles;
+    });
+
+    print('✅ Simple markers set: ${newMarkers.length} markers');
+
+    // Fit map to show all markers
+    _fitMapToAllMarkers();
+  }
+
+  /// Fit map to show all markers
+  void _fitMapToAllMarkers() {
+    if (_mapController == null) {
+      print('⚠️ Map controller not ready yet');
+      return;
+    }
+
+    final List<LatLng> allPoints = [];
+
+    if (_driverLocation != null) allPoints.add(_driverLocation!);
+    if (_rideData?['pickupCoordinates'] != null)
+      allPoints.add(_rideData!['pickupCoordinates']);
+    if (_rideData?['dropoffCoordinates'] != null)
+      allPoints.add(_rideData!['dropoffCoordinates']);
+
+    if (allPoints.isEmpty) {
+      print('⚠️ No points to fit map to');
+      return;
+    }
+
+    final bounds = _boundsFromLatLngList(allPoints);
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (_mapController != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newLatLngBounds(bounds, 150),
+        );
+        print('✅ Map fitted to show all markers');
+      }
+    });
+  }
+
+  LatLngBounds _boundsFromLatLngList(List<LatLng> list) {
+    double? x0, x1, y0, y1;
+
+    for (LatLng latLng in list) {
+      if (x0 == null) {
+        x0 = x1 = latLng.latitude;
+        y0 = y1 = latLng.longitude;
+      } else {
+        if (latLng.latitude > x1!) x1 = latLng.latitude;
+        if (latLng.latitude < x0) x0 = latLng.latitude;
+        if (latLng.longitude > y1!) y1 = latLng.longitude;
+        if (latLng.longitude < y0!) y0 = latLng.longitude;
+      }
+    }
+
+    return LatLngBounds(
+      southwest: LatLng(x0!, y0!),
+      northeast: LatLng(x1!, y1!),
+    );
+  }
+
+  /// Decode polyline from Google Directions API
+  List<LatLng> _decodePolyline(String encoded) {
+    if (encoded.isEmpty) return [];
+
+    List<LatLng> points = [];
+    int index = 0;
+    int len = encoded.length;
+    int lat = 0;
+    int lng = 0;
+
+    while (index < len) {
+      int b;
+      int shift = 0;
+      int result = 0;
+
+      do {
+        b = encoded.codeUnitAt(index) - 63;
+        index++;
+        result |= (b & 0x1F) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+
+      int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lat += dlat;
+
+      shift = 0;
+      result = 0;
+
+      do {
+        b = encoded.codeUnitAt(index) - 63;
+        index++;
+        result |= (b & 0x1F) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+
+      int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lng += dlng;
+
+      points.add(LatLng(lat / 1e5, lng / 1e5));
+    }
+
+    return points;
+  }
+
+  /// Fetch directions from Google Directions API
+  Future<void> _getDirections() async {
+    if (_rideData?['pickupCoordinates'] == null ||
+        _rideData?['dropoffCoordinates'] == null) {
+      print('⚠️ Cannot get directions: coordinates missing');
+      return;
+    }
+
+    try {
+      // 1. Fetch route from Driver to Pickup
+      if (_driverLocation != null && _rideData!['pickupCoordinates'] != null) {
+        final pickupCoords = _rideData!['pickupCoordinates'] as LatLng;
+        final url = Uri.parse(
+          'https://maps.googleapis.com/maps/api/directions/json'
+          '?origin=${_driverLocation!.latitude},${_driverLocation!.longitude}'
+          '&destination=${pickupCoords.latitude},${pickupCoords.longitude}'
+          '&key=$GOOGLE_API_KEY',
+        );
+
+        print('🛣️ Fetching route from driver to pickup...');
+        final response = await http.get(url);
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+
+          if (data['routes'] != null && data['routes'].isNotEmpty) {
+            final route = data['routes'][0];
+            final polylineEncoded = route['overview_polyline']['points'];
+            _routeCoordinates = _decodePolyline(polylineEncoded);
+
+            // Extract distance and duration
+            if (route['legs'] != null && route['legs'].isNotEmpty) {
+              final leg = route['legs'][0];
+              setState(() {
+                _routeInfo = {
+                  'distance': leg['distance']['text'] ?? '',
+                  'duration': leg['duration']['text'] ?? '',
+                };
+              });
+            }
+
+            print('🛣️ Route Driver → Pickup calculated');
+          }
+        }
+      }
+
+      // 2. Fetch route from Pickup to Drop
+      if (_rideData!['pickupCoordinates'] != null &&
+          _rideData!['dropoffCoordinates'] != null) {
+        final pickupCoords = _rideData!['pickupCoordinates'] as LatLng;
+        final dropoffCoords = _rideData!['dropoffCoordinates'] as LatLng;
+
+        final url = Uri.parse(
+          'https://maps.googleapis.com/maps/api/directions/json'
+          '?origin=${pickupCoords.latitude},${pickupCoords.longitude}'
+          '&destination=${dropoffCoords.latitude},${dropoffCoords.longitude}'
+          '&key=$GOOGLE_API_KEY',
+        );
+
+        print('🛣️ Fetching route from pickup to drop...');
+        final response = await http.get(url);
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+
+          if (data['routes'] != null && data['routes'].isNotEmpty) {
+            final route = data['routes'][0];
+            final polylineEncoded = route['overview_polyline']['points'];
+            _pickupToDropCoordinates = _decodePolyline(polylineEncoded);
+
+            print('🛣️ Route Pickup → Drop calculated');
+          }
+        }
+      }
+
+      _updatePolylines();
+    } catch (e) {
+      print('❌ Error fetching directions: $e');
+    }
+  }
+
+  void _updatePolylines() {
+    final polylines = <Polyline>{};
+
+    // Driver to Pickup route (Blue solid line)
+    if (_routeCoordinates.isNotEmpty) {
+      polylines.add(
+        Polyline(
+          polylineId: PolylineId('driver_to_pickup'),
+          points: _routeCoordinates,
+          color: Colors.blue,
+          width: 4,
+        ),
+      );
+    }
+
+    // Pickup to Drop route (Green dashed line)
+    if (_pickupToDropCoordinates.isNotEmpty) {
+      polylines.add(
+        Polyline(
+          polylineId: PolylineId('pickup_to_drop'),
+          points: _pickupToDropCoordinates,
+          color: Colors.green,
+          width: 4,
+          patterns: [PatternItem.dash(10), PatternItem.gap(10)],
+        ),
+      );
+    }
+
+    setState(() {
+      _polylines = polylines;
+    });
+  }
+
+  Future<void> _handleAutoDecline() async {
+    if (_hasAccepted || _hasDeclined) return;
+
+    _hasDeclined = true;
+    _countdownTimer?.cancel();
+
+    _showSnackbar('Ride auto-cancelled (timeout)');
+  }
+
+  Future<void> _handleDeclineRide(String reason) async {
+    if (_hasAccepted || _hasDeclined) return;
+
+    setState(() => _isDeclining = true);
+
+    try {
+      await Future.delayed(Duration(seconds: 1));
+
+      _showCancelSheet = false;
+      _selectedReasonIndex = null;
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('✅ Ride Declined'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Ride declined successfully.'),
+              SizedBox(height: 16),
+              Text('Message sent to rider:'),
+              SizedBox(height: 8),
+              Text(
+                '"Sorry, I cannot accept this ride. Reason: $reason"',
+                style: TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      _showSnackbar('Failed to decline ride: $e');
+    } finally {
+      setState(() => _isDeclining = false);
+    }
+  }
+
+  void _showSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final double w = MediaQuery.of(context).size.width;
+    final w = MediaQuery.of(context).size.width;
 
-    // Debug: Print current values
-    print("\n🎨 BUILDING LiveRide WIDGET 🎨");
-    print("📊 Using local stored data:");
-    print("├─ riderName: $_riderName");
-    print("├─ riderPhone: $_riderPhone");
-    print("├─ totalFare: $_totalFare");
-    print("├─ distance: $_distance");
-    print("├─ pickupAddress: $_pickupAddress");
-    print("├─ dropAddress: $_dropAddress");
-    print("└─ formattedDate: $_formattedDate");
-
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(w * 0.04),
-          child: Column(
-            children: [
-              // REMOVED TIMER WIDGET FROM HERE
-              // _timerWidget(context, w),
-              // SizedBox(height: w * 0.02),
-              _dateText(context, w, _formattedDate),
-              SizedBox(height: w * 0.02),
-              _fareCard(context, w, _riderName, _totalFare, _riderPhone, _rideId, _orderId),
-              SizedBox(height: w * 0.03),
-              _mapView(w),
-              SizedBox(height: w * 0.04),
-              _locationInfo(context, w, _pickupAddress, _dropAddress),
-              SizedBox(height: w * 0.04),
-              _distanceCard(context, w, _distance),
-              SizedBox(height: w * 0.03),
-              _actionButtons(context, w),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // REMOVED THE SEPARATE _timerWidget METHOD SINCE IT'S NOW PART OF _actionButtons
-
-  Widget _dateText(BuildContext context, double w, String date) {
-    return AppFonts.textPoppins(
-      context,
-      date,
-      w * 0.04,
-      FontWeight.w500,
-      const Color(0xFF5F6165),
-      TextAlign.center,
-      TextOverflow.visible,
-    );
-  }
-
-  Widget _fareCard(BuildContext context, double w, String riderName, String totalFare, String riderPhone, String rideId, String orderId) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: w * 0.04, vertical: w * 0.03),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(w * 0.035),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: AppColors.mediumGray.withOpacity(0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Image.asset(
-                "assets/images/profil.png",
-                height: w * 0.12,
-                width: w * 0.12,
-              ),
-              SizedBox(width: w * 0.04),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AppFonts.textPoppins(
-                      context,
-                      riderName,
-                      w * 0.048,
-                      FontWeight.w600,
-                      AppColors.black,
-                      TextAlign.start,
-                      TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: w * 0.01),
-                    AppFonts.textPoppins(
-                      context,
-                      riderPhone,
-                      w * 0.035,
-                      FontWeight.w500,
-                      AppColors.mediumGray,
-                      TextAlign.start,
-                      TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+    return WillPopScope(
+      onWillPop: () async {
+        if (_showCancelSheet) {
+          setState(() => _showCancelSheet = false);
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: _rideData == null
+            ? _buildErrorView()
+            : Stack(
                 children: [
-                  Row(
+                  // Main Column Layout - Card first, Map below
+                  Column(
                     children: [
-                      Icon(Icons.currency_rupee, color: AppColors.green, size: w * 0.065),
-                      AppFonts.textPoppins(
-                        context,
-                        totalFare,
-                        w * 0.055,
-                        FontWeight.w600,
-                        AppColors.green,
-                        TextAlign.center,
-                        TextOverflow.visible,
+                      // Center(
+                      //   child: Text(
+                      //     DateFormat('dd MMMM, yyyy').format(DateTime.now()),
+                      //     style: TextStyle(
+                      //       fontSize: 14,
+                      //       color: Colors.grey[600],
+                      //       fontWeight: FontWeight.w500,
+                      //     ),
+                      //   ),
+                      // ),
+
+                      // Top padding
+                      SizedBox(height: 10),
+                      SizedBox(height: 20),
+                      Container(
+                        // margin: EdgeInsets.only(t),
+                        padding: EdgeInsets.only(top: 20),
+                        child: Center(
+                          child: Text(
+                            DateFormat('dd MMMM, yyyy').format(DateTime.now()),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // User Info Card
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: _buildUserInfoCard(w),
+                      ),
+
+                      // Location Error Warning
+                      if (_locationError)
+                        Padding(
+                          padding: EdgeInsets.only(top: 8),
+                          child: _buildWarningBadge(),
+                        ),
+
+                      // Spacing
+                      SizedBox(height: 16),
+
+                      // Map - takes remaining space
+                      Expanded(child: _buildMap()),
+
+                      // Ride Details Section
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(24),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: Offset(0, -2),
+                            ),
+                          ],
+                        ),
+                        child: SingleChildScrollView(
+                          child: _buildRideDetails(w),
+                        ),
                       ),
                     ],
                   ),
-                  SizedBox(height: w * 0.01),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: w * 0.03, vertical: w * 0.01),
-                    decoration: BoxDecoration(
-                      color: AppColors.green.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(w * 0.02),
-                    ),
-                    child: AppFonts.textPoppins(
-                      context,
-                      widget.rideData['rideType']?.toString().toUpperCase() ?? 'IMMEDIATE',
-                      w * 0.03,
-                      FontWeight.w600,
-                      AppColors.green,
-                      TextAlign.center,
-                      TextOverflow.visible,
-                    ),
-                  ),
+
+                  // Cancel Reason Sheet
+                  if (_showCancelSheet) _buildCancelReasonSheet(w),
                 ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(color: Color(0xFF87D750)),
+          SizedBox(height: 16),
+          Text(
+            'Loading ride details...',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 64, color: Colors.red),
+          SizedBox(height: 16),
+          Text(
+            'No ride information available',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Please go back and try again',
+            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+          ),
+          SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+            ),
+            child: Text('Go Back', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMap() {
+    final initialLocation = _driverLocation != null
+        ? _driverLocation!
+        : (_rideData!['pickupCoordinates'] ?? LatLng(23.2599, 77.4126));
+
+    return GoogleMap(
+      onMapCreated: (GoogleMapController controller) {
+        _mapController = controller;
+        print('✅ Google Map created');
+
+        // Wait a bit then set markers and fit map
+        Future.delayed(Duration(milliseconds: 500), () {
+          _setMarkers();
+          _fitMapToAllMarkers();
+        });
+      },
+      initialCameraPosition: CameraPosition(target: initialLocation, zoom: 16),
+      markers: markers,
+      circles: circles,
+      polylines: _polylines,
+      myLocationEnabled: false,
+      myLocationButtonEnabled: false,
+      zoomControlsEnabled: false,
+    );
+  }
+
+  Widget _buildWarningBadge() {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.red.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          '⚠️ Location unavailable',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRideDetails(double w) {
+    return Padding(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Date
+          // Center(
+          //   child: Text(
+          //     DateFormat('dd MMMM, yyyy').format(DateTime.now()),
+          //     style: TextStyle(
+          //       fontSize: 14,
+          //       color: Colors.grey[600],
+          //       fontWeight: FontWeight.w500,
+          //     ),
+          //   ),
+          // ),
+          SizedBox(height: 16),
+
+          // Trip Information
+          Text(
+            'Trip Information',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+          SizedBox(height: 14),
+
+          _locationInfo(
+            context,
+            w,
+            _rideData!['pickupLocation'],
+            _rideData!['dropLocation'],
+          ),
+
+          SizedBox(height: 5),
+          // Distance Info Cards
+          _buildInfoGrid(),
+          SizedBox(height: 20),
+
+          // Action Buttons
+          _actionButtons(context, w),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserInfoCard(double w) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Color(0xFFF0F0F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundImage: NetworkImage(_rideData!['riderImage']),
+              ),
+              SizedBox(width: 12),
+              Text(
+                _rideData!['riderName'],
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
               ),
             ],
           ),
-          SizedBox(height: w * 0.02),
-          // Additional ride info
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     _rideInfoItem(context, w, "Ride ID", rideId),
-          //     _rideInfoItem(context, w, "Order ID", orderId),
-          //   ],
-          // ),
+          Row(
+            children: [
+              Icon(Icons.currency_rupee, color: Color(0xFF22C55E), size: 22),
+              Text(
+                _rideData!['fare'],
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF22C55E),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
-    ).animate().fade(duration: 700.ms).scale();
+    );
   }
 
-  Widget _rideInfoItem(BuildContext context, double w, String title, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildInfoGrid() {
+    return Row(
       children: [
-        AppFonts.textPoppins(
-          context,
-          title,
-          w * 0.03,
-          FontWeight.w500,
-          AppColors.mediumGray,
-          TextAlign.start,
-          TextOverflow.ellipsis,
+        Expanded(
+          child: _buildInfoCard(
+            label: 'Pick up',
+            value: '${_distanceToPickup.toStringAsFixed(1)} Km',
+          ),
         ),
-        SizedBox(height: w * 0.005),
-        AppFonts.textPoppins(
-          context,
-          value,
-          w * 0.035,
-          FontWeight.w600,
-          AppColors.black,
-          TextAlign.start,
-          TextOverflow.ellipsis,
+        SizedBox(width: 16),
+        Expanded(
+          child: _buildInfoCard(
+            label: 'Drop',
+            value: '${_rideData!['distance']} Km',
+          ),
         ),
       ],
     );
   }
 
-  Widget _mapView(double w) {
-    final initialPosition = pickupLatLng ?? const LatLng(17.4065, 78.4772);
-    
-    return SizedBox(
-      height: w * 0.95,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(w * 0.03),
-        child: GoogleMap(
-          initialCameraPosition: CameraPosition(
-            target: initialPosition,
-            zoom: 14.5,
+  Widget _buildInfoCard({required String label, required String value}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[600],
+            fontWeight: FontWeight.w500,
           ),
-          myLocationEnabled: true,
-          zoomControlsEnabled: false,
-          markers: _markers,
-          onMapCreated: (GoogleMapController controller) {
-            _mapController = controller;
-            if (pickupLatLng != null && dropLatLng != null) {
-              _fitMapToMarkers(); // fit camera to both markers
-            }
+        ),
+        SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimerCircle() {
+    const size = 26.0;
+    const strokeWidth = 3.0;
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Background circle
+          CircularProgressIndicator(
+            value: 1,
+            strokeWidth: strokeWidth,
+            backgroundColor: Color(0xFFE5E7EB),
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFE5E7EB)),
+          ),
+
+          // Progress circle (changes color based on time)
+          SizedBox(
+            width: size,
+            height: size,
+            child: CustomPaint(
+              painter: _TimerPainter(
+                progress: _progress,
+                strokeWidth: strokeWidth,
+                color: _timer <= 10
+                    ? Colors.red
+                    : _timer <= 30
+                    ? Colors.orange
+                    : Color(0xFF16A34A),
+              ),
+            ),
+          ),
+
+          // Timer text
+          Center(
+            child: Text(
+              '$_timer',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: _timer <= 10
+                    ? Colors.red
+                    : _timer <= 30
+                    ? Colors.orange
+                    : Color(0xFF87D750),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCancelReasonSheet(double w) {
+    return Positioned.fill(
+      child: Container(
+        color: Colors.black.withOpacity(0.5),
+        child: DraggableScrollableSheet(
+          initialChildSize: 0.55,
+          minChildSize: 0.55,
+          maxChildSize: 0.7,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                children: [
+                  // Header
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(width: 48),
+                        Text(
+                          'Why Do You Want To Cancel?',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.close),
+                          onPressed: () =>
+                              setState(() => _showCancelSheet = false),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Reason List
+                  Expanded(
+                    child: ListView.builder(
+                      controller: scrollController,
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: _cancelReasons.length,
+                      itemBuilder: (context, index) {
+                        final reason = _cancelReasons[index];
+                        final isSelected = _selectedReasonIndex == index;
+
+                        return Card(
+                          margin: EdgeInsets.only(bottom: 8),
+                          color: isSelected
+                              ? Color(0xFF87D750).withOpacity(0.1)
+                              : Color(0xFFF9FAFB),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            side: BorderSide(
+                              color: isSelected
+                                  ? Color(0xFF87D750)
+                                  : Color(0xFFE5E7EB),
+                            ),
+                          ),
+                          child: ListTile(
+                            leading: Icon(
+                              reason['icon'],
+                              color: isSelected
+                                  ? Color(0xFF87D750)
+                                  : Colors.grey[700],
+                            ),
+                            title: Text(
+                              reason['label'],
+                              style: TextStyle(
+                                color: isSelected
+                                    ? Color(0xFF87D750)
+                                    : Colors.black,
+                                fontWeight: isSelected
+                                    ? FontWeight.w500
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                            onTap: () =>
+                                setState(() => _selectedReasonIndex = index),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  // Submit Button
+                  Padding(
+                    padding: EdgeInsets.all(16),
+                    child: ElevatedButton(
+                      onPressed: _selectedReasonIndex == null || _isDeclining
+                          ? null
+                          : () {
+                              final reason =
+                                  _cancelReasons[_selectedReasonIndex!]['label'];
+                              _handleDeclineRide(reason);
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF87D750),
+                        minimumSize: Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      child: _isDeclining
+                          ? SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              'Submit',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            );
           },
         ),
       ),
     );
   }
 
-  Widget _locationInfo(BuildContext context, double w, String pickupAddress, String dropAddress) {
+  Widget _locationInfo(
+    BuildContext context,
+    double w,
+    String pickupAddress,
+    String dropAddress,
+  ) {
     return Column(
       children: [
         Row(
@@ -2768,7 +1636,7 @@ class _LiveRideState extends State<LiveRide> {
                 ),
                 children: [
                   TextSpan(
-                    text: "10 min",
+                    text: "${_rideData!['estimatedTime']} min",
                     style: TextStyle(
                       fontSize: w * 0.04,
                       fontWeight: FontWeight.w600,
@@ -2811,17 +1679,9 @@ class _LiveRideState extends State<LiveRide> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _locationText(
-                    context,
-                    "Pickup",
-                    pickupAddress,
-                  ),
+                  _locationText(context, "Pickup", pickupAddress),
                   SizedBox(height: w * 0.05),
-                  _locationText(
-                    context,
-                    "Drop",
-                    dropAddress,
-                  ),
+                  _locationText(context, "Drop", dropAddress),
                 ],
               ),
             ),
@@ -2859,108 +1719,9 @@ class _LiveRideState extends State<LiveRide> {
     );
   }
 
-  Widget _distanceCard(BuildContext context, double w, String distance) {
-    // Calculate pickup and drop distances
-    final pickupDistance = "${widget.rideData['driverDistance']?.toString() ?? '1.1'} Km";
-    final dropDistance = "$distance Km";
-
-    return SizedBox(
-      height: w * 0.18,
-      child: Row(
-        children: [
-          _distanceItem(context, w, "Pickup", pickupDistance),
-          SizedBox(width: w * 0.03),
-          _distanceItem(context, w, "Drop", dropDistance),
-          SizedBox(width: w * 0.03),
-          _distanceItem(context, w, "Fare", "₹${_totalFare}"),
-        ],
-      ),
-    ).animate().fade(duration: 700.ms).scale();
-  }
-
-  Widget _distanceItem(BuildContext context, double w, String title, String value) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          vertical: w * 0.02,
-          horizontal: w * 0.02,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(w * 0.025),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
-          border: Border.all(
-            color: AppColors.mediumGray.withOpacity(0.3),
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AppFonts.textPoppins(
-              context,
-              title,
-              w * 0.037,
-              FontWeight.w600,
-              AppColors.mediumGray,
-              TextAlign.center,
-              TextOverflow.visible,
-            ),
-            AppFonts.textPoppins(
-              context,
-              value,
-              w * 0.042,
-              FontWeight.bold,
-              AppColors.black,
-              TextAlign.center,
-              TextOverflow.visible,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _actionButtons(BuildContext context, double w) {
     return Column(
       children: [
-        // Timer display above buttons
-        Container(
-          margin: EdgeInsets.only(bottom: w * 0.03),
-          padding: EdgeInsets.symmetric(horizontal: w * 0.04, vertical: w * 0.02),
-          decoration: BoxDecoration(
-            color: _secondsRemaining <= 3 ? Colors.red.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(w * 0.02),
-            border: Border.all(
-              color: _secondsRemaining <= 3 ? Colors.red : Colors.orange,
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.timer,
-                size: w * 0.05,
-                color: _secondsRemaining <= 3 ? Colors.red : Colors.orange,
-              ),
-              SizedBox(width: w * 0.02),
-              Text(
-                'Accept within: $_secondsRemaining seconds',
-                style: TextStyle(
-                  fontSize: w * 0.04,
-                  fontWeight: FontWeight.w600,
-                  color: _secondsRemaining <= 3 ? Colors.red : Colors.orange,
-                ),
-              ),
-            ],
-          ),
-        ),
-        
         // Buttons Row
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -2975,11 +1736,15 @@ class _LiveRideState extends State<LiveRide> {
                   minimumSize: Size(w * 0.43, w * 0.14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
-                    side: BorderSide(color: AppColors.mediumGray.withOpacity(0.5)),
+                    side: BorderSide(
+                      color: AppColors.mediumGray.withOpacity(0.5),
+                    ),
                   ),
                   elevation: 0,
                   disabledBackgroundColor: AppColors.lightGray.withOpacity(0.5),
-                  disabledForegroundColor: AppColors.mediumGray.withOpacity(0.5),
+                  disabledForegroundColor: AppColors.mediumGray.withOpacity(
+                    0.5,
+                  ),
                 ),
                 child: Text(
                   "Cancel",
@@ -2995,65 +1760,39 @@ class _LiveRideState extends State<LiveRide> {
 
             // Accept Button with timer integration
             Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: _secondsRemaining <= 3 
-                      ? Border.all(color: Colors.red, width: 2)
-                      : _secondsRemaining <= 6
-                      ? Border.all(color: Colors.orange, width: 2)
-                      : null,
+              child: ElevatedButton(
+                onPressed: () {
+                  _acceptRide();
+                },
+
+                // _hasAccepted || _hasCancelled ? null : ,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(
+                    0xFF00BFA6,
+                  ), // Cyan color matching Figma
+                  foregroundColor: Colors.white,
+                  minimumSize: Size(w * 0.43, w * 0.14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 2,
+                  shadowColor: Color(0xFF00BFA6).withOpacity(0.3),
+                  disabledBackgroundColor: Color(0xFF00BFA6).withOpacity(0.5),
+                  disabledForegroundColor: Colors.white.withOpacity(0.5),
                 ),
-                child: ElevatedButton(
-                  onPressed: _hasAccepted || _hasCancelled ? null : _acceptRide,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _secondsRemaining <= 3 
-                        ? Colors.red 
-                        : _secondsRemaining <= 6
-                        ? Colors.orange
-                        : ColorsList.mainButtonColor,
-                    foregroundColor: Colors.white,
-                    minimumSize: Size(w * 0.43, w * 0.14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Accept",
+                      style: TextStyle(
+                        fontSize: w * 0.045,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    elevation: 2,
-                    shadowColor: ColorsList.mainButtonColor.withOpacity(0.3),
-                    disabledBackgroundColor: ColorsList.mainButtonColor.withOpacity(0.5),
-                    disabledForegroundColor: Colors.white.withOpacity(0.5),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "Accept Ride",
-                        style: TextStyle(
-                          fontSize: w * 0.045,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(height: w * 0.005),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.timer,
-                            size: w * 0.03,
-                            color: Colors.white.withOpacity(0.9),
-                          ),
-                          SizedBox(width: w * 0.01),
-                          Text(
-                            "$_secondsRemaining s",
-                            style: TextStyle(
-                              fontSize: w * 0.03,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                    SizedBox(width: 14),
+                    _buildTimerCircle(),
+                  ],
                 ),
               ),
             ),
@@ -3062,21 +1801,152 @@ class _LiveRideState extends State<LiveRide> {
       ],
     );
   }
+
+  Future<void> _acceptRide() async {
+    print("myyy_tapp33333");
+
+    if (_orderId == null) {
+      print("❌ Order ID is null, cannot accept ride");
+      Fluttertoast.showToast(
+        msg: "Cannot accept ride: Order ID not available",
+        toastLength: Toast.LENGTH_SHORT,
+      );
+      return;
+    }
+
+    // Call the updated controller method with correct parameter names
+    await orderUpdateController.updateOrder(
+      orderStatus: "Accepted", // Changed from 'orderstatus' to 'orderStatus'
+      orderId: _orderId!, // Changed from 'orderid' to 'orderId'
+      context: context,
+      rideData: widget.rideData,
+      stepControl: "Accepted", // Changed from 'step_control' to 'stepControl'
+    );
+
+    // Check if the API call was successful
+    if (orderUpdateController.updateOrderResponse.value?.success == true) {
+      print("✅ Ride accepted successfully!");
+
+      _hasAccepted = true;
+      _isTimerRunning = false;
+      _autoCancelTimer?.cancel();
+
+      print("orderrrid Accepting ride with ID: $_orderId");
+
+      // Navigate to ArrivingClient screen
+      CustomNavigator.push(
+        context,
+        ArrivingClient(rideData: widget.rideData),
+        transition: TransitionType.slideLeft,
+      );
+    } else {
+      // Show error if API failed
+      final errorMessage = orderUpdateController.errorMessage.value.isNotEmpty
+          ? orderUpdateController.errorMessage.value
+          : "Failed to accept ride";
+
+      Fluttertoast.showToast(
+        msg: errorMessage,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+    }
+  }
+  // Future<void> _acceptRide() async {
+  //   print("myyy_tapp33333");
+
+  //   if (_orderId == null) {
+  //     print("❌ Order ID is null, cannot accept ride");
+  //     Fluttertoast.showToast(
+  //       msg: "Cannot accept ride: Order ID not available",
+  //       toastLength: Toast.LENGTH_SHORT,
+  //     );
+  //     return;
+  //   }
+
+  //   await orderUpdateController.updateOrder(
+  //     orderstatus: "Accepted",
+  //     orderid: _orderId!,
+  //     context: context,
+  //     rideData: widget.rideData,
+  //     step_control: "Accepted",
+  //   );
+
+  //   print(
+  //     "whennnn_i_accept_bool_api_bool_check>>>>> ${orderUpdateController.updateOrderResponse.value!.success}",
+  //   );
+
+  //   // if (_hasAccepted || _hasCancelled) return;
+
+  //   print("myyy_tappp244444");
+  //   _hasAccepted = true;
+  //   _isTimerRunning = false;
+  //   _autoCancelTimer?.cancel();
+
+  //   print("orderrrid Accepting ride with ID: $_orderId");
+
+  //   print("myyy_tappp2");
+
+  //   // stepperController.resetSteps();
+  //   // print("myyy_tappp255555");
+  //   // CustomNavigator.push(
+  //   //   context,
+  //   //   ArrivingClient(rideData: widget.rideData),
+  //   //   transition: TransitionType.slideLeft,
+  //   // );
+  // }
+}
+
+class _TimerPainter extends CustomPainter {
+  final double progress;
+  final double strokeWidth;
+  final Color color;
+
+  _TimerPainter({
+    required this.progress,
+    required this.strokeWidth,
+    required this.color,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - strokeWidth) / 2;
+    final sweepAngle = 2 * pi * progress;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -pi / 2,
+      sweepAngle,
+      false,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _TimerPainter oldDelegate) {
+    return progress != oldDelegate.progress || color != oldDelegate.color;
+  }
 }
 
 class OrderService {
-  static Future<void> declineOrder({
-    String? orderId,
-  }) async {
+  static Future<void> declineOrder({required String orderId}) async {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
-    final String? order_id = prefs.getString("order_id");
 
     print("my___token_here ${token}");
     print("declineddddd__myyyyy_orderid_iss ${orderId}");
 
     final Uri url = Uri.parse(
-      "https://corezap.smarttechbros.com/api/v1/order/decline/$order_id",
+      "https://corezap.smarttechbros.com/api/v1/order/decline/$orderId",
     );
 
     print("🔵 DECLINE ORDER API");
@@ -3096,7 +1966,7 @@ class OrderService {
 
       final decoded = jsonDecode(response.body);
       print("🎯 Decoded Response : $decoded");
-      
+
       Fluttertoast.showToast(
         msg: decoded['message'] ?? "Ride declined successfully",
         toastLength: Toast.LENGTH_SHORT,
@@ -3109,8 +1979,7 @@ class OrderService {
     }
   }
 
-
-      static Future<void> VerifyOtpOrder({
+  static Future<void> VerifyOtpOrder({
     required String orderId,
     required String rideOtpEnter,
   }) async {
@@ -3136,10 +2005,7 @@ class OrderService {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
-        body: jsonEncode({
-          "orderId": order_id,
-          "rideOtp": rideOtpEnter
-        }),
+        body: jsonEncode({"orderId": order_id, "rideOtp": rideOtpEnter}),
       );
 
       print("arriivinngggggggggggggggggggggggg");

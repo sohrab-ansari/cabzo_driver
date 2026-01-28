@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'package:corezap_driver/apiervices/services/driver_socket_service.dart';
+import 'dart:convert';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:corezap_driver/controllers/controllers.dart';
 import 'package:corezap_driver/controllers/home_controllers/home_controller.dart';
 import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
@@ -13,9 +13,8 @@ import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart'
 import 'package:corezap_driver/views/home_related/live_ride.dart';
 import 'package:corezap_driver/views/widgets/home_screen_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,52 +31,101 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Controllers controllers = Get.put(Controllers());
   final HomeController homeController = Get.find<HomeController>();
   final StepperController stepperController = Get.find<StepperController>();
-  
-  // Use the new DriverSocketService
-  final DriverSocketService _socketService = DriverSocketService();
-  
-  // Socket state
+
+  // Socket instance
+  IO.Socket? _socket;
   bool _isSocketConnected = false;
+  String? _socketId;
+
+  // Socket configuration
+  // static const String SOCKET_URL = 'https://corezap.smarttechbros.com';
+
+  static const String SOCKET_URL = 'https://api.corezap.framekarts.com';
+
+  static const int MAX_RECONNECT_ATTEMPTS = 5;
+  static const int CONNECTION_TIMEOUT = 10000;
+  static const int LOCATION_UPDATE_INTERVAL = 2000; // 2 seconds
+  static const double LOCATION_CHANGE_THRESHOLD = 0.0001; // ~11 meters
+
+  // Driver data
+  String? _driverId;
+  String? _driverName;
+  String? _driverPhone;
+  String? _driverImage;
+  String? _vehicleType;
+  String? _vehicleNumber;
+  String? _vehicleImage;
+  String? _fleetId;
+
+  // Location
+  double _currentLatitude = 0.0;
+  double _currentLongitude = 0.0;
+  double? _lastSentLatitude;
+  double? _lastSentLongitude;
+  DateTime? _lastLocationUpdate;
+  StreamSubscription<Position>? _positionStreamSubscription;
+  Timer? _locationUpdateTimer;
+
+  // Driver status
   bool _isOnDuty = false;
   bool _isProcessingOnline = false;
-  String _socketStatus = 'Not Connected';
-  String _socketId = '';
-  
+  bool _isRideInProgress = false;
+  bool _isAppReady = false;
+  bool _permissionCheckInProgress = false;
+
+  // Ride tracking
+  Map<String, dynamic>? _currentRide;
+  String? _activeRideId;
+  DateTime? _rideStartTime;
+
   // App lifecycle state
   AppLifecycleState? _appLifecycleState;
   bool _appInBackground = false;
   DateTime? _appBackgroundTime;
   String _selectedTab = "Driver";
-  // Location variables
-  double? _currentLatitude;
-  double? _currentLongitude;
-  String _vehicleType = 'Car';
-  String? _vehicleImage;
-  String? _fleetId;
-  
-  // Driver data
-  String _driverId = '';
-  String? _token;
-  String? _userId;
-  
+
   // Ride variables
   Map<String, dynamic>? _newRideRequest;
   bool _hasPendingRideRequest = false;
   Timer? _rideRequestTimer;
-  
+
   // Reconnection tracking
   int _reconnectAttempts = 0;
   final int _maxReconnectAttempts = 5;
   Timer? _backgroundReconnectTimer;
 
+  // Map variables
+  final CameraPosition _initialCameraPosition = const CameraPosition(
+    target: LatLng(23.2508131, 77.4647936),
+    zoom: 17,
+  );
+  late GoogleMapController _mapController;
+
+  // Markers and circles
+  Set<Marker> markers = {};
+  Set<Circle> circles = {};
+  BitmapDescriptor? _bikeMarkerIcon;
+
+  // Nearby riders/drivers
+  List<Map<String, dynamic>> _nearbyRiders = [];
+  Map<String, BitmapDescriptor> _vehicleIcons = {};
+
+  // Event listeners storage
+  final Map<String, List<Function(dynamic)>> _socketListeners = {};
+
+  // Token
+  String? _token;
+  String? _userId;
+  String _socketStatus = 'Not Connected';
+
   @override
   void initState() {
     homeController.home_data_method();
     super.initState();
-    
+
     // Add observer for app lifecycle
     WidgetsBinding.instance.addObserver(this);
-    
+
     // Initialize connection
     _initializeConnection();
   }
@@ -86,33 +134,35 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void dispose() {
     // Remove observer
     WidgetsBinding.instance.removeObserver(this);
-    
+
     // Clean up resources
     _cleanupResources();
-    
-    // Remove all socket event listeners
-    _removeSocketListeners();
-    
-    // Disconnect socket service
-    _socketService.disconnect();
-    
+
+    // Disconnect socket
+    _disconnectSocket();
+
     super.dispose();
   }
-  
+
   void _cleanupResources() {
     // Clear all timers
     _clearRideRequestTimer();
     _stopBackgroundReconnectTimer();
+    _stopLocationWatch();
+    _stopLocationUpdates();
+
+    // Cancel position stream
+    _positionStreamSubscription?.cancel();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     print('📱 App lifecycle changed: $state');
-    
+
     setState(() {
       _appLifecycleState = state;
     });
-    
+
     switch (state) {
       case AppLifecycleState.resumed:
         _onAppResumed();
@@ -134,57 +184,38 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _onAppResumed() {
     print('📱 App resumed from background');
-    
+
     if (_appInBackground) {
       _appInBackground = false;
-      
+
       // Stop background reconnect timer
       _stopBackgroundReconnectTimer();
-      
+
       // Mark app as ready for location requests
-      _socketService.setAppReady(true);
-      
+      _isAppReady = true;
+
       // Check connection status
-      final status = _socketService.getConnectionStatus();
-      final isConnected = status['isConnected'] ?? false;
-      final isOnDuty = status['isOnDuty'] ?? false;
-      
-      if (isConnected && isOnDuty) {
+      if (_isSocketConnected && _isOnDuty) {
         print('✅ Socket still connected, resuming operations...');
-      } else if (isOnDuty) {
+      } else if (_isOnDuty) {
         // Was on duty but disconnected, try to reconnect
         print('⚠️ Socket disconnected while in background, reconnecting...');
         _reconnectWithRetry();
       }
-      
+
       _appBackgroundTime = null;
     }
   }
 
-   final CameraPosition _initialCameraPosition = const CameraPosition(
-    target: LatLng(23.2508131, 77.4647936), 
-    zoom: 14,
-  );
-   late GoogleMapController _mapController;
-   
-   // Markers and circles
-   Set<Marker> markers = {};
-   Set<Circle> circles = {};
-   BitmapDescriptor? _bikeMarkerIcon;
-   
-   // Nearby riders/drivers
-   List<Map<String, dynamic>> _nearbyRiders = [];
-   Map<String, BitmapDescriptor> _vehicleIcons = {};
-
   void _onAppPaused() {
     print('📱 App going to background');
-    
+
     _appInBackground = true;
     _appBackgroundTime = DateTime.now();
-    
+
     // Clear pending ride request
     _clearPendingRideRequest();
-    
+
     // If we're online, set up background reconnect attempts
     if (_isOnDuty) {
       _startBackgroundReconnectTimer();
@@ -208,28 +239,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Future<void> _initializeConnection() async {
     // Request permissions
     await _requestPermissions();
-    
+
     // Load custom bike marker and vehicle icons
     await _loadCustomBikeMarker();
     await _loadVehicleIcons();
-    
+
+    // Get initial location IMMEDIATELY (no waiting)
+    await _getInitialLocationImmediately();
+
+    // Start background location listener
+    _startBackgroundLocationListener();
+
     // Wait for token to load
-    await gettoken();
-    
-    // Fetch location immediately and cache it
-    try {
-      await _getCurrentLocation();
-      _createDriverMarker(); // Create driver marker after getting location
-      print('✅ Location cached on HomeScreen init');
-    } catch (e) {
-      print('⚠️ Failed to cache location: $e');
-    }
-    
-    // Setup socket event listeners
-    _setupSocketListeners();
-    
+    await _getToken();
+
     // Then connect socket with valid token
-    if (_token != null && _driverId.isNotEmpty) {
+    if (_token != null && _driverId != null && _driverId!.isNotEmpty) {
       await _connectSocket();
     } else {
       print('❌ Cannot connect: Token or Driver ID is missing');
@@ -239,29 +264,104 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Future<void> _requestPermissions() async {
     try {
-      // Request location permission
-      final locationStatus = await Permission.location.request();
-      if (locationStatus.isGranted) {
-        print('✅ Location permission granted');
-      } else {
-        print('⚠️ Location permission not granted: $locationStatus');
+      // Request location service
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        print('❌ Location service disabled');
+        return;
       }
-      
+
+      // Request location permission
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        print('❌ Location permission permanently denied');
+        return;
+      }
+
+      if (permission == LocationPermission.denied) {
+        print('⚠️ Location permission denied');
+        return;
+      }
+
+      print('✅ Location permission granted');
+
       // Request notification permission (if needed)
       final notificationStatus = await Permission.notification.request();
       if (notificationStatus.isGranted) {
         print('✅ Notification permission granted');
       }
-      
+
       // Mark app as ready
-      _socketService.setAppReady(true);
-      
+      _isAppReady = true;
     } catch (error) {
       print('❌ Error requesting permissions: $error');
     }
   }
 
-  Future<void> gettoken() async {
+  // New method: Get initial location without starting stream
+  Future<void> _getInitialLocationImmediately() async {
+    try {
+      // Check if we already have location
+      if (_currentLatitude != 0.0 && _currentLongitude != 0.0) {
+        print(
+          '✅ Using existing location: $_currentLatitude, $_currentLongitude',
+        );
+        return;
+      }
+
+      // Get quick location
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium, // Use medium for speed
+        timeLimit: const Duration(seconds: 3), // Short timeout
+      );
+
+      _currentLatitude = position.latitude;
+      _currentLongitude = position.longitude;
+      _lastLocationUpdate = DateTime.now();
+
+      print(
+        '✅ Initial location obtained (quick): $_currentLatitude, $_currentLongitude',
+      );
+
+      // Update marker immediately
+      if (mounted) {
+        _updateMarkerOnly(
+          LatLng(_currentLatitude, _currentLongitude),
+          50.0, // Default accuracy
+        );
+      }
+    } catch (e) {
+      print('⚠️ Quick location failed: $e');
+      // Try to get last known location as fallback
+      try {
+        final lastPosition = await Geolocator.getLastKnownPosition();
+        if (lastPosition != null) {
+          _currentLatitude = lastPosition.latitude;
+          _currentLongitude = lastPosition.longitude;
+          print(
+            '📍 Using last known location: $_currentLatitude, $_currentLongitude',
+          );
+        } else {
+          // Default location if everything fails
+          _currentLatitude = 23.2508131;
+          _currentLongitude = 77.4647936;
+          print(
+            '📍 Using default location: $_currentLatitude, $_currentLongitude',
+          );
+        }
+      } catch (e) {
+        print('⚠️ Could not get last known position: $e');
+        _currentLatitude = 23.2508131;
+        _currentLongitude = 77.4647936;
+      }
+    }
+  }
+
+  Future<void> _getToken() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final String? token = prefs.getString("auth_token");
@@ -270,90 +370,132 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       setState(() {
         _token = token;
         _userId = userId;
-        _driverId = userId.toString();
+        _driverId = userId;
       });
 
       print('✅ Token loaded from SharedPreferences');
       print('User ID: $_userId');
-      print("myyyy_tokenn>>> ${_token?.substring(0, _token!.length > 20 ? 20 : _token!.length)}...");
+      print(
+        "myyyy_tokenn>>> ${_token?.substring(0, _token!.length > 20 ? 20 : _token!.length)}...",
+      );
       print("myyyy_driverid>>> ${_driverId}");
-
     } catch (e) {
       print('❌ Error loading token: $e');
     }
   }
 
+  // ==================== SOCKET METHODS ====================
+
   Future<bool> _connectSocket() async {
     print("🔄 Connecting socket...");
-    
+
     try {
-      // Check if already connected
-      final status = _socketService.getConnectionStatus();
-      if (status['isConnected'] ?? false) {
+      if (_socket != null && _isSocketConnected) {
         print('✅ Socket already connected');
         return true;
       }
 
-      // Connect with timeout
-      final connected = await Future.any([
-        _socketService.connect(),
-        Future.delayed(const Duration(seconds: 5), () => false),
-      ]);
-      
-      if (connected) {
-        print('✅ Socket connected quickly');
-        // Connection status will be updated via event listeners
-        return true;
-      } else {
-        print('❌ Socket connection timeout');
-        setState(() {
-          _socketStatus = 'Connection Timeout';
-        });
-        return false;
-      }
+      // Get driver data
+      await _fetchDriverData();
+
+      // Disconnect existing
+      _disconnectSocket();
+
+      print('🔌 Connecting driver socket...');
+
+      // Create socket connection with optimized settings
+      _socket = IO.io(
+        SOCKET_URL,
+        IO.OptionBuilder()
+            .setTransports(['websocket', 'polling'])
+            .enableAutoConnect()
+            .setReconnectionAttempts(MAX_RECONNECT_ATTEMPTS)
+            .setReconnectionDelay(1000)
+            .setReconnectionDelayMax(5000)
+            .setTimeout(CONNECTION_TIMEOUT)
+            .setAuth({'token': _token})
+            .setQuery({
+              'userRole': 'Driver',
+              'platform': 'flutter',
+              'driverId': _driverId,
+            })
+            .build(),
+      );
+
+      // Setup event listeners
+      _setupSocketEventListeners();
+
+      // Connect
+      _socket!.connect();
+
+      // Wait for connection with timeout
+      return await _waitForConnection();
     } catch (error) {
       print('❌ Socket connection error: $error');
-      setState(() {
-        _socketStatus = 'Connection Error: $error';
-      });
       return false;
     }
   }
 
-  void _setupSocketListeners() {
-    // ==================== CONNECTION EVENTS ====================
-    _socketService.addEventListener('socket:connected', (data) {
-      if (!mounted) return;
-      print('✅✅✅ DRIVER SOCKET CONNECTED: ${data['socketId']}');
+  Future<bool> _waitForConnection() async {
+    final completer = Completer<bool>();
+
+    final timeout = Timer(const Duration(seconds: 5), () {
+      if (!completer.isCompleted) {
+        print('❌ Connection timeout');
+        completer.complete(false);
+      }
+    });
+
+    _socket!.once('connect', (_) {
+      timeout.cancel();
+      if (!completer.isCompleted) {
+        print('✅ Socket connected!');
+        completer.complete(true);
+      }
+    });
+
+    _socket!.once('connect_error', (error) {
+      timeout.cancel();
+      if (!completer.isCompleted) {
+        print('❌ Connection error: $error');
+        completer.complete(false);
+      }
+    });
+
+    return completer.future;
+  }
+
+  void _setupSocketEventListeners() {
+    if (_socket == null) return;
+
+    // CONNECTION EVENTS
+    _socket!.onConnect((_) {
+      print('✅ Driver socket connected: ${_socket!.id}');
       setState(() {
         _isSocketConnected = true;
-        _socketStatus = 'Connected';
-        _socketId = data['socketId'] ?? '';
+        _socketId = _socket!.id;
         _reconnectAttempts = 0;
+        _socketStatus = 'Connected';
       });
-      
-      // If we were online before, restore status
+
+      // Auto go online if driver was on duty
       if (_isOnDuty) {
-        print('🔄 Restoring online status after connection...');
-        Future.delayed(const Duration(seconds: 1), () {
-          if (mounted) {
-            _restoreOnlineStatus();
-          }
+        Timer(const Duration(seconds: 1), () {
+          _goOnline();
         });
       }
     });
 
-    _socketService.addEventListener('socket:disconnected', (data) {
-      if (!mounted) return;
-      print('❌ Driver socket disconnected: ${data['reason']}');
+    _socket!.onDisconnect((_) {
+      print('❌ Driver socket disconnected');
       setState(() {
         _isSocketConnected = false;
         _socketStatus = 'Disconnected';
       });
-      
-      // Clear pending ride request
+
+      _stopLocationUpdates();
       _clearPendingRideRequest();
-      
+
       // If we're online and app is active, try to reconnect
       if (_isOnDuty && !_appInBackground && mounted) {
         print('🔄 Online but disconnected, will attempt reconnect...');
@@ -365,370 +507,330 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
     });
 
-    _socketService.addEventListener('socket:error', (data) {
-      if (!mounted) return;
-      print('❌ Socket error: ${data['error']}');
+    _socket!.onConnectError((data) {
+      print('❌ Socket connection error: $data');
       _reconnectAttempts++;
       setState(() {
         _socketStatus = 'Connection Error';
       });
     });
 
-    _socketService.addEventListener('socket:reconnected', (data) {
-      if (!mounted) return;
-      print('🔄 Socket reconnected after ${data['attemptNumber']} attempts');
+    _socket!.onReconnect((data) {
+      print('🔄 Socket reconnected');
       setState(() {
         _isSocketConnected = true;
         _socketStatus = 'Reconnected';
         _reconnectAttempts = 0;
       });
-      
+
       // If we were online, restore status
       if (_isOnDuty) {
         _restoreOnlineStatus();
       }
     });
 
-    // ==================== DRIVER STATUS EVENTS ====================
-    _socketService.addEventListener('driver:online:success', (data) {
-      if (!mounted) return;
-      print('✅✅✅ DRIVER ONLINE SUCCESS: $data');
+    // DRIVER STATUS EVENTS
+    _socket!.on('driver:online_success', (data) {
+      print('✅ Driver online confirmed: ${data}');
       _handleOnlineSuccess(data);
     });
 
-    _socketService.addEventListener('driver:online:failed', (data) {
-      if (!mounted) return;
-      print('❌❌❌ DRIVER ONLINE FAILED: $data');
+    _socket!.on('driver:online_failed ', (data) {
+      print('❌ Driver online failed:${data}');
       _handleOnlineFailure(data);
     });
 
-    _socketService.addEventListener('driver:offline', (data) {
-      if (!mounted) return;
-      print('🔴 Driver offline confirmed: ${data['message']}');
-      setState(() {
-        _isOnDuty = false;
-        _isProcessingOnline = false;
-      });
-    });
+    // RIDE REQUEST EVENTS
+    _socket!.on('ride:newRide', (data) {
+      final rideData = _mapRideData(data);
+      print('🚕 NEW RIDE REQUEST RECEIVED : ${rideData}');
 
-    // ==================== RIDE REQUEST EVENTS ====================
-    _socketService.addEventListener('ride:newRequest', (data) {
-      if (!mounted) return;
-      print('🚕🚕🚕 NEW RIDE REQUEST RECEIVED 🚕🚕🚕');
-      
-      // Print ALL data received
-      print('📦 RAW RIDE DATA RECEIVED:');
-      data.forEach((key, value) {
-        print('  $key: $value (${value.runtimeType})');
-      });
-      
       // Check if we're online and can accept rides
       if (!_isOnDuty) {
         print('⚠️ Received ride request but driver is offline');
         return;
       }
-      
+
       // Process the ride request
-      _processRideRequest(data);
+      _processRideRequest(rideData);
     });
 
-    _socketService.addEventListener('ride:acceptedConfirmed', (data) async {
-      if (!mounted) return;
+    _socket!.on('ride:orderCancelled', (data) {
+      print('userrrr_side____Canceeledddd>>>>>>>>>>>>>>>>: ${data}');
+      // _handleOnlineSuccess(data);
+    });
+
+    _socket!.on('ride:confirmed', (data) async {
       final prefs = await SharedPreferences.getInstance();
-      print('✅ Ride accepted - Backend confirmed: ${data['orderId']}');
-      await prefs.setString("order_id", data['orderId']);
+
+      final orderId = data['orderId'] ?? data['_id'];
+
+      print("🚗 [SOCKET] Ride Confirmed");
+      print("📦 Full Ride Data: ${jsonEncode(data)}");
+
+      // ✅ Save FULL backend data
+      await prefs.setString('active_ride_full_data', jsonEncode(data));
+
+      // Save order id separately
+      await prefs.setString('active_order_id', orderId.toString());
+
+      // App memory state
+      _currentRide = Map<String, dynamic>.from(data);
+      _activeRideId = orderId.toString();
+      _isRideInProgress = true;
+      _rideStartTime = DateTime.now();
+
+      // Join socket room
+      _joinRideRoom(orderId.toString());
 
       // Navigate to ride screen
-      _navigateToRideScreen(data);
+      _navigateToRideScreen(_currentRide!);
     });
 
-    _socketService.addEventListener('ride:status', (data) {
-      if (!mounted) return;
-      print('📊 Ride status update: ${data['status']}');
-      // Handle ride status updates
+    // _socket!.on('ride:confirmed', (data) async {
+    //   final prefs = await SharedPreferences.getInstance();
+    //   final orderId = data['orderId'] ?? data['_id'];
+
+    //   print("myyyyy_ rideee_confimmmed_datata");
+
+    //   print('✅ [SOCKET] Ride accepted - Backend confirmed: $orderId');
+    //   print('🚗 [SOCKET] Ride data: ${jsonEncode(data)}');
+
+    //   await prefs.setString("order_id", orderId.toString());
+
+    //   // Update current ride state with complete data
+    //   _currentRide = {
+    //     'orderId': orderId,
+    //     'rideId': data['rideId'] ?? orderId,
+    //     'status': 'confirmed',
+    //     'rider': data['rider'] ?? data['user'],
+    //     'riderId': data['riderId'] ?? data['rider']?['_id'] ?? data['userId'],
+    //     'riderName':
+    //         data['riderName'] ??
+    //         data['rider']?['name'] ??
+    //         data['user']?['name'] ??
+    //         'Customer',
+    //     'riderPhone':
+    //         data['riderNumber'] ??
+    //         data['rider']?['phone'] ??
+    //         data['user']?['phone'] ??
+    //         '',
+    //     'pickup': data['pickupLocation'] ?? data['startLocation'],
+    //     'dropoff': data['dropoffLocation'] ?? data['endLocation'],
+    //     'fare': data['fare'] ?? data['totalFare'],
+    //     'totalFare': data['totalFare'] ?? data['fare'],
+    //     'distance': data['distance'],
+    //     'duration': data['duration'] ?? data['estimatedTime'],
+    //     'otp': data['otp'],
+    //     'rideOtp': data['otp'],
+    //     'completeData': data,
+    //   };
+
+    //   // Ensure ride is marked as in progress
+    //   if (_activeRideId == orderId) {
+    //     print('🚗 [SOCKET] Ride confirmation matched active ride');
+    //   } else {
+    //     print(
+    //       '⚠️ [SOCKET] Ride confirmation for different ride, updating active ride',
+    //     );
+    //     _activeRideId = orderId.toString();
+    //     _rideStartTime = DateTime.now();
+    //     _isRideInProgress = true;
+    //   }
+
+    //   print('🚗 [SOCKET] Ride state updated to CONFIRMED');
+
+    //   // Save ride to persistence
+    //   await _saveActiveRide(_currentRide!);
+
+    //   // Join ride room for real-time updates
+    //   _joinRideRoom(orderId.toString());
+
+    //   // Navigate to ride screen
+    //   _navigateToRideScreen(_currentRide!);
+    // });
+
+    _socket!.on('ride:status', (data) {
+      print('📊 Ride status update: ${data}');
+
+      final orderId = data['orderId'] ?? data['rideId'];
+      if (orderId != null) {
+        if (_currentRide != null && _currentRide!['orderId'] == orderId) {
+          _currentRide!['status'] = data['status'];
+        }
+
+        // Mark ride as complete
+        final status = data['status'];
+        if (status == 'completed' ||
+            status == 'finished' ||
+            status == 'ended') {
+          print('✅ Ride completion status received: $status');
+          _completeRide(orderId);
+        }
+      }
     });
 
-    _socketService.addEventListener('ride:cancelled', (data) {
-      if (!mounted) return;
-      print('❌ Ride cancelled: ${data['orderId']}');
-      _clearPendingRideRequest();
-      _showToast('Ride cancelled');
+    _socket!.on('ride:orderCancelled', (data) {
+      print('❌ Ride cancelled: ${data}');
+
+      // FIX: Use rideId instead of orderId
+      final rideId = data['rideId'] ?? data['orderId'];
+
+      if (rideId != null && rideId is String) {
+        _completeRide(rideId);
+        _currentRide = null;
+        _clearPendingRideRequest();
+        _showToast('Ride cancelled');
+      } else {
+        print('⚠️ No valid rideId found in cancellation data');
+      }
     });
 
-    _socketService.addEventListener('ride:completed', (data) {
-      if (!mounted) return;
-      print('✅ Ride completed: ${data['rideId']}');
-      _showToast('Ride completed successfully');
+    _socket!.on('ride:location', (data) {
+      print('📍 Rider location during ride: ${data}');
     });
 
-    // ==================== LOCATION EVENTS ====================
-    _socketService.addEventListener('ride:location', (data) {
-      if (!mounted) return;
-      print('📍 Rider location during ride: ${data['location']}');
-    });
-
-    // ==================== CHAT EVENTS (optional) ====================
-    _socketService.addEventListener('chat:message', (data) {
-      if (!mounted) return;
-      print('💬 Chat message received: ${data['message']}');
-    });
-  }
-
-  void _removeSocketListeners() {
-    // Remove all socket event listeners to prevent setState() on disposed widgets
-    _socketService.removeEventListener('socket:connected', (_) {});
-    _socketService.removeEventListener('socket:disconnected', (_) {});
-    _socketService.removeEventListener('socket:error', (_) {});
-    _socketService.removeEventListener('socket:reconnected', (_) {});
-    _socketService.removeEventListener('driver:online:success', (_) {});
-    _socketService.removeEventListener('driver:online:failed', (_) {});
-    _socketService.removeEventListener('driver:offline', (_) {});
-    _socketService.removeEventListener('ride:newRequest', (_) {});
-    _socketService.removeEventListener('ride:acceptedConfirmed', (_) {});
-    _socketService.removeEventListener('ride:status', (_) {});
-    _socketService.removeEventListener('ride:cancelled', (_) {});
-    _socketService.removeEventListener('ride:completed', (_) {});
-    _socketService.removeEventListener('ride:location', (_) {});
-    _socketService.removeEventListener('chat:message', (_) {});
-    print('🧹 Socket listeners removed');
-  }
-
-  void _processRideRequest(Map<String, dynamic> rideData) {
-    print('🚕 Processing ride request...');
-    
-    try {
-      // Create a deep copy to ensure data doesn't get modified
-      final Map<String, dynamic> rideDataCopy = Map<String, dynamic>.from(rideData);
-      
-      // Add any missing fields with default values
-      if (!rideDataCopy.containsKey('riderName')) {
-        rideDataCopy['riderName'] = 'Customer';
-      }
-      if (!rideDataCopy.containsKey('riderNumber')) {
-        rideDataCopy['riderNumber'] = 'N/A';
-      }
-      if (!rideDataCopy.containsKey('totalFare')) {
-        rideDataCopy['totalFare'] = '0';
-      }
-      if (!rideDataCopy.containsKey('distance')) {
-        rideDataCopy['distance'] = '0';
-      }
-      if (!rideDataCopy.containsKey('rideId')) {
-        rideDataCopy['rideId'] = rideDataCopy['orderId'] ?? 'N/A';
-      }
-      if (!rideDataCopy.containsKey('timestamp')) {
-        rideDataCopy['timestamp'] = DateTime.now().millisecondsSinceEpoch;
-      }
-      
-      // Ensure nested structures exist
-      if (!rideDataCopy.containsKey('startLocation')) {
-        rideDataCopy['startLocation'] = {
-          'address': 'Location not specified',
-          'coordinates': [78.4772, 17.4065]
-        };
-      }
-      
-      if (!rideDataCopy.containsKey('endLocation')) {
-        rideDataCopy['endLocation'] = {
-          'address': 'Destination not specified',
-          'coordinates': [78.4850, 17.4120]
-        };
-      }
-      
-      // Extract and print key information
-      print('\n📋 KEY RIDE INFORMATION (Before Navigation):');
-      print('├─ Ride ID: ${rideDataCopy['rideId']}');
-      print('├─ Order ID: ${rideDataCopy['orderId']}');
-      print('├─ Rider Name: ${rideDataCopy['riderName']}');
-      print('├─ Rider Phone: ${rideDataCopy['riderNumber']}');
-      print('├─ Total Fare: ₹${rideDataCopy['totalFare']}');
-      print('├─ Distance: ${rideDataCopy['distance']} km');
-      
-      if (rideDataCopy.containsKey('startLocation')) {
-        print('├─ Pickup Address: ${rideDataCopy['startLocation']?['address']}');
-      }
-      if (rideDataCopy.containsKey('endLocation')) {
-        print('├─ Destination: ${rideDataCopy['endLocation']?['address']}');
-      }
-      
-      // Store the new ride request
-      setState(() {
-        _newRideRequest = rideDataCopy;
-        _hasPendingRideRequest = true;
-      });
-
-      // Navigate to LiveRide screen IMMEDIATELY (without delay)
+    _socket!.on('ride:reconnected', (data) {
+      print('>>>>>>Reconnected to active ride: ${data}');
       if (mounted) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => LiveRide(rideData: rideDataCopy),
-            ),
-          );
+        setState(() {
+          _currentRide = {
+            'orderId': data['orderId'],
+            'status': data['orderStatus'] ?? data['status'],
+          };
         });
       }
+    });
 
-      // Auto-reject timer
-      final timeoutSeconds = rideDataCopy['timeout']?.toDouble() ?? 30.0;
-      _startRideRequestTimer(rideDataCopy['orderId'], timeoutSeconds);
+    // CHAT EVENTS
+    _socket!.on('chat:join_success', (data) {
+      print('✅ Joined chat room: ${data}');
+    });
 
-      print('✅ New ride request stored and navigating...');
-      print('⏰ Auto-reject timer started (${timeoutSeconds} seconds)');
-    } catch (error) {
-      print('❌ Error processing ride request: $error');
-      print('Stack trace: ${error.toString()}');
-    }
-  }
+    _socket!.on('chat:join_error', (data) {
+      print('❌ Chat join error: ${data}');
+    });
 
-  void _navigateToRideScreen(Map<String, dynamic> rideData) {
-    // Clear pending request
-    _clearPendingRideRequest();
-    
-    // Create a deep copy for navigation
-    final Map<String, dynamic> rideDataCopy = Map<String, dynamic>.from(rideData);
-    
-    // Navigate to ride screen
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => LiveRide(rideData: rideDataCopy),
-        ),
-      );
+    _socket!.on('chat:receiveMessage', (data) {
+      print('💬 New chat message received (chat:receiveMessage): ${data}');
+    });
+
+    _socket!.on('chat:message', (data) {
+      print('💬 New chat message received (chat:message): ${data}');
+    });
+
+    _socket!.on('chat:message_sent', (data) {
+      print('✅ Message sent successfully: ${data}');
+    });
+
+    _socket!.on('chat:typing', (data) {
+      print('✍️ User is typing: ${data}');
+    });
+
+    _socket!.on('chat:error', (data) {
+      print('❌ Chat error: ${data}');
+    });
+
+    // Generic event listener for debugging
+    _socket!.onAny((event, data) {
+      print('[RECEIVED] $event: ${data}');
     });
   }
 
-  // ==================== RIDE REQUEST TIMER ====================
-  void _startRideRequestTimer(String orderId, double timeoutSeconds) {
-    _clearRideRequestTimer();
-    
-    final seconds = timeoutSeconds.toInt();
-    
-    _rideRequestTimer = Timer(Duration(seconds: seconds), () {
-      if (_hasPendingRideRequest && _newRideRequest != null) {
-        print('⏰ Auto-rejecting ride request after $seconds seconds: $orderId');
-        
-        _socketService.declineRide(orderId, reason: 'timeout');
-        _showToast('Ride request auto-rejected (timeout)');
-        
-        _clearPendingRideRequest();
+  Map<String, dynamic> _mapRideData(dynamic data) {
+    final Map<String, dynamic> rideData = Map<String, dynamic>.from(data);
+
+    // Extract pickup coordinates
+    Map<String, dynamic>? pickupCoords;
+    if (rideData['pickup'] != null) {
+      final pickup = Map<String, dynamic>.from(rideData['pickup']);
+      if (pickup['latitude'] != null && pickup['longitude'] != null) {
+        pickupCoords = {
+          'latitude': double.parse(pickup['latitude'].toString()),
+          'longitude': double.parse(pickup['longitude'].toString()),
+        };
       }
-    });
-  }
-
-  void _clearRideRequestTimer() {
-    if (_rideRequestTimer != null) {
-      _rideRequestTimer!.cancel();
-      _rideRequestTimer = null;
     }
-  }
 
-  void _clearPendingRideRequest() {
-    _clearRideRequestTimer();
-    setState(() {
-      _newRideRequest = null;
-      _hasPendingRideRequest = false;
-    });
-  }
-
-  // ==================== BACKGROUND RECONNECT ====================
-  void _startBackgroundReconnectTimer() {
-    _stopBackgroundReconnectTimer();
-    
-    print('🔄 Starting background reconnect monitoring...');
-    
-    _backgroundReconnectTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
-      if (_appInBackground && _isOnDuty && !_isSocketConnected) {
-        print('🔧 Background: Checking connection...');
-        _checkAndReconnect();
+    // Extract dropoff coordinates
+    Map<String, dynamic>? dropoffCoords;
+    if (rideData['destination'] != null) {
+      final destination = Map<String, dynamic>.from(rideData['destination']);
+      if (destination['latitude'] != null && destination['longitude'] != null) {
+        dropoffCoords = {
+          'latitude': double.parse(destination['latitude'].toString()),
+          'longitude': double.parse(destination['longitude'].toString()),
+        };
       }
-    });
-  }
-
-  void _stopBackgroundReconnectTimer() {
-    if (_backgroundReconnectTimer != null) {
-      _backgroundReconnectTimer!.cancel();
-      _backgroundReconnectTimer = null;
     }
-  }
 
-  void _checkAndReconnect() {
-    final status = _socketService.getConnectionStatus();
-    if (!(status['isConnected'] ?? false)) {
-      print('🔄 Background: Socket disconnected, attempting reconnect...');
-      _socketService.connect();
-    }
-  }
-
-  void _reconnectWithRetry() {
-    if (_isSocketConnected) return;
-    
-    print('🔄 Attempting socket reconnection...');
-    
-    int attempts = 0;
-    const maxAttempts = 3;
-    
-    Future.delayed(Duration.zero, () async {
-      while (attempts < maxAttempts && !_isSocketConnected && mounted) {
-        attempts++;
-        print('🔄 Reconnection attempt $attempts/$maxAttempts');
-        
-        try {
-          await _connectSocket();
-          
-          // Wait for connection
-          await Future.delayed(const Duration(seconds: 2));
-          
-          final status = _socketService.getConnectionStatus();
-          if (status['isConnected'] ?? false) {
-            print('✅ Reconnection successful');
-            
-            // If we were online before, restore online status
-            if (_isOnDuty) {
-              print('🔄 Restoring online status...');
-              await _restoreOnlineStatus();
+    // Build mapped data
+    return {
+      ...rideData,
+      'orderId': rideData['orderId'] ?? rideData['rideId'] ?? rideData['_id'],
+      'pickup': pickupCoords,
+      'destination': dropoffCoords,
+      'startLocation': {
+        'address': rideData['startLocation']?['address'] ?? 'Pickup Location',
+        'coordinates': pickupCoords,
+      },
+      'endLocation': rideData['endLocation'] != null
+          ? {
+              'address': rideData['endLocation']?['address'] ?? 'Drop Location',
+              'coordinates': dropoffCoords,
             }
-            
-            break;
-          }
-        } catch (error) {
-          print('❌ Reconnection attempt $attempts failed: $error');
-        }
-        
-        if (attempts < maxAttempts) {
-          await Future.delayed(Duration(seconds: attempts * 2));
-        }
-      }
-      
-      if (!_isSocketConnected) {
-        print('❌ Failed to reconnect after $maxAttempts attempts');
-        _showToast('Connection lost. Please check your internet.');
-      }
-    });
+          : null,
+      'riderId':
+          rideData['riderId'] ??
+          rideData['userId']?['_id'] ??
+          rideData['userId'],
+      'riderName':
+          rideData['riderName'] ?? rideData['userId']?['name'] ?? 'Customer',
+      'riderNumber':
+          (rideData['riderNumber'] ?? rideData['userId']?['phone'] ?? '')
+              .toString(),
+      'totalFare':
+          (rideData['totalFare'] ??
+                  rideData['fare']?['total'] ??
+                  rideData['fare'] ??
+                  '0')
+              .toString(),
+      'distance': (rideData['distance'] ?? '0').toString(),
+      'estimatedTime': (rideData['estimatedTime'] ?? '15').toString(),
+      'vehicleType': rideData['vehicleType'] ?? 'sedan',
+      'otp': rideData['otp'],
+    };
   }
 
-  Future<void> _restoreOnlineStatus() async {
-    final status = _socketService.getConnectionStatus();
-    if (!(status['isConnected'] ?? false)) return;
-    
-    print('🔄 Restoring driver online status...');
-    
-    try {
-      // Get current location
-      final location = await _getCurrentLocation();
-      
-      // Go online
-      await _socketService.goOnline();
-      
-      print('✅ Online status restored');
-      
-    } catch (error) {
-      print('❌ Error restoring online status: $error');
+  void _disconnectSocket() {
+    // Don't disconnect if ride is in progress
+    if (_isRideInProgress && _activeRideId != null) {
+      print(
+        '⚠️ Cannot disconnect - RIDE IN PROGRESS (ID: $_activeRideId)! Socket will remain connected.',
+      );
+      return;
     }
+
+    _stopLocationWatch();
+    _stopLocationUpdates();
+
+    if (_socket != null) {
+      _socket!.disconnect();
+      _socket!.dispose();
+      _socket = null;
+    }
+
+    setState(() {
+      _isSocketConnected = false;
+      _socketId = null;
+      _isOnDuty = false;
+    });
+
+    print('🔌 Driver socket disconnected');
   }
 
   // ==================== DRIVER ONLINE/OFFLINE ====================
+
   Future<void> _goOnline() async {
     print('🟢 GOING ONLINE...');
 
@@ -742,36 +844,86 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     });
 
     try {
-      // Check if already connected
-      final status = _socketService.getConnectionStatus();
-      bool isConnected = status['isConnected'] ?? false;
+      // If socket is not connected, try to reconnect first
+      if (_socket == null || !_isSocketConnected) {
+        print('⚠️ Socket not connected, attempting to reconnect...');
 
-      // If not connected, connect quickly (target: 1 second)
-      if (!isConnected) {
-        print('🔌 Socket not connected, connecting...');
-        final connected = await _connectSocket();
-        
-        if (!connected) {
-          _handleOnlineFailure('Network connection failed');
+        final reconnected = await _connectSocket();
+
+        if (!reconnected) {
+          print('❌ Failed to reconnect socket');
+          _handleOnlineFailure(
+            'Failed to connect to server. Please check your internet connection.',
+          );
           return;
         }
-        
-        // Give socket a moment to be ready
-        await Future.delayed(const Duration(milliseconds: 300));
+
+        print('✅ Socket reconnected successfully');
+
+        // Wait a bit for socket to stabilize
+        await Future.delayed(const Duration(milliseconds: 500));
       }
 
-      // Go online with cached location (no delay for fetching)
-      print('🚀 Sending online status with cached location...');
-      final success = await _socketService.goOnline();
+      // Use current location immediately (already set from initState)
+      print('📍 Using current location: $_currentLatitude, $_currentLongitude');
 
-      if (success) {
-        print('✅ Online request sent successfully');
-      } else {
-        _handleOnlineFailure('Failed to go online');
+      final payload = {
+        'latitude': _currentLatitude,
+        'longitude': _currentLongitude,
+        'vehicleType': _vehicleType,
+        'vehicleImage': _vehicleImage,
+        'fleetId': _fleetId,
+        'timestamp': DateTime.now().toIso8601String(),
+      };
+
+      print('📡 Emitting user:online: $payload');
+      _socket!.emit('user:online', payload);
+
+      // Start sending location updates every 2 seconds
+      _startLocationUpdates();
+
+      print('🟢 Driver online request sent immediately');
+    } catch (error) {
+      print('❌ Error going online: $error');
+      _handleOnlineFailure('Error: $error');
+    }
+  }
+
+  Future<void> _goOffline() async {
+    print('🔴 GOING OFFLINE...');
+
+    try {
+      // Emit offline event but keep socket connected
+      if (_socket != null && _isSocketConnected) {
+        print('🔴 Emitting offline status...');
+
+        final payload = {
+          'driverId': _driverId,
+          'timestamp': DateTime.now().toIso8601String(),
+        };
+        _socket!.emit('user:offline', payload);
+        print('📡 Emitted user:offline event: $payload');
       }
-    } catch (e) {
-      print('❌ Error: $e');
-      _handleOnlineFailure('Error: $e');
+
+      // Stop location updates
+      _stopLocationUpdates();
+
+      setState(() {
+        _isOnDuty = false;
+        _isProcessingOnline = false;
+      });
+
+      // Remove bike marker and circle
+      _removeBikeMarkerAndCircle();
+
+      // Clear pending ride request
+      _clearPendingRideRequest();
+
+      print('✅ Driver is now offline (socket remains connected)');
+      _showToast('Driver is now offline');
+    } catch (error) {
+      print('❌ Error going offline: $error');
+      _showToast('Error going offline');
     }
   }
 
@@ -792,9 +944,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     _showToast(successMessage);
 
-    // Animate camera and create marker (async operations)
-   
-    // _createBikeMarkerAndCircle(); // Returns Future but we don't await to avoid blocking UI
+    // Update map with current location
+    if (_currentLatitude != 0.0 && _currentLongitude != 0.0) {
+      _updateMarkerOnly(
+        LatLng(_currentLatitude, _currentLongitude),
+        50.0, // Default accuracy
+      );
+    }
   }
 
   void _handleOnlineFailure(dynamic data) {
@@ -817,370 +973,454 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _showToast(errorMessage);
   }
 
-  Future<void> _goOffline() async {
-    print('🔴 GOING OFFLINE...');
-    
-    try {
-      // Stop processing any online requests
-      setState(() {
-        _isProcessingOnline = false;
-      });
-
-      // Go offline via socket service (fully disconnects)
-      await _socketService.goOffline();
-      
-      setState(() {
-        _isOnDuty = false;
-      });
-
-      // Remove bike marker and circle
-      _removeBikeMarkerAndCircle();
-
-      // Clear pending ride request
-      _clearPendingRideRequest();
-
-      print('✅ Driver is now offline - socket disconnected');
-      _showToast('Offline - Socket disconnected');
-      
-    } catch (error) {
-      print('❌ Error going offline: $error');
-      _showToast('Error going offline');
-    }
-  }
-
   // ==================== LOCATION METHODS ====================
-  Future<Map<String, dynamic>> _getCurrentLocation() async {
-    try {
-      final coordinates = _socketService.getCurrentCoordinates();
 
-      print("socckettt_coordianted  ${coordinates['latitude']}");
+  // Start location listener in initState after getting initial location
+  void _startBackgroundLocationListener() {
+    print('📍 Starting background location listener');
 
-      print("socckettt_coordianted222  ${coordinates['longitude']}");
-      setState(() {
-        _currentLatitude = coordinates['latitude'] as double? ?? 0.0;
-        _currentLongitude = coordinates['longitude'] as double? ?? 0.0;
-      });
-      
-      print('✅ Got current location: $_currentLatitude, $_currentLongitude');
-      
-      // Update driver marker with new location
-      _createDriverMarker();
-      
-      return coordinates;
-    } catch (e) {
-      print('❌ Error getting location: $e');
-      return {'latitude': 23.2508438, 'longitude': 77.4647827};
-    }
+    _positionStreamSubscription =
+        Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.best,
+            distanceFilter: 5, // Update every 5 meters
+          ),
+        ).listen(
+          (position) {
+            // Just update the coordinates silently
+            _currentLatitude = position.latitude;
+            _currentLongitude = position.longitude;
+            _lastLocationUpdate = DateTime.now();
+
+            // Update marker on map
+            if (mounted) {
+              _updateMarkerOnly(
+                LatLng(_currentLatitude, _currentLongitude),
+                position.accuracy,
+              );
+            }
+
+            print(
+              '📍 Location updated silently: $_currentLatitude, $_currentLongitude',
+            );
+          },
+          onError: (error) {
+            print('⚠️ Background location error: $error');
+          },
+        );
   }
 
+  void _updateMarkerOnly(LatLng location, double accuracy) {
+    if (!mounted) return;
 
- 
-
-  // Create bike marker and circle at current location (async)
-
-  // Remove bike marker and circle
-  void _removeBikeMarkerAndCircle() {
     setState(() {
       markers.clear();
       circles.clear();
+
+      // Bike marker
+      markers.add(
+        Marker(
+          markerId: const MarkerId('driver_location'),
+          position: location,
+          icon:
+              _bikeMarkerIcon ??
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          anchor: const Offset(0.5, 0.5),
+          infoWindow: const InfoWindow(
+            title: 'Your Location',
+            snippet: 'You are here',
+          ),
+          zIndex: 2,
+        ),
+      );
+
+      // Grey outer circle (accuracy shadow)
+      circles.add(
+        Circle(
+          circleId: const CircleId('outer_shadow'),
+          center: location,
+          radius: accuracy + 80,
+          fillColor: Colors.grey.withOpacity(0.25),
+          strokeColor: Colors.transparent,
+        ),
+      );
+
+      // Green inner circle (center)
+      circles.add(
+        Circle(
+          circleId: const CircleId('inner_green'),
+          center: location,
+          radius: 60,
+          fillColor: Colors.green.withOpacity(0.35),
+          strokeColor: Colors.green,
+          strokeWidth: 1,
+        ),
+      );
     });
-    print('✅ Bike marker and circle removed');
   }
 
-  // Load custom bike marker icon from assets
-  Future<void> _loadCustomBikeMarker() async {
-    try {
-      _bikeMarkerIcon = await MapHelper.loadCustomIcon(
-        assetPath: 'assets/images/bike2.png',
-        width: 80,
-        height: 80,
-      );
-      print('✅ Custom bike marker icon loaded');
-    } catch (e) {
-      print('❌ Error loading custom bike marker: $e');
-      _bikeMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
+  void _sendLocationUpdate() {
+    if (_socket == null || !_isSocketConnected) return;
+
+    // Only send if location has changed significantly
+    final latDiff = (_currentLatitude - (_lastSentLatitude ?? _currentLatitude))
+        .abs();
+    final lngDiff =
+        (_currentLongitude - (_lastSentLongitude ?? _currentLongitude)).abs();
+
+    if (latDiff < LOCATION_CHANGE_THRESHOLD &&
+        lngDiff < LOCATION_CHANGE_THRESHOLD) {
+      return; // Skip sending if location change is too small
+    }
+
+    // Update last sent coordinates
+    _lastSentLatitude = _currentLatitude;
+    _lastSentLongitude = _currentLongitude;
+
+    // 1. General driver location update
+    final driverPayload = {
+      'latitude': _currentLatitude,
+      'longitude': _currentLongitude,
+      'role': 'Driver',
+      'vehicleType': _vehicleType,
+      'vehicleImage': _vehicleImage,
+      'fleetId': _fleetId,
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+
+    print(
+      '📍 Sending location update every 2 seconds: $_currentLatitude, $_currentLongitude',
+    );
+    _socket!.emit('driver:location:update', driverPayload);
+
+    // 2. Specific ride location update (if in a ride)
+    final rideId =
+        _activeRideId ?? _currentRide?['orderId'] ?? _currentRide?['rideId'];
+
+    if (rideId != null && rideId is String) {
+      final ridePayload = {
+        'rideId': rideId,
+        'location': {
+          'latitude': _currentLatitude,
+          'longitude': _currentLongitude,
+          'lat': _currentLatitude,
+          'lng': _currentLongitude,
+          'timestamp': DateTime.now().toIso8601String(),
+          'accuracy': 0.0,
+          'speed': 0.0,
+        },
+      };
+
+      _socket!.emit('ride:location:update', ridePayload);
     }
   }
 
-  // Load vehicle icons for nearby riders
-  Future<void> _loadVehicleIcons() async {
-    try {
-      _vehicleIcons = await MapHelper.loadVehicleIcons(
-        iconSize: 70,
-      );
-      print('✅ Vehicle icons loaded');
-    } catch (e) {
-      print('❌ Error loading vehicle icons: $e');
+  void _startLocationUpdates() {
+    _stopLocationUpdates();
+
+    print('🔄 Starting location update broadcasts every 2 seconds');
+
+    _locationUpdateTimer = Timer.periodic(
+      const Duration(milliseconds: LOCATION_UPDATE_INTERVAL), // 2 seconds
+      (_) {
+        if (_socket != null && _isSocketConnected && _isOnDuty) {
+          if (_currentLatitude != 0.0 && _currentLongitude != 0.0) {
+            _sendLocationUpdate();
+          }
+        }
+      },
+    );
+  }
+
+  void _stopLocationUpdates() {
+    if (_locationUpdateTimer != null) {
+      _locationUpdateTimer!.cancel();
+      _locationUpdateTimer = null;
+      print('⏹️ Stopped location update broadcasts');
     }
   }
 
-  // Create driver marker with custom bike icon at current location
-  void _createDriverMarker() {
-    if (_currentLatitude == null || _currentLongitude == null) {
-      print('⚠️ Current location not available for driver marker');
-      return;
-    }
-
-    try {
-      final driverMarker = Marker(
-        markerId: const MarkerId('driver_location'),
-        position: LatLng(_currentLatitude!, _currentLongitude!),
-        icon: _bikeMarkerIcon ?? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-        anchor: const Offset(0.5, 0.5),
-        infoWindow: const InfoWindow(
-          title: 'Your Location',
-          snippet: 'You are here',
-        ),
-        zIndex: 2, // Above rider markers
-      );
-
-      setState(() {
-        // Remove existing driver marker if any
-        markers.removeWhere((m) => m.markerId.value == 'driver_location');
-        // Add new driver marker
-        markers.add(driverMarker);
-      });
-
-      print('✅ Driver marker created/updated at ($_currentLatitude, $_currentLongitude)');
-    } catch (e) {
-      print('❌ Error creating driver marker: $e');
+  void _stopLocationWatch() {
+    if (_positionStreamSubscription != null) {
+      _positionStreamSubscription!.cancel();
+      _positionStreamSubscription = null;
+      print('⏹️ Stopped location watch');
     }
   }
 
-  // Update nearby riders on map
-  Future<void> _updateNearbyRiders(List<Map<String, dynamic>> riders) async {
-    if (_currentLatitude == null || _currentLongitude == null) {
-      print('⚠️ Current location not available for filtering riders');
-      return;
+  // ==================== RIDE METHODS ====================
+
+  bool _acceptRide(Map<String, dynamic> rideData) {
+    if (_socket == null || !_isSocketConnected) {
+      print('❌ Cannot accept ride - socket not connected');
+      return false;
     }
 
-    try {
-      // Filter riders within 5km
-      final filteredRiders = MapHelper.filterRidersByDistance(
-        riders,
-        _currentLatitude!,
-        _currentLongitude!,
-        5.0, // 5km radius
-      );
+    final orderId =
+        rideData['orderId'] ??
+        rideData['_id'] ??
+        rideData['id'] ??
+        rideData['rideId'];
 
-      setState(() {
-        _nearbyRiders = filteredRiders;
-      });
-
-      // Create markers for nearby riders
-      final riderMarkers = MapHelper.createRiderMarkers(
-        riders: filteredRiders,
-        vehicleIcons: _vehicleIcons.isNotEmpty ? _vehicleIcons : null,
-      );
-
-      // Combine driver marker + rider markers
-      setState(() {
-        markers.addAll(riderMarkers);
-      });
-
-      print('✅ Updated ${filteredRiders.length} nearby riders on map');
-    } catch (e) {
-      print('❌ Error updating nearby riders: $e');
+    if (orderId == null) {
+      print('❌ No order ID found in ride data');
+      return false;
     }
+
+    // Mark ride as in progress
+    _activeRideId = orderId;
+    _rideStartTime = DateTime.now();
+    _isRideInProgress = true;
+
+    _currentRide = {
+      'orderId': orderId,
+      'status': 'accepting',
+      'data': rideData,
+    };
+
+    final payload = {
+      'orderId': orderId,
+      'driverId': _driverId,
+      'driverName': _driverName,
+      'driverPhone': _driverPhone,
+      'driverImage': _driverImage,
+      'acceptedAt': DateTime.now().toIso8601String(),
+      'location': {
+        'latitude': _currentLatitude,
+        'longitude': _currentLongitude,
+      },
+      'vehicleType': _vehicleType,
+      'vehicleNumber': _vehicleNumber,
+      'vehicleImage': _vehicleImage,
+    };
+
+    print('✅ Emitting ride:accept with driver data: ${payload}');
+    _socket!.emit('ride:accept', payload);
+
+    return true;
   }
 
-  // Add a single nearby rider (real-time update)
-  void _addNearbyRider(Map<String, dynamic> rider) {
-    try {
-      final riderId = rider['riderId'] as String?;
-      if (riderId == null) return;
-
-      // Check if already exists
-      final exists = _nearbyRiders.any((r) => r['riderId'] == riderId);
-      if (exists) return;
-
-      setState(() {
-        _nearbyRiders.add(rider);
-      });
-
-      // Add marker to map
-      final riderMarker = MapHelper.createSingleRiderMarker(
-        riderId: riderId,
-        position: LatLng(
-          rider['location']['lat'] as double,
-          rider['location']['lng'] as double,
-        ),
-        icon: _vehicleIcons[rider['vehicleType']] ??
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
-        name: rider['name'],
-        status: rider['status'],
-        vehicleType: rider['vehicleType'],
-      );
-
-      setState(() {
-        markers.add(riderMarker);
-      });
-
-      print('✅ Added nearby rider: $riderId');
-    } catch (e) {
-      print('❌ Error adding nearby rider: $e');
+  bool _declineRide(String rideId, {String reason = ''}) {
+    if (_socket == null || !_isSocketConnected) {
+      return false;
     }
+
+    final payload = {
+      'orderId': rideId,
+      'driverId': _driverId,
+      'reason': reason,
+      'declinedAt': DateTime.now().toIso8601String(),
+    };
+
+    print('❌ Declining ride: ${payload}');
+    _socket!.emit('ride:decline', payload);
+    return true;
   }
 
-  // Remove nearby rider from map
-  void _removeNearbyRider(String riderId) {
-    setState(() {
-      _nearbyRiders.removeWhere((r) => r['riderId'] == riderId);
-      markers.removeWhere((m) => m.markerId.value == 'rider_$riderId');
-    });
-    print('✅ Removed nearby rider: $riderId');
-  }
+  void _completeRide(String? rideId) {
+    if (rideId != null && rideId.isNotEmpty) {
+      if (_activeRideId == rideId) {
+        print('✅ Ride completed (ID: $rideId)');
+        _activeRideId = null;
+        _rideStartTime = null;
+        _isRideInProgress = false;
+        _currentRide = null;
 
-  // Update rider location in real-time
-  void _updateRiderLocation(String riderId, double lat, double lng) {
-    final index = _nearbyRiders.indexWhere((r) => r['riderId'] == riderId);
-    if (index != -1) {
-      setState(() {
-        _nearbyRiders[index]['location'] = {'lat': lat, 'lng': lng};
-      });
+        // Navigate back to home if needed
+        if (mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
 
-      // Update marker
-      final riderMarker = MapHelper.createSingleRiderMarker(
-        riderId: riderId,
-        position: LatLng(lat, lng),
-        icon: _vehicleIcons[_nearbyRiders[index]['vehicleType']] ??
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
-        name: _nearbyRiders[index]['name'],
-        status: _nearbyRiders[index]['status'],
-        vehicleType: _nearbyRiders[index]['vehicleType'],
-      );
-
-      setState(() {
-        markers.removeWhere((m) => m.markerId.value == 'rider_$riderId');
-        markers.add(riderMarker);
-      });
-
-      print('✅ Updated rider location: $riderId');
-    }
-  }
-
-  // ==================== NOTIFICATIONS ====================
-  void _showRideRequestNotification(Map<String, dynamic> rideData) {
-    if (!mounted) return;
-
-    // Extract data
-    final riderName = rideData['riderName']?.toString() ?? 'Customer';
-    final riderPhone = rideData['riderNumber']?.toString() ?? '';
-    final distance = rideData['distance']?.toString() ?? '0';
-    final fare = rideData['totalFare']?.toString() ?? '0';
-    final pickup = rideData['startLocation']?['address']?.toString() ?? 'Location not specified';
-    final destination = rideData['endLocation']?['address']?.toString() ?? 'Destination not specified';
-    final orderId = rideData['orderId']?.toString() ?? '';
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.local_taxi, color: Colors.green),
-            SizedBox(width: 10),
-            Text('🚕 New Ride Request'),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(
-                leading: CircleAvatar(
-                  child: Text(riderName.substring(0, 1).toUpperCase()),
-                ),
-                title: Text(riderName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text(riderPhone),
-              ),
-              const Divider(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Fare', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      Text('₹$fare', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Distance', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      Text('$distance km', style: const TextStyle(fontSize: 16)),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(Icons.location_on, color: Colors.green, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Pickup', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                        Text(pickup, style: const TextStyle(fontSize: 14)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(Icons.location_on, color: Colors.red, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Destination', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                        Text(destination, style: const TextStyle(fontSize: 14)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              if (orderId.isNotEmpty) {
-                _socketService.declineRide(orderId);
-                _showToast('Ride rejected');
-                _clearPendingRideRequest();
+          // After navigating back, check socket connection
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted) {
+              // Check if socket is still connected
+              if (_socket == null || !_isSocketConnected) {
+                print(
+                  '⚠️ Socket disconnected after ride completion, attempting reconnect...',
+                );
+                _reconnectWithRetry();
+              } else {
+                print('✅ Socket still connected after ride completion');
               }
-            },
-            child: const Text('Reject', style: TextStyle(color: Colors.red)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              if (orderId.isNotEmpty) {
-                _socketService.acceptRide(rideData);
-                print('✅ Ride accepted: $orderId');
-                _showToast('Ride accepted!');
-                _clearPendingRideRequest();
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-            child: const Text('Accept'),
-          ),
-        ],
+            }
+          });
+        }
+      }
+    } else {
+      print('⚠️ Invalid rideId provided to _completeRide');
+    }
+  }
+
+  // ==================== RIDE REQUEST HANDLING ====================
+
+  void _processRideRequest(Map<String, dynamic> rideData) {
+    print('🚕 Processing ride request...');
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RideRequestScreen(rideData: rideData),
       ),
     );
   }
+
+  void _navigateToRideScreen(Map<String, dynamic> rideData) {
+    // Clear pending request
+    _clearPendingRideRequest();
+  }
+
+  void _startRideRequestTimer(String orderId, double timeoutSeconds) {
+    _clearRideRequestTimer();
+
+    final seconds = timeoutSeconds.toInt();
+
+    _rideRequestTimer = Timer(Duration(seconds: seconds), () {
+      if (_hasPendingRideRequest && _newRideRequest != null) {
+        print('⏰ Auto-rejecting ride request after $seconds seconds: $orderId');
+
+        _declineRide(orderId, reason: 'timeout');
+        _showToast('Ride request auto-rejected (timeout)');
+
+        _clearPendingRideRequest();
+      }
+    });
+  }
+
+  void _clearRideRequestTimer() {
+    if (_rideRequestTimer != null) {
+      _rideRequestTimer!.cancel();
+      _rideRequestTimer = null;
+    }
+  }
+
+  void _clearPendingRideRequest() {
+    _clearRideRequestTimer();
+    setState(() {
+      _newRideRequest = null;
+      _hasPendingRideRequest = false;
+    });
+  }
+
+  // ==================== BACKGROUND RECONNECT ====================
+
+  void _startBackgroundReconnectTimer() {
+    _stopBackgroundReconnectTimer();
+
+    print('🔄 Starting background reconnect monitoring...');
+
+    _backgroundReconnectTimer = Timer.periodic(const Duration(seconds: 30), (
+      timer,
+    ) {
+      if (_appInBackground && _isOnDuty && !_isSocketConnected) {
+        print('🔧 Background: Checking connection...');
+        _checkAndReconnect();
+      }
+    });
+  }
+
+  void _stopBackgroundReconnectTimer() {
+    if (_backgroundReconnectTimer != null) {
+      _backgroundReconnectTimer!.cancel();
+      _backgroundReconnectTimer = null;
+    }
+  }
+
+  void _checkAndReconnect() {
+    if (!_isSocketConnected) {
+      print('🔄 Background: Socket disconnected, attempting reconnect...');
+      _connectSocket();
+    }
+  }
+
+  void _reconnectWithRetry() {
+    if (_isSocketConnected) return;
+
+    print('🔄 Attempting socket reconnection...');
+
+    int attempts = 0;
+    const maxAttempts = 3;
+
+    Future.delayed(Duration.zero, () async {
+      while (attempts < maxAttempts && !_isSocketConnected && mounted) {
+        attempts++;
+        print('🔄 Reconnection attempt $attempts/$maxAttempts');
+
+        try {
+          await _connectSocket();
+
+          // Wait for connection
+          await Future.delayed(const Duration(seconds: 2));
+
+          if (_isSocketConnected) {
+            print('✅ Reconnection successful');
+
+            // If we were online before, restore online status
+            if (_isOnDuty) {
+              print('🔄 Restoring online status...');
+              await _restoreOnlineStatus();
+            }
+
+            break;
+          }
+        } catch (error) {
+          print('❌ Reconnection attempt $attempts failed: $error');
+        }
+
+        if (attempts < maxAttempts) {
+          await Future.delayed(Duration(seconds: attempts * 2));
+        }
+      }
+
+      if (!_isSocketConnected) {
+        print('❌ Failed to reconnect after $maxAttempts attempts');
+        _showToast('Connection lost. Please check your internet.');
+      }
+    });
+  }
+
+  Future<void> _restoreOnlineStatus() async {
+    if (!_isSocketConnected) return;
+
+    print('🔄 Restoring driver online status...');
+
+    try {
+      // Go online with current location
+      await _goOnline();
+
+      print('✅ Online status restored');
+    } catch (error) {
+      print('❌ Error restoring online status: $error');
+    }
+  }
+
+  // ==================== DRIVER DATA ====================
+
+  Future<void> _fetchDriverData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final storedDriverData = prefs.getString('driverData');
+
+      if (storedDriverData != null) {
+        final driverData = json.decode(storedDriverData);
+
+        // Store complete driver profile data
+        _driverName = driverData['name'] ?? driverData['driverName'];
+        _driverPhone = driverData['phone'] ?? driverData['phoneNumber'];
+        _driverImage =
+            driverData['profileImage'] ??
+            driverData['image'] ??
+            driverData['driverImage'];
+        _vehicleType = driverData['vehicleType'];
+        _vehicleNumber = driverData['vehicleNumber'] ?? driverData['vehicleNo'];
+        _vehicleImage = driverData['vehicleImage'];
+        _fleetId = driverData['fleetId'];
+      }
+    } catch (error) {
+      print('❌ Error fetching driver data: $error');
+    }
+  }
+
+  // ==================== HELPER METHODS ====================
 
   void _showToast(String message) {
     if (!mounted) return;
@@ -1188,24 +1428,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
     );
-  }
-
-  // ==================== UTILITY METHODS ====================
-  void _toggleConnection() {
-    final status = _socketService.getConnectionStatus();
-    if (status['isConnected'] ?? false) {
-      _socketService.disconnect();
-      setState(() {
-        _isSocketConnected = false;
-        _socketStatus = 'Disconnecting...';
-        _isOnDuty = false;
-        _isProcessingOnline = false;
-      });
-      _showToast('Socket disconnected');
-    } else {
-      _connectSocket();
-      _showToast('Connecting socket...');
-    }
   }
 
   void _toggleOnlineStatus() {
@@ -1216,441 +1438,471 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  // Helper methods for connection status
-  Color _getConnectionColor() {
-    if (!_isSocketConnected) return Colors.red;
-    if (_appInBackground) return Colors.orange;
-    return Colors.green;
-  }
-
-  IconData _getConnectionIcon() {
-    if (!_isSocketConnected) return Icons.signal_wifi_off;
-    if (_appInBackground) return Icons.phone_android;
-    return Icons.signal_wifi_4_bar;
-  }
-
-  String _getConnectionText() {
-    if (!_isSocketConnected) return 'Offline';
-    if (_appInBackground) return 'Background';
-    if (!_isOnDuty) return 'Online (Idle)';
-    return 'Online';
+  // Helper method to extract ride ID from data
+  String? _extractRideId(dynamic data) {
+    if (data is Map<String, dynamic>) {
+      return data['orderId'] ?? data['rideId'] ?? data['_id'] ?? data['id'];
+    }
+    return null;
   }
 
   // ==================== UI BUILD ====================
+
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
 
-    return
-    
-    
-             _isOnDuty == false ? 
- Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(w * .300),
-        child: Container(
-          height: w * .290,
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.2),
-                spreadRadius: 1,
-                blurRadius: 2,
-                offset: const Offset(0, 3),
-              ),
-            ],
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(w * 0.04),
-              bottomRight: Radius.circular(w * 0.04),
-            ),
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: w * 0.04),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: w * 0.06,
-                        backgroundImage: const AssetImage('assets/images/home2.png'),
-                      ),
-                      SizedBox(width: w * 0.03),
-                      AppFonts.textPoppins(
-                        context,
-                        "Ayaan Malviya",
-                        w * 0.05,
-                        FontWeight.w600,
-                        AppColors.black,
-                        TextAlign.left,
-                        TextOverflow.visible,
-                      ),
-                    ],
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Connection status indicator
-                      // Container(
-                      //   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      //   decoration: BoxDecoration(
-                      //     color: _getConnectionColor(),
-                      //     borderRadius: BorderRadius.circular(12),
-                      //   ),
-                      //   child: Row(
-                      //     mainAxisSize: MainAxisSize.min,
-                      //     children: [
-                      //       Icon(_getConnectionIcon(), size: 12, color: Colors.white),
-                      //       const SizedBox(width: 4),
-                      //       Text(
-                      //         _getConnectionText(),
-                      //         style: const TextStyle(color: Colors.white, fontSize: 10),
-                      //       ),
-                      //     ],
-                      //   ),
-                      // ),
-                      SizedBox(height: w * 0.01),
-                      // Online/Offline toggle
-                      GestureDetector(
-                        onTap: _isProcessingOnline ? null : _toggleOnlineStatus,
-                        child: Container(
-                          width: w * 0.26,
-                          height: w * 0.10,
-                          decoration: BoxDecoration(
-                            color: _isOnDuty ? const Color(0xFF34C759) : const Color(0xFFF26061),
-                            borderRadius: BorderRadius.circular(w * 0.06),
+    return _isOnDuty == false
+        ? Scaffold(
+            backgroundColor: AppColors.white,
+            appBar: PreferredSize(
+              preferredSize: Size.fromHeight(w * .300),
+              child:
+                  Container(
+                        height: w * .290,
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              spreadRadius: 1,
+                              blurRadius: 2,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(w * 0.04),
+                            bottomRight: Radius.circular(w * 0.04),
                           ),
-                          alignment: Alignment.center,
-                          child: _isProcessingOnline
-                              ? SizedBox(
-                                  width: w * 0.04,
-                                  height: w * 0.04,
-                                  child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                                )
-                              : Text(
-                                  _isOnDuty ? 'Online' : 'Offline',
-                                  style: TextStyle(color: Colors.white, fontSize: w * 0.032, fontWeight: FontWeight.w600),
-                                ),
                         ),
+                        child: SafeArea(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: w * 0.04),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: w * 0.06,
+                                      backgroundImage: const AssetImage(
+                                        'assets/images/home2.png',
+                                      ),
+                                    ),
+                                    SizedBox(width: w * 0.03),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Ayaan Malviya",
+                                      w * 0.05,
+                                      FontWeight.w600,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.visible,
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(height: w * 0.01),
+                                    // Online/Offline toggle
+                                    GestureDetector(
+                                      onTap: _isProcessingOnline
+                                          ? null
+                                          : _toggleOnlineStatus,
+                                      child: Container(
+                                        width: w * 0.26,
+                                        height: w * 0.10,
+                                        decoration: BoxDecoration(
+                                          color: _isOnDuty
+                                              ? const Color(0xFF34C759)
+                                              : const Color(0xFFF26061),
+                                          borderRadius: BorderRadius.circular(
+                                            w * 0.06,
+                                          ),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: _isProcessingOnline
+                                            ? SizedBox(
+                                                width: w * 0.04,
+                                                height: w * 0.04,
+                                                child:
+                                                    const CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      color: Colors.white,
+                                                    ),
+                                              )
+                                            : Text(
+                                                _isOnDuty
+                                                    ? 'Online'
+                                                    : 'Offline',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: w * 0.032,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                      .animate()
+                      .fade(duration: 800.ms, curve: Curves.easeInOut)
+                      .scale(
+                        begin: const Offset(0.95, 0.95),
+                        end: const Offset(1, 1),
                       ),
-                    ],
-                  ),
-                ],
-              ),
             ),
-          ),
-        ).animate().fade(duration: 800.ms, curve: Curves.easeInOut).scale(
-          begin: const Offset(0.95, 0.95),
-          end: const Offset(1, 1),
-        ),
-      ),
-      body: 
-      
-
-     SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: w * 0.04),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-
-              // Status indicators
-              if (_hasPendingRideRequest && _newRideRequest != null)
-                Container(
-                  margin: EdgeInsets.only(bottom: w * 0.02),
-                  padding: EdgeInsets.all(w * 0.015),
-                  decoration: BoxDecoration(
-                    color: Colors.orange[50],
-                    borderRadius: BorderRadius.circular(w * 0.02),
-                    border: Border.all(color: Colors.orange),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.local_taxi, color: Colors.orange, size: w * 0.04),
-                      SizedBox(width: w * 0.02),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+            body: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: w * 0.04),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Status indicators
+                    if (_hasPendingRideRequest && _newRideRequest != null)
+                      Container(
+                        margin: EdgeInsets.only(bottom: w * 0.02),
+                        padding: EdgeInsets.all(w * 0.015),
+                        decoration: BoxDecoration(
+                          color: Colors.orange[50],
+                          borderRadius: BorderRadius.circular(w * 0.02),
+                          border: Border.all(color: Colors.orange),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('🚕 Pending Ride Request', style: TextStyle(fontSize: w * 0.03, color: Colors.orange[800]!, fontWeight: FontWeight.w600)),
-                            Text('Tap to view details', style: TextStyle(fontSize: w * 0.025, color: Colors.orange[600]!)),
+                            Icon(
+                              Icons.local_taxi,
+                              color: Colors.orange,
+                              size: w * 0.04,
+                            ),
+                            SizedBox(width: w * 0.02),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '🚕 Pending Ride Request',
+                                    style: TextStyle(
+                                      fontSize: w * 0.03,
+                                      color: Colors.orange[800]!,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Tap to view details',
+                                    style: TextStyle(
+                                      fontSize: w * 0.025,
+                                      color: Colors.orange[600]!,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.visibility, size: w * 0.04),
+                              onPressed: () {
+                                if (_newRideRequest != null) {
+                                  // _showRideRequestNotification(_newRideRequest!);
+                                }
+                              },
+                            ),
                           ],
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.visibility, size: w * 0.04),
-                        onPressed: () {
-                          if (_newRideRequest != null) {
-                            _showRideRequestNotification(_newRideRequest!);
-                          }
-                        },
+
+                    SizedBox(height: w * 0.04),
+                    Image.asset(
+                      "assets/images/offline_image.png",
+                      height: w * 0.5,
+                    ),
+                    Text(
+                      _isOnDuty ? "You're Online" : "You're Offline",
+                      style: TextStyle(
+                        fontSize: w * 0.05,
+                        fontWeight: FontWeight.bold,
+                        color: _isOnDuty ? Colors.green : Colors.black,
                       ),
-                    ],
-                  ),
-                ),
-
-              SizedBox(height: w * 0.04),
-              Image.asset("assets/images/offline_image.png",height: w * 0.5,),
-              Text(
-                _isOnDuty ? "You're Online" : "You're Offline",
-                style: TextStyle(
-                  fontSize: w * 0.05,
-                  fontWeight: FontWeight.bold,
-                  color: _isOnDuty ? Colors.green : Colors.black,
-                ),
-              ),
-              Text(
-                _isOnDuty ? "Ready to accept rides!" : "Go online to start accepting rides.",
-                style: const TextStyle(color: Color(0xFF5F6165), fontWeight: FontWeight.w500),
-              ),
-              SizedBox(height: w * 0.04),
-              ElevatedButton(
-                onPressed: _isProcessingOnline ? null : _toggleOnlineStatus,
-                style: ElevatedButton.styleFrom(
-                  // padding: EdgeInsets.symmetric(vertical: 2),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(8)),
-                  backgroundColor: _isOnDuty ? const Color(0xFFF26061) : const Color(0xFF34C759),
-                  minimumSize: const Size(double.infinity, 45),
-                ),
-                child: _isProcessingOnline
-                    ? SizedBox(
-                        width: w * 0.04,
-                        height: w * 0.04,
-                        child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                      )
-                    : Text(
-                        _isOnDuty ? "Go Offline" : "Go Online",
-                        style: TextStyle(fontSize: w * 0.04, color: Colors.white),
+                    ),
+                    Text(
+                      _isOnDuty
+                          ? "Ready to accept rides!"
+                          : "Go online to start accepting rides.",
+                      style: const TextStyle(
+                        color: Color(0xFF5F6165),
+                        fontWeight: FontWeight.w500,
                       ),
-              ),
+                    ),
+                    SizedBox(height: w * 0.04),
+                    ElevatedButton(
+                      onPressed: _isProcessingOnline
+                          ? null
+                          : _toggleOnlineStatus,
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        backgroundColor: _isOnDuty
+                            ? const Color(0xFFF26061)
+                            : const Color(0xFF34C759),
+                        minimumSize: const Size(double.infinity, 45),
+                      ),
+                      child: _isProcessingOnline
+                          ? SizedBox(
+                              width: w * 0.04,
+                              height: w * 0.04,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              _isOnDuty ? "Go Offline" : "Go Online",
+                              style: TextStyle(
+                                fontSize: w * 0.04,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
 
-              // Debug button
-              // SizedBox(height: w * 0.02),
-              // TextButton(
-              //   onPressed: () {
-              //     final status = _socketService.getConnectionStatus();
-              //     print('🔧 Debug Info:');
-              //     print('  Socket Connected: ${status['isConnected']}');
-              //     print('  On Duty: ${status['isOnDuty']}');
-              //     print('  Socket ID: ${status['socketId']}');
-              //     print('  Driver ID: ${status['driverId']}');
-              //     print('  Ride In Progress: ${status['rideInProgress']}');
-              //     print('  App in Background: $_appInBackground');
-              //   },
-              //   child: Text('Debug Info', style: TextStyle(fontSize: w * 0.03, color: Colors.blue)),
-              // ),
-
-              SizedBox(height: w * 0.03),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: AppFonts.textPoppins(
-                  context,
-                  "Today's Update",
-                  w * 0.038,
-                  FontWeight.w600,
-                  AppColors.black,
-                  TextAlign.left,
-                  TextOverflow.visible,
-                ).animate().fade(duration: 820.ms, curve: Curves.easeInOut).scale(
-                  begin: const Offset(0.95, 0.95),
-                  end: const Offset(1, 1),
-                ),
-              ),
-              SizedBox(height: w * 0.04),
-              Column(
-                children: [
-                  HomeScreenWidgets.elevatedBox(
-                    shadowColor: const Color(0xFF4CAF50),
-                    width: double.infinity,
-                    child: const Column(
+                    SizedBox(height: w * 0.03),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child:
+                          AppFonts.textPoppins(
+                                context,
+                                "Today's Update",
+                                w * 0.038,
+                                FontWeight.w600,
+                                AppColors.black,
+                                TextAlign.left,
+                                TextOverflow.visible,
+                              )
+                              .animate()
+                              .fade(duration: 820.ms, curve: Curves.easeInOut)
+                              .scale(
+                                begin: const Offset(0.95, 0.95),
+                                end: const Offset(1, 1),
+                              ),
+                    ),
+                    SizedBox(height: w * 0.04),
+                    Column(
                       children: [
-                        Text("Today's Earnings", style: TextStyle(fontSize: 14, color: Color(0xFF414142))),
-                        SizedBox(height: 6),
-                        Text("₹1000.00", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        HomeScreenWidgets.elevatedBox(
+                          shadowColor: const Color(0xFF4CAF50),
+                          width: double.infinity,
+                          child: const Column(
+                            children: [
+                              Text(
+                                "Today's Earnings",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Color(0xFF414142),
+                                ),
+                              ),
+                              SizedBox(height: 6),
+                              Text(
+                                "₹1000.00",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                              width: w * 0.45,
+                              child: HomeScreenWidgets.elevatedBox(
+                                shadowColor: const Color(0xFFFEBC2F),
+                                child: const Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Online",
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Color(0xFF414142),
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      "₹500 Total",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: w * 0.02),
+                            SizedBox(
+                              width: w * 0.45,
+                              child: HomeScreenWidgets.elevatedBox(
+                                shadowColor: const Color(0xFF7C7C8D),
+                                child: const Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Cash",
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Color(0xFF414142),
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      "₹500 On Hand",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: w * 0.05),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: w * 0.45,
+                              child: HomeScreenWidgets.elevatedBox(
+                                shadowColor: const Color(0xFF439AFE),
+                                child: const Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Total Rides",
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Color(0xFF414142),
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      "50 / 45 Completed",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: w * 0.02),
+                            SizedBox(
+                              width: w * 0.45,
+                              child: HomeScreenWidgets.elevatedBox(
+                                shadowColor: const Color(0xFFF26061),
+                                child: const Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Total Rides",
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Color(0xFF414142),
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      "50 / 05 Cancelled",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
+                    SizedBox(height: w * 0.04),
+                  ],
+                ),
+              ),
+            ),
+          )
+        : Scaffold(
+            body: SafeArea(
+              child: Stack(
+                children: [
+                  /// 1️⃣ Google Map (BOTTOM)
+                  GoogleMap(
+                    initialCameraPosition: _initialCameraPosition,
+                    myLocationEnabled: false,
+                    myLocationButtonEnabled: false,
+                    zoomControlsEnabled: false,
+                    onMapCreated: (controller) {
+                      _mapController = controller;
+                    },
+                    markers: markers,
+                    circles: circles,
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(
-                        width: w * 0.45,
-                        child: HomeScreenWidgets.elevatedBox(
-                          shadowColor: const Color(0xFFFEBC2F),
-                          child: const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Online", style: TextStyle(fontSize: 13, color: Color(0xFF414142))),
-                              SizedBox(height: 4),
-                              Text("₹500 Total", style: TextStyle(fontWeight: FontWeight.w600)),
-                            ],
-                          ),
+
+                  /// 2️⃣ Book Ride Button (Top Right)
+                  Positioned(
+                    top: 16,
+                    right: 16,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.to(() => const BookRide());
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.cyan,
+                        elevation: 4,
+                        shape: const StadiumBorder(),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 10,
                         ),
                       ),
-                      SizedBox(width: w * 0.02),
-                      SizedBox(
-                        width: w * 0.45,
-                        child: HomeScreenWidgets.elevatedBox(
-                          shadowColor: const Color(0xFF7C7C8D),
-                          child: const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Cash", style: TextStyle(fontSize: 13, color: Color(0xFF414142))),
-                              SizedBox(height: 4),
-                              Text("₹500 On Hand", style: TextStyle(fontWeight: FontWeight.w600)),
-                            ],
-                          ),
+                      child: const Text(
+                        "Book Ride",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                  SizedBox(height: w * 0.05),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: w * 0.45,
-                        child: HomeScreenWidgets.elevatedBox(
-                          shadowColor: const Color(0xFF439AFE),
-                          child: const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Total Rides", style: TextStyle(fontSize: 13, color: Color(0xFF414142))),
-                              SizedBox(height: 4),
-                              Text("50 / 45 Completed", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: w * 0.02),
-                      SizedBox(
-                        width: w * 0.45,
-                        child: HomeScreenWidgets.elevatedBox(
-                          shadowColor: const Color(0xFFF26061),
-                          child: const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Total Rides", style: TextStyle(fontSize: 13, color: Color(0xFF414142))),
-                              SizedBox(height: 4),
-                              Text("50 / 05 Cancelled", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+
+                  /// 3️⃣ Bottom Offline Card (FIRST)
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: _bottomOfflineCard(),
                   ),
                 ],
               ),
-              SizedBox(height: w * 0.04),
-            ],
-          ),
-        ),
-      )
-   
-   
-  
-    )
-
-    :  Scaffold(
-      body: 
-      SafeArea(
-        child: Stack(
-          children: [
-            /// 1️⃣ Google Map (BOTTOM)
-            GoogleMap(
-              initialCameraPosition: _initialCameraPosition,
-              myLocationEnabled: false, // Disabled to show custom marker instead
-              myLocationButtonEnabled: false,
-              zoomControlsEnabled: false,
-              onMapCreated: (controller) {
-                _mapController = controller;
-              },
-              markers: markers,
-              circles: circles,
             ),
-
-            /// 2️⃣ Book Ride Button (Top Right)
-            Positioned(
-              top: 16,
-              right: 16,
-              child: ElevatedButton(
-                onPressed: () {
-                  Get.to(() => const BookRide());
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.cyan,
-                  elevation: 4,
-                  shape: const StadiumBorder(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 10,
-                  ),
-                ),
-                child: const Text(
-                  "Book Ride",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-
-            /// 3️⃣ Bottom Offline Card (FIRST)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: _bottomOfflineCard(),
-            ),
-
-            /// 4️⃣ Go Online Floating Button (LAST → ALWAYS ON TOP)
-            // Positioned(
-            //   bottom: 320,
-            //   left: 0,
-            //   right: 0,
-            //   child: Center(
-            //     child: ElevatedButton(
-            //       onPressed: () {},
-            //       style: ElevatedButton.styleFrom(
-            //         backgroundColor: Colors.green,
-            //         elevation: 2,
-            //         shape: const StadiumBorder(),
-            //         padding: const EdgeInsets.symmetric(
-            //           horizontal: 36,
-            //           vertical: 14,
-            //         ),
-            //       ),
-            //       child: const Text(
-            //         "Go Online",
-            //         style: TextStyle(
-            //           color: Colors.white,
-            //           fontSize: 15,
-            //           fontWeight: FontWeight.w600,
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-            // ),
-          ],
-        ),
-      ),
-
-      /// Bottom Navigation
-      // bottomNavigationBar: BottomnavmainScreen(),
-    );
+          );
   }
-
 
   Widget _bottomOfflineCard() {
     double w = MediaQuery.of(context).size.width;
     return Container(
+      margin: EdgeInsets.only(top: 200),
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -1704,7 +1956,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-   Widget _driverContent() {
+  Widget _driverContent() {
     return Column(
       children: [
         /// Offline Image
@@ -1733,8 +1985,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           height: 48,
           child: ElevatedButton(
             onPressed: () {
-              print("hellooo");
-              Get.offAll(() =>  BottomnavmainScreen());
+              _goOffline();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
@@ -1808,7 +2059,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             /// Online & Cash
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
               children: [
                 SizedBox(
                   width: w * 0.4,
@@ -1854,7 +2104,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ],
             ),
 
-            // const SizedBox(height: 16),
             SizedBox(height: w * 0.02),
 
             /// Ride Stats
@@ -1869,18 +2118,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           "Total Rides",
                           style: TextStyle(fontSize: 13, color: Colors.grey),
                         ),
-                        SizedBox(height: 1),
+                        const SizedBox(height: 1),
                         RichText(
                           text: const TextSpan(
                             children: [
                               TextSpan(
                                 text: "50",
                                 style: TextStyle(
-                                  fontSize: 18, // bigger height
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
                                 ),
@@ -1896,9 +2145,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             ],
                           ),
                         ),
-
-                        // Text("50 / 45 Completed",
-                        //     style: TextStyle(fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
@@ -1911,18 +2157,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           "Total Rides",
                           style: TextStyle(fontSize: 13, color: Colors.grey),
                         ),
-                        SizedBox(height: 1),
+                        const SizedBox(height: 1),
                         RichText(
                           text: const TextSpan(
                             children: [
                               TextSpan(
                                 text: "50",
                                 style: TextStyle(
-                                  fontSize: 18, // bigger height
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
                                 ),
@@ -1938,9 +2184,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             ],
                           ),
                         ),
-
-                        // Text("50 / 05 Cancelled",
-                        //     style: TextStyle(fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
@@ -1951,5 +2194,276 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
       ],
     );
+  }
+
+  // ==================== ASSET LOADING METHODS ====================
+
+  Future<void> _loadCustomBikeMarker() async {
+    try {
+      _bikeMarkerIcon = await MapHelper.loadCustomIcon(
+        assetPath: 'assets/images/bike2.png',
+        width: 150,
+        height: 150,
+      );
+      print('✅ Custom bike marker icon loaded');
+    } catch (e) {
+      print('❌ Error loading custom bike marker: $e');
+      _bikeMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(
+        BitmapDescriptor.hueBlue,
+      );
+    }
+  }
+
+  Future<void> _loadVehicleIcons() async {
+    try {
+      _vehicleIcons = await MapHelper.loadVehicleIcons(iconSize: 70);
+      print('✅ Vehicle icons loaded');
+    } catch (e) {
+      print('❌ Error loading vehicle icons: $e');
+    }
+  }
+
+  void _removeBikeMarkerAndCircle() {
+    setState(() {
+      markers.clear();
+      circles.clear();
+    });
+    print('✅ Bike marker and circle removed');
+  }
+
+  // ==================== RIDE PERSISTENCE METHODS ====================
+
+  /// Save active ride to SharedPreferences for persistence
+  Future<bool> _saveActiveRide(Map<String, dynamic> rideData) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // Extract coordinates properly
+      LatLng? pickupCoords;
+      if (rideData['pickupCoordinates'] != null) {
+        pickupCoords = rideData['pickupCoordinates'] as LatLng;
+      } else if (rideData['pickup'] != null) {
+        final pickup = rideData['pickup'];
+        if (pickup is Map && pickup['latitude'] != null) {
+          pickupCoords = LatLng(
+            pickup['latitude'].toDouble(),
+            pickup['longitude'].toDouble(),
+          );
+        }
+      }
+
+      LatLng? dropoffCoords;
+      if (rideData['dropoffCoordinates'] != null) {
+        dropoffCoords = rideData['dropoffCoordinates'] as LatLng;
+      } else if (rideData['destination'] != null) {
+        final dest = rideData['destination'];
+        if (dest is Map && dest['latitude'] != null) {
+          dropoffCoords = LatLng(
+            dest['latitude'].toDouble(),
+            dest['longitude'].toDouble(),
+          );
+        }
+      }
+
+      final activeRide = {
+        'orderId': rideData['orderId']?.toString() ?? '',
+        'rideId':
+            rideData['rideId']?.toString() ??
+            rideData['orderId']?.toString() ??
+            '',
+        'riderId': rideData['riderId']?.toString() ?? '',
+        'riderName': rideData['riderName']?.toString() ?? 'Rider',
+        'riderPhone': rideData['riderPhone']?.toString() ?? '',
+        'riderImage': rideData['riderImage']?.toString() ?? '',
+        'pickupAddress':
+            rideData['pickupLocation']?.toString() ?? 'Pickup Location',
+        'dropoffAddress':
+            rideData['dropLocation']?.toString() ?? 'Drop Location',
+        'pickupLat': pickupCoords?.latitude ?? 0.0,
+        'pickupLng': pickupCoords?.longitude ?? 0.0,
+        'dropoffLat': dropoffCoords?.latitude ?? 0.0,
+        'dropoffLng': dropoffCoords?.longitude ?? 0.0,
+        'totalFare': rideData['totalFare']?.toString() ?? '0',
+        'vehicleType': rideData['vehicleType']?.toString() ?? 'sedan',
+        'orderStatus': rideData['orderStatus']?.toString() ?? 'accepted',
+        'rideOtp': rideData['rideOtp']?.toString() ?? '',
+        'savedAt': DateTime.now().toIso8601String(),
+        'screenToRestore':
+            rideData['screenToRestore']?.toString() ?? 'Arriving',
+      };
+
+      await prefs.setString('activeRide', jsonEncode(activeRide));
+      print('💾 Active ride saved to storage: ${activeRide['orderId']}');
+      return true;
+    } catch (error) {
+      print('❌ Failed to save active ride: $error');
+      return false;
+    }
+  }
+
+  /// Restore active ride from SharedPreferences
+  Future<Map<String, dynamic>?> _getPersistedRide() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? activeRideJson = prefs.getString('activeRide');
+
+      if (activeRideJson != null) {
+        final activeRide = jsonDecode(activeRideJson) as Map<String, dynamic>;
+        print('📂 Found persisted ride: ${activeRide['orderId']}');
+
+        // Check if ride data is not too old (max 4 hours)
+        final savedAt = DateTime.parse(activeRide['savedAt']);
+        final now = DateTime.now();
+        final hoursDiff = now.difference(savedAt).inHours;
+
+        if (hoursDiff > 4) {
+          print('⚠️ Persisted ride is too old, clearing');
+          await _clearPersistedRide();
+          return null;
+        }
+
+        return activeRide;
+      }
+
+      return null;
+    } catch (error) {
+      print('❌ Failed to get persisted ride: $error');
+      return null;
+    }
+  }
+
+  /// Clear persisted ride data
+  Future<bool> _clearPersistedRide() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('activeRide');
+      print('🗑️ Cleared persisted ride data');
+      return true;
+    } catch (error) {
+      print('❌ Failed to clear persisted ride: $error');
+      return false;
+    }
+  }
+
+  /// Update the screen to restore to
+  Future<void> _updatePersistedRideScreen(String screen) async {
+    try {
+      final activeRide = await _getPersistedRide();
+      if (activeRide != null) {
+        activeRide['screenToRestore'] = screen;
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('activeRide', jsonEncode(activeRide));
+        print('📝 Updated persisted ride screen to: $screen');
+      }
+    } catch (error) {
+      print('❌ Failed to update persisted ride screen: $error');
+    }
+  }
+
+  // ==================== CHAT FUNCTIONALITY ====================
+
+  /// Join chat room for a ride
+  bool joinChatRoom(String orderId, {String userRole = 'driver'}) {
+    if (_socket == null || !_isSocketConnected) {
+      print('❌ [CHAT] Cannot join chat - socket not connected');
+      return false;
+    }
+
+    final payload = {
+      'rideId': orderId,
+      'orderId': orderId,
+      'userRole': userRole,
+      'userId': _driverId,
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+
+    print('💬 [CHAT] Joining chat room: $payload');
+    _socket!.emit('chat:join', payload);
+    return true;
+  }
+
+  /// Send a chat message
+  bool sendChatMessage(
+    String orderId,
+    String message, {
+    String? receiverId,
+    String? chatId,
+  }) {
+    if (_socket == null || !_isSocketConnected) {
+      print('❌ [CHAT] Cannot send message - socket not connected');
+      return false;
+    }
+
+    final payload = {
+      'rideId': orderId,
+      'orderId': orderId,
+      if (chatId != null) 'chatId': chatId,
+      'message': message.trim(),
+      'senderId': _driverId,
+      'senderType': 'Driver',
+      'senderRole': 'driver',
+      if (receiverId != null) 'receiverId': receiverId,
+      'receiverRole': 'user',
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+
+    print('💬 [CHAT] Sending message: $payload');
+
+    // Emit to both known events for compatibility
+    _socket!.emit('chat:sendMessage', payload);
+    _socket!.emit('sendChatMessage', payload);
+
+    return true;
+  }
+
+  /// Send typing indicator
+  bool sendTypingIndicator(
+    String orderId,
+    bool isTyping, {
+    String userRole = 'driver',
+  }) {
+    if (_socket == null || !_isSocketConnected) {
+      return false;
+    }
+
+    final payload = {
+      'orderId': orderId,
+      'userRole': userRole,
+      'isTyping': isTyping,
+    };
+
+    _socket!.emit('chat:typing', payload);
+    return true;
+  }
+
+  /// Get chat history
+  bool getChatHistory(String orderId) {
+    if (_socket == null || !_isSocketConnected) {
+      return false;
+    }
+
+    print('💬 [CHAT] Requesting chat history for: $orderId');
+    _socket!.emit('chat:getHistory', {'orderId': orderId});
+    return true;
+  }
+
+  /// Leave chat room
+  bool leaveChatRoom(String orderId) {
+    if (_socket == null || !_isSocketConnected) {
+      return false;
+    }
+
+    print('💬 [CHAT] Leaving chat room: $orderId');
+    _socket!.emit('chat:leave', {'orderId': orderId});
+    return true;
+  }
+
+  /// Join ride room for real-time updates
+  void _joinRideRoom(String rideId) {
+    if (_socket != null && _isSocketConnected) {
+      final roomName = 'ride:$rideId';
+      _socket!.emit('join:room', {'roomName': roomName});
+      print('✅ Joined ride room: $roomName');
+    }
   }
 }

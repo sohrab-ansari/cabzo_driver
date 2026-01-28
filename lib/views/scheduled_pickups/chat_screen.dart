@@ -1,10 +1,40 @@
+import 'package:corezap_driver/controllers/chart_id_controller/chartid_controller.dart';
+import 'package:corezap_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/custom_font.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
 
-class ChatScreen extends StatelessWidget {
-  const ChatScreen({super.key});
+class ChatScreen extends StatefulWidget {
+  final Map<String, dynamic>? rideData;
+
+  final dynamic orderid;
+
+  ChatScreen({super.key, this.rideData, this.orderid});
+
+  @override
+  State<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+  final ChartidController chartidController = Get.find<ChartidController>();
+
+  @override
+  void initState() {
+    super.initState();
+
+    chartidController.getchartidmethod(orderid: widget.orderid);
+  }
+
+  void socketgetdatacall() {
+    chartidController.getchartidmethod(orderid: widget.orderid);
+
+    var chartid = chartidController.chartresposne.value!.data!.id;
+
+    print("the__chartttidd ${chartid}");
+  }
 
   @override
   Widget build(BuildContext context) {
