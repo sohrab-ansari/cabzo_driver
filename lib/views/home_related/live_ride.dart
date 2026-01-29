@@ -2,20 +2,19 @@ import 'dart:ui';
 
 import 'package:corezap_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
+// import 'package:corezap_driver/models/navigation_command.dart';
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/custom_font.dart';
 import 'package:corezap_driver/utilities/custom_images.dart';
 import 'package:corezap_driver/utilities/map_helper.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
+import 'package:corezap_driver/utilities/utils/button_state_manager.dart';
+import 'package:corezap_driver/utilities/utils/navigation_command.dart';
 import 'package:corezap_driver/views/scheduled_pickups/accepted_screen.dart';
+
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
-
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
-import 'package:get/get_navigation/src/snackbar/snackbar.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
@@ -27,7 +26,6 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class RideRequestScreen extends StatefulWidget {
   final Map<String, dynamic> rideData;
@@ -61,8 +59,6 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   Map<String, String> _routeInfo = {'distance': '', 'duration': ''};
 
   // Controllers
-  final OrderUpdateController transactionController =
-      Get.find<OrderUpdateController>();
   final StepperController stepperController = Get.find();
   final OrderUpdateController orderUpdateController =
       Get.find<OrderUpdateController>();
@@ -96,6 +92,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   Timer? _autoCancelTimer;
   bool _hasCancelled = false;
 
+  // Navigation listener
+  Worker? _navigationWorker;
+
   // Cancel Reasons
   final List<Map<String, dynamic>> _cancelReasons = [
     {'id': 1, 'label': 'Too many rides', 'icon': Icons.directions_bike},
@@ -128,9 +127,28 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   void initState() {
     super.initState();
 
+    // Set up navigation listener
+    _setupNavigationListener();
+
     // Initialize everything
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _initializeAll();
+    });
+  }
+
+  void _setupNavigationListener() {
+    _navigationWorker = ever(orderUpdateController.shouldNavigate$, (
+      bool shouldNavigate,
+    ) {
+      if (shouldNavigate && mounted) {
+        final command = NavigationCommand(
+          route: orderUpdateController.navigationRoute,
+          arguments: orderUpdateController.navigationArgs,
+          clearAll: orderUpdateController.clearAll,
+        );
+        _handleNavigation(command);
+        orderUpdateController.clearNavigation();
+      }
     });
   }
 
@@ -165,11 +183,33 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
   @override
   void dispose() {
+    print('🗑️ RideRequestScreen dispose called');
+
+    // Cancel all timers and subscriptions first
     _countdownTimer?.cancel();
     _positionStreamSubscription?.cancel();
     _positionStream?.cancel();
-    _mapController?.dispose();
+    _autoCancelTimer?.cancel();
+
+    // Clean up workers
+    _navigationWorker?.dispose();
+
+    // Call super.dispose first
     super.dispose();
+
+    // Clean up button states safely after disposal
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        ButtonStateManager.clearState('accept_button');
+        ButtonStateManager.clearState('cancel_button');
+        ButtonStateManager.clearState('custom_cancel_button');
+      } catch (e) {
+        // Silently catch errors during disposal
+        print('⚠️ Error clearing button states: $e');
+      }
+    });
+
+    _mapController?.dispose();
   }
 
   // Helper method to format date from timestamp
@@ -181,80 +221,6 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       return DateFormat('dd MMMM, yyyy').format(DateTime.now());
     }
   }
-
-  Future<void> _cancelRide() async {
-    if (_hasCancelled || _hasAccepted) return;
-
-    if (_orderId == null) {
-      print("❌ Order ID is null, cannot cancel ride");
-      Fluttertoast.showToast(
-        msg: "Cannot cancel ride: Order ID not available",
-        toastLength: Toast.LENGTH_SHORT,
-      );
-      return;
-    }
-
-    _hasCancelled = true;
-    _isTimerRunning = false;
-    _autoCancelTimer?.cancel();
-
-    // Call the updated controller method
-    final result = await orderUpdateController.updateOrder(
-      orderStatus: "Cancelled",
-      orderId: _orderId!,
-      context: context,
-      rideData: _rideData,
-      stepControl: "Cancelled",
-    );
-
-    if (result?.success == true) {
-      // Only navigate back if API was successful
-      Get.back();
-      Get.snackbar(
-        'Ride Cancelled',
-        'You have cancelled the ride',
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
-      );
-    } else {
-      // Show error message
-      Get.snackbar(
-        'Error',
-        orderUpdateController.errorMessage.value.isNotEmpty
-            ? orderUpdateController.errorMessage.value
-            : 'Failed to cancel ride',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    }
-  }
-  // Future<void> _cancelRide() async {
-  //   if (_hasCancelled || _hasAccepted) return;
-
-  //   if (_orderId == null) {
-  //     print("❌ Order ID is null, cannot cancel ride");
-  //     Fluttertoast.showToast(
-  //       msg: "Cannot cancel ride: Order ID not available",
-  //       toastLength: Toast.LENGTH_SHORT,
-  //     );
-  //     return;
-  //   }
-
-  //   _hasCancelled = true;
-  //   _isTimerRunning = false;
-  //   _autoCancelTimer?.cancel();
-
-  //   await OrderService.declineOrder(orderId: _orderId!);
-
-  //   Get.back();
-  //   Get.snackbar(
-  //     'Ride Cancelled',
-  //     'You have cancelled the ride',
-  //     backgroundColor: Colors.orange,
-  //     colorText: Colors.white,
-  //   );
-  // }
 
   void _startTimer() {
     _countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
@@ -275,7 +241,6 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     });
   }
 
-  /// Load bike marker (optional)
   Future<void> _loadCustomBikeMarker() async {
     try {
       _bikeMarkerIcon = await MapHelper.loadCustomIcon(
@@ -1002,63 +967,35 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     _hasDeclined = true;
     _countdownTimer?.cancel();
 
-    _showSnackbar('Ride auto-cancelled (timeout)');
-  }
-
-  Future<void> _handleDeclineRide(String reason) async {
-    if (_hasAccepted || _hasDeclined) return;
-
-    setState(() => _isDeclining = true);
-
-    try {
-      await Future.delayed(Duration(seconds: 1));
-
-      _showCancelSheet = false;
-      _selectedReasonIndex = null;
-
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('✅ Ride Declined'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Ride declined successfully.'),
-              SizedBox(height: 16),
-              Text('Message sent to rider:'),
-              SizedBox(height: 8),
-              Text(
-                '"Sorry, I cannot accept this ride. Reason: $reason"',
-                style: TextStyle(
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        ),
-      );
-    } catch (e) {
-      _showSnackbar('Failed to decline ride: $e');
-    } finally {
-      setState(() => _isDeclining = false);
-    }
-  }
-
-  void _showSnackbar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
+      SnackBar(
+        content: Text('Ride auto-cancelled (timeout)'),
+        backgroundColor: Colors.orange,
+      ),
     );
+  }
+
+  void _handleNavigation(NavigationCommand command) {
+    if (!mounted) return;
+
+    switch (command.route) {
+      case 'bottom_nav':
+        // Go back to home screen on cancellation
+        Get.back();
+        break;
+      case 'arriving_screen':
+        // Navigate to ArrivingClient screen
+        _hasAccepted = true;
+        _isTimerRunning = false;
+        _autoCancelTimer?.cancel();
+        _countdownTimer?.cancel();
+
+        Get.off(
+          () => ArrivingClient(rideData: widget.rideData),
+          transition: Transition.rightToLeft,
+        );
+        break;
+    }
   }
 
   @override
@@ -1082,34 +1019,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
                   // Main Column Layout - Card first, Map below
                   Column(
                     children: [
-                      // Center(
-                      //   child: Text(
-                      //     DateFormat('dd MMMM, yyyy').format(DateTime.now()),
-                      //     style: TextStyle(
-                      //       fontSize: 14,
-                      //       color: Colors.grey[600],
-                      //       fontWeight: FontWeight.w500,
-                      //     ),
-                      //   ),
-                      // ),
-
-                      // Top padding
-                      SizedBox(height: 10),
-                      SizedBox(height: 20),
-                      Container(
-                        // margin: EdgeInsets.only(t),
-                        padding: EdgeInsets.only(top: 20),
-                        child: Center(
-                          child: Text(
-                            DateFormat('dd MMMM, yyyy').format(DateTime.now()),
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
+                      SizedBox(height: 60),
 
                       // User Info Card
                       Padding(
@@ -1202,7 +1112,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
           ),
           SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Get.back(),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
@@ -1271,16 +1181,16 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Date
-          // Center(
-          //   child: Text(
-          //     DateFormat('dd MMMM, yyyy').format(DateTime.now()),
-          //     style: TextStyle(
-          //       fontSize: 14,
-          //       color: Colors.grey[600],
-          //       fontWeight: FontWeight.w500,
-          //     ),
-          //   ),
-          // ),
+          Center(
+            child: Text(
+              DateFormat('dd MMMM, yyyy').format(DateTime.now()),
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
           SizedBox(height: 16),
 
           // Trip Information
@@ -1411,71 +1321,6 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     );
   }
 
-  Widget _buildTimerCircle() {
-    const size = 26.0;
-    const strokeWidth = 3.0;
-
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Background circle
-          CircularProgressIndicator(
-            value: 1,
-            strokeWidth: strokeWidth,
-            backgroundColor: Color(0xFFE5E7EB),
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFE5E7EB)),
-          ),
-
-          // Progress circle (changes color based on time)
-          SizedBox(
-            width: size,
-            height: size,
-            child: CustomPaint(
-              painter: _TimerPainter(
-                progress: _progress,
-                strokeWidth: strokeWidth,
-                color: _timer <= 10
-                    ? Colors.red
-                    : _timer <= 30
-                    ? Colors.orange
-                    : Color(0xFF16A34A),
-              ),
-            ),
-          ),
-
-          // Timer text
-          Center(
-            child: Text(
-              '$_timer',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: _timer <= 10
-                    ? Colors.red
-                    : _timer <= 30
-                    ? Colors.orange
-                    : Color(0xFF87D750),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildCancelReasonSheet(double w) {
     return Positioned.fill(
       child: Container(
@@ -1574,7 +1419,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
                           : () {
                               final reason =
                                   _cancelReasons[_selectedReasonIndex!]['label'];
-                              _handleDeclineRide(reason);
+                              _handleCustomDecline(reason);
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFF87D750),
@@ -1609,6 +1454,41 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _handleCustomDecline(String reason) async {
+    if (_hasAccepted || _hasDeclined) return;
+
+    setState(() => _isDeclining = true);
+
+    try {
+      // Use the new updateOrder method for custom decline
+      orderUpdateController.updateOrder(
+        context: context,
+        buttonId: 'custom_cancel_button',
+        orderStatus: "Cancelled",
+        orderId: _orderId!,
+        rideData: widget.rideData,
+        stepControl: "Cancelled",
+        successMessage: 'Ride declined successfully',
+        shouldTriggerNavigation: true,
+      );
+
+      // Close the sheet
+      setState(() {
+        _showCancelSheet = false;
+        _selectedReasonIndex = null;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to decline ride'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isDeclining = false);
+    }
   }
 
   Widget _locationInfo(
@@ -1720,6 +1600,12 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   }
 
   Widget _actionButtons(BuildContext context, double w) {
+    // Get loading states for buttons
+    final isAcceptLoading =
+        ButtonStateManager.watchLoading('accept_button')?.value ?? false;
+    final isCancelLoading =
+        ButtonStateManager.watchLoading('cancel_button')?.value ?? false;
+
     return Column(
       children: [
         // Buttons Row
@@ -1728,72 +1614,30 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
           children: [
             // Cancel Button
             Expanded(
-              child: ElevatedButton(
-                onPressed: _hasAccepted || _hasCancelled ? null : _cancelRide,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.lightGray,
-                  foregroundColor: AppColors.mediumGray,
-                  minimumSize: Size(w * 0.43, w * 0.14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    side: BorderSide(
-                      color: AppColors.mediumGray.withOpacity(0.5),
-                    ),
-                  ),
-                  elevation: 0,
-                  disabledBackgroundColor: AppColors.lightGray.withOpacity(0.5),
-                  disabledForegroundColor: AppColors.mediumGray.withOpacity(
-                    0.5,
-                  ),
-                ),
-                child: Text(
-                  "Cancel",
-                  style: TextStyle(
-                    fontSize: w * 0.045,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+              child: _buildLoadingButton(
+                text: "Cancel",
+                isLoading: isCancelLoading,
+                color: AppColors.lightGray,
+                textColor: AppColors.mediumGray,
+                buttonId: 'cancel_button',
+                onTap: _hasAccepted || _hasCancelled ? null : _cancelRide,
               ),
             ),
 
             SizedBox(width: w * 0.03),
 
-            // Accept Button with timer integration
+            // Accept Button
             Expanded(
-              child: ElevatedButton(
-                onPressed: () {
-                  _acceptRide();
-                },
-
-                // _hasAccepted || _hasCancelled ? null : ,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(
-                    0xFF00BFA6,
-                  ), // Cyan color matching Figma
-                  foregroundColor: Colors.white,
-                  minimumSize: Size(w * 0.43, w * 0.14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 2,
-                  shadowColor: Color(0xFF00BFA6).withOpacity(0.3),
-                  disabledBackgroundColor: Color(0xFF00BFA6).withOpacity(0.5),
-                  disabledForegroundColor: Colors.white.withOpacity(0.5),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Accept",
-                      style: TextStyle(
-                        fontSize: w * 0.045,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    SizedBox(width: 14),
-                    _buildTimerCircle(),
-                  ],
-                ),
+              child: _buildLoadingButton(
+                text: "Accept",
+                isLoading: isAcceptLoading,
+                color: Color(0xFF00BFA6),
+                textColor: Colors.white,
+                buttonId: 'accept_button',
+                onTap: _hasAccepted || _hasCancelled ? null : _acceptRide,
+                showTimer: true,
+                timer: _timer,
+                progress: _progress,
               ),
             ),
           ],
@@ -1802,101 +1646,172 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     );
   }
 
+  Widget _buildLoadingButton({
+    required String text,
+    required bool isLoading,
+    required Color color,
+    required Color textColor,
+    required String buttonId,
+    required VoidCallback? onTap,
+    bool showTimer = false,
+    int timer = 0,
+    double progress = 1.0,
+  }) {
+    return ElevatedButton(
+      onPressed: isLoading ? null : onTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: textColor,
+        minimumSize: Size(double.infinity, 50),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        elevation: 2,
+        shadowColor: color.withOpacity(0.3),
+        disabledBackgroundColor: color.withOpacity(0.5),
+        disabledForegroundColor: textColor.withOpacity(0.5),
+      ),
+      child: isLoading
+          ? SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: textColor,
+              ),
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  text,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                if (showTimer && !isLoading) ...[
+                  SizedBox(width: 14),
+                  _buildTimerCircle(timer, progress),
+                ],
+              ],
+            ),
+    );
+  }
+
+  Widget _buildTimerCircle(int timer, double progress) {
+    const size = 26.0;
+    const strokeWidth = 3.0;
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Background circle
+          CircularProgressIndicator(
+            value: 1,
+            strokeWidth: strokeWidth,
+            backgroundColor: Color(0xFFE5E7EB),
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFE5E7EB)),
+          ),
+
+          // Progress circle (changes color based on time)
+          SizedBox(
+            width: size,
+            height: size,
+            child: CustomPaint(
+              painter: _TimerPainter(
+                progress: progress,
+                strokeWidth: strokeWidth,
+                color: timer <= 10
+                    ? Colors.red
+                    : timer <= 30
+                    ? Colors.orange
+                    : Color(0xFF16A34A),
+              ),
+            ),
+          ),
+
+          // Timer text
+          Center(
+            child: Text(
+              '$timer',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: timer <= 10
+                    ? Colors.red
+                    : timer <= 30
+                    ? Colors.orange
+                    : Color(0xFF87D750),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _acceptRide() async {
     print("myyy_tapp33333");
 
     if (_orderId == null) {
       print("❌ Order ID is null, cannot accept ride");
-      Fluttertoast.showToast(
-        msg: "Cannot accept ride: Order ID not available",
-        toastLength: Toast.LENGTH_SHORT,
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Cannot accept ride: Order ID not available'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
-    // Call the updated controller method with correct parameter names
-    await orderUpdateController.updateOrder(
-      orderStatus: "Accepted", // Changed from 'orderstatus' to 'orderStatus'
-      orderId: _orderId!, // Changed from 'orderid' to 'orderId'
+    // Use the new updateOrder method
+    orderUpdateController.updateOrder(
       context: context,
+      buttonId: 'accept_button',
+      orderStatus: "Accepted",
+      orderId: _orderId!,
       rideData: widget.rideData,
-      stepControl: "Accepted", // Changed from 'step_control' to 'stepControl'
+      stepControl: "Accepted",
+      successMessage: 'Ride accepted successfully!',
+      shouldTriggerNavigation: true,
     );
-
-    // Check if the API call was successful
-    if (orderUpdateController.updateOrderResponse.value?.success == true) {
-      print("✅ Ride accepted successfully!");
-
-      _hasAccepted = true;
-      _isTimerRunning = false;
-      _autoCancelTimer?.cancel();
-
-      print("orderrrid Accepting ride with ID: $_orderId");
-
-      // Navigate to ArrivingClient screen
-      CustomNavigator.push(
-        context,
-        ArrivingClient(rideData: widget.rideData),
-        transition: TransitionType.slideLeft,
-      );
-    } else {
-      // Show error if API failed
-      final errorMessage = orderUpdateController.errorMessage.value.isNotEmpty
-          ? orderUpdateController.errorMessage.value
-          : "Failed to accept ride";
-
-      Fluttertoast.showToast(
-        msg: errorMessage,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
-    }
   }
-  // Future<void> _acceptRide() async {
-  //   print("myyy_tapp33333");
 
-  //   if (_orderId == null) {
-  //     print("❌ Order ID is null, cannot accept ride");
-  //     Fluttertoast.showToast(
-  //       msg: "Cannot accept ride: Order ID not available",
-  //       toastLength: Toast.LENGTH_SHORT,
-  //     );
-  //     return;
-  //   }
+  Future<void> _cancelRide() async {
+    if (_hasCancelled || _hasAccepted) return;
 
-  //   await orderUpdateController.updateOrder(
-  //     orderstatus: "Accepted",
-  //     orderid: _orderId!,
-  //     context: context,
-  //     rideData: widget.rideData,
-  //     step_control: "Accepted",
-  //   );
+    if (_orderId == null) {
+      print("❌ Order ID is null, cannot cancel ride");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Cannot cancel ride: Order ID not available'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
-  //   print(
-  //     "whennnn_i_accept_bool_api_bool_check>>>>> ${orderUpdateController.updateOrderResponse.value!.success}",
-  //   );
-
-  //   // if (_hasAccepted || _hasCancelled) return;
-
-  //   print("myyy_tappp244444");
-  //   _hasAccepted = true;
-  //   _isTimerRunning = false;
-  //   _autoCancelTimer?.cancel();
-
-  //   print("orderrrid Accepting ride with ID: $_orderId");
-
-  //   print("myyy_tappp2");
-
-  //   // stepperController.resetSteps();
-  //   // print("myyy_tappp255555");
-  //   // CustomNavigator.push(
-  //   //   context,
-  //   //   ArrivingClient(rideData: widget.rideData),
-  //   //   transition: TransitionType.slideLeft,
-  //   // );
-  // }
+    // Use the new updateOrder method
+    orderUpdateController.updateOrder(
+      context: context,
+      buttonId: 'cancel_button',
+      orderStatus: "Cancelled",
+      orderId: _orderId!,
+      rideData: widget.rideData,
+      stepControl: "Cancelled",
+      successMessage: 'Ride cancelled successfully',
+      shouldTriggerNavigation: true,
+    );
+  }
 }
 
 class _TimerPainter extends CustomPainter {
@@ -1934,89 +1849,5 @@ class _TimerPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _TimerPainter oldDelegate) {
     return progress != oldDelegate.progress || color != oldDelegate.color;
-  }
-}
-
-class OrderService {
-  static Future<void> declineOrder({required String orderId}) async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString("auth_token");
-
-    print("my___token_here ${token}");
-    print("declineddddd__myyyyy_orderid_iss ${orderId}");
-
-    final Uri url = Uri.parse(
-      "https://corezap.smarttechbros.com/api/v1/order/decline/$orderId",
-    );
-
-    print("🔵 DECLINE ORDER API");
-    print("URL : $url");
-
-    try {
-      final response = await http.patch(
-        url,
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-      );
-
-      print("✅ Status Code : ${response.statusCode}");
-      print("📦 Raw Response : ${response.body}");
-
-      final decoded = jsonDecode(response.body);
-      print("🎯 Decoded Response : $decoded");
-
-      Fluttertoast.showToast(
-        msg: decoded['message'] ?? "Ride declined successfully",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-      );
-    } catch (e) {
-      print("❌ Error declining order : $e");
-    }
-  }
-
-  static Future<void> VerifyOtpOrder({
-    required String orderId,
-    required String rideOtpEnter,
-  }) async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString("auth_token");
-
-    final String? order_id = prefs.getString("order_id");
-
-    print("my___token_here ${token}");
-    print("myyyyy_orderid_iss in verifyOtpppp>>>>> ${order_id}");
-
-    final Uri url = Uri.parse(
-      "https://corezap.smarttechbros.com/api/v1/order/verifyOtp",
-    );
-
-    print("🔵 ACCEPT ORDER API");
-    print("URL : $url");
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({"orderId": order_id, "rideOtp": rideOtpEnter}),
-      );
-
-      print("arriivinngggggggggggggggggggggggg");
-      print("✅ Status Code : ${response.statusCode}");
-      print("📦 Raw Response arrivinggggggggg : ${response.body}");
-      print("arriivinngggggggggggggggggggggggg");
-
-      final decoded = jsonDecode(response.body);
-      print("🎯 Decoded Response : $decoded");
-    } catch (e) {
-      print("❌ Error accepting order : $e");
-    }
   }
 }

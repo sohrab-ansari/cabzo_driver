@@ -1,3 +1,6 @@
+// import 'dart:async';
+
+// import 'package:corezap_driver/controllers/chart_id_controller/chartid_controller.dart';
 // import 'package:corezap_driver/controllers/home_controllers/order_update_controller.dart';
 // import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
 // import 'package:corezap_driver/utilities/colors/colors_list.dart';
@@ -5,10 +8,11 @@
 // import 'package:corezap_driver/utilities/custom_text.dart';
 // import 'package:corezap_driver/utilities/location_input_textfield.dart';
 // import 'package:corezap_driver/utilities/navigator.dart';
+// import 'package:corezap_driver/utilities/utils/button_state_manager.dart';
+// import 'package:corezap_driver/utilities/utils/navigation_command.dart';
 // import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
 // import 'package:corezap_driver/views/scheduled_pickups/arrived_otp_screen.dart';
 // import 'package:corezap_driver/views/scheduled_pickups/chat_screen.dart';
-// import 'package:corezap_driver/views/scheduled_pickups/newwwwwwwwwwz.dart';
 // import 'package:corezap_driver/views/scheduled_pickups/receive_payment_modes.dart';
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
@@ -21,7 +25,6 @@
 // import 'package:geolocator/geolocator.dart';
 // import 'dart:ui' as ui;
 // import 'package:flutter/services.dart';
-// import 'dart:async';
 // import 'dart:typed_data';
 // import 'dart:math';
 
@@ -29,7 +32,7 @@
 //   final bool? typeCheck;
 //   final Map<String, dynamic>? rideData;
 
-//   ArrivingClient({super.key, this.typeCheck, this.rideData});
+//   const ArrivingClient({super.key, this.typeCheck, this.rideData});
 
 //   @override
 //   State<ArrivingClient> createState() => _ArrivingClientState();
@@ -39,6 +42,8 @@
 //   final StepperController stepperController = Get.find<StepperController>();
 //   final OrderUpdateController orderUpdateController =
 //       Get.find<OrderUpdateController>();
+
+//   final ChartidController chartidController = Get.find<ChartidController>();
 
 //   // Google API Key for Directions
 //   static const String GOOGLE_API_KEY =
@@ -69,15 +74,44 @@
 //   BitmapDescriptor? _pickupMarkerIcon;
 //   BitmapDescriptor? _dropMarkerIcon;
 
+//   // Navigation listener subscription
+//   Worker? _navigationWorker;
+
 //   @override
 //   void initState() {
 //     super.initState();
 //     _isScreenActive = true;
 //     print('🚗 ArrivingClient initState called');
 
+//     // Set up navigation listener
+//     _setupNavigationListener();
+//     _getchartidmethod();
+
 //     WidgetsBinding.instance.addPostFrameCallback((_) async {
 //       await _initializeAll();
 //     });
+//   }
+
+//   void _setupNavigationListener() {
+//     _navigationWorker = ever(orderUpdateController.shouldNavigate$, (
+//       bool shouldNavigate,
+//     ) {
+//       if (shouldNavigate && mounted && _isScreenActive) {
+//         final command = NavigationCommand(
+//           route: orderUpdateController.navigationRoute,
+//           arguments: orderUpdateController.navigationArgs,
+//           clearAll: orderUpdateController.clearAll,
+//         );
+
+//         print("myyyy222 ${command}");
+//         _handleNavigation(command);
+//         orderUpdateController.clearNavigation();
+//       }
+//     });
+//   }
+
+//   void _getchartidmethod() {
+//     chartidController.getchartidmethod(orderid: widget.rideData!['orderId']);
 //   }
 
 //   @override
@@ -85,7 +119,6 @@
 //     super.didChangeDependencies();
 //     print('🔄 ArrivingClient didChangeDependencies called');
 
-//     // Refresh map if coming back from another screen
 //     if (_isScreenActive && !_isInitialized) {
 //       WidgetsBinding.instance.addPostFrameCallback((_) async {
 //         await _refreshOnReturn();
@@ -97,8 +130,30 @@
 //   void dispose() {
 //     print('🗑️ ArrivingClient dispose called');
 //     _isScreenActive = false;
-//     _cleanupResources();
+
+//     // Cancel all timers and subscriptions first
+//     _positionStreamSubscription?.cancel();
+
+//     // Clean up workers
+//     _navigationWorker?.dispose();
+
+//     // Call super.dispose first
 //     super.dispose();
+
+//     // Clean up button states safely after disposal
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       try {
+//         ButtonStateManager.clearState('arrive_button');
+//         ButtonStateManager.clearState('cancel_button');
+//         ButtonStateManager.clearState('start_trip_button');
+//         ButtonStateManager.clearState('complete_button');
+//       } catch (e) {
+//         // Silently catch errors during disposal
+//         print('⚠️ Error clearing button states: $e');
+//       }
+//     });
+
+//     _cleanupResources();
 //   }
 
 //   void _cleanupResources() {
@@ -139,19 +194,10 @@
 //     try {
 //       print('🔄 Initializing ArrivingClient...');
 
-//       // Extract ride data
 //       _extractAndStoreRideData();
-
-//       // Load custom marker icons
 //       await _loadCustomMarkers();
-
-//       // Start location tracking
 //       await _startLocationTracking();
-
-//       // Get directions
 //       await _getDirections();
-
-//       // Set markers
 //       _setMarkers();
 
 //       _isInitialized = true;
@@ -186,10 +232,31 @@
 //     }
 //   }
 
+//   void _forceRefreshMap() {
+//     if (!mounted || !_isScreenActive) return;
+
+//     print('🔄 Force refreshing map...');
+
+//     setState(() {
+//       markers.clear();
+//       circles.clear();
+//       _polylines.clear();
+//       _isInitialized = false;
+//     });
+
+//     WidgetsBinding.instance.addPostFrameCallback((_) async {
+//       if (mounted && _isScreenActive) {
+//         await Future.delayed(const Duration(milliseconds: 300));
+//         if (mounted && _isScreenActive) {
+//           await _initializeAll();
+//         }
+//       }
+//     });
+//   }
+
 //   void _extractAndStoreRideData() {
 //     print("📦 Ride Data Received: ${widget.rideData}");
 
-//     // Store all data locally
 //     _rideData = {
 //       'orderId': widget.rideData?['orderId']?.toString() ?? 'N/A',
 //       'riderId': widget.rideData?['riderId'],
@@ -208,15 +275,12 @@
 //       'distance': widget.rideData?['distance']?.toString() ?? '0',
 //     };
 
-//     // Extract coordinates
 //     _extractCoordinates();
-
 //     print('✅ Ride data extracted successfully');
 //   }
 
 //   void _extractCoordinates() {
 //     try {
-//       // Extract pickup coordinates
 //       if (widget.rideData?['pickup'] != null) {
 //         final pickup = widget.rideData!['pickup'];
 //         _rideData!['pickupCoordinates'] = LatLng(
@@ -234,7 +298,6 @@
 //         }
 //       }
 
-//       // Extract drop coordinates
 //       if (widget.rideData?['destination'] != null) {
 //         final destination = widget.rideData!['destination'];
 //         _rideData!['dropoffCoordinates'] = LatLng(
@@ -252,30 +315,20 @@
 //         }
 //       }
 
-//       // Fallback coordinates if none found
 //       if (_rideData!['pickupCoordinates'] == null) {
-//         _rideData!['pickupCoordinates'] = const LatLng(
-//           23.2599,
-//           77.4126,
-//         ); // Bhopal
+//         _rideData!['pickupCoordinates'] = const LatLng(23.2599, 77.4126);
 //       }
 
 //       if (_rideData!['dropoffCoordinates'] == null) {
-//         _rideData!['dropoffCoordinates'] = const LatLng(
-//           18.5204,
-//           73.8567,
-//         ); // Pune
+//         _rideData!['dropoffCoordinates'] = const LatLng(18.5204, 73.8567);
 //       }
 
 //       print('📍 Pickup coordinates: ${_rideData!['pickupCoordinates']}');
 //       print('📍 Drop coordinates: ${_rideData!['dropoffCoordinates']}');
 //     } catch (e) {
 //       print("❌ Error extracting coordinates: $e");
-//       _rideData!['pickupCoordinates'] = const LatLng(
-//         23.2599,
-//         77.4126,
-//       ); // Bhopal
-//       _rideData!['dropoffCoordinates'] = const LatLng(18.5204, 73.8567); // Pune
+//       _rideData!['pickupCoordinates'] = const LatLng(23.2599, 77.4126);
+//       _rideData!['dropoffCoordinates'] = const LatLng(18.5204, 73.8567);
 //     }
 //   }
 
@@ -301,7 +354,6 @@
 
 //   Future<void> _loadCustomMarkers() async {
 //     try {
-//       // Load bike marker
 //       final ByteData bikeData = await rootBundle.load(
 //         'assets/images/bike2.png',
 //       );
@@ -322,12 +374,10 @@
 //         print('✅ Bike marker icon loaded');
 //       }
 
-//       // Create pickup marker (blue)
 //       _pickupMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(
 //         BitmapDescriptor.hueBlue,
 //       );
 
-//       // Create drop marker (red)
 //       _dropMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(
 //         BitmapDescriptor.hueRed,
 //       );
@@ -351,10 +401,8 @@
 //       return;
 //     }
 
-//     // Cancel existing subscription if any
 //     _positionStreamSubscription?.cancel();
 
-//     // Get initial position
 //     try {
 //       final position = await Geolocator.getCurrentPosition(
 //         locationSettings: const LocationSettings(
@@ -375,7 +423,6 @@
 
 //       print('📍 Initial location: ${position.latitude}, ${position.longitude}');
 
-//       // Calculate distance to pickup
 //       if (_rideData?['pickupCoordinates'] != null) {
 //         final pickupCoords = _rideData!['pickupCoordinates'] as LatLng;
 //         _distanceToPickup = _calculateDistance(
@@ -392,7 +439,6 @@
 //       }
 //     }
 
-//     // Start position stream for continuous updates
 //     const locationSettings = LocationSettings(
 //       accuracy: LocationAccuracy.high,
 //       distanceFilter: 10,
@@ -413,7 +459,6 @@
 //               _locationError = false;
 //             });
 
-//             // Recalculate distance to pickup
 //             if (_rideData?['pickupCoordinates'] != null) {
 //               final pickupCoords = _rideData!['pickupCoordinates'] as LatLng;
 //               _distanceToPickup = _calculateDistance(
@@ -424,7 +469,6 @@
 //               );
 //             }
 
-//             // Update markers
 //             _setMarkers();
 //           },
 //           onError: (error) {
@@ -466,7 +510,6 @@
 //     final newMarkers = <Marker>{};
 //     final newCircles = <Circle>{};
 
-//     // 1. Driver marker (blue bike icon)
 //     if (_driverLocation != null && _bikeMarkerIcon != null) {
 //       newMarkers.add(
 //         Marker(
@@ -481,7 +524,6 @@
 //         ),
 //       );
 
-//       // Driver accuracy circles
 //       newCircles.add(
 //         Circle(
 //           circleId: const CircleId('outer_shadow'),
@@ -504,7 +546,6 @@
 //       );
 //     }
 
-//     // 2. Pickup marker
 //     if (_rideData?['pickupCoordinates'] != null && _pickupMarkerIcon != null) {
 //       newMarkers.add(
 //         Marker(
@@ -519,7 +560,6 @@
 //         ),
 //       );
 
-//       // Pickup zone circle
 //       newCircles.add(
 //         Circle(
 //           circleId: const CircleId('pickup_zone'),
@@ -532,7 +572,6 @@
 //       );
 //     }
 
-//     // 3. Drop marker
 //     if (_rideData?['dropoffCoordinates'] != null && _dropMarkerIcon != null) {
 //       newMarkers.add(
 //         Marker(
@@ -555,7 +594,6 @@
 //       });
 //     }
 
-//     // Fit map to show all markers
 //     _fitMapToAllMarkers();
 //   }
 
@@ -655,7 +693,6 @@
 //     }
 
 //     try {
-//       // 1. Fetch route from Driver to Pickup
 //       if (_driverLocation != null && _rideData!['pickupCoordinates'] != null) {
 //         final pickupCoords = _rideData!['pickupCoordinates'] as LatLng;
 //         final url = Uri.parse(
@@ -680,7 +717,6 @@
 //         }
 //       }
 
-//       // 2. Fetch route from Pickup to Drop
 //       if (_rideData!['pickupCoordinates'] != null &&
 //           _rideData!['dropoffCoordinates'] != null) {
 //         final pickupCoords = _rideData!['pickupCoordinates'] as LatLng;
@@ -719,7 +755,6 @@
 
 //     final polylines = <Polyline>{};
 
-//     // Route polylines (driver→pickup) - Blue solid line
 //     if (_routeCoordinates.isNotEmpty) {
 //       polylines.add(
 //         Polyline(
@@ -731,7 +766,6 @@
 //       );
 //     }
 
-//     // Route polylines (pickup→drop) - Green dashed line
 //     if (_pickupToDropCoordinates.isNotEmpty) {
 //       polylines.add(
 //         Polyline(
@@ -787,108 +821,148 @@
 //   Future<void> _navigateToOtpScreen() async {
 //     print('🔄 Navigating to OTP screen...');
 
+//     // Check if we have valid ride data
+//     if (_rideData == null) {
+//       print('❌ Cannot navigate to OTP: No ride data available');
+//       _showSnackbar('Cannot navigate: No ride data', isError: true);
+//       return;
+//     }
+
+//     final orderId = _rideData!['orderId'];
+//     if (orderId == null || orderId == 'N/A') {
+//       print('❌ Cannot navigate to OTP: Invalid order ID');
+//       _showSnackbar('Invalid order ID', isError: true);
+//       return;
+//     }
+
 //     // Pause location tracking
 //     await _pauseLocationTracking();
 
-//     print("myyy_datat_Senddd ${_rideData}");
-//     // Navigate and wait for result
-//     final result = await Navigator.push(
-//       context,
-//       MaterialPageRoute(
-//         builder: (context) =>
-//             ArrivedOtpScreen(bookridetypecheck: false, rideData: _rideData),
-//       ),
-//     );
+//     print("📤 Sending ride data to OTP screen: $_rideData");
 
-//     // Handle return from OTP screen
-//     if (mounted && _isScreenActive) {
-//       if (result == true) {
-//         // OTP verified successfully
-//         print('✅ OTP verified, updating order status...');
+//     // Navigate to OTP screen using GetX
+//     try {
+//       await Get.to(
+//         () => ArrivedOtpScreen(rideData: _rideData),
+//         transition: Transition.rightToLeft,
+//         duration: Duration(milliseconds: 300),
+//       );
 
-//         // Only proceed if API is successful
-//         final orderId = _rideData?['orderId'];
-//         if (orderId != null && orderId.isNotEmpty) {
-//           // Call API
-//           await orderUpdateController.updateOrder(
-//             orderstatus: "Progress",
-//             orderid: orderId,
-//             context: context ?? this.context,
-//             rideData: _rideData,
-//             step_control: "Progress",
-//           );
+//       print('↩️ Returned from OTP screen');
 
-//           // stepperController.nextStep();
+//       // // When returning from OTP screen
+//       // if (_isScreenActive && mounted) {
+//       //   // Resume location tracking
+//       //   await _resumeLocationTracking();
 
-//           // await _updateOrderWithValidation(
-//           //   orderstatus: "Progress",
-//           //   orderid: orderId,
-//           //   onSuccess: () {
-//           //     // Only update stepper if API is successful
-//           //     stepperController.nextStep();
-//           //   },
-//           // );
-//         }
+//       //   // Force refresh the map
+//       //   _forceRefreshMap();
+//       // }
+//     } catch (e) {
+//       print('❌ Error navigating to OTP screen: $e');
+//       if (_isScreenActive && mounted) {
+//         _showSnackbar('Failed to navigate to OTP', isError: true);
+//         await _resumeLocationTracking(); // Resume tracking on error
 //       }
-
-//       // Resume location tracking
-//       await _resumeLocationTracking();
-
-//       // Refresh map
-//       WidgetsBinding.instance.addPostFrameCallback((_) {
-//         if (mounted && _isScreenActive) {
-//           _setMarkers();
-//           _fitMapToAllMarkers();
-//         }
-//       });
 //     }
 //   }
 
-//   // Helper method to update order with validation
-//   // Future<void> _updateOrderWithValidation({
-//   //   required String orderstatus,
-//   //   required String orderid,
-//   //   VoidCallback? onSuccess,
-//   //   BuildContext? context,
-//   // }) async {
-//   //   try {
-//   //     // Show loading
-//   //     showDialog(
-//   //       context: context ?? this.context,
-//   //       barrierDismissible: false,
-//   //       builder: (context) => const Center(child: CircularProgressIndicator()),
-//   //     );
+//   // Helper method to show snackbar
+//   void _showSnackbar(String message, {bool isError = true}) {
+//     if (mounted && _isScreenActive) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(
+//           content: Text(message),
+//           backgroundColor: isError ? Colors.red : Colors.green,
+//           duration: Duration(seconds: 2),
+//         ),
+//       );
+//     }
+//   }
+//   // Future<void> _navigateToOtpScreen() async {
+//   //   print('🔄 Navigating to OTP screen...');
 
-//   //     // Call API
-//   //     await orderUpdateController.updateOrder(
-//   //       orderstatus: orderstatus,
-//   //       orderid: orderid,
-//   //       context: context ?? this.context,
-//   //       rideData: _rideData,
-//   //     );
+//   //   // Pause location tracking
+//   //   await _pauseLocationTracking();
 
-//   //     // Check if API was successful
-//   //     if (orderUpdateController.updateOrderResponse.value?.success == true) {
-//   //       // Only execute onSuccess callback if API succeeded
-//   //       onSuccess?.call();
-//   //       print('✅ Order updated successfully');
-//   //     } else {
-//   //       // Show error if API failed
-//   //       Get.snackbar(
-//   //         'Error',
-//   //         orderUpdateController.errorMessage.value.isNotEmpty
-//   //             ? orderUpdateController.errorMessage.value
-//   //             : 'Failed to update order status',
-//   //         snackPosition: SnackPosition.BOTTOM,
-//   //         backgroundColor: Colors.red,
-//   //         colorText: Colors.white,
-//   //       );
-//   //     }
-//   //   } finally {
-//   //     // Hide loading
-//   //     if (mounted && (context ?? this.context).mounted) {
-//   //       Navigator.of(context ?? this.context, rootNavigator: true).pop();
-//   //     }
+//   //   print("📤 Sending ride data to OTP screen: $_rideData");
+
+//   //   // Navigate to OTP screen
+//   //   final result = await Navigator.of(context).push<bool>(
+//   //     MaterialPageRoute(
+//   //       builder: (context) =>
+//   //           ArrivedOtpScreen(bookridetypecheck: false, rideData: _rideData),
+//   //     ),
+//   //   );
+
+//   //   // When returning from OTP screen
+//   //   if (_isScreenActive && mounted) {
+//   //     print('↩️ Returning from OTP screen');
+
+//   //     // Resume location tracking
+//   //     await _resumeLocationTracking();
+
+//   //     // Force refresh the map
+//   //     _forceRefreshMap();
+//   //   }
+//   // }
+
+//   void _handleNavigation(NavigationCommand command) {
+//     print("myyyyy ${command.arguments}");
+//     print("myyyyyxxx ${command.route}");
+//     print("myyyyycccc ${command}");
+//     if (!mounted || !_isScreenActive) return;
+
+//     // switch (command.route) {
+//     //   case 'bottom_nav':
+//     //     Get.offAll(() => BottomnavmainScreen());
+//     //     break;
+//     //   case 'otp_screen':
+//     //     _navigateToOtpScreen();
+//     //     break;
+//     //   case 'payment_screen':
+//     //     Get.offAll(() => const ReceivePaymentModes());
+//     //     break;
+//     //   case 'arriving_client':  // Add this case if needed
+//     //     // Already on arriving client screen
+//     //     break;
+//     //   default:
+//     //     print('⚠️ Unknown navigation route: ${command.route}');
+//     //     break;
+//     // }
+
+//     switch (command.route) {
+//       case 'bottom_nav':
+//         Get.offAll(() => BottomnavmainScreen());
+//         break;
+//       case 'arriving_screen':
+//         _navigateToOtpScreen();
+//         break;
+//       case 'payment_screen':
+//         Get.offAll(() => ReceivePaymentModes(rideData: widget.rideData));
+//         break;
+//       case 'arriving_client': // Add this case if needed
+//         // Already on arriving client screen
+//         break;
+//       default:
+//         print('⚠️ Unknown navigation route: ${command.route}');
+//         break;
+//     }
+//   }
+
+//   // void _handleNavigation(NavigationCommand command) {
+//   //   if (!mounted || !_isScreenActive) return;
+
+//   //   switch (command.route) {
+//   //     case 'bottom_nav':
+//   //       Get.offAll(() => BottomnavmainScreen());
+//   //       break;
+//   //     case 'otp_screen':
+//   //       _navigateToOtpScreen();
+//   //       break;
+//   //     case 'payment_screen':
+//   //       Get.offAll(() => const ReceivePaymentModes());
+//   //       break;
 //   //   }
 //   // }
 
@@ -901,11 +975,8 @@
 //       appBar: _buildAppBar(w),
 //       body: Column(
 //         children: [
-//           // Location Inputs
 //           _buildLocationInputs(w),
-//           // Map Section
 //           Expanded(child: _buildMapSection(w)),
-//           // Bottom Sheet
 //           _buildBottomSheet(w),
 //         ],
 //       ),
@@ -945,14 +1016,12 @@
 //       padding: EdgeInsets.symmetric(horizontal: w * .03, vertical: w * .01),
 //       child: Column(
 //         children: [
-//           // Pickup Location
 //           LocationInputTextfield(
 //             onPressed: () {},
 //             preffixImage: "assets/icons/greenDot.png",
 //             hintText: _rideData?['pickupLocation'] ?? 'Pickup location',
 //           ),
 //           SizedBox(height: w * .02),
-//           // Drop Location
 //           LocationInputTextfield(
 //             onPressed: () {},
 //             preffixImage: "assets/icons/redDot.png",
@@ -999,11 +1068,10 @@
 //       child: Column(
 //         crossAxisAlignment: CrossAxisAlignment.start,
 //         children: [
-//           // Route Information
 //           SizedBox(height: w * .03),
-//           Text(
+//           const Text(
 //             "to pickup location",
-//             style: const TextStyle(color: Colors.black54),
+//             style: TextStyle(color: Colors.black54),
 //           ),
 //           SizedBox(height: w * .04),
 
@@ -1016,7 +1084,7 @@
 //           SizedBox(height: w * .04),
 
 //           if (widget.typeCheck == true) ...[
-//             // _buildActionButtons2(w),
+//             // _buildActionButtons2(w), // Implement if needed
 //           ] else ...[
 //             _buildActionButtons(w),
 //           ],
@@ -1087,8 +1155,54 @@
 //                 }),
 //                 SizedBox(width: w * .02),
 //               ],
+
 //               _circleImage("assets/images/mess.png", () {
-//                 CustomNavigator.push(context, ChatScreen());
+//                 print("myyyyy_datatt  ${widget.rideData}");
+
+//                 print(
+//                   "myyy_getttt ${chartidController.chartresposne.value!.data!.id}",
+//                 );
+
+//                 // CustomNavigator.push(
+//                 //                       context,
+//                 //                       ChatScreen(
+//                 //                         orderId:
+//                 //                             (socketController
+//                 //                                         .currentRide
+//                 //                                         .value?['orderId'] ??
+//                 //                                     socketController
+//                 //                                         .currentRide
+//                 //                                         .value?['_id'] ??
+//                 //                                     '')
+//                 //                                 .toString(),
+//                 //                         driverId:
+//                 //                             (socketController
+//                 //                                         .currentRide
+//                 //                                         .value?['driver']?['id'] ??
+//                 //                                     socketController
+//                 //                                         .currentRide
+//                 //                                         .value?['driver']?['_id'] ??
+//                 //                                     '')
+//                 //                                 .toString(),
+//                 //                         driverName:
+//                 //                             (socketController
+//                 //                                         .currentRide
+//                 //                                         .value?['driver']?['name'] ??
+//                 //                                     "Driver")
+//                 //                                 .toString(),
+//                 //                         driverImage: socketController
+//                 //                             .currentRide
+//                 //                             .value?['driver']?['profilePic'],
+//                 //                       ),
+//                 //                     );
+
+//                 CustomNavigator.push(
+//                   context,
+//                   ChatScreen(
+//                     // orderid: _rideData?['orderId'],
+//                     rideData: widget.rideData,
+//                   ),
+//                 );
 //               }),
 //             ],
 //           ),
@@ -1195,131 +1309,35 @@
 //     return Obx(() {
 //       final step = stepperController.activeStep.value;
 
+//       // Get loading states for buttons
+//       final isCancelLoading =
+//           ButtonStateManager.watchLoading('cancel_button')?.value ?? false;
+//       final isArriveLoading =
+//           ButtonStateManager.watchLoading('arrive_button')?.value ?? false;
+//       final isStartTripLoading =
+//           ButtonStateManager.watchLoading('start_trip_button')?.value ?? false;
+//       final isCompleteLoading =
+//           ButtonStateManager.watchLoading('complete_button')?.value ?? false;
+
 //       return Row(
 //         children: [
 //           Expanded(
-//             child: _actionButton(
+//             child: _buildLoadingButton(
 //               text: "Cancel",
+//               isLoading: isCancelLoading,
 //               color: const Color(0xFFE0E4E7),
 //               textColor: Colors.grey,
-//               onTap: () async {
-//                 final orderId = _rideData?['orderId'];
-//                 if (orderId != null && orderId.isNotEmpty) {
-//                   // await
-
-//                   await orderUpdateController.updateOrder(
-//                     orderstatus: "Cancelled",
-//                     orderid: orderId,
-//                     context: context ?? this.context,
-//                     rideData: _rideData,
-//                     step_control: "Cancelled",
-//                   );
-
-//                   // _updateOrderWithValidation(
-//                   //   orderstatus: "Cancelled",
-//                   //   orderid: orderId,
-//                   //   onSuccess: () {
-//                   //     // Only navigate if API is successful
-//                   //     CustomNavigator.removeUntil(
-//                   //       context,
-//                   //       BottomnavmainScreen(),
-//                   //       transition: TransitionType.fade,
-//                   //     );
-//                   //   },
-//                   // );
-//                 }
-//               },
+//               buttonId: 'cancel_button',
+//               onTap: _handleCancelOrder,
 //             ),
 //           ),
 //           SizedBox(width: w * .04),
 //           Expanded(
-//             child: _actionButton(
-//               text: step == 0
-//                   ? "I've Arrived"
-//                   : step == 1
-//                   ? "Start Trip"
-//                   : "Complete",
-//               color: const Color(0xFF26E3DD),
-//               textColor: Colors.black87,
-//               onTap: () async {
-//                 final orderId = _rideData?['orderId'];
-//                 if (orderId == null || orderId.isEmpty) {
-//                   Get.snackbar(
-//                     'Error',
-//                     'Invalid order ID',
-//                     snackPosition: SnackPosition.BOTTOM,
-//                     backgroundColor: Colors.red,
-//                     colorText: Colors.white,
-//                   );
-//                   return;
-//                 }
-
-//                 if (step == 0) {
-//                   // await _updateOrderWithValidation(
-//                   //   orderstatus: "Arriving",
-//                   //   orderid: orderId,
-//                   //   onSuccess: () async {
-//                   //     // Only navigate to OTP screen if API is successful
-//                   //     await _navigateToOtpScreen();
-//                   //   },
-//                   // );
-
-//                   await orderUpdateController.updateOrder(
-//                     orderstatus: "Arriving",
-//                     orderid: orderId,
-//                     context: context ?? this.context,
-//                     rideData: _rideData,
-//                     step_control: "Arriving",
-//                   );
-
-//                   //   Navigator.push(
-//                   //   context,
-//                   //   MaterialPageRoute(
-//                   //     builder: (context) =>
-//                   //         ArrivedOtpScreen(bookridetypecheck: false, rideData: _rideData),
-//                   //   ),
-//                   // );
-//                 } else if (step == 1) {
-//                   await orderUpdateController.updateOrder(
-//                     orderstatus: "Progress",
-//                     orderid: orderId,
-//                     context: context ?? this.context,
-//                     rideData: _rideData,
-//                     step_control: "Progress",
-//                   );
-//                   // await _updateOrderWithValidation(
-//                   //   orderstatus: "Progress",
-//                   //   orderid: orderId,
-//                   //   onSuccess: () {
-//                   //     // Only update stepper if API is successful
-//                   //     stepperController.nextStep();
-//                   //   },
-//                   // );
-//                 } else if (step == 2) {
-//                   // await _updateOrderWithValidation(
-//                   //   orderstatus: "Completed",
-//                   //   orderid: orderId,
-//                   //   onSuccess: () {
-//                   //     // Only navigate to payment screen if API is successful
-//                   //     CustomNavigator.removeUntil(
-//                   //       context,
-//                   //       ReceivePaymentModes(),
-//                   //       transition: TransitionType.fade,
-//                   //     );
-//                   //   },
-//                   // );
-
-//                   await orderUpdateController.updateOrder(
-//                     orderstatus: "Completed",
-//                     orderid: orderId,
-//                     context: context ?? this.context,
-//                     rideData: _rideData,
-//                     step_control: "Completed",
-//                   );
-//                 } else {
-//                   _finalizeTrip();
-//                 }
-//               },
+//             child: _buildStepButton(
+//               step: step,
+//               isArriveLoading: isArriveLoading,
+//               isStartTripLoading: isStartTripLoading,
+//               isCompleteLoading: isCompleteLoading,
 //             ),
 //           ),
 //         ],
@@ -1327,119 +1345,157 @@
 //     });
 //   }
 
-//   // Widget _buildActionButtons2(double w) {
-//   //   return Obx(() {
-//   //     final step = stepperController.activeStep.value;
-
-//   //     return Row(
-//   //       children: [
-//   //         Expanded(
-//   //           child: _actionButton(
-//   //             text: "Cancel",
-//   //             color: const Color(0xFFE0E4E7),
-//   //             textColor: Colors.grey,
-//   //             onTap: () async {
-//   //               final orderId = _rideData?['orderId'];
-//   //               if (orderId != null && orderId.isNotEmpty) {
-//   //                 await _updateOrderWithValidation(
-//   //                   orderstatus: "Cancelled",
-//   //                   orderid: orderId,
-//   //                   onSuccess: () {
-//   //                     // Only navigate if API is successful
-//   //                     CustomNavigator.removeUntil(
-//   //                       context,
-//   //                       BottomnavmainScreen(),
-//   //                       transition: TransitionType.fade,
-//   //                     );
-//   //                   },
-//   //                 );
-//   //               }
-//   //             },
-//   //           ),
-//   //         ),
-//   //         SizedBox(width: w * .04),
-//   //         Expanded(
-//   //           child: _actionButton(
-//   //             text: step == 0 ? "Start Trip" : "Complete",
-//   //             color: const Color(0xFF26E3DD),
-//   //             textColor: Colors.black87,
-//   //             onTap: () {
-//   //               final orderId = _rideData?['orderId'];
-//   //               if (orderId == null || orderId.isEmpty) {
-//   //                 Get.snackbar(
-//   //                   'Error',
-//   //                   'Invalid order ID',
-//   //                   snackPosition: SnackPosition.BOTTOM,
-//   //                   backgroundColor: Colors.red,
-//   //                   colorText: Colors.white,
-//   //                 );
-//   //                 return;
-//   //               }
-
-//   //               if (step == 0) {
-//   //                 _updateOrderWithValidation(
-//   //                   orderstatus: "Progress",
-//   //                   orderid: orderId,
-//   //                   onSuccess: () {
-//   //                     // Only update stepper if API is successful
-//   //                     stepperController.nextStep();
-//   //                   },
-//   //                 );
-//   //               } else if (step == 1) {
-//   //                 _updateOrderWithValidation(
-//   //                   orderstatus: "Completed",
-//   //                   orderid: orderId,
-//   //                   onSuccess: () {
-//   //                     // Only navigate if API is successful
-//   //                     CustomNavigator.removeUntil(
-//   //                       context,
-//   //                       ReceivePaymentModes(),
-//   //                       transition: TransitionType.fade,
-//   //                     );
-//   //                   },
-//   //                 );
-//   //               } else {
-//   //                 _finalizeTrip();
-//   //               }
-//   //             },
-//   //           ),
-//   //         ),
-//   //       ],
-//   //     );
-//   //   });
-//   // }
-
-//   void _startTrip() async {
-//     stepperController.nextStep();
-//     print("Trip started");
-//   }
-
-//   void _finalizeTrip() async {
-//     stepperController.resetSteps();
-//     print("Trip finalized");
-//   }
-
-//   Widget _actionButton({
+//   Widget _buildLoadingButton({
 //     required String text,
+//     required bool isLoading,
 //     required Color color,
 //     required Color textColor,
+//     required String buttonId,
 //     required VoidCallback onTap,
 //   }) {
 //     return SizedBox(
 //       height: 40,
 //       child: ElevatedButton(
-//         onPressed: onTap,
+//         onPressed: isLoading ? null : onTap,
 //         style: ElevatedButton.styleFrom(
 //           backgroundColor: color,
 //           elevation: 0,
 //           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
 //         ),
-//         child: Text(
-//           text,
-//           style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
-//         ),
+//         child: isLoading
+//             ? SizedBox(
+//                 width: 20,
+//                 height: 20,
+//                 child: CircularProgressIndicator(
+//                   strokeWidth: 2,
+//                   valueColor: AlwaysStoppedAnimation<Color>(textColor),
+//                 ),
+//               )
+//             : Text(
+//                 text,
+//                 style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
+//               ),
 //       ),
 //     );
+//   }
+
+//   Widget _buildStepButton({
+//     required int step,
+//     required bool isArriveLoading,
+//     required bool isStartTripLoading,
+//     required bool isCompleteLoading,
+//   }) {
+//     final orderId = _rideData?['orderId'];
+
+//     switch (step) {
+//       case 0: // "I've Arrived"
+//         return _buildLoadingButton(
+//           text: "I've Arrived",
+//           isLoading: isArriveLoading,
+//           color: const Color(0xFF26E3DD),
+//           textColor: Colors.black87,
+//           buttonId: 'arrive_button',
+//           onTap: () {
+//             if (orderId != null && orderId.isNotEmpty) {
+//               orderUpdateController.updateOrder(
+//                 context: context,
+//                 buttonId: 'arrive_button',
+//                 orderStatus: "Arriving",
+//                 orderId: orderId,
+//                 rideData: _rideData,
+//                 stepControl: "Arriving",
+//                 successMessage: 'Arrival status updated',
+//                 shouldTriggerNavigation: true,
+//               );
+//             } else {
+//               // _showSnackbar('Invalid order ID', isError: true);
+//             }
+//           },
+//         );
+
+//       case 1: // "Start Trip" - This should trigger OTP screen
+//         return _buildLoadingButton(
+//           text: "Start Trip",
+//           isLoading: isStartTripLoading,
+//           color: const Color(0xFF26E3DD),
+//           textColor: Colors.black87,
+//           buttonId: 'start_trip_button',
+//           onTap: () {
+//             if (orderId != null && orderId.isNotEmpty) {
+//               orderUpdateController.updateOrder(
+//                 context: context,
+//                 buttonId: 'start_trip_button',
+//                 orderStatus: "Progress", // This should trigger OTP navigation
+//                 orderId: orderId,
+//                 rideData: _rideData,
+//                 stepControl: "Progress",
+//                 successMessage: 'Trip started successfully',
+//                 shouldTriggerNavigation: true,
+//               );
+//             } else {
+//               // _showSnackbar('Invalid order ID', isError: true);
+//             }
+//           },
+//         );
+
+//       case 2: // "Complete"
+//         return _buildLoadingButton(
+//           text: "Complete",
+//           isLoading: isCompleteLoading,
+//           color: const Color(0xFF26E3DD),
+//           textColor: Colors.black87,
+//           buttonId: 'complete_button',
+//           onTap: () {
+//             if (orderId != null && orderId.isNotEmpty) {
+//               orderUpdateController.updateOrder(
+//                 context: context,
+//                 buttonId: 'complete_button',
+//                 orderStatus: "Completed",
+//                 orderId: orderId,
+//                 rideData: _rideData,
+//                 stepControl: "Completed",
+//                 successMessage: 'Trip completed successfully',
+//                 shouldTriggerNavigation: true,
+//               );
+//             } else {
+//               // _showSnackbar('Invalid order ID', isError: true);
+//             }
+//           },
+//         );
+
+//       default:
+//         return _buildLoadingButton(
+//           text: "Action",
+//           isLoading: false,
+//           color: const Color(0xFF26E3DD),
+//           textColor: Colors.black87,
+//           buttonId: 'default_button',
+//           onTap: () {},
+//         );
+//     }
+//   }
+
+//   void _handleCancelOrder() {
+//     final orderId = _rideData?['orderId'];
+
+//     if (orderId != null && orderId.isNotEmpty) {
+//       orderUpdateController.updateOrder(
+//         context: context,
+//         buttonId: 'cancel_button',
+//         orderStatus: "Cancelled",
+//         orderId: orderId,
+//         rideData: _rideData,
+//         stepControl: "Cancelled",
+//         successMessage: 'Order cancelled successfully',
+//       );
+//     } else {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(
+//           content: Text('Invalid order ID'),
+//           backgroundColor: Colors.red,
+//         ),
+//       );
+//     }
 //   }
 
 //   Widget _circleIcon(IconData icon, VoidCallback onTap) {
@@ -1474,6 +1530,12 @@
 //   }
 // }
 
+import 'dart:async';
+import 'dart:math';
+import 'dart:ui' as ui;
+import 'dart:typed_data';
+
+import 'package:corezap_driver/controllers/chart_id_controller/chartid_controller.dart';
 import 'package:corezap_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:corezap_driver/utilities/colors/colors_list.dart';
@@ -1481,6 +1543,8 @@ import 'package:corezap_driver/utilities/custom_images.dart';
 import 'package:corezap_driver/utilities/custom_text.dart';
 import 'package:corezap_driver/utilities/location_input_textfield.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
+import 'package:corezap_driver/utilities/utils/button_state_manager.dart';
+import 'package:corezap_driver/utilities/utils/navigation_command.dart';
 import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
 import 'package:corezap_driver/views/scheduled_pickups/arrived_otp_screen.dart';
 import 'package:corezap_driver/views/scheduled_pickups/chat_screen.dart';
@@ -1494,11 +1558,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
-import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
-import 'dart:async';
-import 'dart:typed_data';
-import 'dart:math';
 
 class ArrivingClient extends StatefulWidget {
   final bool? typeCheck;
@@ -1514,6 +1574,8 @@ class _ArrivingClientState extends State<ArrivingClient> {
   final StepperController stepperController = Get.find<StepperController>();
   final OrderUpdateController orderUpdateController =
       Get.find<OrderUpdateController>();
+
+  final ChartidController chartidController = Get.find<ChartidController>();
 
   // Google API Key for Directions
   static const String GOOGLE_API_KEY =
@@ -1544,15 +1606,51 @@ class _ArrivingClientState extends State<ArrivingClient> {
   BitmapDescriptor? _pickupMarkerIcon;
   BitmapDescriptor? _dropMarkerIcon;
 
+  // Navigation listener subscription
+  Worker? _navigationWorker;
+
   @override
   void initState() {
     super.initState();
     _isScreenActive = true;
     print('🚗 ArrivingClient initState called');
 
+    // Set up navigation listener
+    _setupNavigationListener();
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _initializeAll();
     });
+  }
+
+  void _setupNavigationListener() {
+    _navigationWorker = ever(orderUpdateController.shouldNavigate$, (
+      bool shouldNavigate,
+    ) {
+      if (shouldNavigate && mounted && _isScreenActive) {
+        final command = NavigationCommand(
+          route: orderUpdateController.navigationRoute,
+          arguments: orderUpdateController.navigationArgs,
+          clearAll: orderUpdateController.clearAll,
+        );
+
+        print("Navigation command: ${command}");
+        _handleNavigation(command);
+        orderUpdateController.clearNavigation();
+      }
+    });
+  }
+
+  Future<void> _getchartidmethod() async {
+    final orderId = widget.rideData?['orderId']?.toString();
+    if (orderId != null) {
+      try {
+        await chartidController.getchartidmethod(orderid: orderId);
+        print('✅ Chart ID method called for order: $orderId');
+      } catch (e) {
+        print('❌ Error getting chart ID: $e');
+      }
+    }
   }
 
   @override
@@ -1571,8 +1669,30 @@ class _ArrivingClientState extends State<ArrivingClient> {
   void dispose() {
     print('🗑️ ArrivingClient dispose called');
     _isScreenActive = false;
-    _cleanupResources();
+
+    // Cancel all timers and subscriptions first
+    _positionStreamSubscription?.cancel();
+
+    // Clean up workers
+    _navigationWorker?.dispose();
+
+    // Call super.dispose first
     super.dispose();
+
+    // Clean up button states safely after disposal
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        ButtonStateManager.clearState('arrive_button');
+        ButtonStateManager.clearState('cancel_button');
+        ButtonStateManager.clearState('start_trip_button');
+        ButtonStateManager.clearState('complete_button');
+      } catch (e) {
+        // Silently catch errors during disposal
+        print('⚠️ Error clearing button states: $e');
+      }
+    });
+
+    _cleanupResources();
   }
 
   void _cleanupResources() {
@@ -1681,6 +1801,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
       'riderId': widget.rideData?['riderId'],
       'riderName': widget.rideData?['riderName']?.toString() ?? 'Customer',
       'riderPhone': widget.rideData?['riderNumber']?.toString() ?? 'N/A',
+      'riderImage': widget.rideData?['riderImage']?.toString() ?? '',
       'pickupLocation':
           widget.rideData?['startLocation']?['address']?.toString() ??
           widget.rideData?['pickup']?['address']?.toString() ??
@@ -2240,207 +2361,75 @@ class _ArrivingClientState extends State<ArrivingClient> {
   Future<void> _navigateToOtpScreen() async {
     print('🔄 Navigating to OTP screen...');
 
+    // Check if we have valid ride data
+    if (_rideData == null) {
+      print('❌ Cannot navigate to OTP: No ride data available');
+      _showSnackbar('Cannot navigate: No ride data', isError: true);
+      return;
+    }
+
+    final orderId = _rideData!['orderId'];
+    if (orderId == null || orderId == 'N/A') {
+      print('❌ Cannot navigate to OTP: Invalid order ID');
+      _showSnackbar('Invalid order ID', isError: true);
+      return;
+    }
+
     // Pause location tracking
     await _pauseLocationTracking();
 
     print("📤 Sending ride data to OTP screen: $_rideData");
 
-    // Use Navigator.push with explicit context
-    final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (context) =>
-            ArrivedOtpScreen(bookridetypecheck: false, rideData: _rideData),
-      ),
-    );
+    // Navigate to OTP screen using GetX
+    try {
+      await Get.to(
+        () => ArrivedOtpScreen(rideData: _rideData),
+        transition: Transition.rightToLeft,
+        duration: const Duration(milliseconds: 300),
+      );
 
-    // When returning from OTP screen
-    // if (_isScreenActive && mounted) {
-    //   print('↩️ Returning from OTP screen');
-
-    //   // Resume location tracking
-    //   await _resumeLocationTracking();
-
-    //   // Force refresh the map
-    //   _forceRefreshMap();
-    // }
-
-    // Handle OTP verification result
-    // if (result == true && mounted && _isScreenActive) {
-    //   print('✅ OTP verified, updating order status to Progress...');
-
-    //   final orderId = _rideData?['orderId'];
-    //   if (orderId != null && orderId.isNotEmpty) {
-    //     await _handleProgressStatus(orderId);
-    //   }
-    // }
+      print('↩️ Returned from OTP screen');
+    } catch (e) {
+      print('❌ Error navigating to OTP screen: $e');
+      if (_isScreenActive && mounted) {
+        _showSnackbar('Failed to navigate to OTP', isError: true);
+        await _resumeLocationTracking(); // Resume tracking on error
+      }
+    }
   }
 
-  // Handler methods for different order statuses
-  Future<void> _handleCancelOrder(String orderId) async {
-    try {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(child: CircularProgressIndicator()),
-      );
-
-      final result = await orderUpdateController.updateOrder(
-        orderStatus: "Cancelled",
-        orderId: orderId,
-        context: context,
-        rideData: _rideData,
-        stepControl: "Cancelled",
-      );
-
-      Navigator.of(context, rootNavigator: true).pop();
-
-      if (result?.success == true) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => BottomnavmainScreen()),
-          (route) => false,
-        );
-      } else {
-        Get.snackbar(
-          'Error',
-          'Failed to cancel order: ${result?.message ?? "Unknown error"}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-      }
-    } catch (e) {
-      Navigator.of(context, rootNavigator: true).pop();
-      Get.snackbar(
-        'Error',
-        'Failed to cancel order: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+  // Helper method to show snackbar
+  void _showSnackbar(String message, {bool isError = true}) {
+    if (mounted && _isScreenActive) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: isError ? Colors.red : Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
       );
     }
   }
 
-  Future<void> _handleArrivedStatus(String orderId) async {
-    try {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(child: CircularProgressIndicator()),
-      );
+  void _handleNavigation(NavigationCommand command) {
+    print("Navigation command: ${command}");
+    if (!mounted || !_isScreenActive) return;
 
-      final result = await orderUpdateController.updateOrder(
-        orderStatus: "Arriving",
-        orderId: orderId,
-        context: context,
-        rideData: _rideData,
-        stepControl: "Arriving",
-      );
-
-      // Navigator.of(context, rootNavigator: true).pop();
-
-      if (result?.success == true) {
-        print("arrivveeeing>>>");
-        await _navigateToOtpScreen();
-      } else {
-        Get.snackbar(
-          'Error',
-          'Failed to update arrival status: ${result?.message ?? "Unknown error"}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-      }
-    } catch (e) {
-      Navigator.of(context, rootNavigator: true).pop();
-      Get.snackbar(
-        'Error',
-        'Failed to update arrival status: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    }
-  }
-
-  Future<void> _handleProgressStatus(String orderId) async {
-    try {
-      // showDialog(
-      //   context: context,
-      //   barrierDismissible: false,
-      //   builder: (context) => const Center(child: CircularProgressIndicator()),
-      // );
-
-      final result = await orderUpdateController.updateOrder(
-        orderStatus: "Progress",
-        orderId: orderId,
-        context: context,
-        rideData: _rideData,
-        stepControl: "Progress",
-      );
-
-      // Navigator.of(context, rootNavigator: true).pop();
-
-      if (result?.success == true) {
-        // stepperController.nextStep();
-        print('✅ Trip started successfully');
-      } else {
-        Get.snackbar(
-          'Error',
-          'Failed to start trip: ${result?.message ?? "Unknown error"}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-      }
-    } catch (e) {
-      Navigator.of(context, rootNavigator: true).pop();
-      Get.snackbar(
-        'Error',
-        'Failed to start trip: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    }
-  }
-
-  Future<void> _handleCompletedStatus(String orderId) async {
-    try {
-      final result = await orderUpdateController.updateOrder(
-        orderStatus: "Completed",
-        orderId: orderId,
-        context: context,
-        rideData: _rideData,
-        stepControl: "Completed",
-      );
-
-      // Navigator.of(context, rootNavigator: true).pop();
-
-      if (result?.success == true) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const ReceivePaymentModes()),
-          (route) => false,
-        );
-      } else {
-        Get.snackbar(
-          'Error',
-          'Failed to complete trip: ${result?.message ?? "Unknown error"}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-      }
-    } catch (e) {
-      Navigator.of(context, rootNavigator: true).pop();
-      Get.snackbar(
-        'Error',
-        'Failed to complete trip: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+    switch (command.route) {
+      case 'bottom_nav':
+        Get.offAll(() => BottomnavmainScreen());
+        break;
+      case 'arriving_screen':
+        _navigateToOtpScreen();
+        break;
+      case 'payment_screen':
+        Get.offAll(() => ReceivePaymentModes(rideData: widget.rideData));
+        break;
+      case 'arriving_client': // Already on arriving client screen
+        break;
+      default:
+        print('⚠️ Unknown navigation route: ${command.route}');
+        break;
     }
   }
 
@@ -2633,9 +2622,152 @@ class _ArrivingClientState extends State<ArrivingClient> {
                 }),
                 SizedBox(width: w * .02),
               ],
-              _circleImage("assets/images/mess.png", () {
-                CustomNavigator.push(context, ChatScreen());
+
+              // In ArrivingClient.dart, update the chat button:
+              _circleImage("assets/images/mess.png", () async {
+                print(
+                  "📱 Chat button tapped with ride data: ${widget.rideData}",
+                );
+
+                try {
+                  // Show loading
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Opening chat...'),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+
+                  // Get chart ID first
+                  await _getchartidmethod();
+
+                  // Wait for controller to update
+                  await Future.delayed(const Duration(milliseconds: 1000));
+
+                  // Check if we have chart response
+                  if (chartidController.chartresposne.value != null &&
+                      chartidController.chartresposne.value!.success == true &&
+                      chartidController.chartresposne.value!.data != null &&
+                      chartidController.chartresposne.value!.data!.id != null &&
+                      chartidController
+                          .chartresposne
+                          .value!
+                          .data!
+                          .id!
+                          .isNotEmpty) {
+                    final chatId =
+                        chartidController.chartresposne.value!.data!.id!;
+                    print("✅ Chat ID obtained: $chatId");
+
+                    // Navigate to chat screen
+                    // await CustomNavigator.push(
+                    //   context,
+                    //   ChatScreen(rideData: widget.rideData),
+                    // );
+Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ChatScreen(rideData: widget.rideData),
+                      ),
+                    );
+                    
+                  } else if (chartidController.isLoading.value) {
+                    print("⏳ Still loading chart ID...");
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Loading chat... Please wait.'),
+                        backgroundColor: Colors.orange,
+                      ),
+                    );
+                  } else if (chartidController.errorMessage.value.isNotEmpty) {
+                    print(
+                      "❌ Error getting chart ID: ${chartidController.errorMessage.value}",
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Chat error: ${chartidController.errorMessage.value}',
+                        ),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  } else {
+                    print("❌ No chart ID available after loading");
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Chat not available. Please try again.'),
+                        backgroundColor: Colors.orange,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  print("❌ Error navigating to chat: $e");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to open chat: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               }),
+
+              // _circleImage("assets/images/mess.png", () async {
+              //   print(
+              //     "📱 Chat button tapped with ride data: ${widget.rideData}",
+              //   );
+
+              //   try {
+              //     // Get chart ID first
+              //     await _getchartidmethod();
+
+              //     // Wait a moment for the response to update
+              //     await Future.delayed(const Duration(milliseconds: 500));
+
+              //     // Check if we have chart response
+              //     if (chartidController.chartresposne.value != null &&
+              //         chartidController.chartresposne.value!.data != null &&
+              //         chartidController.chartresposne.value!.data!.id != null) {
+              //       final chatId =
+              //           chartidController.chartresposne.value!.data!.id;
+              //       print("✅ Chat ID obtained: $chatId");
+
+              //       // Navigate to chat screen
+                    // await CustomNavigator.push(
+                    //   context,
+                    //   ChatScreen(
+                    //     rideData: widget.rideData,
+                    //   ),
+                    // );
+
+              //       await Navigator.push(
+              //         context,
+              //         MaterialPageRoute(
+              //           builder: (context) =>
+              //               ChatScreen(rideData: widget.rideData),
+              //         ),
+              //       );
+              //     } else {
+              //       print("❌ No chart ID available");
+              //       ScaffoldMessenger.of(context).showSnackBar(
+              //         const SnackBar(
+              //           content: Text(
+              //             'Chat not available yet. Please try again in a moment.',
+              //           ),
+              //           backgroundColor: Colors.orange,
+              //         ),
+              //       );
+              //     }
+              //   } catch (e) {
+              //     print("❌ Error navigating to chat: $e");
+              //     ScaffoldMessenger.of(context).showSnackBar(
+              //       SnackBar(
+              //         content: Text('Failed to open chat: ${e.toString()}'),
+              //         backgroundColor: Colors.red,
+              //       ),
+              //     );
+              //   }
+              // }),
             ],
           ),
           SizedBox(height: w * .03),
@@ -2741,71 +2873,35 @@ class _ArrivingClientState extends State<ArrivingClient> {
     return Obx(() {
       final step = stepperController.activeStep.value;
 
+      // Get loading states for buttons
+      final isCancelLoading =
+          ButtonStateManager.watchLoading('cancel_button')?.value ?? false;
+      final isArriveLoading =
+          ButtonStateManager.watchLoading('arrive_button')?.value ?? false;
+      final isStartTripLoading =
+          ButtonStateManager.watchLoading('start_trip_button')?.value ?? false;
+      final isCompleteLoading =
+          ButtonStateManager.watchLoading('complete_button')?.value ?? false;
+
       return Row(
         children: [
           Expanded(
-            child: _actionButton(
-              text: "Cancel ${step}",
+            child: _buildLoadingButton(
+              text: "Cancel",
+              isLoading: isCancelLoading,
               color: const Color(0xFFE0E4E7),
               textColor: Colors.grey,
-              onTap: () async {
-                final orderId = _rideData?['orderId'];
-                if (orderId != null && orderId.isNotEmpty) {
-                  await _handleCancelOrder(orderId);
-                }
-              },
+              buttonId: 'cancel_button',
+              onTap: _handleCancelOrder,
             ),
           ),
           SizedBox(width: w * .04),
           Expanded(
-            child: _actionButton(
-              text: step == 0
-                  ? "I've Arrived"
-                  : step == 1
-                  ? "Start Trip"
-                  : "Complete",
-              color: const Color(0xFF26E3DD),
-              textColor: Colors.black87,
-              onTap: () async {
-                final orderId = _rideData?['orderId'];
-                if (orderId == null || orderId.isEmpty) {
-                  Get.snackbar(
-                    'Error',
-                    'Invalid order ID',
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: Colors.red,
-                    colorText: Colors.white,
-                  );
-                  return;
-                }
-
-                if (step == 0) {
-                  print(
-                    "steppppppp>>>>>>>>>>>>>>>>>>>>  arrvinnggg  000000000000000000000000",
-                  );
-                  await _handleArrivedStatus(orderId);
-                } else if (step == 1) {
-                  print(
-                    "steppppppp>>>>>>>>>>>>>>>>>>>>  progressssss   1111111111111111111111111111",
-                  );
-
-                  await _handleProgressStatus(orderId);
-                } else if (step == 2) {
-                  print(
-                    "steppppppp>>>>>>>>>>>>>>>>>>>> compleeteeee   22222222222222222222222",
-                  );
-
-                  await _handleCompletedStatus(orderId);
-
-                  _finalizeTrip();
-                } else {
-                  print(
-                    "steppppppp>>>>>>>>>>>>>>>>>>>>   elseeeeeeeeeeeeeeeeeeee",
-                  );
-
-                  _finalizeTrip();
-                }
-              },
+            child: _buildStepButton(
+              step: step,
+              isArriveLoading: isArriveLoading,
+              isStartTripLoading: isStartTripLoading,
+              isCompleteLoading: isCompleteLoading,
             ),
           ),
         ],
@@ -2813,38 +2909,157 @@ class _ArrivingClientState extends State<ArrivingClient> {
     });
   }
 
-  void _startTrip() async {
-    stepperController.nextStep();
-    print("Trip started");
-  }
-
-  void _finalizeTrip() async {
-    stepperController.resetSteps();
-
-    print("Trip finalized");
-  }
-
-  Widget _actionButton({
+  Widget _buildLoadingButton({
     required String text,
+    required bool isLoading,
     required Color color,
     required Color textColor,
+    required String buttonId,
     required VoidCallback onTap,
   }) {
     return SizedBox(
       height: 40,
       child: ElevatedButton(
-        onPressed: onTap,
+        onPressed: isLoading ? null : onTap,
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
-        child: Text(
-          text,
-          style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
-        ),
+        child: isLoading
+            ? SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(textColor),
+                ),
+              )
+            : Text(
+                text,
+                style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
+              ),
       ),
     );
+  }
+
+  Widget _buildStepButton({
+    required int step,
+    required bool isArriveLoading,
+    required bool isStartTripLoading,
+    required bool isCompleteLoading,
+  }) {
+    final orderId = _rideData?['orderId'];
+
+    switch (step) {
+      case 0: // "I've Arrived"
+        return _buildLoadingButton(
+          text: "I've Arrived",
+          isLoading: isArriveLoading,
+          color: const Color(0xFF26E3DD),
+          textColor: Colors.black87,
+          buttonId: 'arrive_button',
+          onTap: () {
+            if (orderId != null && orderId.isNotEmpty) {
+              orderUpdateController.updateOrder(
+                context: context,
+                buttonId: 'arrive_button',
+                orderStatus: "Arriving",
+                orderId: orderId,
+                rideData: _rideData,
+                stepControl: "Arriving",
+                successMessage: 'Arrival status updated',
+                shouldTriggerNavigation: true,
+              );
+            } else {
+              _showSnackbar('Invalid order ID', isError: true);
+            }
+          },
+        );
+
+      case 1: // "Start Trip" - This should trigger OTP screen
+        return _buildLoadingButton(
+          text: "Start Trip",
+          isLoading: isStartTripLoading,
+          color: const Color(0xFF26E3DD),
+          textColor: Colors.black87,
+          buttonId: 'start_trip_button',
+          onTap: () {
+            if (orderId != null && orderId.isNotEmpty) {
+              orderUpdateController.updateOrder(
+                context: context,
+                buttonId: 'start_trip_button',
+                orderStatus: "Progress", // This should trigger OTP navigation
+                orderId: orderId,
+                rideData: _rideData,
+                stepControl: "Progress",
+                successMessage: 'Trip started successfully',
+                shouldTriggerNavigation: true,
+              );
+            } else {
+              _showSnackbar('Invalid order ID', isError: true);
+            }
+          },
+        );
+
+      case 2: // "Complete"
+        return _buildLoadingButton(
+          text: "Complete",
+          isLoading: isCompleteLoading,
+          color: const Color(0xFF26E3DD),
+          textColor: Colors.black87,
+          buttonId: 'complete_button',
+          onTap: () {
+            if (orderId != null && orderId.isNotEmpty) {
+              orderUpdateController.updateOrder(
+                context: context,
+                buttonId: 'complete_button',
+                orderStatus: "Completed",
+                orderId: orderId,
+                rideData: _rideData,
+                stepControl: "Completed",
+                successMessage: 'Trip completed successfully',
+                shouldTriggerNavigation: true,
+              );
+            } else {
+              _showSnackbar('Invalid order ID', isError: true);
+            }
+          },
+        );
+
+      default:
+        return _buildLoadingButton(
+          text: "Action",
+          isLoading: false,
+          color: const Color(0xFF26E3DD),
+          textColor: Colors.black87,
+          buttonId: 'default_button',
+          onTap: () {},
+        );
+    }
+  }
+
+  void _handleCancelOrder() {
+    final orderId = _rideData?['orderId'];
+
+    if (orderId != null && orderId.isNotEmpty) {
+      orderUpdateController.updateOrder(
+        context: context,
+        buttonId: 'cancel_button',
+        orderStatus: "Cancelled",
+        orderId: orderId,
+        rideData: _rideData,
+        stepControl: "Cancelled",
+        successMessage: 'Order cancelled successfully',
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid order ID'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Widget _circleIcon(IconData icon, VoidCallback onTap) {

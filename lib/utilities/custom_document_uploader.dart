@@ -158,7 +158,6 @@
 // //   }
 // // }
 
-
 // import 'dart:io';
 // import 'dart:math' as math;
 // import 'package:corezap_driver/utilities/app_buttons.dart';
@@ -213,7 +212,7 @@
 //         setState(() {
 //           _selectedImage = File(picked.path);
 //         });
-        
+
 //         // Notify parent widget about the selected image
 //         if (widget.onImageSelected != null) {
 //           widget.onImageSelected!(_selectedImage);
@@ -231,7 +230,7 @@
 //     setState(() {
 //       _selectedImage = null;
 //     });
-    
+
 //     // Notify parent widget about the cleared image
 //     if (widget.onImageSelected != null) {
 //       widget.onImageSelected!(null);
@@ -333,7 +332,6 @@
 //   }
 // }
 
-
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:corezap_driver/utilities/app_buttons.dart';
@@ -393,7 +391,7 @@ class _CustomDocumentUploaderState extends State<CustomDocumentUploader> {
   @override
   void didUpdateWidget(covariant CustomDocumentUploader oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     // Clear local image if external state says it should be cleared
     if (!widget.isImageUploaded && _selectedImage != null) {
       _selectedImage = null;
@@ -411,7 +409,7 @@ class _CustomDocumentUploaderState extends State<CustomDocumentUploader> {
         setState(() {
           _selectedImage = File(picked.path);
         });
-        
+
         // Notify parent widget about the selected image
         if (widget.onImageSelected != null) {
           widget.onImageSelected!(_selectedImage);
@@ -419,9 +417,9 @@ class _CustomDocumentUploaderState extends State<CustomDocumentUploader> {
       }
     } catch (e) {
       debugPrint('Image picking failed: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to pick image')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to pick image')));
     }
   }
 
@@ -429,12 +427,12 @@ class _CustomDocumentUploaderState extends State<CustomDocumentUploader> {
     setState(() {
       _selectedImage = null;
     });
-    
+
     // Notify parent widget about the cleared image
     if (widget.onImageSelected != null) {
       widget.onImageSelected!(null);
     }
-    
+
     // Also call the onClearImage callback if provided
     if (widget.onClearImage != null) {
       widget.onClearImage!();
@@ -508,7 +506,7 @@ class _CustomDocumentUploaderState extends State<CustomDocumentUploader> {
                                   _selectedImage!,
                                   width: effectiveWidth,
                                   height: effectiveHeight,
-                                  fit: BoxFit.cover,
+                                  fit: BoxFit.fill,
                                 )
                               : Container(
                                   width: effectiveWidth,

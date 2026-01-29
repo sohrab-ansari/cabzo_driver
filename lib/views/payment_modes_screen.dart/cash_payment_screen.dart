@@ -1,13 +1,92 @@
+// import 'package:corezap_driver/utilities/colors.dart';
+// import 'package:corezap_driver/utilities/custom_font.dart';
+// import 'package:flutter/material.dart';
+
+// class CashPaymentScreen extends StatelessWidget {
+//   const CashPaymentScreen({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     double w = MediaQuery.of(context).size.width;
+//     return Scaffold(
+//       backgroundColor: AppColors.white,
+//       body: SafeArea(
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.center,
+//           children: [
+//             SizedBox(height: w * .2),
+
+//             Image.asset(
+//               'assets/images/cash_collect.png',
+//               height: w * 0.8,
+//               width: w * 1.0,
+//             ),
+//             Padding(
+//               padding: EdgeInsets.symmetric(vertical: w * .02),
+//               child: AppFonts.textPoppins(
+//                 context,
+//                 "Collect Cash Payment",
+//                 w * 0.065,
+//                 FontWeight.w600,
+//                 AppColors.black,
+//                 TextAlign.left,
+//                 TextOverflow.visible,
+//               ),
+//             ),
+//             SizedBox(height: w * .01),
+//             Padding(
+//               padding: EdgeInsets.symmetric(horizontal: w * .04),
+//               child: AppFonts.textPoppins(
+//                 context,
+//                 "Collect the shown fare in cash from the user. Make sure the amount is correct.",
+//                 w * 0.04,
+//                 FontWeight.w400,
+//                 AppColors.mediumGray,
+//                 TextAlign.center,
+//                 TextOverflow.visible,
+//                 maxLines: 2,
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+
+
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/custom_font.dart';
+import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class CashPaymentScreen extends StatelessWidget {
+class CashPaymentScreen extends StatefulWidget {
   const CashPaymentScreen({super.key});
+
+  @override
+  State<CashPaymentScreen> createState() => _CashPaymentScreenState();
+}
+
+class _CashPaymentScreenState extends State<CashPaymentScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Navigate after 3 seconds
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        Get.offAll(() => BottomnavmainScreen(),
+          transition: Transition.fade,
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
+    
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -21,6 +100,7 @@ class CashPaymentScreen extends StatelessWidget {
               height: w * 0.8,
               width: w * 1.0,
             ),
+            
             Padding(
               padding: EdgeInsets.symmetric(vertical: w * .02),
               child: AppFonts.textPoppins(
@@ -29,11 +109,13 @@ class CashPaymentScreen extends StatelessWidget {
                 w * 0.065,
                 FontWeight.w600,
                 AppColors.black,
-                TextAlign.left,
+                TextAlign.center,
                 TextOverflow.visible,
               ),
             ),
+            
             SizedBox(height: w * .01),
+            
             Padding(
               padding: EdgeInsets.symmetric(horizontal: w * .04),
               child: AppFonts.textPoppins(
@@ -46,6 +128,25 @@ class CashPaymentScreen extends StatelessWidget {
                 TextOverflow.visible,
                 maxLines: 2,
               ),
+            ),
+
+            SizedBox(height: w * .06),
+
+            // Loading indicator
+            CircularProgressIndicator(
+              color: Colors.green,
+            ),
+
+            SizedBox(height: w * .03),
+
+            AppFonts.textPoppins(
+              context,
+              "Redirecting to home screen...",
+              w * 0.035,
+              FontWeight.w400,
+              AppColors.darkGray,
+              TextAlign.center,
+              TextOverflow.visible,
             ),
           ],
         ),

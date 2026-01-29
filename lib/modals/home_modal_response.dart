@@ -10,7 +10,7 @@ class HomeModalResponse {
     this.message,
     this.driver,
     this.documentSubmission,
-    this.todayStats,
+    this.todayStats,GetAllVehicleCategoriesresponse
   });
 
   factory HomeModalResponse.fromJson(Map<String, dynamic> json) {

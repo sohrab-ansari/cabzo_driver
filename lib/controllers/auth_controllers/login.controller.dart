@@ -241,76 +241,153 @@ Future<void> verifyOtp({String? otp, String? phoneNumber}) async {
   // }
 
   Future<void> createVehicleMethod({
-    required String vehicleName,
-    String? vehicleNumber,
-    String? vehicleColor,
+  required String vehicleName,
+  String? vehicleNumber,
+  String? vehicleColor,
+  String? vehicleType,
+  String? vehicleStatus,
+  String? vehicleModel,
+  String? vehicleCapacity,
+  String? driverId,
+  int? vehicleYear,
+  File? rcImage,
+  File? vehicleInsuraneImage,
+  File? vehicleNumberImage,
+}) async {
+  try {
+    isLoading.value = true;
 
-    String? vehicleType,
+    // Call API
+    final CreateVehicleRes res = await AuthApiService.createVehicle_Api(
+      vehicleName: vehicleName,
+      driverId: driverId,
+      vehicleCapacity: vehicleCapacity,
+      vehicleColor: vehicleColor,
+      vehicleModel: vehicleModel,
+      vehicleNumber: vehicleNumber,
+      vehicleStatus: vehicleStatus,
+      vehicleType: vehicleType,
+      vehicleYear: vehicleYear,
+      rcImage: rcImage,
+      vehicleInsuraneImage: vehicleInsuraneImage,
+      vehicleNumberImage: vehicleNumberImage,
+    );
 
-    String? vehicleStatus,
-
-    String? vehicleModel,
-
-    String? vehicleCapacity,
-
-    String? driverId,
-
-    int? vehicleYear,
-  }) async {
-    try {
-      // Validate OTP
-
-      isLoading.value = true;
-
-      // Call API
-      final CreateVehicleRes res = await AuthApiService.createVehicle_Api(
-        vehicleName: vehicleName,
-        driverId: driverId,
-        vehicleCapacity: vehicleCapacity,
-        vehicleColor: vehicleColor,
-        vehicleModel: vehicleModel,
-        vehicleNumber: vehicleNumber,
-        vehicleStatus: vehicleStatus,
-        vehicleType: vehicleType,
-        vehicleYear: vehicleYear,
+    if (res.success == true) {
+      isOtpVerified.value = true;
+      Get.snackbar(
+        'Success',
+        'Vehicle created successfully',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
       );
-
-      if (res.success == true) {
-        // IMPORTANT: Update isOtpVerified to true
-        isOtpVerified.value = true;
-
-        Get.snackbar(
-          'Success',
-          'OTP verified successfully',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-      } else {
-        isOtpVerified.value = false;
-        otpError.value = res.message ?? 'Invalid OTP. Please try again.';
-        Get.snackbar(
-          'Error',
-          res.message ?? 'Invalid OTP',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-      }
-    } catch (e) {
+    } else {
       isOtpVerified.value = false;
-      otpError.value = 'An error occurred. Please try again.';
+      otpError.value = res.message ?? 'Failed to create vehicle. Please try again.';
       Get.snackbar(
         'Error',
-        'An error occurred: $e',
+        res.message ?? 'Failed to create vehicle',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-    } finally {
-      isLoading.value = false;
     }
+  } catch (e) {
+    isOtpVerified.value = false;
+    otpError.value = 'An error occurred. Please try again.';
+    Get.snackbar(
+      'Error',
+      'An error occurred: $e',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
+  } finally {
+    isLoading.value = false;
   }
+}
+
+  // Future<void> createVehicleMethod({
+  //   required String vehicleName,
+  //   String? vehicleNumber,
+  //   String? vehicleColor,
+
+  //   String? vehicleType,
+
+  //   String? vehicleStatus,
+
+  //   String? vehicleModel,
+
+  //   String? vehicleCapacity,
+
+  //   String? driverId,
+
+  //   int? vehicleYear,
+
+  //    dynamic rcImage,
+
+  //   dynamic vehicleInsuraneImage,
+
+  //   dynamic vehicleNumberImage,
+  // }) async {
+  //   try {
+  //     // Validate OTP
+
+  //     isLoading.value = true;
+
+  //     // Call API
+  //     final CreateVehicleRes res = await AuthApiService.createVehicle_Api(
+  //       vehicleName: vehicleName,
+  //       driverId: driverId,
+  //       vehicleCapacity: vehicleCapacity,
+  //       vehicleColor: vehicleColor,
+  //       vehicleModel: vehicleModel,
+  //       vehicleNumber: vehicleNumber,
+  //       vehicleStatus: vehicleStatus,
+  //       vehicleType: vehicleType,
+  //       vehicleYear: vehicleYear,
+  //       rcImage: rcImage,
+  //       vehicleInsuraneImage:     vehicleInsuraneImage,
+  //       vehicleNumberImage:     vehicleNumberImage,
+  //     );
+
+  //     if (res.success == true) {
+  //       // IMPORTANT: Update isOtpVerified to true
+  //       isOtpVerified.value = true;
+
+  //       Get.snackbar(
+  //         'Success',
+  //         'OTP verified successfully',
+  //         snackPosition: SnackPosition.BOTTOM,
+  //         backgroundColor: Colors.green,
+  //         colorText: Colors.white,
+  //       );
+  //     } else {
+  //       isOtpVerified.value = false;
+  //       otpError.value = res.message ?? 'Invalid OTP. Please try again.';
+  //       Get.snackbar(
+  //         'Error',
+  //         res.message ?? 'Invalid OTP',
+  //         snackPosition: SnackPosition.BOTTOM,
+  //         backgroundColor: Colors.red,
+  //         colorText: Colors.white,
+  //       );
+  //     }
+  //   } catch (e) {
+  //     isOtpVerified.value = false;
+  //     otpError.value = 'An error occurred. Please try again.';
+  //     Get.snackbar(
+  //       'Error',
+  //       'An error occurred: $e',
+  //       snackPosition: SnackPosition.BOTTOM,
+  //       backgroundColor: Colors.red,
+  //       colorText: Colors.white,
+  //     );
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
 
   Future<void> createRegisterMethod({
     required String name,

@@ -37,34 +37,34 @@ class AuthApiService {
       print("Status Code : ${response.statusCode}");
       print("Response Body : ${response.body}");
 
-print("Response Body222 : ${response.body}");
-    final Map<String, dynamic> data = jsonDecode(response.body);
+      print("Response Body222 : ${response.body}");
+      final Map<String, dynamic> data = jsonDecode(response.body);
 
-  Fluttertoast.showToast(
-      msg: data['message'] ?? "Something went wrong",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-    );
-    //  Fluttertoast.showToast(
-    //   msg: data['error'] ?? "Something went wrong",
-    //   toastLength: Toast.LENGTH_SHORT,
-    //   gravity: ToastGravity.BOTTOM,
-    // );
+      Fluttertoast.showToast(
+        msg: data['message'] ?? "Something went wrong",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+      //  Fluttertoast.showToast(
+      //   msg: data['error'] ?? "Something went wrong",
+      //   toastLength: Toast.LENGTH_SHORT,
+      //   gravity: ToastGravity.BOTTOM,
+      // );
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
 
         print("Parsed Response : $data");
 
-         print(">>>>>>helloooooo2222  ");
+        print(">>>>>>helloooooo2222  ");
 
         return data["success"] == true;
       } else {
         print(">>>>>>helloooooo  ");
-         Fluttertoast.showToast(
-      msg: data['error'] ?? "Something went wrong",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-    );
+        Fluttertoast.showToast(
+          msg: data['error'] ?? "Something went wrong",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
         print("❌ Server error");
         return false;
       }
@@ -74,212 +74,339 @@ print("Response Body222 : ${response.body}");
     }
   }
 
-static Future<OtpverifyRes> verifyOtp({
-  required String otp,
-  String? phoneNumber,
-}) async {
-  final Uri url = Uri.parse(ApiPath.verifyOtp);
-
-  final Map<String, dynamic> requestBody = {
-    "otp": otp,
-    "phone": phoneNumber ?? "9908479999",
-    "fcmToken": "test-fcm-token-123",
-    "deviceId": "device-001",
-  };
-
-  try {
-    final http.Response response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(requestBody),
-    );
-
-    final Map<String, dynamic> data = jsonDecode(response.body);
-
-    print("Status Code : ${response.statusCode}");
-    print("Response Message : ${data['message']}");
-    print("Full Driver Object : ${data['driver']}");
-
-    final String? driverId = data['driver']?['id']?.toString();
-    print("Driver ID : $driverId");
-
-    final OtpverifyRes otpResponse = OtpverifyRes.fromJson(data);
-
-    /// ✅ SAVE TOKEN & DRIVER ID
-    if (otpResponse.token != null &&
-        otpResponse.token!.isNotEmpty &&
-        driverId != null &&
-        driverId.isNotEmpty) {
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString("auth_token", otpResponse.token!);
-      await prefs.setString("driver_userid", driverId);
-    }
-
-    return otpResponse;
-  } catch (e) {
-    Fluttertoast.showToast(msg: "Connection error");
-    return OtpverifyRes(success: false, message: "Connection error");
-  }
-}
-
-
-// static Future<OtpverifyRes> verifyOtp({
-//   required String otp,
-//   String? phoneNumber,
-// }) async {
-//   final Uri url = Uri.parse(ApiPath.verifyOtp);
-
-//   final Map<String, dynamic> requestBody = {
-//     "otp": otp,
-//     "phone": phoneNumber ?? "9908479999",
-//     "fcmToken": "test-fcm-token-123",
-//     "deviceId": "device-001",
-//   };
-
-//   try {
-//     final http.Response response = await http.post(
-//       url,
-//       headers: {"Content-Type": "application/json"},
-//       body: jsonEncode(requestBody),
-//     );
-
-//     final Map<String, dynamic> data = jsonDecode(response.body);
-
-//     print("Status Code : ${response.statusCode}");
-//     print("Response Message : ${data['message']}");
-
-//  print("Response Message otp verify full respsone  : ${data['driver']}");
-//  print("Response Message otp verify full respsone  : ${data['driver']['id']}");
-
-//  print("Driver ID : ${data['driver']['id']}");
-
-
-//     /// 🔔 SHOW TOAST MESSAGE
-//     // Fluttertoast.showToast(
-//     //   msg: data['message'] ?? "Something went wrong",
-//     //   toastLength: Toast.LENGTH_SHORT,
-//     //   gravity: ToastGravity.BOTTOM,
-//     // );
-//     //  Fluttertoast.showToast(
-//     //   msg: data['error'] ?? "Something went wrong",
-//     //   toastLength: Toast.LENGTH_SHORT,
-//     //   gravity: ToastGravity.BOTTOM,
-//     // );
-
-//     // "error": "Maximum OTP attempts exceeded. Please request a new OTP"
-
-
-//     final OtpverifyRes otpResponse = OtpverifyRes.fromJson(data);
-
-//     /// ✅ SAVE TOKEN IF EXISTS
-//     if (otpResponse.token != null && otpResponse.token!.isNotEmpty) {
-//       final prefs = await SharedPreferences.getInstance();
-//       await prefs.setString("auth_token", otpResponse.token!);
-//    await prefs.setString("driver_userid", data['driver']['id']);
-
-
-
-//       // prefs.getString("driver_userid");
-//     }
-
-//     return otpResponse;
-//   } catch (e) {
-//     Fluttertoast.showToast(msg: "Connection error");
-//     return OtpverifyRes(success: false, message: "Connection error");
-//   }
-// }
-
-
-
-  static Future<CreateVehicleRes> createVehicle_Api({
-    required String vehicleName,
-    String? vehicleNumber,
-    String? vehicleColor,
-    String? vehicleType,
-    String? vehicleStatus,
-    String? vehicleModel,
-    String? vehicleCapacity,
-    String? driverId,
-    int? vehicleYear,
+  static Future<OtpverifyRes> verifyOtp({
+    required String otp,
+    String? phoneNumber,
   }) async {
-    final Uri url = Uri.parse(ApiPath.createVehicle);
+    final Uri url = Uri.parse(ApiPath.verifyOtp);
 
-    /// 🔐 GET TOKEN
-    final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString("auth_token");
-
-final String? userId = prefs.getString("driver_userid");
-
-
-
-print("hhhhhh>>>>>useridddddddddddddd   ${userId}");
-
-    print("hhhhh>>>> vehicleName ${vehicleName} ");
-    print("hhhhh>>>> vehicleNumber ${vehicleNumber} ");
-    print("hhhhh>>>> vehicleColor ${vehicleColor} ");
-    print("hhhhh>>>> vehicleType ${vehicleType} ");
-    print("hhhhh>>>> vehicleStatus ${vehicleStatus} ");
-    print("hhhhh>>>> vehicleModel ${vehicleModel} ");
-    print("hhhhh>>>> vehicleCapacity ${vehicleCapacity} ");
-    print("hhhhh>>>> driverId ${driverId} ");
-      print("hhhhh>>>> driverId>>>>>>>>> ${userId} ");
-    print("hhhhh>>>> vehicleYear ${vehicleYear} ");
-
-    // final Map<String, dynamic> requestBody = {
-    //   "vehicleName": "honda civic",
-      // "vehicleNumber":
-      //     "MH12sdsfsdddddddAsafdsSsdssdsansasslkdjskjfdsandsjkakjkhjhasjhfkjdfsdddsdddssafasdB112ddfsSDsas4adssd39adasdasasadvfgw" ??
-      //     "",
-    //   "vehicleColor": "Blue",
-    //   "vehicleType": "691581132fbb2cbdd65fbd8d",
-    //   "vehicleStatus": "Active",
-    //   "vehicleModel": "VXI",
-    //   "vehicleCapacity": "4",
-    //   "vehicleYear": "2019",
-    //   "driverId": "695907abb30f1d4e3c7ce75c",
-    // };
-
-     final Map<String, dynamic> requestBody = {
-      "vehicleName": vehicleName,
-      "vehicleNumber": vehicleNumber,
-        
-      "vehicleColor": vehicleColor,
-      "vehicleType": vehicleType,
-      "vehicleStatus": "Active",
-      "vehicleModel": vehicleModel,
-      "vehicleCapacity": "4",
-      "vehicleYear": vehicleYear,
-      "driverId": userId,
+    final Map<String, dynamic> requestBody = {
+      "otp": otp,
+      "phone": phoneNumber ?? "9908479999",
+      "fcmToken": "test-fcm-token-123",
+      "deviceId": "device-001",
     };
 
-    print("========== CREATE VEHICLE API ==========");
-    print("URL : $url");
-    print("Token : $token");
-    print("Request Body : ${jsonEncode(requestBody)}");
-    print("my_tokennnn ${token}");
     try {
       final http.Response response = await http.post(
         url,
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token", // ✅ BEARER TOKEN
-        },
+        headers: {"Content-Type": "application/json"},
         body: jsonEncode(requestBody),
       );
 
-      print("Status Code : ${response.statusCode}");
-      print("Response Body : ${response.body}");
-
       final Map<String, dynamic> data = jsonDecode(response.body);
-      final CreateVehicleRes createVehicleRes = CreateVehicleRes.fromJson(data);
 
-      return createVehicleRes;
+      print("Status Code : ${response.statusCode}");
+      print("Response Message : ${data['message']}");
+      print("Full Driver Object : ${data['driver']}");
+
+      final String? driverId = data['driver']?['id']?.toString();
+      print("Driver ID : $driverId");
+
+      final OtpverifyRes otpResponse = OtpverifyRes.fromJson(data);
+
+      /// ✅ SAVE TOKEN & DRIVER ID
+      if (otpResponse.token != null &&
+          otpResponse.token!.isNotEmpty &&
+          driverId != null &&
+          driverId.isNotEmpty) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("auth_token", otpResponse.token!);
+        await prefs.setString("driver_userid", driverId);
+      }
+
+      return otpResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle : $e");
-      return CreateVehicleRes(success: false, message: "Connection error: $e");
+      Fluttertoast.showToast(msg: "Connection error");
+      return OtpverifyRes(success: false, message: "Connection error");
     }
   }
+
+  // static Future<OtpverifyRes> verifyOtp({
+  //   required String otp,
+  //   String? phoneNumber,
+  // }) async {
+  //   final Uri url = Uri.parse(ApiPath.verifyOtp);
+
+  //   final Map<String, dynamic> requestBody = {
+  //     "otp": otp,
+  //     "phone": phoneNumber ?? "9908479999",
+  //     "fcmToken": "test-fcm-token-123",
+  //     "deviceId": "device-001",
+  //   };
+
+  //   try {
+  //     final http.Response response = await http.post(
+  //       url,
+  //       headers: {"Content-Type": "application/json"},
+  //       body: jsonEncode(requestBody),
+  //     );
+
+  //     final Map<String, dynamic> data = jsonDecode(response.body);
+
+  //     print("Status Code : ${response.statusCode}");
+  //     print("Response Message : ${data['message']}");
+
+  //  print("Response Message otp verify full respsone  : ${data['driver']}");
+  //  print("Response Message otp verify full respsone  : ${data['driver']['id']}");
+
+  //  print("Driver ID : ${data['driver']['id']}");
+
+  //     /// 🔔 SHOW TOAST MESSAGE
+  //     // Fluttertoast.showToast(
+  //     //   msg: data['message'] ?? "Something went wrong",
+  //     //   toastLength: Toast.LENGTH_SHORT,
+  //     //   gravity: ToastGravity.BOTTOM,
+  //     // );
+  //     //  Fluttertoast.showToast(
+  //     //   msg: data['error'] ?? "Something went wrong",
+  //     //   toastLength: Toast.LENGTH_SHORT,
+  //     //   gravity: ToastGravity.BOTTOM,
+  //     // );
+
+  //     // "error": "Maximum OTP attempts exceeded. Please request a new OTP"
+
+  //     final OtpverifyRes otpResponse = OtpverifyRes.fromJson(data);
+
+  //     /// ✅ SAVE TOKEN IF EXISTS
+  //     if (otpResponse.token != null && otpResponse.token!.isNotEmpty) {
+  //       final prefs = await SharedPreferences.getInstance();
+  //       await prefs.setString("auth_token", otpResponse.token!);
+  //    await prefs.setString("driver_userid", data['driver']['id']);
+
+  //       // prefs.getString("driver_userid");
+  //     }
+
+  //     return otpResponse;
+  //   } catch (e) {
+  //     Fluttertoast.showToast(msg: "Connection error");
+  //     return OtpverifyRes(success: false, message: "Connection error");
+  //   }
+  // }
+
+  static Future<CreateVehicleRes> createVehicle_Api({
+  required String vehicleName,
+  String? vehicleNumber,
+  String? vehicleColor,
+  String? vehicleType,
+  String? vehicleStatus,
+  String? vehicleModel,
+  String? vehicleCapacity,
+  String? driverId,
+  int? vehicleYear,
+  File? rcImage,
+  File? vehicleInsuraneImage,
+  File? vehicleNumberImage,
+}) async {
+  final Uri url = Uri.parse(ApiPath.createVehicle);
+
+  /// 🔐 GET TOKEN
+  final prefs = await SharedPreferences.getInstance();
+  final String? token = prefs.getString("auth_token");
+  final String? userId = prefs.getString("driver_userid");
+
+  print("hhhhhh>>>>>useridddddddddddddd   ${userId}");
+  print("hhhhh>>>> vehicleName ${vehicleName} ");
+  print("hhhhh>>>> vehicleNumber ${vehicleNumber} ");
+  print("hhhhh>>>> vehicleColor ${vehicleColor} ");
+  print("hhhhh>>>> vehicleType ${vehicleType} ");
+  print("hhhhh>>>> vehicleStatus ${vehicleStatus} ");
+  print("hhhhh>>>> vehicleModel ${vehicleModel} ");
+  print("hhhhh>>>> vehicleCapacity ${vehicleCapacity} ");
+  print("hhhhh>>>> driverId ${driverId} ");
+  print("hhhhh>>>> driverId>>>>>>>>> ${userId} ");
+  print("hhhhh>>>> vehicleYear ${vehicleYear} ");
+
+  // Print file paths for debugging
+  print("hhhhh >>>>>>>> rc imageeee ${rcImage?.path}");
+  print("hhhhh >>>>>>>> vehicleInsuraneImage ${vehicleInsuraneImage?.path}");
+  print("hhhhh >>>>>>>> vehicleNumberImage ${vehicleNumberImage?.path}");
+
+  print("========== CREATE VEHICLE API ==========");
+  print("URL : $url");
+  print("Token : $token");
+
+  try {
+    // Create multipart request
+    var request = http.MultipartRequest('POST', url);
+    
+    // Add headers
+    request.headers['Authorization'] = "Bearer $token";
+    
+    // Add text fields
+    request.fields['vehicleName'] = vehicleName;
+    request.fields['vehicleNumber'] = vehicleNumber ?? '';
+    request.fields['vehicleColor'] = vehicleColor ?? '';
+    request.fields['vehicleType'] = vehicleType ?? '';
+    request.fields['vehicleStatus'] = vehicleStatus ?? 'Active';
+    request.fields['vehicleModel'] = vehicleModel ?? '';
+    request.fields['vehicleCapacity'] = vehicleCapacity ?? '4';
+    request.fields['vehicleYear'] = vehicleYear?.toString() ?? '';
+    request.fields['driverId'] = userId ?? '';
+    
+    // Add files if they exist
+    if (rcImage != null) {
+      var rcStream = http.ByteStream(rcImage.openRead());
+      var rcLength = await rcImage.length();
+      var rcMultipartFile = http.MultipartFile(
+        'rcImage',
+        rcStream,
+        rcLength,
+        filename: rcImage.path.split('/').last,
+      );
+      request.files.add(rcMultipartFile);
+    }
+    
+    if (vehicleInsuraneImage != null) {
+      var insuranceStream = http.ByteStream(vehicleInsuraneImage.openRead());
+      var insuranceLength = await vehicleInsuraneImage.length();
+      var insuranceMultipartFile = http.MultipartFile(
+        'vehicleInsuraneImage',
+        insuranceStream,
+        insuranceLength,
+        filename: vehicleInsuraneImage.path.split('/').last,
+      );
+      request.files.add(insuranceMultipartFile);
+    }
+    
+    if (vehicleNumberImage != null) {
+      var numberStream = http.ByteStream(vehicleNumberImage.openRead());
+      var numberLength = await vehicleNumberImage.length();
+      var numberMultipartFile = http.MultipartFile(
+        'vehicleNumberImage',
+        numberStream,
+        numberLength,
+        filename: vehicleNumberImage.path.split('/').last,
+      );
+      request.files.add(numberMultipartFile);
+    }
+    
+    // Print request details for debugging
+    print("Request fields: ${request.fields}");
+    print("Request files count: ${request.files.length}");
+    
+    // Send request
+    var streamedResponse = await request.send();
+    var response = await http.Response.fromStream(streamedResponse);
+    
+    print("Status Code : ${response.statusCode}");
+    print("Response Body : ${response.body}");
+    
+    final Map<String, dynamic> data = jsonDecode(response.body);
+    final CreateVehicleRes createVehicleRes = CreateVehicleRes.fromJson(data);
+    
+    print("myyyyy_api_ressssposneee ${createVehicleRes}");
+    
+    return createVehicleRes;
+  } catch (e) {
+    print("❌ Exception in Create Vehicle : $e");
+    print("Stack trace: ${e.toString()}");
+    return CreateVehicleRes(success: false, message: "Connection error: $e");
+  }
+}
+
+  // static Future<CreateVehicleRes> createVehicle_Api({
+  //   required String vehicleName,
+  //   String? vehicleNumber,
+  //   String? vehicleColor,
+  //   String? vehicleType,
+  //   String? vehicleStatus,
+  //   String? vehicleModel,
+  //   String? vehicleCapacity,
+  //   String? driverId,
+  //   int? vehicleYear,
+
+  //   dynamic rcImage,
+
+  //   dynamic vehicleInsuraneImage,
+
+  //   dynamic vehicleNumberImage,
+  // }) async {
+  //   final Uri url = Uri.parse(ApiPath.createVehicle);
+
+  //   /// 🔐 GET TOKEN
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final String? token = prefs.getString("auth_token");
+
+  //   final String? userId = prefs.getString("driver_userid");
+
+  //   print("hhhhhh>>>>>useridddddddddddddd   ${userId}");
+
+  //   print("hhhhh>>>> vehicleName ${vehicleName} ");
+  //   print("hhhhh>>>> vehicleNumber ${vehicleNumber} ");
+  //   print("hhhhh>>>> vehicleColor ${vehicleColor} ");
+  //   print("hhhhh>>>> vehicleType ${vehicleType} ");
+  //   print("hhhhh>>>> vehicleStatus ${vehicleStatus} ");
+  //   print("hhhhh>>>> vehicleModel ${vehicleModel} ");
+  //   print("hhhhh>>>> vehicleCapacity ${vehicleCapacity} ");
+  //   print("hhhhh>>>> driverId ${driverId} ");
+  //   print("hhhhh>>>> driverId>>>>>>>>> ${userId} ");
+  //   print("hhhhh>>>> vehicleYear ${vehicleYear} ");
+
+  //   print("hhhhh >>>>>>>> rc imageeee ${rcImage}");
+  //   print("hhhhh >>>>>>>> vehicleInsuraneImage ${vehicleInsuraneImage}");
+  //   print("hhhhh >>>>>>>> vehicleNumberImage ${vehicleNumberImage}");
+
+  //   // final Map<String, dynamic> requestBody = {
+  //   //   "vehicleName": "honda civic",
+  //   // "vehicleNumber":
+  //   //     "MH12sdsfsdddddddAsafdsSsdssdsansasslkdjskjfdsandsjkakjkhjhasjhfkjdfsdddsdddssafasdB112ddfsSDsas4adssd39adasdasasadvfgw" ??
+  //   //     "",
+  //   //   "vehicleColor": "Blue",
+  //   //   "vehicleType": "691581132fbb2cbdd65fbd8d",
+  //   //   "vehicleStatus": "Active",
+  //   //   "vehicleModel": "VXI",
+  //   //   "vehicleCapacity": "4",
+  //   //   "vehicleYear": "2019",
+  //   //   "driverId": "695907abb30f1d4e3c7ce75c",
+  //   // };
+
+  //   final Map<String, dynamic> requestBody = {
+  //     "vehicleName": vehicleName,
+  //     "vehicleNumber": vehicleNumber,
+
+  //     "vehicleColor": vehicleColor,
+  //     "vehicleType": vehicleType,
+  //     "vehicleStatus": "Active",
+  //     "vehicleModel": vehicleModel,
+  //     "vehicleCapacity": "4",
+  //     "vehicleYear": vehicleYear,
+  //     "driverId": userId,
+  //     "rcImage": rcImage,
+  //     "vehicleInsuraneImage": vehicleInsuraneImage,
+
+  //     "vehicleNumberImage": vehicleNumberImage,
+  //   };
+
+  //   print("========== CREATE VEHICLE API ==========");
+  //   print("URL : $url");
+  //   print("Token : $token");
+  //   print("Request Body : ${jsonEncode(requestBody)}");
+  //   print("my_tokennnn ${token}");
+  //   try {
+  //     final http.Response response = await http.post(
+  //       url,
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "Authorization": "Bearer $token", // ✅ BEARER TOKEN
+  //       },
+  //       body: jsonEncode(requestBody),
+  //     );
+
+  //     print("Status Code : ${response.statusCode}");
+  //     print("Response Body : ${response.body}");
+
+  //     final Map<String, dynamic> data = jsonDecode(response.body);
+  //     final CreateVehicleRes createVehicleRes = CreateVehicleRes.fromJson(data);
+
+  //     print("myyyyy_api_ressssposneee ${createVehicleRes}");
+
+  //     return createVehicleRes;
+  //   } catch (e) {
+  //     print("❌ Exception in Create Vehicle : $e");
+  //     return CreateVehicleRes(success: false, message: "Connection error: $e");
+  //   }
+  // }
 
   static Future<RegisterProfileRes> createRegister_Api({
     required String name,
@@ -535,17 +662,10 @@ print("hhhhhh>>>>>useridddddddddddddd   ${userId}");
     }
   }
 
-
-
-
-
-
-
   //   static Future<HomeModalResponse> get_home_data(
-  
+
   // ) async {
 
-    
   //   // final Uri url = Uri.parse(ApiPath.createVehicle);
   //    final Uri url = Uri.parse("${ApiPath.driver_home}");
 
@@ -553,13 +673,11 @@ print("hhhhhh>>>>>useridddddddddddddd   ${userId}");
   //   final prefs = await SharedPreferences.getInstance();
   //   final String? token = prefs.getString("auth_token");
 
-  
   //   print("========== CREATE VEHICLE API ==========");
   //   print("URL : $url");
   //   print("Token : $token");
   //   // print("Request Body : ${jsonEncode(requestBody)}");
   //   print("my_tokennnn ${token}");
-   
 
   //     try {
   //     final http.Response response = await http.get(
