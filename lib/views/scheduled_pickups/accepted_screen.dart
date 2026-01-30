@@ -2629,145 +2629,99 @@ class _ArrivingClientState extends State<ArrivingClient> {
                   "📱 Chat button tapped with ride data: ${widget.rideData}",
                 );
 
-                try {
-                  // Show loading
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Opening chat...'),
-                      duration: Duration(seconds: 1),
-                    ),
-                  );
 
-                  // Get chart ID first
-                  await _getchartidmethod();
-
-                  // Wait for controller to update
-                  await Future.delayed(const Duration(milliseconds: 1000));
-
-                  // Check if we have chart response
-                  if (chartidController.chartresposne.value != null &&
-                      chartidController.chartresposne.value!.success == true &&
-                      chartidController.chartresposne.value!.data != null &&
-                      chartidController.chartresposne.value!.data!.id != null &&
-                      chartidController
-                          .chartresposne
-                          .value!
-                          .data!
-                          .id!
-                          .isNotEmpty) {
-                    final chatId =
-                        chartidController.chartresposne.value!.data!.id!;
-                    print("✅ Chat ID obtained: $chatId");
-
-                    // Navigate to chat screen
-                    // await CustomNavigator.push(
-                    //   context,
-                    //   ChatScreen(rideData: widget.rideData),
-                    // );
-Navigator.push(
+                  Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
                             ChatScreen(rideData: widget.rideData),
                       ),
                     );
+
+//                 try {
+//                   // Show loading
+//                   ScaffoldMessenger.of(context).showSnackBar(
+//                     const SnackBar(
+//                       content: Text('Opening chat...'),
+//                       duration: Duration(seconds: 1),
+//                     ),
+//                   );
+
+//                   // Get chart ID first
+//                   await _getchartidmethod();
+
+//                   // Wait for controller to update
+//                   await Future.delayed(const Duration(milliseconds: 1000));
+
+//                   // Check if we have chart response
+//                   if (chartidController.chartresposne.value != null &&
+//                       chartidController.chartresposne.value!.success == true &&
+//                       chartidController.chartresposne.value!.data != null &&
+//                       chartidController.chartresposne.value!.data!.id != null &&
+//                       chartidController
+//                           .chartresposne
+//                           .value!
+//                           .data!
+//                           .id!
+//                           .isNotEmpty) {
+//                     final chatId =
+//                         chartidController.chartresposne.value!.data!.id!;
+//                     print("✅ Chat ID obtained: $chatId");
+
+//                     // Navigate to chat screen
+//                     // await CustomNavigator.push(
+//                     //   context,
+//                     //   ChatScreen(rideData: widget.rideData),
+//                     // );
+// Navigator.push(
+//                       context,
+//                       MaterialPageRoute(
+//                         builder: (context) =>
+//                             ChatScreen(rideData: widget.rideData),
+//                       ),
+//                     );
                     
-                  } else if (chartidController.isLoading.value) {
-                    print("⏳ Still loading chart ID...");
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Loading chat... Please wait.'),
-                        backgroundColor: Colors.orange,
-                      ),
-                    );
-                  } else if (chartidController.errorMessage.value.isNotEmpty) {
-                    print(
-                      "❌ Error getting chart ID: ${chartidController.errorMessage.value}",
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Chat error: ${chartidController.errorMessage.value}',
-                        ),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  } else {
-                    print("❌ No chart ID available after loading");
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Chat not available. Please try again.'),
-                        backgroundColor: Colors.orange,
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  print("❌ Error navigating to chat: $e");
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Failed to open chat: ${e.toString()}'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
+//                   } else if (chartidController.isLoading.value) {
+//                     print("⏳ Still loading chart ID...");
+//                     ScaffoldMessenger.of(context).showSnackBar(
+//                       const SnackBar(
+//                         content: Text('Loading chat... Please wait.'),
+//                         backgroundColor: Colors.orange,
+//                       ),
+//                     );
+//                   } else if (chartidController.errorMessage.value.isNotEmpty) {
+//                     print(
+//                       "❌ Error getting chart ID: ${chartidController.errorMessage.value}",
+//                     );
+//                     ScaffoldMessenger.of(context).showSnackBar(
+//                       SnackBar(
+//                         content: Text(
+//                           'Chat error: ${chartidController.errorMessage.value}',
+//                         ),
+//                         backgroundColor: Colors.red,
+//                       ),
+//                     );
+//                   } else {
+//                     print("❌ No chart ID available after loading");
+//                     ScaffoldMessenger.of(context).showSnackBar(
+//                       const SnackBar(
+//                         content: Text('Chat not available. Please try again.'),
+//                         backgroundColor: Colors.orange,
+//                       ),
+//                     );
+//                   }
+//                 } catch (e) {
+//                   print("❌ Error navigating to chat: $e");
+//                   ScaffoldMessenger.of(context).showSnackBar(
+//                     SnackBar(
+//                       content: Text('Failed to open chat: ${e.toString()}'),
+//                       backgroundColor: Colors.red,
+//                     ),
+//                   );
+//                 }
               }),
 
-              // _circleImage("assets/images/mess.png", () async {
-              //   print(
-              //     "📱 Chat button tapped with ride data: ${widget.rideData}",
-              //   );
-
-              //   try {
-              //     // Get chart ID first
-              //     await _getchartidmethod();
-
-              //     // Wait a moment for the response to update
-              //     await Future.delayed(const Duration(milliseconds: 500));
-
-              //     // Check if we have chart response
-              //     if (chartidController.chartresposne.value != null &&
-              //         chartidController.chartresposne.value!.data != null &&
-              //         chartidController.chartresposne.value!.data!.id != null) {
-              //       final chatId =
-              //           chartidController.chartresposne.value!.data!.id;
-              //       print("✅ Chat ID obtained: $chatId");
-
-              //       // Navigate to chat screen
-                    // await CustomNavigator.push(
-                    //   context,
-                    //   ChatScreen(
-                    //     rideData: widget.rideData,
-                    //   ),
-                    // );
-
-              //       await Navigator.push(
-              //         context,
-              //         MaterialPageRoute(
-              //           builder: (context) =>
-              //               ChatScreen(rideData: widget.rideData),
-              //         ),
-              //       );
-              //     } else {
-              //       print("❌ No chart ID available");
-              //       ScaffoldMessenger.of(context).showSnackBar(
-              //         const SnackBar(
-              //           content: Text(
-              //             'Chat not available yet. Please try again in a moment.',
-              //           ),
-              //           backgroundColor: Colors.orange,
-              //         ),
-              //       );
-              //     }
-              //   } catch (e) {
-              //     print("❌ Error navigating to chat: $e");
-              //     ScaffoldMessenger.of(context).showSnackBar(
-              //       SnackBar(
-              //         content: Text('Failed to open chat: ${e.toString()}'),
-              //         backgroundColor: Colors.red,
-              //       ),
-              //     );
-              //   }
-              // }),
+     
             ],
           ),
           SizedBox(height: w * .03),

@@ -72,6 +72,26 @@ class Vehicle {
   });
 
   factory Vehicle.fromJson(Map<String, dynamic> json) {
+    // Handle vehicleYear - convert double to int if needed
+    int? vehicleYear;
+    if (json['vehicleYear'] != null) {
+      if (json['vehicleYear'] is int) {
+        vehicleYear = json['vehicleYear'] as int;
+      } else if (json['vehicleYear'] is double) {
+        vehicleYear = (json['vehicleYear'] as double).toInt();
+      }
+    }
+
+    // Handle vehicleCapacity - convert double to int if needed
+    int? vehicleCapacity;
+    if (json['vehicleCapacity'] != null) {
+      if (json['vehicleCapacity'] is int) {
+        vehicleCapacity = json['vehicleCapacity'] as int;
+      } else if (json['vehicleCapacity'] is double) {
+        vehicleCapacity = (json['vehicleCapacity'] as double).toInt();
+      }
+    }
+
     return Vehicle(
       id: json['_id'],
       vehicleName: json['vehicleName'],
@@ -79,8 +99,8 @@ class Vehicle {
       vehicleType: json['vehicleType'],
       vehicleColor: json['vehicleColor'],
       vehicleModel: json['vehicleModel'],
-      vehicleYear: json['vehicleYear'],
-      vehicleCapacity: json['vehicleCapacity'],
+      vehicleYear: vehicleYear,
+      vehicleCapacity: vehicleCapacity,
       vehicleStatus: json['vehicleStatus'],
       driverId: json['driverId'],
       createdBy: json['createdBy'],

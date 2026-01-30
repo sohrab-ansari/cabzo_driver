@@ -68,6 +68,7 @@ dependencies:
   flutter_polyline_points: ^3.1.0
   permission_handler: ^11.0.3
   logger: ^2.6.2
+  flutter_pdfview: ^1.4.4
 
 
 

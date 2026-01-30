@@ -10,7 +10,8 @@ class HomeModalResponse {
     this.message,
     this.driver,
     this.documentSubmission,
-    this.todayStats,GetAllVehicleCategoriesresponse
+    this.todayStats,
+    GetAllVehicleCategoriesresponse,
   });
 
   factory HomeModalResponse.fromJson(Map<String, dynamic> json) {
@@ -22,8 +23,8 @@ class HomeModalResponse {
           : null,
       documentSubmission:
           json['data'] != null && json['data']['documentSubmission'] != null
-              ? DocumentSubmission.fromJson(json['data']['documentSubmission'])
-              : null,
+          ? DocumentSubmission.fromJson(json['data']['documentSubmission'])
+          : null,
       todayStats: json['data'] != null && json['data']['todayStats'] != null
           ? TodayStats.fromJson(json['data']['todayStats'])
           : null,
@@ -88,11 +89,7 @@ class DocumentSubmission {
   String? status;
   String? message;
 
-  DocumentSubmission({
-    this.isPending,
-    this.status,
-    this.message,
-  });
+  DocumentSubmission({this.isPending, this.status, this.message});
 
   factory DocumentSubmission.fromJson(Map<String, dynamic> json) {
     return DocumentSubmission(
@@ -103,11 +100,7 @@ class DocumentSubmission {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'isPending': isPending,
-      'status': status,
-      'message': message,
-    };
+    return {'isPending': isPending, 'status': status, 'message': message};
   }
 }
 
@@ -115,10 +108,7 @@ class TodayStats {
   Earnings? earnings;
   Rides? rides;
 
-  TodayStats({
-    this.earnings,
-    this.rides,
-  });
+  TodayStats({this.earnings, this.rides});
 
   factory TodayStats.fromJson(Map<String, dynamic> json) {
     return TodayStats(
@@ -130,10 +120,7 @@ class TodayStats {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'earnings': earnings?.toJson(),
-      'rides': rides?.toJson(),
-    };
+    return {'earnings': earnings?.toJson(), 'rides': rides?.toJson()};
   }
 }
 
@@ -142,11 +129,7 @@ class Earnings {
   double? cash;
   double? online;
 
-  Earnings({
-    this.total,
-    this.cash,
-    this.online,
-  });
+  Earnings({this.total, this.cash, this.online});
 
   factory Earnings.fromJson(Map<String, dynamic> json) {
     return Earnings(
@@ -157,11 +140,7 @@ class Earnings {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'total': total,
-      'cash': cash,
-      'online': online,
-    };
+    return {'total': total, 'cash': cash, 'online': online};
   }
 }
 
@@ -170,11 +149,7 @@ class Rides {
   int? completed;
   int? cancelled;
 
-  Rides({
-    this.total,
-    this.completed,
-    this.cancelled,
-  });
+  Rides({this.total, this.completed, this.cancelled});
 
   factory Rides.fromJson(Map<String, dynamic> json) {
     return Rides(
@@ -185,10 +160,6 @@ class Rides {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'total': total,
-      'completed': completed,
-      'cancelled': cancelled,
-    };
+    return {'total': total, 'completed': completed, 'cancelled': cancelled};
   }
 }

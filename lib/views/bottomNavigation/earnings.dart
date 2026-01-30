@@ -2,6 +2,7 @@ import 'package:corezap_driver/controllers/controllers.dart';
 import 'package:corezap_driver/utilities/app_buttons.dart';
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/custom_font.dart';
+import 'package:corezap_driver/apiervices/earnings_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -18,6 +19,9 @@ class Earnings extends StatefulWidget {
 class _EarningsState extends State<Earnings> {
   ButtonController controller = Get.put(ButtonController());
   PageController _pageController = PageController(initialPage: 0);
+  late Future<Map<String, dynamic>> earningsReportFuture;
+  late Future<List<dynamic>> rideHistoryFuture;
+  
   final tripStatuses = [
     {'name': 'Completed Trip', 'progress': 3, 'color': AppColors.yellow},
     {'name': 'Canceled Trip', 'progress': 2, 'color': AppColors.mediumYellow},
@@ -31,18 +35,19 @@ class _EarningsState extends State<Earnings> {
     {'day': 'Fri', 'completed': 7, 'canceled': 4, 'denied': 3},
     {'day': 'Sat', 'completed': 5, 'canceled': 2, 'denied': 7},
   ];
-  final totalEarnings = ["500.0", "5000.0", "10000.0"];
-
-  final weeksText = [
-    "Saturday, October 11, 2025",
-    "Weekly Report",
-    "Monthly Report",
-  ];
 
   @override
   void initState() {
     super.initState();
     controller.selectedIndex.value = 0;
+    _loadData(0);
+  }
+
+  void _loadData(int pageIndex) {
+    String period = ['today', 'weekly', 'monthly'][pageIndex];
+    earningsReportFuture = EarningsService.getEarningReport(period);
+    rideHistoryFuture = EarningsService.getRideHistory();
+    setState(() {});
   }
 
   @override
@@ -201,6 +206,7 @@ class _EarningsState extends State<Earnings> {
                                     text: buttonText[index],
                                     onClicked: () {
                                       controller.selectedIndex.value = index;
+                                      _loadData(index);
                                       _pageController.animateToPage(
                                         index,
                                         duration: const Duration(
@@ -240,9 +246,12 @@ class _EarningsState extends State<Earnings> {
         controller: _pageController,
         onPageChanged: (int index) {
           controller.selectedIndex.value = index;
+          _loadData(index);
         },
         itemCount: 3,
         itemBuilder: (context, pageIndex) {
+          String period = ['today', 'weekly', 'monthly'][pageIndex];
+          
           return SingleChildScrollView(
             child: Padding(
               padding: EdgeInsets.symmetric(
@@ -252,7 +261,60 @@ class _EarningsState extends State<Earnings> {
               child: Column(
                 children: [
                   SizedBox(height: w * 0.02),
-                  Card(
+                  FutureBuilder<Map<String, dynamic>>(
+                    future: earningsReportFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Card(
+                          elevation: 6,
+                          shadowColor: Colors.black26,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(w * 0.04),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: w * 0.06,
+                              horizontal: w * 0.05,
+                            ),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                        );
+                      }
+
+                      if (snapshot.hasError) {
+                        return Card(
+                          elevation: 6,
+                          shadowColor: Colors.black26,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(w * 0.04),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: w * 0.06,
+                              horizontal: w * 0.05,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(Icons.error,
+                                    color: Colors.red, size: w * 0.08),
+                                SizedBox(height: w * 0.02),
+                                Text("Error loading data",
+                                    style: TextStyle(color: Colors.red)),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+
+                      final data = snapshot.data ?? {};
+                      final earnings = data['earnings'] ?? {};
+                      final totalEarning = earnings['total']?.toString() ?? "0";
+
+                      return Card(
                         elevation: 6,
                         shadowColor: Colors.black26,
                         shape: RoundedRectangleBorder(
@@ -287,7 +349,7 @@ class _EarningsState extends State<Earnings> {
                                   ),
                                   AppFonts.textPoppins(
                                     context,
-                                    totalEarnings[pageIndex],
+                                    totalEarning,
                                     w * 0.08,
                                     FontWeight.bold,
                                     AppColors.black,
@@ -297,13 +359,9 @@ class _EarningsState extends State<Earnings> {
                                 ],
                               ),
                               SizedBox(height: w * 0.03),
-
-                              // weeksText
                               AppFonts.textPoppins(
                                 context,
-
-                                weeksText[pageIndex],
-                                // "Saturday, October 11, 2025",
+                                EarningsService.getFormattedDate(period),
                                 w * 0.04,
                                 FontWeight.w500,
                                 AppColors.darkGray,
@@ -314,150 +372,85 @@ class _EarningsState extends State<Earnings> {
                           ),
                         ),
                       )
-                      .animate()
-                      .fade(duration: 820.ms, curve: Curves.easeInOut)
-                      .scale(
-                        begin: const Offset(0.95, 0.95),
-                        end: const Offset(1, 1),
-                      ),
-
-                  SizedBox(height: w * 0.04),
-
-                  GridView.count(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: w * .03,
-                    mainAxisSpacing: w * .03,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    childAspectRatio: 2.4,
-                    children: [
-                      _infoCard(
-                        imagePath: "assets/images/approval.png",
-                        // bgColor: ,
-                        // icon: Icons.check_circle,
-                        // iconColor: Colors.green,
-                        title: "Completed",
-                        value: "10",
-                        borderColor: Colors.blue,
-                        w: w,
-                      ),
-                      _infoCard(
-                        imagePath: "assets/images/cancelride.png",
-                        // icon: Icons.cancel,
-                        // iconColor: Colors.red,
-                        title: "Cancelled",
-                        value: "05",
-                        borderColor: Colors.redAccent,
-                        w: w,
-                      ),
-                      _infoCard(
-                        imagePath: "assets/images/new1.png",
-                        title: "Time Online",
-                        value: "5h 37m",
-                        borderColor: Colors.blueGrey,
-                        w: w,
-                      ),
-                      _infoCard(
-                        imagePath: "assets/images/cruncy.png",
-
-                        title: "In cash",
-                        value: "₹100",
-                        borderColor: Colors.orange,
-                        w: w,
-                      ),
-                    ],
+                          .animate()
+                          .fade(duration: 820.ms, curve: Curves.easeInOut)
+                          .scale(
+                            begin: const Offset(0.95, 0.95),
+                            end: const Offset(1, 1),
+                          );
+                    },
                   ),
 
                   SizedBox(height: w * 0.04),
 
-                  // Conditionally show different content based on pageIndex
-                  if (pageIndex == 0) ...[
-                    // TripStatusSection(
-                    //   tripStatuses: tripStatuses,
-                    //   totalSteps: 10,
-                    // ),
-                    // SizedBox(height: w * 0.04),
-                    // CustomWeeklyEarningsChart(
-                    //   width: double.infinity,
-                    //   height: w * 0.4,
-                    //   title: "Today's Earnings",
-                    //   amount: "₹500",
-                    // ),
-                  ] else if (pageIndex == 1) ...[
-                    // TripStatusSectionWeekly(
-                    //   tripData: weeklyTripData,
-                    // ),
-                    // SizedBox(height: w * 0.04),
-                    // CustomWeeklyEarningsChart(
-                    //   width: double.infinity,
-                    //   height: w * 0.4,
-                    //   title: "Weekly Earnings",
-                    //   amount: "₹5000",
-                    // ),
-                  ] else ...[
-                    // CustomWeeklyEarningsChart(
-                    //   width: double.infinity,
-                    //   height: w * 0.4,
-                    //   title: "Monthly Earnings",
-                    //   amount: "₹10000",
-                    // ),
-                    // SizedBox(height: w * 0.04),
-                    // Card(
-                    //   elevation: 4,
-                    //   shape: RoundedRectangleBorder(
-                    //     borderRadius: BorderRadius.circular(w * 0.03),
-                    //   ),
-                    //   child: Padding(
-                    //     padding: EdgeInsets.all(w * 0.04),
-                    //     child: Column(
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       children: [
-                    //         AppFonts.textPoppins(
-                    //           context,
-                    //           "Monthly Performance",
-                    //           w * 0.04,
-                    //           FontWeight.w600,
-                    //           AppColors.black,
-                    //           TextAlign.left,
-                    //           TextOverflow.ellipsis,
-                    //         ),
-                    //         SizedBox(height: w * 0.02),
-                    //         LinearProgressIndicator(
-                    //           value: 0.75,
-                    //           backgroundColor: AppColors.lightGray,
-                    //           valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryRed),
-                    //           borderRadius: BorderRadius.circular(10),
-                    //           minHeight: w * 0.02,
-                    //         ),
-                    //         SizedBox(height: w * 0.01),
-                    //         Row(
-                    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    //           children: [
-                    //             AppFonts.textPoppins(
-                    //               context,
-                    //               "75% of target achieved",
-                    //               w * 0.03,
-                    //               FontWeight.w500,
-                    //               AppColors.darkGray,
-                    //               TextAlign.left,
-                    //               TextOverflow.ellipsis,
-                    //             ),
-                    //             AppFonts.textPoppins(
-                    //               context,
-                    //               "₹7500/₹10000",
-                    //               w * 0.03,
-                    //               FontWeight.w600,
-                    //               AppColors.primaryRed,
-                    //               TextAlign.right,
-                    //               TextOverflow.ellipsis,
-                    //             ),
-                    //           ],
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-                  ],
+                  FutureBuilder<Map<String, dynamic>>(
+                    future: earningsReportFuture,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return SizedBox(
+                          height: w * 0.5,
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
+                      final data = snapshot.data ?? {};
+                      final earnings = data['earnings'] ?? {};
+                      final trips = data['trips'] ?? {};
+                      final cashEarnings =
+                          earnings['cash']?.toString() ?? "0";
+                      final completed = trips['completed']?.toString() ?? "0";
+                      final cancelled = trips['cancelled']?.toString() ?? "0";
+
+                      return GridView.count(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: w * .03,
+                        mainAxisSpacing: w * .03,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        childAspectRatio: 2.4,
+                        children: [
+                          _infoCard(
+                            imagePath: "assets/images/approval.png",
+                            title: "Completed",
+                            value: completed,
+                            borderColor: Colors.blue,
+                            w: w,
+                          ),
+                          _infoCard(
+                            imagePath: "assets/images/cancelride.png",
+                            title: "Cancelled",
+                            value: cancelled,
+                            borderColor: Colors.redAccent,
+                            w: w,
+                          ),
+                          FutureBuilder<List<dynamic>>(
+                            future: rideHistoryFuture,
+                            builder: (context, historySnapshot) {
+                              String timeOnline = "0h 0m";
+                              if (historySnapshot.hasData) {
+                                timeOnline = EarningsService.calculateTimeOnline(
+                                    historySnapshot.data ?? []);
+                              }
+                              return _infoCard(
+                                imagePath: "assets/images/new1.png",
+                                title: "Time Online",
+                                value: timeOnline,
+                                borderColor: Colors.blueGrey,
+                                w: w,
+                              );
+                            },
+                          ),
+                          _infoCard(
+                            imagePath: "assets/images/cruncy.png",
+                            title: "In cash",
+                            value: "₹$cashEarnings",
+                            borderColor: Colors.orange,
+                            w: w,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
 
                   SizedBox(height: w * 0.04),
 
@@ -476,15 +469,46 @@ class _EarningsState extends State<Earnings> {
 
                   SizedBox(height: w * 0.02),
 
-                  // RECENT TRIPS LIST
-                  ListView(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: const [
-                      TripTile(amount: "₹50.00"),
-                      TripTile(amount: "₹50.00"),
-                      TripTile(amount: "₹70.00"),
-                    ],
+                  FutureBuilder<List<dynamic>>(
+                    future: rideHistoryFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text("Error loading trips"),
+                        );
+                      }
+
+                      final trips = snapshot.data ?? [];
+                      if (trips.isEmpty) {
+                        return Center(
+                          child: Text("No trips available"),
+                        );
+                      }
+
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: trips.length > 3 ? 3 : trips.length,
+                        itemBuilder: (context, index) {
+                          final trip = trips[index];
+                          final amount =
+                              trip['totalFare']?.toString() ?? "0";
+                          final time =
+                              trip['createdAt']?.toString().split('T')[1] ?? "N/A";
+                          final location = trip['startLocation']?['address']?.toString().split(',')[0] ?? "Unknown location";
+
+                          return TripTile(
+                            amount: "₹$amount",
+                            time: time.substring(0, 5),
+                            location: location,
+                          );
+                        },
+                      );
+                    },
                   ),
 
                   SizedBox(height: w * 0.06),
@@ -1029,8 +1053,14 @@ class CustomWeeklyEarningsChart extends StatelessWidget {
 
 class TripTile extends StatelessWidget {
   final String amount;
+  final String time;
+  final String location;
 
-  const TripTile({required this.amount});
+  const TripTile({
+    required this.amount,
+    this.time = "N/A",
+    this.location = "Unknown location",
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1059,7 +1089,7 @@ class TripTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "11:30 AM",
+                  time,
                   style: TextStyle(
                     fontSize: w * 0.035,
                     fontWeight: FontWeight.w600,
@@ -1067,7 +1097,9 @@ class TripTile extends StatelessWidget {
                 ),
                 SizedBox(height: w * 0.005),
                 Text(
-                  "Trip to MP Nagar, Zone-2, Bhopal",
+                  location,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontSize: w * 0.03, color: Colors.grey),
                 ),
               ],

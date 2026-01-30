@@ -62,6 +62,22 @@ class DriveridController extends GetxController {
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch home data';
         print("Error: ${errorMessage.value}");
+        // Only show snackbar if context is available
+        if (Get.isSnackbarOpen == false) {
+          Get.snackbar(
+            'Error',
+            errorMessage.value,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+      }
+    } catch (e) {
+      errorMessage.value = 'An error occurred: $e';
+      print("Exception: $e");
+      // Only show snackbar if context is available
+      if (Get.isSnackbarOpen == false) {
         Get.snackbar(
           'Error',
           errorMessage.value,
@@ -70,16 +86,6 @@ class DriveridController extends GetxController {
           colorText: Colors.white,
         );
       }
-    } catch (e) {
-      errorMessage.value = 'An error occurred: $e';
-      print("Exception: $e");
-      Get.snackbar(
-        'Error',
-        errorMessage.value,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
     } finally {
       // Reset loading state
       isLoading.value = false;

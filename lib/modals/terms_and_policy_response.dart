@@ -3,11 +3,7 @@ class Termsandpolicyresponse {
   String? message;
   Data? data;
 
-  Termsandpolicyresponse({
-    this.success,
-    this.message,
-    this.data,
-  });
+  Termsandpolicyresponse({this.success, this.message, this.data});
 
   factory Termsandpolicyresponse.fromJson(Map<String, dynamic> json) =>
       Termsandpolicyresponse(
@@ -17,10 +13,10 @@ class Termsandpolicyresponse {
       );
 
   Map<String, dynamic> toJson() => {
-        "success": success,
-        "message": message,
-        "data": data?.toJson(),
-      };
+    "success": success,
+    "message": message,
+    "data": data?.toJson(),
+  };
 }
 
 class Data {
@@ -67,50 +63,50 @@ class Data {
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
-        id: json["_id"],
-        companyName: json["companyName"],
-        address: json["address"],
-        contactNumber: json["contactNumber"],
-        whatsappNumber: json["whatsappNumber"],
-        privacyPolicy: json["privacyPolicy"],
-        termAndCondition: json["termAndCondition"],
-        helpandSupport: json["helpandSupport"],
-        aboutUs: json["aboutUs"],
-        supportEmail: json["supportEmail"],
-        description: json["description"],
-        logo: json["logo"],
-        favIcon: json["favIcon"],
-        website: json["website"],
-        timing: json["timing"],
-        createdAt: json["createdAt"] == null
-            ? null
-            : DateTime.parse(json["createdAt"]),
-        updatedAt: json["updatedAt"] == null
-            ? null
-            : DateTime.parse(json["updatedAt"]),
-        v: json["__v"],
-        driverCommision: json["driverCommision"],
-      );
+    id: json["_id"],
+    companyName: json["companyName"],
+    address: json["address"],
+    contactNumber: json["contactNumber"],
+    whatsappNumber: json["whatsappNumber"],
+    privacyPolicy: json["privacyPolicy"],
+    termAndCondition: json["termAndCondition"],
+    helpandSupport: json["helpandSupport"],
+    aboutUs: json["aboutUs"],
+    supportEmail: json["supportEmail"],
+    description: json["description"],
+    logo: json["logo"],
+    favIcon: json["favIcon"],
+    website: json["website"],
+    timing: json["timing"],
+    createdAt: json["createdAt"] == null
+        ? null
+        : DateTime.parse(json["createdAt"]),
+    updatedAt: json["updatedAt"] == null
+        ? null
+        : DateTime.parse(json["updatedAt"]),
+    v: json["__v"],
+    driverCommision: json["driverCommision"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "_id": id,
-        "companyName": companyName,
-        "address": address,
-        "contactNumber": contactNumber,
-        "whatsappNumber": whatsappNumber,
-        "privacyPolicy": privacyPolicy,
-        "termAndCondition": termAndCondition,
-        "helpandSupport": helpandSupport,
-        "aboutUs": aboutUs,
-        "supportEmail": supportEmail,
-        "description": description,
-        "logo": logo,
-        "favIcon": favIcon,
-        "website": website,
-        "timing": timing,
-        "createdAt": createdAt?.toIso8601String(),
-        "updatedAt": updatedAt?.toIso8601String(),
-        "__v": v,
-        "driverCommision": driverCommision,
-      };
+    "_id": id,
+    "companyName": companyName,
+    "address": address,
+    "contactNumber": contactNumber,
+    "whatsappNumber": whatsappNumber,
+    "privacyPolicy": privacyPolicy,
+    "termAndCondition": termAndCondition,
+    "helpandSupport": helpandSupport,
+    "aboutUs": aboutUs,
+    "supportEmail": supportEmail,
+    "description": description,
+    "logo": logo,
+    "favIcon": favIcon,
+    "website": website,
+    "timing": timing,
+    "createdAt": createdAt?.toIso8601String(),
+    "updatedAt": updatedAt?.toIso8601String(),
+    "__v": v,
+    "driverCommision": driverCommision,
+  };
 }

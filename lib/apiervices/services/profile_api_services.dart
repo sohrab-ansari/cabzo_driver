@@ -93,7 +93,7 @@ class ProfileApiServices {
       }
       return homeModalResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle : $e");
+      print("❌ Exception in Create Vehicle1 : $e");
       return HomeModalResponse(success: false, message: "Connection error: $e");
     }
   }
@@ -212,7 +212,7 @@ class ProfileApiServices {
 
       return walletResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle : $e");
+      print("❌ Exception in Create Vehicle4 : $e");
       return WalletResponse(success: false, message: "Connection error: $e");
     }
   }
@@ -251,7 +251,7 @@ class ProfileApiServices {
 
       return walletResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle : $e");
+      print("❌ Exception in Create Vehicle2 : $e");
       return TransactionsResponse(
         success: false,
         message: "Connection error: $e",
@@ -293,7 +293,7 @@ class ProfileApiServices {
 
       return walletResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle : $e");
+      print("❌ Exception in Create Vehicle3 : $e");
       return TransactionsResponse(
         success: false,
         message: "Connection error: $e",
@@ -459,6 +459,8 @@ class ProfileApiServices {
 
     final String? userId = prefs.getString("driver_userid");
 
+
+
     print("theeeee____ useriddddd ${userId}");
 
     final Uri url = Uri.parse(
@@ -485,11 +487,23 @@ class ProfileApiServices {
       print("Response Body : ${response.body}");
 
       final Map<String, dynamic> data = jsonDecode(response.body);
-      final DriverIdResponse walletResponse = DriverIdResponse.fromJson(data);
+      final DriverIdResponse driverIdResponse = DriverIdResponse.fromJson(data);
 
-      return walletResponse;
+  final prefs = await SharedPreferences.getInstance();
+        
+        await prefs.setString("driver_name", driverIdResponse.driver!.name ?? "");
+
+        await prefs.setString("driver_mobile", driverIdResponse.driver!.phone ?? "");
+
+//  if (driverIdResponse.token != null &&
+//           otpResponse.token!.isNotEmpty &&
+//           driverId != null &&
+//           driverId.isNotEmpty) {
+       
+//       }
+      return driverIdResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle : $e");
+      print("❌ Exception in Create Vehicle5 : $e");
       return DriverIdResponse(success: false, message: "Connection error: $e");
     }
   }
@@ -538,7 +552,7 @@ class ProfileApiServices {
 
       return walletResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle : $e");
+      print("❌ Exception in Create Vehicle7 : $e");
       return AddMoneyWalletResponse(
         success: false,
         message: "Connection error: $e",
@@ -597,7 +611,7 @@ class ProfileApiServices {
 
       return true;
     } catch (e) {
-      print("❌ Exception in Create Vehicle : $e");
+      print("❌ Exception in Create Vehicle6 : $e");
 
       return false;
       // return AddMoneyWalletResponse(success: false, message: "Connection error: $e");
@@ -642,7 +656,7 @@ class ProfileApiServices {
 
       return walletResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle : $e");
+      print("❌ Excesssssssssssption in drivverrrrrr idd : $e");
       return GetBankAccountsResponse(
         success: false,
         message: "Connection error: $e",
@@ -686,7 +700,7 @@ class ProfileApiServices {
 
       return walletResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle : $e");
+      print("❌ Exception in Create Vehicle9 : $e");
       return ReviewRatingResponse(
         success: false,
         message: "Connection error: $e",
@@ -729,7 +743,7 @@ class ProfileApiServices {
 
       return walletResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle : $e");
+      print("❌ Exception in Create Vehicle8 : $e");
       return Termsandpolicyresponse(
         success: false,
         message: "Connection error: $e",
@@ -1425,11 +1439,53 @@ class ProfileApiServices {
 
       return walletResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle : $e");
+      print("❌ Exception in Create Vehicle10 : $e");
       return RideHistoryResponse2(
         success: false,
         message: "Connection error: $e",
       );
     }
   }
+
+
+  static Future<ChatResponse> get_chat_messages_data({
+  required String chatId,
+}) async {
+  final prefs = await SharedPreferences.getInstance();
+  final String? token = prefs.getString("auth_token");
+
+  final Uri url =
+      Uri.parse("${ApiPath.baseUri}/chat/$chatId/messages");
+
+  print("========== 🔵 GET CHAT MESSAGES API ==========");
+  print("URL : $url");
+  print("Token : $token");
+
+  try {
+    final http.Response response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    print("✅ Status Code : ${response.statusCode}");
+
+    final decodedJson = jsonDecode(response.body);
+
+    print("📦 FULL RESPONSE 👇");
+    print(const JsonEncoder.withIndent('  ').convert(decodedJson));
+
+    if (response.statusCode == 200) {
+      return ChatResponse.fromJson(decodedJson);
+    } else {
+      throw Exception(decodedJson['message'] ?? 'Something went wrong');
+    }
+  } catch (e) {
+    print("❌ Exception in get_chat_messages_data");
+    throw Exception(e);
+  }
+}
+
 }

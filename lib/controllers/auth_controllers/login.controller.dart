@@ -7,6 +7,7 @@ import 'package:corezap_driver/modals/create_vehicle_res.dart';
 import 'package:corezap_driver/modals/driver_Image_upload_res.dart';
 import 'package:corezap_driver/modals/register_profile_res.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
+import 'package:corezap_driver/views/auth/login_screen.dart';
 import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
 // import 'package:corezap_driver/apiServices/services/auth_api_service.dart';
 import 'package:flutter/material.dart';
@@ -517,10 +518,17 @@ class LoginController extends GetxController {
       if (res.success == true) {
         print("\n✅ IMAGE UPLOAD SUCCESSFUL!");
 
-        CustomNavigator.push(
+        // CustomNavigator.push(
+        //   context!,
+        //   BottomnavmainScreen(),
+        //   transition: TransitionType.fade,
+        // );
+
+
+         CustomNavigator.removeUntil(
           context!,
-          BottomnavmainScreen(),
-          transition: TransitionType.fade,
+          LoginScreen(),
+          transition: TransitionType.fade,   
         );
         Get.snackbar(
           'Success',

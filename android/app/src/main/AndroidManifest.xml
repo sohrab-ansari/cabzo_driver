@@ -28,6 +28,7 @@
         android:label="NZCU Driver"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="true"
         android:usesCleartextTraffic="true"> <!-- Add this for development/testing -->
 
         <activity

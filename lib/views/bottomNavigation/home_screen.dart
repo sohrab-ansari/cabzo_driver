@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:corezap_driver/controllers/controllers.dart';
 import 'package:corezap_driver/controllers/home_controllers/home_controller.dart';
 import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
+import 'package:corezap_driver/controllers/profile_controllers/driverid_controller.dart';
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/custom_font.dart';
 import 'package:corezap_driver/utilities/map_helper.dart';
 import 'package:corezap_driver/views/book_ride/book_ride.dart';
+import 'package:corezap_driver/views/bottomNavigation/Agreement_screen.dart';
 import 'package:corezap_driver/views/home_related/live_ride.dart';
 import 'package:corezap_driver/views/widgets/home_screen_widgets.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +33,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Controllers controllers = Get.put(Controllers());
   final HomeController homeController = Get.find<HomeController>();
   final StepperController stepperController = Get.find<StepperController>();
+
+    final DriveridController driveridController = Get.put(DriveridController());
 
   // Socket Manager instance
   final SocketManager socketManager = SocketManager();
@@ -63,6 +67,8 @@ String? driverName;
   @override
   void initState() {
     homeController.home_data_method();
+
+    driveridController.driverid_mdethod();
     super.initState();
 
     WidgetsBinding.instance.addObserver(this);
@@ -87,6 +93,7 @@ String? driverName;
     // Load custom icons
     await _loadCustomBikeMarker();
     await _loadVehicleIcons();
+    
 
     // Initialize socket manager with callbacks
     _setupSocketCallbacks();
@@ -496,6 +503,8 @@ String? driverName;
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+
+             
               SizedBox(height: w * 0.04),
               Image.asset("assets/images/offline_image.png", height: w * 0.5),
               Text(
@@ -547,6 +556,83 @@ String? driverName;
                       ),
               ),
               SizedBox(height: w * 0.03),
+
+   Card(
+      margin: const EdgeInsets.all(16.0),
+      elevation: 2.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: Theme.of(context).primaryColor,
+                  size: 24.0,
+                ),
+                const SizedBox(width: 12.0),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Driver Agreement Required',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4.0),
+                      Text(
+                        'Please upload and e-sign your driver agreement to continue accepting rides.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            color: Colors.grey[50],
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: (){
+
+
+Navigator.push(context, MaterialPageRoute(builder: (context) => AgreementScreen()));
+                    },
+                    child: const Text('Continue'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+ 
+ 
+ 
+              // Text("dhjshafj"),
+
+              //  KYCNoticeCardWidget(isKycCompleted: true,
+              
+              // onContinuePressed: (){
+              //   print("Continue Pressed");
+
+                
+              // },
+              // ),
               Align(
                 alignment: Alignment.centerLeft,
                 child:
@@ -1067,6 +1153,240 @@ String? driverName;
           ],
         ),
       ],
+    );
+  }
+}
+
+
+
+
+
+class KYCNoticeWidget extends StatelessWidget {
+  final bool isKycCompleted;
+  final VoidCallback onContinuePressed;
+  
+  const KYCNoticeWidget({
+    Key? key,
+    required this.isKycCompleted,
+    required this.onContinuePressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    if (isKycCompleted) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      margin: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: 4.0,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Agreement Box
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Info Icon
+                Padding(
+                  padding: const EdgeInsets.only(top: 2.0),
+                  child: Icon(
+                    Icons.info_outline,
+                    color: Colors.blue,
+                    size: 24.0,
+                  ),
+                ),
+                const SizedBox(width: 12.0),
+                // Text Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Driver Agreement Required',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                      const SizedBox(height: 4.0),
+                      Text(
+                        'Please upload and e-sign your driver agreement to continue accepting rides.',
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          color: Colors.grey[600],
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Button Section
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(8.0),
+                bottomRight: Radius.circular(8.0),
+              ),
+            ),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onContinuePressed,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue, // Button background color
+                  foregroundColor: Colors.white, // Text color
+                  padding: const EdgeInsets.symmetric(vertical: 14.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6.0),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'Continue',
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Alternative version using a Card widget
+class KYCNoticeCardWidget extends StatelessWidget {
+  final bool isKycCompleted;
+  final VoidCallback onContinuePressed;
+  
+  const KYCNoticeCardWidget({
+    Key? key,
+    required this.isKycCompleted,
+    required this.onContinuePressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    if (isKycCompleted) {
+      return const SizedBox.shrink();
+    }
+
+    return 
+    
+    Card(
+      margin: const EdgeInsets.all(16.0),
+      elevation: 2.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: Theme.of(context).primaryColor,
+                  size: 24.0,
+                ),
+                const SizedBox(width: 12.0),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Driver Agreement Required',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4.0),
+                      Text(
+                        'Please upload and e-sign your driver agreement to continue accepting rides.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            color: Colors.grey[50],
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: onContinuePressed,
+                    child: const Text('Continue'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+ 
+ 
+ 
+ 
+ 
+  }
+}
+
+// Usage example
+class ExampleScreen extends StatelessWidget {
+  const ExampleScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Driver Dashboard'),
+      ),
+      body: Column(
+        children: [
+          // Other widgets here...
+          
+          KYCNoticeWidget(
+            isKycCompleted: false, // This would come from your state
+            onContinuePressed: () {
+              // Navigate to Agreement screen
+              Navigator.pushNamed(context, '/agreement');
+            },
+          ),
+          
+          // More widgets...
+        ],
+      ),
     );
   }
 }

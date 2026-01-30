@@ -75,6 +75,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
     "Privacy Policy",
   ];
 
+
+
+String? driverName;
+
+
+
+String? driverphone;
+
+initState() {
+    super.initState();
+    
+    sharedpreferences();
+  }
+
+
+   Future<void> sharedpreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+
+     setState(() {
+
+        driverName = prefs.getString("driver_name");
+
+        driverphone =   prefs.getString("driver_mobile");
+     });
+    print("Driver__Name from SharedPreferences: $driverName");
+    print("Driver__Phone from SharedPreferences: $driverphone");  
+  }
+
   @override
   Widget build(BuildContext context) {
     final double w = MediaQuery.of(context).size.width;
@@ -140,16 +169,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CustomText(
-                      text: "Juanita Valencia",
+                    // CustomText(
+                    //   text: "Juanita Valencia",
+                    //   textFontSize: w * .05,
+                    //   textFontWeight: FontWeight.w500,
+                    // ),
+CustomText(
+                      text: "${driverName ?? ''}",
                       textFontSize: w * .05,
                       textFontWeight: FontWeight.w500,
                     ),
-                    CustomText(
-                      text: "+91 123456789",
+                    // CustomText
+                    //   text: "+91 123456789",
+                    //   textFontSize: w * .04,
+                    //   textFontWeight: FontWeight.w400,
+                    // ),
+
+                      CustomText(
+                      text: "+91 ${driverphone ?? ''}",
                       textFontSize: w * .04,
                       textFontWeight: FontWeight.w400,
                     ),
+
+                    
                   ],
                 ),
               ],

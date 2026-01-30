@@ -53,15 +53,19 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
   // Helper method to show snackbar safely
   void _showSnackbar(String message, {bool isError = true}) {
     if (mounted && !_isDisposed) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: isError ? Colors.red : Colors.green,
-          duration: Duration(seconds: isError ? 3 : 2),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.all(10),
-        ),
-      );
+      try {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: isError ? Colors.red : Colors.green,
+            duration: Duration(seconds: isError ? 3 : 2),
+            behavior: SnackBarBehavior.floating,
+            margin: EdgeInsets.all(10),
+          ),
+        );
+      } catch (e) {
+        print("⚠️ Could not show snackbar: $e");
+      }
     }
   }
 
@@ -492,12 +496,7 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
         successMessage: 'Order cancelled successfully',
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Invalid order ID'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showSnackbar('Invalid order ID');
     }
   }
 }

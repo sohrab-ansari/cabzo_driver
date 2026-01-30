@@ -18,6 +18,9 @@ class SocketManager {
 
   // Configuration
   static const String SOCKET_URL = 'https://api.corezap.framekarts.com';
+
+//  static const String SOCKET_URL = 'https://corezap.smarttechbros.com';
+  
   static const int MAX_RECONNECT_ATTEMPTS = 5;
   static const int CONNECTION_TIMEOUT = 10000;
   static const int LOCATION_UPDATE_INTERVAL = 2000;
