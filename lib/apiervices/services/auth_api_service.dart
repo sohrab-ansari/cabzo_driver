@@ -184,126 +184,529 @@ class AuthApiService {
   //   }
   // }
 
-  static Future<CreateVehicleRes> createVehicle_Api({
+
+
+static Future<CreateVehicleRes> createVehicle_Api({
   required String vehicleName,
   String? vehicleNumber,
   String? vehicleColor,
   String? vehicleType,
   String? vehicleStatus,
   String? vehicleModel,
-  String? vehicleCapacity,
+  int? vehicleCapacity,
   String? driverId,
   int? vehicleYear,
   File? rcImage,
   File? vehicleInsuraneImage,
   File? vehicleNumberImage,
 }) async {
+  // Print all received parameters
+  print("\n📋 VEHICLE CREATION PARAMETERS:");
+  print("├─ vehicleName: $vehicleName");
+  print("├─ vehicleNumber: $vehicleNumber");
+  print("├─ vehicleColor: $vehicleColor");
+  print("├─ vehicleType: $vehicleType");
+  print("├─ vehicleStatus: $vehicleStatus");
+  print("├─ vehicleModel: $vehicleModel");
+  print("├─ vehicleCapacity: $vehicleCapacity (type: ${vehicleCapacity.runtimeType})");
+  print("├─ driverId: $driverId");
+  print("├─ vehicleYear: $vehicleYear");
+  print("├─ rcImage: ${rcImage?.path ?? 'NULL'}");
+  print("├─ vehicleInsuraneImage: ${vehicleInsuraneImage?.path ?? 'NULL'}");
+  print("└─ vehicleNumberImage: ${vehicleNumberImage?.path ?? 'NULL'}");
+
   final Uri url = Uri.parse(ApiPath.createVehicle);
 
-  /// 🔐 GET TOKEN
+  // Get token from SharedPreferences
   final prefs = await SharedPreferences.getInstance();
   final String? token = prefs.getString("auth_token");
   final String? userId = prefs.getString("driver_userid");
 
-  print("hhhhhh>>>>>useridddddddddddddd   ${userId}");
-  print("hhhhh>>>> vehicleName ${vehicleName} ");
-  print("hhhhh>>>> vehicleNumber ${vehicleNumber} ");
-  print("hhhhh>>>> vehicleColor ${vehicleColor} ");
-  print("hhhhh>>>> vehicleType ${vehicleType} ");
-  print("hhhhh>>>> vehicleStatus ${vehicleStatus} ");
-  print("hhhhh>>>> vehicleModel ${vehicleModel} ");
-  print("hhhhh>>>> vehicleCapacity ${vehicleCapacity} ");
-  print("hhhhh>>>> driverId ${driverId} ");
-  print("hhhhh>>>> driverId>>>>>>>>> ${userId} ");
-  print("hhhhh>>>> vehicleYear ${vehicleYear} ");
-
-  // Print file paths for debugging
-  print("hhhhh >>>>>>>> rc imageeee ${rcImage?.path}");
-  print("hhhhh >>>>>>>> vehicleInsuraneImage ${vehicleInsuraneImage?.path}");
-  print("hhhhh >>>>>>>> vehicleNumberImage ${vehicleNumberImage?.path}");
-
-  print("========== CREATE VEHICLE API ==========");
-  print("URL : $url");
-  print("Token : $token");
+  print("Token: $token");
+  print("User ID from SharedPreferences: $userId");
 
   try {
     // Create multipart request
     var request = http.MultipartRequest('POST', url);
-    
+
     // Add headers
-    request.headers['Authorization'] = "Bearer $token";
+    if (token != null) {
+      request.headers['Authorization'] = 'Bearer $token';
+    }
+
+    // Add text fields - Use userId from SharedPreferences if driverId is null
+    final actualDriverId = userId ?? "";
     
-    // Add text fields
     request.fields['vehicleName'] = vehicleName;
-    request.fields['vehicleNumber'] = vehicleNumber ?? '';
-    request.fields['vehicleColor'] = vehicleColor ?? '';
-    request.fields['vehicleType'] = vehicleType ?? '';
-    request.fields['vehicleStatus'] = vehicleStatus ?? 'Active';
-    request.fields['vehicleModel'] = vehicleModel ?? '';
-    request.fields['vehicleCapacity'] = vehicleCapacity ?? '4';
-    request.fields['vehicleYear'] = vehicleYear?.toString() ?? '';
-    request.fields['driverId'] = userId ?? '';
+    request.fields['vehicleNumber'] = vehicleNumber ?? "";
+    request.fields['vehicleColor'] = vehicleColor ?? "";
+    request.fields['vehicleType'] = vehicleType ?? "";
+    request.fields['vehicleStatus'] = vehicleStatus ?? "Active";
+    request.fields['vehicleModel'] = vehicleModel ?? "";
     
-    // Add files if they exist
-    if (rcImage != null) {
-      var rcStream = http.ByteStream(rcImage.openRead());
-      var rcLength = await rcImage.length();
-      var rcMultipartFile = http.MultipartFile(
-        'rcImage',
-        rcStream,
-        rcLength,
-        filename: rcImage.path.split('/').last,
-      );
-      request.files.add(rcMultipartFile);
+    // Handle vehicleCapacity - convert int to string
+    if (vehicleCapacity != null) {
+      request.fields['vehicleCapacity'] = vehicleCapacity.toString();
+    } else {
+      request.fields['vehicleCapacity'] = "4"; // default value
     }
     
-    if (vehicleInsuraneImage != null) {
-      var insuranceStream = http.ByteStream(vehicleInsuraneImage.openRead());
-      var insuranceLength = await vehicleInsuraneImage.length();
-      var insuranceMultipartFile = http.MultipartFile(
-        'vehicleInsuraneImage',
-        insuranceStream,
-        insuranceLength,
-        filename: vehicleInsuraneImage.path.split('/').last,
-      );
-      request.files.add(insuranceMultipartFile);
+    if (vehicleYear != null) {
+      request.fields['vehicleYear'] = vehicleYear.toString();
+    } else {
+      request.fields['vehicleYear'] = "";
     }
     
-    if (vehicleNumberImage != null) {
-      var numberStream = http.ByteStream(vehicleNumberImage.openRead());
-      var numberLength = await vehicleNumberImage.length();
-      var numberMultipartFile = http.MultipartFile(
-        'vehicleNumberImage',
-        numberStream,
-        numberLength,
-        filename: vehicleNumberImage.path.split('/').last,
-      );
-      request.files.add(numberMultipartFile);
+    request.fields['driverId'] = actualDriverId;
+
+    print("Text fields added to request");
+    print("Using driverId: $actualDriverId");
+
+    // Helper function to extract filename from path
+    String getFileNameFromPath(String path) {
+      final parts = path.split('/');
+      return parts.isNotEmpty ? parts.last : 'image.jpg';
     }
+
+    // Add RC image if exists
+    if (rcImage != null && await rcImage.exists()) {
+      final fileName = getFileNameFromPath(rcImage.path);
+      print("Adding RC image: $fileName");
+      
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'rcImage',
+          rcImage.path,
+          filename: fileName,
+        ),
+      );
+      print("✓ Added RC image as: $fileName");
+    } else {
+      print("RC Image is null or doesn't exist");
+    }
+
+    // Add Vehicle Insurance image if exists
+    if (vehicleInsuraneImage != null && await vehicleInsuraneImage.exists()) {
+      final fileName = getFileNameFromPath(vehicleInsuraneImage.path);
+      print("Adding Vehicle Insurance image: $fileName");
+      
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'vehicleInsuraneImage',
+          vehicleInsuraneImage.path,
+          filename: fileName,
+        ),
+      );
+      print("✓ Added Insurance image as: $fileName");
+    } else {
+      print("Vehicle Insurance Image is null or doesn't exist");
+    }
+
+    // Add Vehicle Number image if exists
+    if (vehicleNumberImage != null && await vehicleNumberImage.exists()) {
+      final fileName = getFileNameFromPath(vehicleNumberImage.path);
+      print("Adding Vehicle Number image: $fileName");
+      
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'vehicleNumberImage',
+          vehicleNumberImage.path,
+          filename: fileName,
+        ),
+      );
+      print("✓ Added Number Plate image as: $fileName");
+    } else {
+      print("Vehicle Number Image is null or doesn't exist");
+    }
+
+    print("\n========== CREATE VEHICLE API ==========");
+    print("URL: $url");
+    print("Request Fields: ${request.fields}");
+    print("Number of Files: ${request.files.length}");
     
-    // Print request details for debugging
-    print("Request fields: ${request.fields}");
-    print("Request files count: ${request.files.length}");
-    
+    // List all files with their field names and filenames
+    for (var i = 0; i < request.files.length; i++) {
+      var file = request.files[i];
+      print("File $i: field='${file.field}', filename='${file.filename}'");
+    }
+
     // Send request
-    var streamedResponse = await request.send();
-    var response = await http.Response.fromStream(streamedResponse);
+    print("\n🚀 Sending request...");
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
+
+    print("\n📥 Response Received:");
+    print("Status Code: ${response.statusCode}");
     
-    print("Status Code : ${response.statusCode}");
-    print("Response Body : ${response.body}");
-    
-    final Map<String, dynamic> data = jsonDecode(response.body);
-    final CreateVehicleRes createVehicleRes = CreateVehicleRes.fromJson(data);
-    
-    print("myyyyy_api_ressssposneee ${createVehicleRes}");
-    
-    return createVehicleRes;
+    // Check if response is HTML (error) or JSON
+    if (responseBody.trim().startsWith('<!DOCTYPE') || 
+        responseBody.trim().startsWith('<html>') ||
+        response.statusCode >= 400) {
+      print("❌ Server returned error");
+      print("Response Body: $responseBody");
+      
+      String errorMessage = "Server error (${response.statusCode})";
+      
+      if (response.statusCode == 413) {
+        errorMessage = "Images are too large. Please use smaller images.";
+      } else if (responseBody.contains('MulterError:')) {
+        final startIndex = responseBody.indexOf('MulterError:');
+        final endIndex = responseBody.indexOf('<br>', startIndex);
+        if (startIndex != -1 && endIndex != -1) {
+          errorMessage = responseBody.substring(startIndex, endIndex);
+        }
+      }
+      
+      return CreateVehicleRes(
+        success: false,
+        message: errorMessage,
+      );
+    }
+
+    try {
+      print("Response Body: $responseBody");
+      final Map<String, dynamic> data = jsonDecode(responseBody);
+      final CreateVehicleRes createVehicleRes = CreateVehicleRes.fromJson(data);
+      
+      if (createVehicleRes.success == true) {
+        print("✅ Vehicle created successfully!");
+      } else {
+        print("❌ Vehicle creation failed: ${createVehicleRes.message}");
+      }
+      
+      return createVehicleRes;
+    } catch (e) {
+      print("❌ Failed to parse JSON response: $e");
+      print("Raw response: ${responseBody}");
+      return CreateVehicleRes(
+        success: false,
+        message: "Invalid response format: $e",
+      );
+    }
   } catch (e) {
-    print("❌ Exception in Create Vehicle : $e");
+    print("❌ Exception in Create Vehicle API: $e");
     print("Stack trace: ${e.toString()}");
-    return CreateVehicleRes(success: false, message: "Connection error: $e");
+    return CreateVehicleRes(
+      success: false,
+      message: "Connection error: $e",
+    );
   }
 }
+
+// static Future<CreateVehicleRes> createVehicle_Api({
+//   required String vehicleName,
+//   String? vehicleNumber,
+//   String? vehicleColor,
+//   String? vehicleType,
+//   String? vehicleStatus,
+//   String? vehicleModel,
+//   int? vehicleCapacity,
+//   String? driverId,
+//   int? vehicleYear,
+//   File? rcImage,
+//   File? vehicleInsuraneImage,
+//   File? vehicleNumberImage,
+// }) async {
+//   // Print all received parameters
+//   print("\n📋 VEHICLE CREATION PARAMETERS:");
+//   print("├─ vehicleName: $vehicleName");
+//   print("├─ vehicleNumber: $vehicleNumber");
+//   print("├─ vehicleColor: $vehicleColor");
+//   print("├─ vehicleType: $vehicleType");
+//   print("├─ vehicleStatus: $vehicleStatus");
+//   print("├─ vehicleModel: $vehicleModel");
+//   print("├─ vehicleCapacity: $vehicleCapacity (type: ${vehicleCapacity.runtimeType})");
+//   print("├─ driverId: $driverId");
+//   print("├─ vehicleYear: $vehicleYear");
+//   print("├─ rcImage: ${rcImage?.path ?? 'NULL'}");
+//   print("├─ vehicleInsuraneImage: ${vehicleInsuraneImage?.path ?? 'NULL'}");
+//   print("└─ vehicleNumberImage: ${vehicleNumberImage?.path ?? 'NULL'}");
+
+//   final Uri url = Uri.parse(ApiPath.createVehicle);
+
+//   // Get token from SharedPreferences
+//   final prefs = await SharedPreferences.getInstance();
+//   final String? token = prefs.getString("auth_token");
+//   final String? userId = prefs.getString("driver_userid");
+
+//   print("Token: $token");
+//   print("User ID from SharedPreferences: $userId");
+
+//   try {
+//     // Create multipart request
+//     var request = http.MultipartRequest('POST', url);
+
+//     // Add headers
+//     if (token != null) {
+//       request.headers['Authorization'] = 'Bearer $token';
+//     }
+
+//     // Add text fields - Use userId from SharedPreferences if driverId is null
+//     final actualDriverId = driverId ?? userId ?? "";
+    
+//     request.fields['vehicleName'] = vehicleName;
+//     request.fields['vehicleNumber'] = vehicleNumber ?? "";
+//     request.fields['vehicleColor'] = vehicleColor ?? "";
+//     request.fields['vehicleType'] = vehicleType ?? "";
+//     request.fields['vehicleStatus'] = vehicleStatus ?? "Active";
+//     request.fields['vehicleModel'] = vehicleModel ?? "";
+    
+//     // Handle vehicleCapacity - convert int to string
+//     if (vehicleCapacity != null) {
+//       request.fields['vehicleCapacity'] = vehicleCapacity.toString();
+//     } else {
+//       request.fields['vehicleCapacity'] = "4"; // default value
+//     }
+    
+//     if (vehicleYear != null) {
+//       request.fields['vehicleYear'] = vehicleYear.toString();
+//     } else {
+//       request.fields['vehicleYear'] = "";
+//     }
+    
+//     request.fields['driverId'] = actualDriverId;
+
+//     print("Text fields added to request");
+//     print("Using driverId: $actualDriverId");
+
+//     // Add RC image if exists
+//     if (rcImage != null && await rcImage.exists()) {
+//       print("Adding RC image: ${rcImage.path}");
+      
+//       request.files.add(
+//         await http.MultipartFile.fromPath(
+//           'rcImage',
+//           rcImage.path,
+//           filename: 'rc_${DateTime.now().millisecondsSinceEpoch}.jpg',
+//         ),
+//       );
+//       print("✓ Added RC image");
+//     } else {
+//       print("RC Image is null or doesn't exist");
+//     }
+
+//     // Add Vehicle Insurance image if exists
+//     if (vehicleInsuraneImage != null && await vehicleInsuraneImage.exists()) {
+//       print("Adding Vehicle Insurance image: ${vehicleInsuraneImage.path}");
+      
+//       request.files.add(
+//         await http.MultipartFile.fromPath(
+//           'vehicleInsuraneImage',
+//           vehicleInsuraneImage.path,
+//           filename: 'insurance_${DateTime.now().millisecondsSinceEpoch}.jpg',
+//         ),
+//       );
+//       print("✓ Added Insurance image");
+//     } else {
+//       print("Vehicle Insurance Image is null or doesn't exist");
+//     }
+
+//     // Add Vehicle Number image if exists
+//     if (vehicleNumberImage != null && await vehicleNumberImage.exists()) {
+//       print("Adding Vehicle Number image: ${vehicleNumberImage.path}");
+      
+//       request.files.add(
+//         await http.MultipartFile.fromPath(
+//           'vehicleNumberImage',
+//           vehicleNumberImage.path,
+//           filename: 'plate_${DateTime.now().millisecondsSinceEpoch}.jpg',
+//         ),
+//       );
+//       print("✓ Added Number Plate image");
+//     } else {
+//       print("Vehicle Number Image is null or doesn't exist");
+//     }
+
+//     print("\n========== CREATE VEHICLE API ==========");
+//     print("URL: $url");
+//     print("Request Fields: ${request.fields}");
+//     print("Number of Files: ${request.files.length}");
+    
+//     // List all files with their field names
+//     for (var i = 0; i < request.files.length; i++) {
+//       var file = request.files[i];
+//       print("File $i: field='${file.field}', filename='${file.filename}'");
+//     }
+
+//     // Send request
+//     print("\n🚀 Sending request...");
+//     final response = await request.send();
+//     final responseBody = await response.stream.bytesToString();
+
+//     print("\n📥 Response Received:");
+//     print("Status Code: ${response.statusCode}");
+//     print("Response Body: $responseBody");
+
+//     // Check if response is HTML (error) or JSON
+//     if (responseBody.trim().startsWith('<!DOCTYPE')) {
+//       print("❌ Server returned HTML error page");
+      
+//       // Try to extract error message from HTML
+//       String errorMessage = "Server error (${response.statusCode})";
+//       if (responseBody.contains('MulterError:')) {
+//         final startIndex = responseBody.indexOf('MulterError:');
+//         final endIndex = responseBody.indexOf('<br>', startIndex);
+//         if (startIndex != -1 && endIndex != -1) {
+//           errorMessage = responseBody.substring(startIndex, endIndex);
+//         }
+//       }
+      
+//       return CreateVehicleRes(
+//         success: false,
+//         message: errorMessage,
+//       );
+//     }
+
+//     try {
+//       final Map<String, dynamic> data = jsonDecode(responseBody);
+//       final CreateVehicleRes createVehicleRes = CreateVehicleRes.fromJson(data);
+      
+//       if (createVehicleRes.success == true) {
+//         print("✅ Vehicle created successfully!");
+//       } else {
+//         print("❌ Vehicle creation failed: ${createVehicleRes.message}");
+//       }
+      
+//       return createVehicleRes;
+//     } catch (e) {
+//       print("❌ Failed to parse JSON response: $e");
+//       print("Raw response: ${responseBody}");
+//       return CreateVehicleRes(
+//         success: false,
+//         message: "Invalid response format: $e",
+//       );
+//     }
+//   } catch (e) {
+//     print("❌ Exception in Create Vehicle API: $e");
+//     print("Stack trace: ${e.toString()}");
+//     return CreateVehicleRes(
+//       success: false,
+//       message: "Connection error: $e",
+//     );
+//   }
+// }
+
+
+//   static Future<CreateVehicleRes> createVehicle_Api({
+//   required String vehicleName,
+//   String? vehicleNumber,
+//   String? vehicleColor,
+//   String? vehicleType,
+//   String? vehicleStatus,
+//   String? vehicleModel,
+//   String? vehicleCapacity,
+//   String? driverId,
+//   int? vehicleYear,
+//   File? rcImage,
+//   File? vehicleInsuraneImage,
+//   File? vehicleNumberImage,
+// }) async {
+//   final Uri url = Uri.parse(ApiPath.createVehicle);
+
+//   /// 🔐 GET TOKEN
+//   final prefs = await SharedPreferences.getInstance();
+//   final String? token = prefs.getString("auth_token");
+//   final String? userId = prefs.getString("driver_userid");
+
+//   print("hhhhhh>>>>>useridddddddddddddd   ${userId}");
+//   print("hhhhh>>>> vehicleName ${vehicleName} ");
+//   print("hhhhh>>>> vehicleNumber ${vehicleNumber} ");
+//   print("hhhhh>>>> vehicleColor ${vehicleColor} ");
+//   print("hhhhh>>>> vehicleType ${vehicleType} ");
+//   print("hhhhh>>>> vehicleStatus ${vehicleStatus} ");
+//   print("hhhhh>>>> vehicleModel ${vehicleModel} ");
+//   print("hhhhh>>>> vehicleCapacity ${vehicleCapacity} ");
+//   print("hhhhh>>>> driverId ${driverId} ");
+//   print("hhhhh>>>> driverId>>>>>>>>> ${userId} ");
+//   print("hhhhh>>>> vehicleYear ${vehicleYear} ");
+
+//   // Print file paths for debugging
+//   print("hhhhh >>>>>>>> rc imageeee ${rcImage?.path}");
+//   print("hhhhh >>>>>>>> vehicleInsuraneImage ${vehicleInsuraneImage?.path}");
+//   print("hhhhh >>>>>>>> vehicleNumberImage ${vehicleNumberImage?.path}");
+
+//   print("========== CREATE VEHICLE API ==========");
+//   print("URL : $url");
+//   print("Token : $token");
+
+//   try {
+//     // Create multipart request
+//     var request = http.MultipartRequest('POST', url);
+    
+//     // Add headers
+//     request.headers['Authorization'] = "Bearer $token";
+    
+//     // Add text fields
+//     request.fields['vehicleName'] = vehicleName;
+//     request.fields['vehicleNumber'] = vehicleNumber ?? '';
+//     request.fields['vehicleColor'] = vehicleColor ?? '';
+//     request.fields['vehicleType'] = vehicleType ?? '';
+//     request.fields['vehicleStatus'] = vehicleStatus ?? 'Active';
+//     request.fields['vehicleModel'] = vehicleModel ?? '';
+//     request.fields['vehicleCapacity'] = vehicleCapacity ?? '4';
+//     request.fields['vehicleYear'] = vehicleYear?.toString() ?? '';
+//     request.fields['driverId'] = userId ?? '';
+    
+//     // Add files if they exist
+//     if (rcImage != null) {
+//       var rcStream = http.ByteStream(rcImage.openRead());
+//       var rcLength = await rcImage.length();
+//       var rcMultipartFile = http.MultipartFile(
+//         'rcImage',
+//         rcStream,
+//         rcLength,
+//         filename: rcImage.path.split('/').last,
+//       );
+//       request.files.add(rcMultipartFile);
+//     }
+    
+//     if (vehicleInsuraneImage != null) {
+//       var insuranceStream = http.ByteStream(vehicleInsuraneImage.openRead());
+//       var insuranceLength = await vehicleInsuraneImage.length();
+//       var insuranceMultipartFile = http.MultipartFile(
+//         'vehicleInsuraneImage',
+//         insuranceStream,
+//         insuranceLength,
+//         filename: vehicleInsuraneImage.path.split('/').last,
+//       );
+//       request.files.add(insuranceMultipartFile);
+//     }
+    
+//     if (vehicleNumberImage != null) {
+//       var numberStream = http.ByteStream(vehicleNumberImage.openRead());
+//       var numberLength = await vehicleNumberImage.length();
+//       var numberMultipartFile = http.MultipartFile(
+//         'vehicleNumberImage',
+//         numberStream,
+//         numberLength,
+//         filename: vehicleNumberImage.path.split('/').last,
+//       );
+//       request.files.add(numberMultipartFile);
+//     }
+    
+//     // Print request details for debugging
+//     print("Request fields: ${request.fields}");
+//     print("Request files count: ${request.files.length}");
+    
+//     // Send request
+//     var streamedResponse = await request.send();
+//     var response = await http.Response.fromStream(streamedResponse);
+    
+//     print("Status Code : ${response.statusCode}");
+//     print("Response Body : ${response.body}");
+    
+//     final Map<String, dynamic> data = jsonDecode(response.body);
+//     final CreateVehicleRes createVehicleRes = CreateVehicleRes.fromJson(data);
+    
+//     print("myyyyy_api_ressssposneee ${createVehicleRes}");
+    
+//     return createVehicleRes;
+//   } catch (e) {
+//     print("❌ Exception in Create Vehicle : $e");
+//     print("Stack trace: ${e.toString()}");
+//     return CreateVehicleRes(success: false, message: "Connection error: $e");
+//   }
+// }
 
   // static Future<CreateVehicleRes> createVehicle_Api({
   //   required String vehicleName,
@@ -575,7 +978,7 @@ class AuthApiService {
 
   static Future<DriverImageUploadRes> uploadNewDriverImage({
     required File image,
-    required String userIds,
+  
     required String userType,
   }) async {
     final prefs = await SharedPreferences.getInstance();

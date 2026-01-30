@@ -1,10 +1,13 @@
 import 'dart:io';
 
 import 'package:corezap_driver/apiervices/services/auth_api_service.dart';
+import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:corezap_driver/modals/Otp_verify_res.dart';
 import 'package:corezap_driver/modals/create_vehicle_res.dart';
 import 'package:corezap_driver/modals/driver_Image_upload_res.dart';
 import 'package:corezap_driver/modals/register_profile_res.dart';
+import 'package:corezap_driver/utilities/navigator.dart';
+import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
 // import 'package:corezap_driver/apiServices/services/auth_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -23,7 +26,8 @@ class LoginController extends GetxController {
   RxBool isProfileCompleted22 = false.obs;
   // For storing user data after successful login
   var userData = {}.obs;
-
+  final DriverFormController driverFormController =
+      Get.find<DriverFormController>();
   // Function to send OTP
   Future<void> sendOtp(String phoneNumber) async {
     try {
@@ -73,32 +77,79 @@ class LoginController extends GetxController {
     }
   }
 
+  Future<void> verifyOtp({String? otp, String? phoneNumber}) async {
+    print("my_Sended_number_came $phoneNumber");
+    print("my_Sended_number_came_otp $otp");
 
-Future<void> verifyOtp({String? otp, String? phoneNumber}) async {
-  print("my_Sended_number_came $phoneNumber");
-  print("my_Sended_number_came_otp $otp");
+    // 🔐 OTP validation
+    if (otp == null || otp.isEmpty || otp.length != 4) {
+      otpError.value = 'Please enter a valid 4-digit OTP';
+      return;
+    }
 
-  // 🔐 OTP validation
-  if (otp == null || otp.isEmpty || otp.length != 4) {
-    otpError.value = 'Please enter a valid 4-digit OTP';
-    return;
-  }
+    try {
+      otpError.value = '';
+      isLoading.value = true;
 
-  try {
-    otpError.value = '';
-    isLoading.value = true;
+      final OtpverifyRes res = await AuthApiService.verifyOtp(
+        otp: otp,
+        phoneNumber: phoneNumber,
+      );
 
-    final OtpverifyRes res = await AuthApiService.verifyOtp(
-      otp: otp,
-      phoneNumber: phoneNumber,
-    );
+      /// ❌ CASE: INVALID OTP / API FAILURE
+      if (res.success != true) {
+        isOtpVerified.value = false;
+        isProfileCompleted.value = false;
 
-    /// ❌ CASE: INVALID OTP / API FAILURE
-    if (res.success != true) {
+        otpError.value = res.message ?? 'Invalid OTP. Please try again.';
+
+        Get.snackbar(
+          'Error',
+          otpError.value,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      /// ✅ CASE: OTP VERIFIED
+      isOtpVerified.value = true;
+
+      /// Driver data may still be null
+      if (res.driver == null) {
+        isProfileCompleted.value = false;
+        return;
+      }
+
+      /// Save user data
+      userData.value = {
+        'id': res.driver!.id,
+        'phone': res.driver!.phone,
+        'imageVerificationStatus': res.driver!.imageVerificationStatus,
+        'isProfileCompleted': res.driver!.isProfileCompleted,
+      };
+
+      /// Normalize isProfileCompleted (bool safe)
+      final bool profileCompleted =
+          res.driver!.isProfileCompleted == true ||
+          res.driver!.isProfileCompleted == "true";
+
+      isProfileCompleted.value = profileCompleted;
+      isProfileCompleted22.value = profileCompleted;
+
+      Get.snackbar(
+        'Success',
+        'OTP verified successfully',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
       isOtpVerified.value = false;
       isProfileCompleted.value = false;
 
-      otpError.value = res.message ?? 'Invalid OTP. Please try again.';
+      otpError.value = 'Something went wrong. Please try again.';
 
       Get.snackbar(
         'Error',
@@ -107,58 +158,10 @@ Future<void> verifyOtp({String? otp, String? phoneNumber}) async {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-      return;
+    } finally {
+      isLoading.value = false;
     }
-
-    /// ✅ CASE: OTP VERIFIED
-    isOtpVerified.value = true;
-
-    /// Driver data may still be null
-    if (res.driver == null) {
-      isProfileCompleted.value = false;
-      return;
-    }
-
-    /// Save user data
-    userData.value = {
-      'id': res.driver!.id,
-      'phone': res.driver!.phone,
-      'imageVerificationStatus': res.driver!.imageVerificationStatus,
-      'isProfileCompleted': res.driver!.isProfileCompleted,
-    };
-
-    /// Normalize isProfileCompleted (bool safe)
-    final bool profileCompleted =
-        res.driver!.isProfileCompleted == true ||
-        res.driver!.isProfileCompleted == "true";
-
-    isProfileCompleted.value = profileCompleted;
-    isProfileCompleted22.value = profileCompleted;
-
-    Get.snackbar(
-      'Success',
-      'OTP verified successfully',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
-  } catch (e) {
-    isOtpVerified.value = false;
-    isProfileCompleted.value = false;
-
-    otpError.value = 'Something went wrong. Please try again.';
-
-    Get.snackbar(
-      'Error',
-      otpError.value,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-    );
-  } finally {
-    isLoading.value = false;
   }
-}
 
   // Future<void> verifyOtp({String? otp, String? phoneNumber}) async {
 
@@ -241,72 +244,75 @@ Future<void> verifyOtp({String? otp, String? phoneNumber}) async {
   // }
 
   Future<void> createVehicleMethod({
-  required String vehicleName,
-  String? vehicleNumber,
-  String? vehicleColor,
-  String? vehicleType,
-  String? vehicleStatus,
-  String? vehicleModel,
-  String? vehicleCapacity,
-  String? driverId,
-  int? vehicleYear,
-  File? rcImage,
-  File? vehicleInsuraneImage,
-  File? vehicleNumberImage,
-}) async {
-  try {
-    isLoading.value = true;
+    required String vehicleName,
+    String? vehicleNumber,
+    String? vehicleColor,
+    String? vehicleType,
+    String? vehicleStatus,
+    String? vehicleModel,
+    int? vehicleCapacity,
+    String? driverId,
+    int? vehicleYear,
+    File? rcImage,
+    File? vehicleInsuraneImage,
+    File? vehicleNumberImage,
+  }) async {
+    try {
+      isLoading.value = true;
 
-    // Call API
-    final CreateVehicleRes res = await AuthApiService.createVehicle_Api(
-      vehicleName: vehicleName,
-      driverId: driverId,
-      vehicleCapacity: vehicleCapacity,
-      vehicleColor: vehicleColor,
-      vehicleModel: vehicleModel,
-      vehicleNumber: vehicleNumber,
-      vehicleStatus: vehicleStatus,
-      vehicleType: vehicleType,
-      vehicleYear: vehicleYear,
-      rcImage: rcImage,
-      vehicleInsuraneImage: vehicleInsuraneImage,
-      vehicleNumberImage: vehicleNumberImage,
-    );
-
-    if (res.success == true) {
-      isOtpVerified.value = true;
-      Get.snackbar(
-        'Success',
-        'Vehicle created successfully',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
+      // Call API
+      final CreateVehicleRes res = await AuthApiService.createVehicle_Api(
+        vehicleName: vehicleName,
+        driverId: driverId,
+        vehicleCapacity: vehicleCapacity,
+        vehicleColor: vehicleColor,
+        vehicleModel: vehicleModel,
+        vehicleNumber: vehicleNumber,
+        vehicleStatus: vehicleStatus,
+        vehicleType: vehicleType,
+        vehicleYear: vehicleYear,
+        rcImage: rcImage,
+        vehicleInsuraneImage: vehicleInsuraneImage,
+        vehicleNumberImage: vehicleNumberImage,
       );
-    } else {
+
+      if (res.success == true) {
+        isOtpVerified.value = true;
+
+        driverFormController.activeStep.value = 2;
+        Get.snackbar(
+          'Success',
+          'Vehicle created successfully',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        isOtpVerified.value = false;
+        otpError.value =
+            res.message ?? 'Failed to create vehicle. Please try again.';
+        Get.snackbar(
+          'Error',
+          res.message ?? 'Failed to create vehicle',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
       isOtpVerified.value = false;
-      otpError.value = res.message ?? 'Failed to create vehicle. Please try again.';
+      otpError.value = 'An error occurred. Please try again.';
       Get.snackbar(
         'Error',
-        res.message ?? 'Failed to create vehicle',
+        'An error occurred: $e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
+    } finally {
+      isLoading.value = false;
     }
-  } catch (e) {
-    isOtpVerified.value = false;
-    otpError.value = 'An error occurred. Please try again.';
-    Get.snackbar(
-      'Error',
-      'An error occurred: $e',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-    );
-  } finally {
-    isLoading.value = false;
   }
-}
 
   // Future<void> createVehicleMethod({
   //   required String vehicleName,
@@ -449,7 +455,7 @@ Future<void> verifyOtp({String? otp, String? phoneNumber}) async {
       if (res.success == true) {
         isOtpVerified.value = true;
         print("Registration successful!");
-
+        driverFormController.activeStep.value = 3;
         Get.snackbar(
           'Success',
           'Registration completed successfully!',
@@ -485,137 +491,128 @@ Future<void> verifyOtp({String? otp, String? phoneNumber}) async {
     }
   }
 
-Future<void> upload_new_image({
-  required File image,
-}) async {
-  try {
-    print("\n📸 ===== UPLOAD NEW IMAGE METHOD =====");
-    isLoading.value = true;
+  Future<void> upload_new_image({
+    required File image,
+    BuildContext? context,
+  }) async {
+    try {
+      print("\n📸 ===== UPLOAD NEW IMAGE METHOD =====");
+      isLoading.value = true;
 
-    // Get userId from SharedPreferences or your auth state
-    // final prefs = await SharedPreferences.getInstance();
-    // final String? userId = prefs.getString("user_id");
-    // final String? userType = prefs.getString("user_type") ?? "driver";
+      print("└─ Image Path: ${image.path}");
 
-    // print("├─ User ID: $userId");
-    // print("├─ User Type: $userType");
-    print("└─ Image Path: ${image.path}");
+      // Call API with File objects
+      final DriverImageUploadRes res =
+          await AuthApiService.uploadNewDriverImage(
+            image: image,
 
-    // if (userId == null || userId.isEmpty) {
-    //   throw Exception("User ID not found. Please login again.");
-    // }
+            userType: "Driver",
+          );
 
-    // Call API with File objects
-    final DriverImageUploadRes res = await AuthApiService.uploadNewDriverImage(
-      image: image,
-      userIds: "696893d16bf2182c63437b39",
-      userType: "Driver",
-      // userId: userId,
-      // userType: userType,
-    );
+      print("\n📨 IMAGE UPLOAD RESPONSE:");
+      print("├─ Success: ${res.success}");
+      print("├─ Message: ${res.message}");
+      // print("└─ Data: ${res.data}");
 
-    print("\n📨 IMAGE UPLOAD RESPONSE:");
-    print("├─ Success: ${res.success}");
-    print("├─ Message: ${res.message}");
-    // print("└─ Data: ${res.data}");
+      if (res.success == true) {
+        print("\n✅ IMAGE UPLOAD SUCCESSFUL!");
 
-    if (res.success == true) {
-      print("\n✅ IMAGE UPLOAD SUCCESSFUL!");
-      
+        CustomNavigator.push(
+          context!,
+          BottomnavmainScreen(),
+          transition: TransitionType.fade,
+        );
+        Get.snackbar(
+          'Success',
+          'Profile photo uploaded successfully!',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
+        driverFormController.resetSteps();
+
+        return; // Return success
+      } else {
+        throw Exception(res.message ?? 'Image upload failed');
+      }
+    } catch (e) {
+      print("\n❌ ERROR IN IMAGE UPLOAD:");
+      print("├─ Error: $e");
+
       Get.snackbar(
-        'Success',
-        'Profile photo uploaded successfully!',
+        'Error',
+        'Failed to upload profile photo: $e',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-      
-      return; // Return success
-    } else {
-      throw Exception(res.message ?? 'Image upload failed');
+
+      rethrow; // Re-throw to handle in calling method
+    } finally {
+      isLoading.value = false;
+      print("\n🏁 IMAGE UPLOAD COMPLETED");
     }
-  } catch (e) {
-    print("\n❌ ERROR IN IMAGE UPLOAD:");
-    print("├─ Error: $e");
-    
-    Get.snackbar(
-      'Error',
-      'Failed to upload profile photo: $e',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-    );
-    
-    rethrow; // Re-throw to handle in calling method
-  } finally {
-    isLoading.value = false;
-    print("\n🏁 IMAGE UPLOAD COMPLETED");
   }
-}
 
+  //  Future<void> upload_new_image({
+  //     required File image,
+  //   required String userId,
+  //   required String userType,
+  //   }) async {
+  //     try {
+  //       isLoading.value = true;
 
-//  Future<void> upload_new_image({
-//     required File image,
-//   required String userId,
-//   required String userType,
-//   }) async {
-//     try {
-//       isLoading.value = true;
+  //       // Call API with File objects
+  //       final DriverImageUploadRes res = await AuthApiService.upload_new_driver_image(
 
-  
-//       // Call API with File objects
-//       final DriverImageUploadRes res = await AuthApiService.upload_new_driver_image(
-    
-//     image: image,
-//     userId: userId,
-//     userType: userType
-    
-//       );
+  //     image: image,
+  //     userId: userId,
+  //     userType: userType
 
-//       print("API Response - Success: ${res.success}");
-//       print("API Response - Message: ${res.message}");
+  //       );
 
-//       if (res.success == true) {
-//         isOtpVerified.value = true;
-//         print("Registration successful!");
+  //       print("API Response - Success: ${res.success}");
+  //       print("API Response - Message: ${res.message}");
 
-//         Get.snackbar(
-//           'Success',
-//           'Registration completed successfully!',
-//           snackPosition: SnackPosition.BOTTOM,
-//           backgroundColor: Colors.green,
-//           colorText: Colors.white,
-//         );
-//       } else {
-//         isOtpVerified.value = false;
-//         otpError.value =
-//             res.message ?? 'Registration failed. Please try again.';
-//         Get.snackbar(
-//           'Error',
-//           res.message ?? 'Registration failed',
-//           snackPosition: SnackPosition.BOTTOM,
-//           backgroundColor: Colors.red,
-//           colorText: Colors.white,
-//         );
-//       }
-//     } catch (e) {
-//       isOtpVerified.value = false;
-//       otpError.value = 'An error occurred. Please try again.';
-//       print("Error in createRegisterMethod: $e");
-//       Get.snackbar(
-//         'Error',
-//         'An error occurred: $e',
-//         snackPosition: SnackPosition.BOTTOM,
-//         backgroundColor: Colors.red,
-//         colorText: Colors.white,
-//       );
-//     } finally {
-//       isLoading.value = false;
-//     }
-//   }
+  //       if (res.success == true) {
+  //         isOtpVerified.value = true;
+  //         print("Registration successful!");
 
-
-  
+  //         Get.snackbar(
+  //           'Success',
+  //           'Registration completed successfully!',
+  //           snackPosition: SnackPosition.BOTTOM,
+  //           backgroundColor: Colors.green,
+  //           colorText: Colors.white,
+  //         );
+  //       } else {
+  //         isOtpVerified.value = false;
+  //         otpError.value =
+  //             res.message ?? 'Registration failed. Please try again.';
+  //         Get.snackbar(
+  //           'Error',
+  //           res.message ?? 'Registration failed',
+  //           snackPosition: SnackPosition.BOTTOM,
+  //           backgroundColor: Colors.red,
+  //           colorText: Colors.white,
+  //         );
+  //       }
+  //     } catch (e) {
+  //       isOtpVerified.value = false;
+  //       otpError.value = 'An error occurred. Please try again.';
+  //       print("Error in createRegisterMethod: $e");
+  //       Get.snackbar(
+  //         'Error',
+  //         'An error occurred: $e',
+  //         snackPosition: SnackPosition.BOTTOM,
+  //         backgroundColor: Colors.red,
+  //         colorText: Colors.white,
+  //       );
+  //     } finally {
+  //       isLoading.value = false;
+  //     }
+  //   }
 
   // Reset state
   void reset() {

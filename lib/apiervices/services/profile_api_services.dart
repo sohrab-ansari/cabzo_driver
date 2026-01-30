@@ -76,6 +76,12 @@ class ProfileApiServices {
           homeModalResponse.driver!.id.toString(),
         );
 
+
+         await prefs.setString(
+          "driver_name",
+          homeModalResponse.driver!.name.toString(),
+        );
+
         print("Response Body222222222jjjj : ${homeModalResponse.driver!.id}");
         // print(
         //   "✅ Driver user ID saved to SharedPreferences: ${registerProfileRes.data!.id}",

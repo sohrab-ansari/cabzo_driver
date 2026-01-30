@@ -59,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   List<Map<String, dynamic>> _nearbyRiders = [];
   Map<String, BitmapDescriptor> _vehicleIcons = {};
 
+String? driverName;
   @override
   void initState() {
     homeController.home_data_method();
@@ -66,6 +67,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     WidgetsBinding.instance.addObserver(this);
     _initializeApp();
+    sharedpreferences();
+  }
+
+  Future<void> sharedpreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+
+     setState(() {
+        driverName = prefs.getString("driver_name");
+     });
+    print("Driver Name from SharedPreferences: $driverName");
   }
 
   Future<void> _initializeApp() async {
@@ -401,9 +413,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 ),
                               ),
                               SizedBox(width: w * 0.03),
-                              AppFonts.textPoppins(
+                              // AppFonts.textPoppins(
+                              //   context,
+                              //   "Ayaan Malviya ${driverName}",
+                              //   w * 0.05,
+                              //   FontWeight.w600,
+                              //   AppColors.black,
+                              //   TextAlign.left,
+                              //   TextOverflow.visible,
+                              // ),
+
+                                AppFonts.textPoppins(
                                 context,
-                                "Ayaan Malviya",
+                                "${driverName}",
                                 w * 0.05,
                                 FontWeight.w600,
                                 AppColors.black,
