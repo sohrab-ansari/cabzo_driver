@@ -60,6 +60,7 @@ import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/custom_font.dart';
 import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
 class CashPaymentScreen extends StatefulWidget {
@@ -74,7 +75,7 @@ class _CashPaymentScreenState extends State<CashPaymentScreen> {
   void initState() {
     super.initState();
     // Navigate after 3 seconds
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         Get.offAll(() => BottomnavmainScreen(),
           transition: Transition.fade,
@@ -87,7 +88,35 @@ class _CashPaymentScreenState extends State<CashPaymentScreen> {
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     
-    return Scaffold(
+    return PopScope(
+      // canPop: false,
+      // onPopInvoked: (didPop) {
+      //   if (didPop) return;
+      //   // Show message and prevent back navigation
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     SnackBar(
+      //       content: Text('Please complete the payment first'),
+      //       backgroundColor: Colors.orange,
+      //       duration: Duration(seconds: 2),
+      //       behavior: SnackBarBehavior.floating,
+      //     ),
+      //   );
+      // },
+
+        canPop: false,
+  onPopInvokedWithResult: (didPop, result) {
+    if (didPop) return;
+
+    Fluttertoast.showToast(
+      msg: "Please complete the payment first",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.black87,
+      textColor: Colors.white,
+      fontSize: 14,
+    );
+  },
+      child: Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
         child: Column(
@@ -151,6 +180,6 @@ class _CashPaymentScreenState extends State<CashPaymentScreen> {
           ],
         ),
       ),
-    );
+    ));
   }
 }

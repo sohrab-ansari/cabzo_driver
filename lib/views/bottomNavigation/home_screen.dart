@@ -85,6 +85,7 @@ String? driverName;
      });
     print("Driver Name from SharedPreferences: $driverName");
   }
+  
 
   Future<void> _initializeApp() async {
     // Request permissions
@@ -332,6 +333,24 @@ String? driverName;
 
     if (_appInBackground) {
       _appInBackground = false;
+      
+      // ✅ FIX: Restore online status after app restart
+      _restoreOnlineStatusAfterResume();
+    }
+  }
+
+  /// Restore online status if driver was online before app was paused/restarted
+  Future<void> _restoreOnlineStatusAfterResume() async {
+    print('🔄 Checking if driver was online before pause...');
+    
+    try {
+      // Wait a moment for socket to stabilize
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      // Try to restore online status
+      // await socketManager.restoreOnlineStatus();
+    } catch (error) {
+      print('❌ Error restoring online status after resume: $error');
     }
   }
 
@@ -375,6 +394,9 @@ String? driverName;
 
   @override
   Widget build(BuildContext context) {
+    
+
+    
     double w = MediaQuery.of(context).size.width;
 
     return socketManager.isOnDuty == false
@@ -497,7 +519,9 @@ String? driverName;
                   end: const Offset(1, 1),
                 ),
       ),
-      body: SingleChildScrollView(
+      body:
+      
+       SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: w * 0.04),
           child: Column(
@@ -557,7 +581,10 @@ String? driverName;
               ),
               SizedBox(height: w * 0.03),
 
-   Card(
+
+ 
+ 
+    Card(
       margin: const EdgeInsets.all(16.0),
       elevation: 2.0,
       shape: RoundedRectangleBorder(
@@ -580,19 +607,25 @@ String? driverName;
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Driver Agreement Required',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+   Text(
+                        'Driver Agreement View',
+                        style: TextStyle(
+                          fontSize: 16.0,
                           fontWeight: FontWeight.bold,
+                          color: Colors.grey[800],
                         ),
                       ),
                       const SizedBox(height: 4.0),
                       Text(
-                        'Please upload and e-sign your driver agreement to continue accepting rides.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        'Please View your driver driver agreement to continue accepting rides.',
+                        style: TextStyle(
+                          fontSize: 14.0,
                           color: Colors.grey[600],
+                          height: 1.4,
                         ),
                       ),
+ 
+
                     ],
                   ),
                 ),
@@ -620,9 +653,7 @@ Navigator.push(context, MaterialPageRoute(builder: (context) => AgreementScreen(
         ],
       ),
     ),
- 
- 
- 
+
               // Text("dhjshafj"),
 
               //  KYCNoticeCardWidget(isKycCompleted: true,
@@ -653,146 +684,158 @@ Navigator.push(context, MaterialPageRoute(builder: (context) => AgreementScreen(
                         ),
               ),
               SizedBox(height: w * 0.04),
-              Column(
-                children: [
-                  HomeScreenWidgets.elevatedBox(
-                    shadowColor: const Color(0xFF4CAF50),
-                    width: double.infinity,
-                    child: const Column(
+
+              Obx(() {
+                final homeData = homeController.homemodalresponse.value;
+                final earnings = homeData?.todayStats?.earnings;
+                final rides = homeData?.todayStats?.rides;
+
+                String formatCurrency(double? amount) {
+                  return '₹${(amount ?? 0).toStringAsFixed(0)}';
+                }
+
+                return Column(
+                  children: [
+                    HomeScreenWidgets.elevatedBox(
+                      shadowColor: const Color(0xFF4CAF50),
+                      width: double.infinity,
+                      child: Column(
+                        children: [
+                          const Text(
+                            "Today's Earnings",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF414142),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            formatCurrency(earnings?.total),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          "Today's Earnings",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF414142),
+                        SizedBox(
+                          width: w * 0.45,
+                          child: HomeScreenWidgets.elevatedBox(
+                            shadowColor: const Color(0xFFFEBC2F),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Online",
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xFF414142),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "${formatCurrency(earnings?.online)} Total",
+                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        SizedBox(height: 6),
-                        Text(
-                          "₹1000.00",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                        SizedBox(width: w * 0.02),
+                        SizedBox(
+                          width: w * 0.45,
+                          child: HomeScreenWidgets.elevatedBox(
+                            shadowColor: const Color(0xFF7C7C8D),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Cash",
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xFF414142),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "${formatCurrency(earnings?.cash)} On Hand",
+                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(
-                        width: w * 0.45,
-                        child: HomeScreenWidgets.elevatedBox(
-                          shadowColor: const Color(0xFFFEBC2F),
-                          child: const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Online",
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Color(0xFF414142),
+                    SizedBox(height: w * 0.05),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: w * 0.45,
+                          child: HomeScreenWidgets.elevatedBox(
+                            shadowColor: const Color(0xFF439AFE),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Total Rides",
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xFF414142),
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                "₹500 Total",
-                                style: TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                            ],
+                                const SizedBox(height: 4),
+                                Text(
+                                  "${rides?.total ?? 0} / ${rides?.completed ?? 0} Completed",
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(width: w * 0.02),
-                      SizedBox(
-                        width: w * 0.45,
-                        child: HomeScreenWidgets.elevatedBox(
-                          shadowColor: const Color(0xFF7C7C8D),
-                          child: const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Cash",
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Color(0xFF414142),
+                        SizedBox(width: w * 0.02),
+                        SizedBox(
+                          width: w * 0.45,
+                          child: HomeScreenWidgets.elevatedBox(
+                            shadowColor: const Color(0xFFF26061),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Cancelled",
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xFF414142),
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                "₹500 On Hand",
-                                style: TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                            ],
+                                const SizedBox(height: 4),
+                                Text(
+                                  "${rides?.total ?? 0} / ${rides?.cancelled ?? 0} Cancelled",
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: w * 0.05),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: w * 0.45,
-                        child: HomeScreenWidgets.elevatedBox(
-                          shadowColor: const Color(0xFF439AFE),
-                          child: const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Total Rides",
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Color(0xFF414142),
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                "50 / 45 Completed",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: w * 0.02),
-                      SizedBox(
-                        width: w * 0.45,
-                        child: HomeScreenWidgets.elevatedBox(
-                          shadowColor: const Color(0xFFF26061),
-                          child: const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Total Rides",
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Color(0xFF414142),
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                "50 / 05 Cancelled",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                      ],
+                    ),
+                  ],
+                );
+              }),
+             
               SizedBox(height: w * 0.04),
             ],
           ),
@@ -803,7 +846,9 @@ Navigator.push(context, MaterialPageRoute(builder: (context) => AgreementScreen(
 
   Widget _buildOnlineScreen(double w) {
     return Scaffold(
-      body: SafeArea(
+      body:
+      
+       SafeArea(
         child: Stack(
           children: [
             /// 1️⃣ Google Map (BOTTOM)
@@ -970,190 +1015,203 @@ Navigator.push(context, MaterialPageRoute(builder: (context) => AgreementScreen(
   /// Earnings Content
   Widget _earningsContent() {
     double w = MediaQuery.of(context).size.width;
-    return Column(
-      children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child:
-              AppFonts.textPoppins(
-                    context,
-                    "Today's Update",
-                    w * 0.038,
-                    FontWeight.w600,
-                    AppColors.black,
-                    TextAlign.left,
-                    TextOverflow.visible,
-                  )
-                  .animate()
-                  .fade(duration: 820.ms, curve: Curves.easeInOut)
-                  .scale(
-                    begin: const Offset(0.95, 0.95),
-                    end: const Offset(1, 1),
-                  ),
-        ),
-        SizedBox(height: w * 0.02),
+    return Obx(() {
+      final homeData = homeController.homemodalresponse.value;
+      final earnings = homeData?.todayStats?.earnings;
+      final rides = homeData?.todayStats?.rides;
 
-        Column(
-          children: [
-            /// Today's Earnings (Full Width)
-            HomeScreenWidgets.elevatedBox(
-              width: double.infinity,
-              shadowColor: const Color(0xFF4CAF50),
-              child: Column(
-                children: const [
-                  Text(
-                    "Today's Earnings",
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
+
+   print("myyyy_dattatt  ${earnings?.total}");
+      // Format currency
+      String formatCurrency(double? amount) {
+        return '₹${(amount ?? 0).toStringAsFixed(0)}';
+      }
+
+      return Column(
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child:
+                AppFonts.textPoppins(
+                      context,
+                      "Today's Update",
+                      w * 0.038,
+                      FontWeight.w600,
+                      AppColors.black,
+                      TextAlign.left,
+                      TextOverflow.visible,
+                    )
+                    .animate()
+                    .fade(duration: 820.ms, curve: Curves.easeInOut)
+                    .scale(
+                      begin: const Offset(0.95, 0.95),
+                      end: const Offset(1, 1),
+                    ),
+          ),
+          SizedBox(height: w * 0.02),
+
+          Column(
+            children: [
+              /// Today's Earnings (Full Width)
+              HomeScreenWidgets.elevatedBox(
+                width: double.infinity,
+                shadowColor: const Color(0xFF4CAF50),
+                child: Column(
+                  children: [
+                    const Text(
+                      "Today's Earnings",
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      formatCurrency(earnings?.total),
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: w * 0.02),
+
+              /// Online & Cash
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: w * 0.4,
+                    child: HomeScreenWidgets.elevatedBox(
+                      shadowColor: const Color(0xFFFEBC2F),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Online",
+                            style: TextStyle(fontSize: 13, color: Colors.grey),
+                          ),
+                          const SizedBox(height: 1),
+                          Text(
+                            "${formatCurrency(earnings?.online)} Total",
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  SizedBox(height: 1),
-                  Text(
-                    "₹1000.00",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  SizedBox(width: w * 0.01),
+                  SizedBox(
+                    width: w * 0.45,
+                    child: HomeScreenWidgets.elevatedBox(
+                      shadowColor: const Color(0xFF7C7C8D),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Cash",
+                            style: TextStyle(fontSize: 13, color: Colors.grey),
+                          ),
+                          const SizedBox(height: 1),
+                          Text(
+                            "${formatCurrency(earnings?.cash)} On Hand",
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ),
 
-            SizedBox(height: w * 0.02),
+              SizedBox(height: w * 0.02),
 
-            /// Online & Cash
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(
-                  width: w * 0.4,
-                  child: HomeScreenWidgets.elevatedBox(
-                    shadowColor: const Color(0xFFFEBC2F),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          "Online",
-                          style: TextStyle(fontSize: 13, color: Colors.grey),
-                        ),
-                        SizedBox(height: 1),
-                        Text(
-                          "₹500 Total",
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(width: w * 0.01),
-                SizedBox(
-                  width: w * 0.45,
-                  child: HomeScreenWidgets.elevatedBox(
-                    shadowColor: const Color(0xFF7C7C8D),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          "Cash",
-                          style: TextStyle(fontSize: 13, color: Colors.grey),
-                        ),
-                        SizedBox(height: 1),
-                        Text(
-                          "₹500 On Hand",
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            SizedBox(height: w * 0.02),
-
-            /// Ride Stats
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: w * 0.4,
-                  child: HomeScreenWidgets.elevatedBox(
-                    shadowColor: const Color(0xFF439AFE),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Total Rides",
-                          style: TextStyle(fontSize: 13, color: Colors.grey),
-                        ),
-                        const SizedBox(height: 1),
-                        RichText(
-                          text: const TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "50",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              TextSpan(
-                                text: " / 45 Completed",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
+              /// Ride Stats
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: w * 0.4,
+                    child: HomeScreenWidgets.elevatedBox(
+                      shadowColor: const Color(0xFF439AFE),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Total Rides",
+                            style: TextStyle(fontSize: 13, color: Colors.grey),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(width: w * 0.02),
-                SizedBox(
-                  width: w * 0.45,
-                  child: HomeScreenWidgets.elevatedBox(
-                    shadowColor: const Color(0xFFF26061),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Total Rides",
-                          style: TextStyle(fontSize: 13, color: Colors.grey),
-                        ),
-                        const SizedBox(height: 1),
-                        RichText(
-                          text: const TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "50",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
+                          const SizedBox(height: 1),
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "${rides?.total ?? 0}",
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
                                 ),
-                              ),
-                              TextSpan(
-                                text: " / 45 Completed",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
+                                TextSpan(
+                                  text: " / ${rides?.completed ?? 0} Completed",
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
-    );
+                  SizedBox(width: w * 0.02),
+                  SizedBox(
+                    width: w * 0.45,
+                    child: HomeScreenWidgets.elevatedBox(
+                      shadowColor: const Color(0xFFF26061),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Cancelled",
+                            style: TextStyle(fontSize: 13, color: Colors.grey),
+                          ),
+                          const SizedBox(height: 1),
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "${rides?.total ?? 0}",
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: " / ${rides?.cancelled ?? 0} Cancelled",
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      );
+    });
   }
 }
 
@@ -1209,30 +1267,54 @@ class KYCNoticeWidget extends StatelessWidget {
                 ),
                 const SizedBox(width: 12.0),
                 // Text Content
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Driver Agreement Required',
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                      const SizedBox(height: 4.0),
-                      Text(
-                        'Please upload and e-sign your driver agreement to continue accepting rides.',
-                        style: TextStyle(
-                          fontSize: 14.0,
-                          color: Colors.grey[600],
-                          height: 1.4,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                // Expanded(
+                //   child: Column(
+                //     crossAxisAlignment: CrossAxisAlignment.start,
+                //     children: [
+                //       Text(
+                //         'Driver Agreement Required',
+                //         style: TextStyle(
+                //           fontSize: 16.0,
+                //           fontWeight: FontWeight.bold,
+                //           color: Colors.grey[800],
+                //         ),
+                //       ),
+                //       const SizedBox(height: 4.0),
+                //       Text(
+                //         'Please upload and e-sign your driver agreement to continue accepting rides.',
+                //         style: TextStyle(
+                //           fontSize: 14.0,
+                //           color: Colors.grey[600],
+                //           height: 1.4,
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+
+                //     Expanded(
+                //   child: Column(
+                //     crossAxisAlignment: CrossAxisAlignment.start,
+                //     children: [
+                //       Text(
+                //         'Driver Agreement View',
+                //         style: TextStyle(
+                //           fontSize: 16.0,
+                //           fontWeight: FontWeight.bold,
+                //           color: Colors.grey[800],
+                //         ),
+                //       ),
+                //       const SizedBox(height: 4.0),
+                //       Text(
+                //         'Please View your driver driver agreement to continue accepting rides.',
+                //         style: TextStyle(
+                //           fontSize: 14.0,
+                //           color: Colors.grey[600],
+                //           height: 1.4,
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
               ],
             ),
           ),

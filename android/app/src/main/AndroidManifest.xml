@@ -1,27 +1,39 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- ===== ALL PERMISSIONS MUST BE HERE (under <manifest>) ===== -->
     <!-- Internet permission -->
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
-    
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
     <!-- For Foreground Service (required for continuous location updates) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     
+    <!-- Storage permissions -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+    
+    <!-- For Android 11+ (Scoped Storage) -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        android:minSdkVersion="30"
+        tools:ignore="ScopedStorage" />
+    
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <!-- Post notifications permission for Android 13+ -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- For loading images/media -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-    
+    <!-- For loading images/media (Android 13+) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
     <!-- Keep screen on permission (optional for driver app) -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    
+
     <!-- Optional: For network state (if you check connectivity) -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
@@ -29,7 +41,13 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true"
-        android:usesCleartextTraffic="true"> <!-- Add this for development/testing -->
+        android:usesCleartextTraffic="true"
+        android:requestLegacyExternalStorage="true"> <!-- Add this for Android 10 compatibility -->
+        
+        <!-- Add this for MANAGE_EXTERNAL_STORAGE permission -->
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
 
         <activity
             android:name=".MainActivity"
@@ -43,46 +61,59 @@
 
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
-                android:resource="@style/NormalTheme"/>
+                android:resource="@style/NormalTheme" />
 
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <!-- Google Maps API Key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCtM1jo8qzhEn2XZ8SVCoboULcondCjZio"/>
+            android:value="AIzaSyCtM1jo8qzhEn2XZ8SVCoboULcondCjZio" />
 
         <!-- Flutter embedding -->
         <meta-data
             android:name="flutterEmbedding"
-            android:value="2"/>
-            
+            android:value="2" />
+
         <!-- Geolocator background service for Android 10+ -->
         <service
             android:name="com.baseflow.geolocator.location.BackgroundLocationService"
             android:enabled="true"
             android:exported="false" />
-            
+
         <!-- Foreground Service for continuous location updates -->
         <service
             android:name="com.baseflow.geolocator.location.ForegroundNotificationService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="location" />
-            
-        <!-- Socket.IO connection policies (optional but recommended) -->
-        
-            
+
+        <!-- Add this provider for file sharing -->
+        <!-- <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider> -->
+
     </application>
 
     <queries>
         <intent>
-            <action android:name="android.intent.action.PROCESS_TEXT"/>
-            <data android:mimeType="text/plain"/>
+            <action android:name="android.intent.action.PROCESS_TEXT" />
+            <data android:mimeType="text/plain" />
+        </intent>
+        <!-- Add this for PDF viewing -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="application/pdf" />
         </intent>
     </queries>
 

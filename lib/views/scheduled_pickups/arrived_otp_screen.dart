@@ -2,6 +2,7 @@
 import 'package:corezap_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -185,8 +186,10 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted && !_isDisposed) {
             stepperController.nextStep();
+
+            Navigator.pop(context);
             // Navigate to next screen
-            Get.off(() => ArrivingClient(rideData: widget.rideData));
+            // Get.off(() => ArrivingClient(rideData: widget.rideData));
           }
         });
       } else {
@@ -210,22 +213,49 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        leadingWidth: w * 0.08,
-        title: Text("OTP ${widget.bookridetypecheck ?? ''}"),
-        elevation: 0,
+    return PopScope(
+        canPop: false,
+  onPopInvokedWithResult: (didPop, result) {
+    if (didPop) return;
+
+    Fluttertoast.showToast(
+      msg: "Please complete the ride verification first",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.black87,
+      textColor: Colors.white,
+      fontSize: 14,
+    );
+  },
+      // canPop: false,
+      // onPopInvoked: (didPop) {
+      //   if (didPop) return;
+      //   // Show message and prevent back navigation
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     SnackBar(
+      //       content: Text('Please complete the ride verification first'),
+      //       backgroundColor: Colors.orange,
+      //       duration: Duration(seconds: 2),
+      //       behavior: SnackBarBehavior.floating,
+      //     ),
+      //   );
+      // },
+      child: Scaffold(
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (mounted && !_isDisposed) {
-              Navigator.of(context).pop(false);
-            }
-          },
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          leadingWidth: w * 0.08,
+          title: Text("OTP ${widget.bookridetypecheck ?? ''}"),
+          elevation: 0,
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              if (mounted && !_isDisposed) {
+                Navigator.of(context).pop(false);
+              }
+            },
         ),
       ),
       body: SingleChildScrollView(
@@ -311,6 +341,32 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
                 }
               },
             ),
+
+            const SizedBox(height: 20),
+
+            /// PICKUP & DROP LOCATION CARDS
+            _buildLocationCard(
+              label: "Pickup",
+              address: widget.rideData?['pickupLocation']?.toString() ??
+                  "Pickup location",
+              icon: "assets/icons/greenDot.png",
+              w: w,
+            ),
+
+            const SizedBox(height: 12),
+
+            _buildLocationCard(
+              label: "Drop",
+              address: widget.rideData?['dropLocation']?.toString() ??
+                  "Drop location",
+              icon: "assets/icons/redDot.png",
+              w: w,
+            ),
+
+            const SizedBox(height: 20),
+
+            /// RIDE DETAILS CARD
+            _buildRideDetailsCard(w),
 
             const SizedBox(height: 20),
 
@@ -477,7 +533,7 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
           ],
         ),
       ),
-    );
+     ) );
   }
 
 
@@ -498,5 +554,268 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
     } else {
       _showSnackbar('Invalid order ID');
     }
+  }
+
+  /// Helper widget to build location cards
+  Widget _buildLocationCard({
+    required String label,
+    required String address,
+    required String icon,
+    required double w,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: w * 0.04,
+        vertical: w * 0.035,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /// Location Icon
+          Image.asset(
+            icon,
+            height: w * 0.05,
+            width: w * 0.05,
+          ),
+          SizedBox(width: w * 0.03),
+
+          /// Text Content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /// Label
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: w * 0.035,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(height: 6),
+
+                /// Address
+                Text(
+                  address,
+                  style: TextStyle(
+                    fontSize: w * 0.032,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.grey.shade700,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Helper widget to build ride details card
+  Widget _buildRideDetailsCard(double w) {
+    final fare = widget.rideData?['fare']?.toString() ?? '0';
+    final distance = widget.rideData?['distance']?.toString() ?? '0';
+    final riderEmail = widget.rideData?['riderEmail']?.toString() ?? 'N/A';
+    final riderPhone = widget.rideData?['riderPhone']?.toString() ?? 'N/A';
+    final orderId = widget.rideData?['orderId']?.toString() ?? 'N/A';
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: EdgeInsets.all(w * 0.04),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /// Title
+          Text(
+            "Ride Details",
+            style: TextStyle(
+              fontSize: w * 0.045,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+          SizedBox(height: w * 0.03),
+
+          /// Details Grid
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              /// Fare
+              _buildDetailItem(
+                icon: '₹',
+                label: 'Fare',
+                value: fare,
+                w: w,
+              ),
+
+              /// Distance
+              _buildDetailItem(
+                icon: '📍',
+                label: 'Distance',
+                value: '${distance} km',
+                w: w,
+              ),
+            ],
+          ),
+
+          SizedBox(height: w * 0.04),
+
+          /// Order ID
+          _buildDetailRow('Order ID', orderId),
+          SizedBox(height: w * 0.02),
+
+          /// Phone Number
+          if (riderPhone != 'N/A')
+            _buildDetailRow('Phone', riderPhone),
+          if (riderPhone != 'N/A')
+            SizedBox(height: w * 0.02),
+
+          /// Email
+          if (riderEmail != 'N/A')
+            _buildDetailRow('Email', riderEmail),
+          if (riderEmail != 'N/A')
+            SizedBox(height: w * 0.02),
+
+          /// OTP Verified Status
+          _buildStatusRow(
+            'OTP Verified',
+            widget.rideData?['otpVerified'] == true ? 'Yes' : 'No',
+            widget.rideData?['otpVerified'] == true,
+            w,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Helper widget for detail items (Fare, Distance)
+  Widget _buildDetailItem({
+    required String icon,
+    required String label,
+    required String value,
+    required double w,
+  }) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            icon,
+            style: TextStyle(fontSize: w * 0.06),
+          ),
+          SizedBox(height: w * 0.01),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: w * 0.03,
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: w * 0.01),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: w * 0.04,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Helper widget for detail rows
+  Widget _buildDetailRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: MediaQuery.of(context).size.width * 0.032,
+            color: Colors.grey,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.4,
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: MediaQuery.of(context).size.width * 0.032,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.end,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Helper widget for status rows
+  Widget _buildStatusRow(String label, String value, bool isPositive, double w) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: w * 0.032,
+            color: Colors.grey,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: w * 0.03,
+            vertical: w * 0.01,
+          ),
+          decoration: BoxDecoration(
+            color: isPositive
+                ? Colors.green.withOpacity(0.1)
+                : Colors.orange.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: w * 0.03,
+              fontWeight: FontWeight.w600,
+              color: isPositive ? Colors.green : Colors.orange,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

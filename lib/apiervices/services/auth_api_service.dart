@@ -43,7 +43,7 @@ class AuthApiService {
       Fluttertoast.showToast(
         msg: data['message'] ?? "Something went wrong",
         toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
+        gravity: ToastGravity.TOP,
       );
       //  Fluttertoast.showToast(
       //   msg: data['error'] ?? "Something went wrong",

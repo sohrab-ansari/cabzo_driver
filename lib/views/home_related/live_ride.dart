@@ -11,9 +11,11 @@ import 'package:corezap_driver/utilities/navigator.dart';
 import 'package:corezap_driver/utilities/utils/button_state_manager.dart';
 import 'package:corezap_driver/utilities/utils/navigation_command.dart';
 import 'package:corezap_driver/views/scheduled_pickups/accepted_screen.dart';
+import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
 
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -41,8 +43,8 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   static const String GOOGLE_API_KEY =
       'AIzaSyCtM1jo8qzhEn2XZ8SVCoboULcondCjZio';
 
-  // Timer - 1 minute = 60 seconds
-  static const int TOTAL_TIME = 60;
+  // Timer - 10 seconds
+  static const int TOTAL_TIME = 10;
   int _timer = TOTAL_TIME;
   double _progress = 1.0;
   Timer? _countdownTimer;
@@ -973,6 +975,14 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         backgroundColor: Colors.orange,
       ),
     );
+
+    // Navigate to BottomnavmainScreen after 1 second
+    await Future.delayed(Duration(seconds: 1));
+    if (mounted) {
+      // Get.offAll(() => BottomnavmainScreen());
+
+      Navigator.pop(context);
+    }
   }
 
   void _handleNavigation(NavigationCommand command) {
@@ -1002,14 +1012,38 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
 
-    return WillPopScope(
-      onWillPop: () async {
-        if (_showCancelSheet) {
-          setState(() => _showCancelSheet = false);
-          return false;
-        }
-        return true;
-      },
+    return PopScope(
+
+       canPop: false,
+  onPopInvokedWithResult: (didPop, result) {
+    if (didPop) return;
+
+    Fluttertoast.showToast(
+      msg: "Please complete the ride verification first",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.black87,
+      textColor: Colors.white,
+      fontSize: 14,
+    );
+  },
+      // canPop: false,
+      // onPopInvoked: (didPop) {
+      //   if (didPop) return;
+      //   if (_showCancelSheet) {
+      //     setState(() => _showCancelSheet = false);
+      //     return;
+      //   }
+      //   // Prevent back navigation and show message
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     SnackBar(
+      //       content: Text('Please complete the ride first'),
+      //       backgroundColor: Colors.orange,
+      //       duration: Duration(seconds: 2),
+      //       behavior: SnackBarBehavior.floating,
+      //     ),
+      //   );
+      // },
       child: Scaffold(
         backgroundColor: Colors.white,
         body: _rideData == null

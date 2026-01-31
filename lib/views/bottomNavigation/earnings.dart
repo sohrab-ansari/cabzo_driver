@@ -276,8 +276,12 @@ class _EarningsState extends State<Earnings> {
                               vertical: w * 0.06,
                               horizontal: w * 0.05,
                             ),
-                            child: Center(
-                              child: CircularProgressIndicator(),
+                            // child: Center(
+                            //   child: CircularProgressIndicator(),
+                            // ),
+
+                             child: Center(
+                              child: SizedBox.shrink(),
                             ),
                           ),
                         );
@@ -472,8 +476,13 @@ class _EarningsState extends State<Earnings> {
                   FutureBuilder<List<dynamic>>(
                     future: rideHistoryFuture,
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
+                      // if (snapshot.connectionState == ConnectionState.waiting) {
+                      //   return Center(child: CircularProgressIndicator());
+                      // }
+
+
+  if (snapshot.connectionState == ConnectionState.waiting) {
+                        return SizedBox.shrink();
                       }
 
                       if (snapshot.hasError) {

@@ -452,61 +452,135 @@ class ProfileApiServices {
     }
   }
 
+
   static Future<DriverIdResponse> get_driverid_data() async {
-    /// 🔐 GET TOKEN
-    final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString("auth_token");
+  /// 🔐 GET TOKEN
+  final prefs = await SharedPreferences.getInstance();
+  final String? token = prefs.getString("auth_token");
+  final String? userId = prefs.getString("driver_userid");
 
-    final String? userId = prefs.getString("driver_userid");
+  print("herrrerrere_the_driverrrriddd_calling>>>>");
+  print("theeeee____ useriddddd ${userId}");
 
+  final Uri url = Uri.parse(
+    "${ApiPath.baseUri}/driver/getDriverProfile/${userId}",
+  );
 
+  print("========== CREATE VEHICLE API ==========");
+  print("URL : $url");
+  print("Token : $token");
+  print("my_tokennnn ${token}");
 
-    print("theeeee____ useriddddd ${userId}");
-
-    final Uri url = Uri.parse(
-      "${ApiPath.baseUri}/driver/getDriverProfile/${userId}",
+  try {
+    final http.Response response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token", // ✅ BEARER TOKEN
+      },
     );
 
-    print("========== CREATE VEHICLE API ==========");
-    print("URL : $url");
-    print("Token : $token");
-    // print("Request Body : ${jsonEncode(requestBody)}");
-    print("my_tokennnn ${token}");
+    print("Status Code : ${response.statusCode}");
+    print("drievrrrrrid>>>>>>> resss >>>> Response Body : ${response.body}");
 
-    try {
-      final http.Response response = await http.get(
-        url,
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token", // ✅ BEARER TOKEN
-        },
-        // body: jsonEncode(requestBody),
-      );
+    final Map<String, dynamic> data = jsonDecode(response.body);
+    final DriverIdResponse driverIdResponse = DriverIdResponse.fromJson(data);
 
-      print("Status Code : ${response.statusCode}");
-      print("Response Body : ${response.body}");
-
-      final Map<String, dynamic> data = jsonDecode(response.body);
-      final DriverIdResponse driverIdResponse = DriverIdResponse.fromJson(data);
-
-  final prefs = await SharedPreferences.getInstance();
-        
-        await prefs.setString("driver_name", driverIdResponse.driver!.name ?? "");
-
-        await prefs.setString("driver_mobile", driverIdResponse.driver!.phone ?? "");
-
-//  if (driverIdResponse.token != null &&
-//           otpResponse.token!.isNotEmpty &&
-//           driverId != null &&
-//           driverId.isNotEmpty) {
-       
-//       }
-      return driverIdResponse;
-    } catch (e) {
-      print("❌ Exception in Create Vehicle5 : $e");
-      return DriverIdResponse(success: false, message: "Connection error: $e");
+    // Store driver basic info
+    await prefs.setString("driver_name", driverIdResponse.driver!.name ?? "");
+    await prefs.setString("driver_mobile", driverIdResponse.driver!.phone ?? "");
+    
+    // Store vehicle info if available
+    if (driverIdResponse.driver?.vehicle != null) {
+      final vehicle = driverIdResponse.driver!.vehicle!;
+      
+      // Store vehicle ID
+      if (vehicle.id != null && vehicle.id!.isNotEmpty) {
+        await prefs.setString("vehicle_id", vehicle.id!);
+        print("✅ Vehicle ID stored: ${vehicle.id}");
+      }
+      
+      // Store vehicle type ID
+      if (vehicle.vehicleType != null && vehicle.vehicleType!.isNotEmpty) {
+        await prefs.setString("vehicle_type_id", vehicle.vehicleType!);
+        print("✅ Vehicle Type ID stored: ${vehicle.vehicleType}");
+      }
+      
+      // Optionally store other vehicle info if needed
+      await prefs.setString("vehicle_name", vehicle.vehicleName ?? "");
+      await prefs.setString("vehicle_number", vehicle.vehicleNumber ?? "");
+      await prefs.setString("vehicle_color", vehicle.vehicleColor ?? "");
+      await prefs.setString("vehicle_model", vehicle.vehicleModel ?? "");
+      await prefs.setInt("vehicle_capacity", vehicle.vehicleCapacity ?? 0);
+    } else {
+      print("⚠️ No vehicle data available");
     }
+
+    return driverIdResponse;
+  } catch (e) {
+    print("❌ Exception in Create Vehicle5 : $e");
+    return DriverIdResponse(success: false, message: "Connection error: $e");
   }
+}
+
+//   static Future<DriverIdResponse> get_driverid_data() async {
+//     /// 🔐 GET TOKEN
+//     final prefs = await SharedPreferences.getInstance();
+//     final String? token = prefs.getString("auth_token");
+
+//     final String? userId = prefs.getString("driver_userid");
+
+
+
+
+//   print("herrrerrere_the_driverrrriddd_calling>>>>")
+// ;
+//     print("theeeee____ useriddddd ${userId}");
+
+//     final Uri url = Uri.parse(
+//       "${ApiPath.baseUri}/driver/getDriverProfile/${userId}",
+//     );
+
+//     print("========== CREATE VEHICLE API ==========");
+//     print("URL : $url");
+//     print("Token : $token");
+//     // print("Request Body : ${jsonEncode(requestBody)}");
+//     print("my_tokennnn ${token}");
+
+//     try {
+//       final http.Response response = await http.get(
+//         url,
+//         headers: {
+//           "Content-Type": "application/json",
+//           "Authorization": "Bearer $token", // ✅ BEARER TOKEN
+//         },
+//         // body: jsonEncode(requestBody),
+//       );
+
+//       print("Status Code : ${response.statusCode}");
+//       print("drievrrrrrid>>>>>>> resss >>>> Response Body : ${response.body}");
+
+//       final Map<String, dynamic> data = jsonDecode(response.body);
+//       final DriverIdResponse driverIdResponse = DriverIdResponse.fromJson(data);
+
+//   final prefs = await SharedPreferences.getInstance();
+        
+//         await prefs.setString("driver_name", driverIdResponse.driver!.name ?? "");
+
+//         await prefs.setString("driver_mobile", driverIdResponse.driver!.phone ?? "");
+
+// //  if (driverIdResponse.token != null &&
+// //           otpResponse.token!.isNotEmpty &&
+// //           driverId != null &&
+// //           driverId.isNotEmpty) {
+       
+// //       }
+//       return driverIdResponse;
+//     } catch (e) {
+//       print("❌ Exception in Create Vehicle5 : $e");
+//       return DriverIdResponse(success: false, message: "Connection error: $e");
+//     }
+//   }
 
   static Future<AddMoneyWalletResponse> initializeWalletTopUp({
     required dynamic amount,
