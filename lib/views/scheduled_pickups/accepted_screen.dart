@@ -892,7 +892,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
     switch (command.route) {
       case 'bottom_nav':
-        Get.offAll(() => BottomnavmainScreen());
+        Get.offAll(() => BottomnavmainScreen(isOnDuty: true,));
         break;
       case 'arriving_screen':
         _navigateToOtpScreen();

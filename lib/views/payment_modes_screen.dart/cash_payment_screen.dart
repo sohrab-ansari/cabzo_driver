@@ -77,7 +77,7 @@ class _CashPaymentScreenState extends State<CashPaymentScreen> {
     // Navigate after 3 seconds
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
-        Get.offAll(() => BottomnavmainScreen(),
+        Get.offAll(() => BottomnavmainScreen(isOnDuty: true,),
           transition: Transition.fade,
         );
       }

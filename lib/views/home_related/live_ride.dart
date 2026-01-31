@@ -991,7 +991,8 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     switch (command.route) {
       case 'bottom_nav':
         // Go back to home screen on cancellation
-        Get.back();
+        // Get.back();
+         Get.offAll(() => BottomnavmainScreen(isOnDuty: true,));
         break;
       case 'arriving_screen':
         // Navigate to ArrivingClient screen

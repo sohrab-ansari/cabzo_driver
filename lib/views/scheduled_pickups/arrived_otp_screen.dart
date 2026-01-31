@@ -363,10 +363,10 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
               w: w,
             ),
 
-            const SizedBox(height: 20),
+            // const SizedBox(height: 20),
 
-            /// RIDE DETAILS CARD
-            _buildRideDetailsCard(w),
+            // /// RIDE DETAILS CARD
+            // _buildRideDetailsCard(w),
 
             const SizedBox(height: 20),
 
@@ -507,29 +507,29 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
             ),
 
             /// DEBUG INFO (Optional - remove in production)
-            if (widget.rideData != null) ...[
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Debug Info:",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 5),
-                    Text("Order ID: ${widget.rideData?['orderId']}"),
-                    Text("Rider: ${widget.rideData?['riderName']}"),
-                    Text("OTP Entered: $enteredOtp"),
-                  ],
-                ),
-              ),
-            ],
+            // if (widget.rideData != null) ...[
+            //   const SizedBox(height: 20),
+            //   Container(
+            //     padding: const EdgeInsets.all(10),
+            //     decoration: BoxDecoration(
+            //       color: Colors.grey[100],
+            //       borderRadius: BorderRadius.circular(10),
+            //     ),
+            //     child: Column(
+            //       crossAxisAlignment: CrossAxisAlignment.start,
+            //       children: [
+            //         const Text(
+            //           "Debug Info:",
+            //           style: TextStyle(fontWeight: FontWeight.bold),
+            //         ),
+            //         const SizedBox(height: 5),
+            //         Text("Order ID: ${widget.rideData?['orderId']}"),
+            //         Text("Rider: ${widget.rideData?['riderName']}"),
+            //         Text("OTP Entered: $enteredOtp"),
+            //       ],
+            //     ),
+            //   ),
+            // ],
           ],
         ),
       ),

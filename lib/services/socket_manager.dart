@@ -1253,7 +1253,7 @@ class SocketManager {
 
   // Status
   bool _isSocketConnected = false;
-  bool _isOnDuty = false;
+  bool isOnDuty = false;
   bool _isProcessingOnline = false;
   bool _isRideInProgress = false;
   bool _isAppReady = false;
@@ -1478,7 +1478,7 @@ class SocketManager {
             _lastLocationUpdate = DateTime.now();
 
             // Send location update if on duty
-            if (_isOnDuty && _socket != null && _isSocketConnected) {
+            if (isOnDuty && _socket != null && _isSocketConnected) {
               _sendLocationUpdate();
             }
 
@@ -1598,7 +1598,7 @@ class SocketManager {
       onConnectionStatusChange?.call(true);
 
       // Auto go online if driver was on duty
-      if (_isOnDuty) {
+      if (isOnDuty) {
         Timer(const Duration(seconds: 1), () {
           goOnline();
         });
@@ -1642,7 +1642,7 @@ class SocketManager {
         '🚕 NEW RIDE REQUEST RECEIVED: ${jsonEncode(rideData).substring(0, 100)}...',
       );
 
-      if (!_isOnDuty) {
+      if (!isOnDuty) {
         print('⚠️ Received ride request but driver is offline');
         return;
       }
@@ -1949,7 +1949,7 @@ class SocketManager {
       _stopLocationUpdates();
       stopLocationWatch();
 
-      _isOnDuty = false;
+      isOnDuty = false;
       _isProcessingOnline = false;
 
       onDriverStatusChange?.call(false);
@@ -1964,7 +1964,7 @@ class SocketManager {
     if (!_isProcessingOnline) return;
 
     print('✅ DRIVER ONLINE SUCCESS');
-    _isOnDuty = true;
+    isOnDuty = true;
     _isProcessingOnline = false;
 
     onDriverStatusChange?.call(true);
@@ -1974,7 +1974,7 @@ class SocketManager {
     if (!_isProcessingOnline) return;
 
     print('❌ DRIVER ONLINE FAILED');
-    _isOnDuty = false;
+    isOnDuty = false;
     _isProcessingOnline = false;
 
     onDriverStatusChange?.call(false);
@@ -2042,7 +2042,7 @@ class SocketManager {
     _locationUpdateTimer = Timer.periodic(
       const Duration(milliseconds: LOCATION_UPDATE_INTERVAL),
       (_) {
-        if (_socket != null && _isSocketConnected && _isOnDuty) {
+        if (_socket != null && _isSocketConnected && isOnDuty) {
           if (_currentLatitude != 0.0 && _currentLongitude != 0.0) {
             _sendLocationUpdate();
           }
@@ -2109,7 +2109,7 @@ class SocketManager {
     _socket!.emit('ride:accept', payload);
 
     // Keep driver online but mark as busy
-    _isOnDuty = true; // Keep online to receive updates
+    isOnDuty = true; // Keep online to receive updates
 
     return true;
   }
@@ -2478,7 +2478,7 @@ class SocketManager {
 
     _isSocketConnected = false;
     _socketId = null;
-    _isOnDuty = false;
+    isOnDuty = false;
 
     onConnectionStatusChange?.call(false);
     onDriverStatusChange?.call(false);
@@ -2491,7 +2491,7 @@ class SocketManager {
       'isConnected': _isSocketConnected,
       'socketId': _socketId,
       'driverId': _driverId,
-      'isOnDuty': _isOnDuty,
+      'isOnDuty': isOnDuty,
       'currentRide': _currentRide,
       'location': {
         'latitude': _currentLatitude,
@@ -2527,7 +2527,7 @@ class SocketManager {
     print('Connected: $_isSocketConnected');
     print('Socket ID: $_socketId');
     print('Driver ID: $_driverId');
-    print('On Duty: $_isOnDuty');
+    print('On Duty: $isOnDuty');
     print('Current Ride: $_currentRide');
     print('Ride In Progress: $_isRideInProgress');
     print('Active Ride ID: $_activeRideId');
@@ -2549,7 +2549,7 @@ class SocketManager {
 
   // ==================== GETTERS ====================
   bool get isSocketConnected => _isSocketConnected;
-  bool get isOnDuty => _isOnDuty;
+  bool get isOnDutyy => isOnDuty;
   bool get isProcessingOnline => _isProcessingOnline;
   bool get isRideInProgress => _isRideInProgress;
   String get socketStatus => _socketStatus;

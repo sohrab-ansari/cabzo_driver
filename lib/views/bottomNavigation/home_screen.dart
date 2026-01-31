@@ -23,7 +23,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:corezap_driver/services/socket_manager.dart' hide LatLng;
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+   bool? isOnDuty = false;
+   HomeScreen({super.key,  required this.isOnDuty});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -66,14 +67,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 String? driverName;
   @override
   void initState() {
+    super.initState(); // Call super first
+    
+    handleonline();
     homeController.home_data_method();
-
     driveridController.driverid_mdethod();
-    super.initState();
 
     WidgetsBinding.instance.addObserver(this);
     _initializeApp();
     sharedpreferences();
+    
+    // Ensure build is called after state is set
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {});
+    });
   }
 
   Future<void> sharedpreferences() async {
@@ -85,7 +92,20 @@ String? driverName;
      });
     print("Driver Name from SharedPreferences: $driverName");
   }
-  
+
+
+  void handleonline () {
+    print("online status in home screen is ::::::::::::::::::::::::::: ${widget.isOnDuty}");
+    
+    // Set socketManager status based on widget parameter
+    if(widget.isOnDuty == true){
+      socketManager.isOnDuty = true;
+      print("✅ Driver set to ONLINE");
+    } else {
+      socketManager.isOnDuty = false;
+      print("🔴 Driver set to OFFLINE");
+    }
+  }
 
   Future<void> _initializeApp() async {
     // Request permissions
