@@ -48,13 +48,13 @@ class AddMoneyWalletController extends GetxController {
     super.onClose();
   }
 
-  Future<void> add_wallet_method({required dynamic amount}) async {
+  Future<void> add_wallet_method({required dynamic amount, dynamic promoCodeId}) async {
     print("💰 add_wallet_method called with amount: $amount");
 
     // Validate amount
     if (amount.toString().isEmpty) {
       _showError('Please enter amount');
-      return;
+    return;
     }
 
     final amountNum = double.tryParse(amount.toString());
@@ -73,6 +73,7 @@ class AddMoneyWalletController extends GetxController {
       final AddMoneyWalletResponse res =
           await ProfileApiServices.initializeWalletTopUp(
             amount: amount.toString(),
+            promoCodeId: promoCodeId ?? '',
           );
 
       print("🎯 Order Creation Response: ${res.success}");

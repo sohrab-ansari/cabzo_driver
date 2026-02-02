@@ -1,3 +1,4 @@
+import 'package:corezap_driver/services/socket_manager.dart';
 import 'package:corezap_driver/utilities/colors.dart';
 import 'package:corezap_driver/utilities/navigator.dart';
 import 'package:corezap_driver/views/auth/login_screen.dart';
@@ -21,7 +22,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     Future.delayed(const Duration(seconds: 3), () {
       if (!mounted) return;
-
+ 
       CustomNavigator.removeUntil(
         context,
         const LoginScreen(),
@@ -35,13 +36,16 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> tokenbasednav() async {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
+    final bool wasOnline = prefs.getBool("driver_is_online") ?? false;
 
     print("splashtokennnn ${token}");
+    print("splash online status: ${wasOnline}");
 
     if (token != null) {
+       final SocketManager socketManager = SocketManager();
       CustomNavigator.removeUntil(
         context,
-         BottomnavmainScreen(),
+        BottomnavmainScreen(isOnDuty: wasOnline, isFirstLaunch: true),
         transition: TransitionType.fade,
       );
     } else {

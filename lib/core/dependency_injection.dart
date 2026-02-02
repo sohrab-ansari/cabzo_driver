@@ -7,6 +7,7 @@ import 'package:corezap_driver/controllers/profile_controllers/review_and_rating
 import 'package:corezap_driver/controllers/profile_controllers/terms_and_policy_controller.dart';
 import 'package:corezap_driver/controllers/profile_controllers/transaction_controller.dart';
 import 'package:corezap_driver/controllers/profile_controllers/wallet_controller.dart';
+import 'package:corezap_driver/controllers/promo_code_controller/get_promo_code_controller.dart';
 import 'package:corezap_driver/controllers/rides_controllers/rieds_history_controller.dart';
 import 'package:corezap_driver/services/socket_manager.dart';
 import 'package:corezap_driver/views/scheduled_pickups/otp_and_Declined_files/decline_Order_controller.dart';
@@ -41,5 +42,10 @@ class DependencyInjection {
 
 
     Get.put(VehicleTypesController(), permanent: true);
+
+
+Get.put(GetPromoCodeController(), permanent: true);
+
+    
   }
 }

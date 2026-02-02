@@ -12,10 +12,10 @@ class BottomnavmainScreen extends StatefulWidget {
 
   bool? isOnDuty;
   dynamic  rideData;
-
+  final bool isFirstLaunch;
 
   final bool startWithMaps;
-   BottomnavmainScreen({super.key, this.startWithMaps = false,  this.rideData,  this.isOnDuty});
+   BottomnavmainScreen({super.key, this.startWithMaps = false,  this.rideData,  this.isOnDuty, this.isFirstLaunch = false});
 
   @override
   State<BottomnavmainScreen> createState() => _BottomnavmainScreenState();

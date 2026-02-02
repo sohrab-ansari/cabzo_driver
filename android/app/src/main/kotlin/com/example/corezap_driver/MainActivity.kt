@@ -1,4 +1,4 @@
-package com.example.corezap_driver
+package com.nzcudriver
 
 import io.flutter.embedding.android.FlutterActivity
 

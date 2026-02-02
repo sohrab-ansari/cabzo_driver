@@ -23,8 +23,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:corezap_driver/services/socket_manager.dart' hide LatLng;
 
 class HomeScreen extends StatefulWidget {
-   bool? isOnDuty = false;
-   HomeScreen({super.key,  required this.isOnDuty});
+   final bool? isOnDuty;
+   final bool isFirstLaunch;
+   HomeScreen({super.key, this.isOnDuty = false, this.isFirstLaunch = false});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -69,7 +70,7 @@ String? driverName;
   void initState() {
     super.initState(); // Call super first
     
-    handleonline();
+    // handleonline();
     homeController.home_data_method();
     driveridController.driverid_mdethod();
 
@@ -383,7 +384,9 @@ String? driverName;
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    socketManager.dispose();
+    // ❌ DON'T dispose SocketManager here - it's a singleton used across the app
+    // Only remove the observer and cleanup local resources
+    // socketManager.dispose() should only be called on app logout
     super.dispose();
   }
 
@@ -414,14 +417,44 @@ String? driverName;
 
   @override
   Widget build(BuildContext context) {
-    
-
-    
     double w = MediaQuery.of(context).size.width;
+
+    // Show loading screen only while restoration is in progress (app startup)
+    if (socketManager.isRestorationInProgress) {
+      return _buildLoadingScreen();
+    }
 
     return socketManager.isOnDuty == false
         ? _buildOfflineScreen(w)
         : _buildOnlineScreen(w);
+  }
+
+  /// Loading screen shown during app startup while restoring online status
+  Widget _buildLoadingScreen() {
+    return Scaffold(
+      backgroundColor: AppColors.white,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Loading spinner
+            const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+              strokeWidth: 3,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Loading...',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[700],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildOfflineScreen(double w) {

@@ -11,6 +11,7 @@ import 'package:corezap_driver/modals/driverId_response.dart';
 import 'package:corezap_driver/modals/driver_Image_upload_res.dart';
 import 'package:corezap_driver/modals/get_all_vehicle_categories_response.dart';
 import 'package:corezap_driver/modals/get_bank_accounts_response.dart';
+import 'package:corezap_driver/modals/get_promo_code_data.dart';
 import 'package:corezap_driver/modals/home_modal_response.dart';
 import 'package:corezap_driver/modals/order_complete_cash_response.dart';
 import 'package:corezap_driver/modals/payments_withdraw_response.dart';
@@ -584,6 +585,7 @@ class ProfileApiServices {
 
   static Future<AddMoneyWalletResponse> initializeWalletTopUp({
     required dynamic amount,
+    required String promoCodeId,
   }) async {
     /// 🔐 GET TOKEN
     final prefs = await SharedPreferences.getInstance();
@@ -615,6 +617,10 @@ class ProfileApiServices {
           // "driverId": userId,
           "amount": amount,
           // "promoCodeId": "696f52cdfa3339f023632110",
+          "promoCodeId": promoCodeId,
+
+          
+
         }),
       );
       print("Status Code : ${response.statusCode}");
@@ -1092,6 +1098,86 @@ class ProfileApiServices {
 
 
 
+
+
+ static Future<Getpromocodedata> get_promocode_data(
+  
+
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+
+    
+
+    final Uri url = Uri.parse("${ApiPath.baseUri}/promocodes/eligible");
+
+    print("========== 🔵 CASH PAYMENT API ==========");
+    print("URL : $url");
+    print("Token : $token");
+
+    try {
+      final http.Response response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        // body: jsonEncode({"orderId": orderid}),
+      );
+
+      print("✅ Status Code : ${response.statusCode}");
+
+
+print("thee_response_promocode_bodyyyyyy ${response.body}");
+      // Check if response is valid JSON
+      if (response.body.trim().isEmpty) {
+        throw FormatException("Empty response from server");
+      }
+
+      // Check if response is HTML (error page)
+      if (response.body.trim().startsWith('<!DOCTYPE html>') ||
+          response.body.trim().startsWith('<html')) {
+        throw FormatException(
+          "Server returned HTML error page. Check endpoint URL.",
+        );
+      }
+
+      // Try to parse JSON
+      dynamic decodedJson;
+      try {
+        decodedJson = jsonDecode(response.body);
+      } catch (jsonError) {
+        print("JSON Parse Error: $jsonError");
+        print("Raw Response: ${response.body}");
+        throw FormatException("Invalid JSON response from server");
+      }
+
+      // Pretty print for debugging
+      final prettyJson = const JsonEncoder.withIndent(
+        '  ',
+      ).convert(decodedJson);
+      print("📦 FULL RESPONSE (Pretty Print) 👇");
+      print(prettyJson);
+
+      // Parse the response
+      final Getpromocodedata  getpromocodedata =
+          Getpromocodedata .fromJson(decodedJson);
+
+      print("🎯 Parsed Model Object 👇");
+      print(getpromocodedata);
+
+      return getpromocodedata;
+    } catch (e) {
+      print("❌ Exception in get_promocode_data");
+      print(e.toString());
+
+      // Return a proper error response
+      return Getpromocodedata (
+        success: false,
+        message: "Connection error: ${e.toString()}",
+      );
+    }
+  }
 
 
     static Future<GetAllVehicleCategoriesResponse> get_vehical_data() async {
