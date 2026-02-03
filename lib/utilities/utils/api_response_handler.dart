@@ -191,6 +191,7 @@
 
 
 // utilities/utils/api_response_handler.dart
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nzcu_driver/utilities/utils/button_state_manager.dart';
 import 'package:nzcu_driver/utilities/utils/toast_service.dart';
 import 'package:flutter/material.dart';
@@ -217,16 +218,24 @@ class ApiResponseHandler {
       if (response?.success == true) {
         onSuccess(response);
         if (successMessage != null && successMessage.isNotEmpty) {
-          ToastService.showSuccess(context, successMessage);
+
+          Fluttertoast.showToast(msg: successMessage,toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.green,textColor: Colors.white,fontSize: 16.0);
+          // ToastService.showSuccess(context, successMessage);
         }
       } else {
         final errorMessage = response?.message ?? 'Operation failed';
-        ToastService.showError(context, errorTitle ?? 'Error', errorMessage);
+
+                  Fluttertoast.showToast(msg: errorMessage,toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.red,textColor: Colors.white,fontSize: 16.0);
+
+        // ToastService.showError(context, errorTitle ?? 'Error', errorMessage);
         onError?.call(errorMessage);
       }
     } catch (e) {
       final errorMessage = _parseError(e);
-      ToastService.showError(context, errorTitle ?? 'Error', errorMessage);
+
+                        Fluttertoast.showToast(msg:   errorTitle ?? 'Error',toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.red,textColor: Colors.white,fontSize: 16.0);
+
+      // ToastService.showError(context, errorTitle ?? 'Error', errorMessage);
       onError?.call(errorMessage);
     } finally {
       // Reset button loading state

@@ -175,6 +175,7 @@ class CashController extends GetxController {
   // Process cash payment
   Future<void> processCashPayment({
     required String orderId,
+    dynamic rideData,
   }) async {
     print("🔄 Processing cash payment for order: $orderId");
     
@@ -196,11 +197,7 @@ class CashController extends GetxController {
         
         // Navigate to cash payment success screen
         Get.offAll(() => CashPaymentScreen(
-          // orderData: {
-          //   'orderId': orderId,
-          //   'success': true,
-          //   'message': response.message,
-          // },
+          rideData: rideData,
         ), transition: Transition.rightToLeft);
         
       } else {

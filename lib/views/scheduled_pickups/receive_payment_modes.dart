@@ -464,7 +464,7 @@ class _ReceivePaymentModesState extends State<ReceivePaymentModes> {
     }
 
     print("💰 Processing cash payment for order: $orderId");
-    cashController.processCashPayment(orderId: orderId);
+    cashController.processCashPayment(orderId: orderId, rideData: widget.rideData);
   }
 
   void _handleDone() {

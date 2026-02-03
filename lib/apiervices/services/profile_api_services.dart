@@ -77,8 +77,7 @@ class ProfileApiServices {
           homeModalResponse.driver!.id.toString(),
         );
 
-
-         await prefs.setString(
+        await prefs.setString(
           "driver_name",
           homeModalResponse.driver!.name.toString(),
         );
@@ -453,135 +452,134 @@ class ProfileApiServices {
     }
   }
 
-
   static Future<DriverIdResponse> get_driverid_data() async {
-  /// 🔐 GET TOKEN
-  final prefs = await SharedPreferences.getInstance();
-  final String? token = prefs.getString("auth_token");
-  final String? userId = prefs.getString("driver_userid");
+    /// 🔐 GET TOKEN
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+    final String? userId = prefs.getString("driver_userid");
 
-  print("herrrerrere_the_driverrrriddd_calling>>>>");
-  print("theeeee____ useriddddd ${userId}");
+    print("herrrerrere_the_driverrrriddd_calling>>>>");
+    print("theeeee____ useriddddd ${userId}");
 
-  final Uri url = Uri.parse(
-    "${ApiPath.baseUri}/driver/getDriverProfile/${userId}",
-  );
-
-  print("========== CREATE VEHICLE API ==========");
-  print("URL : $url");
-  print("Token : $token");
-  print("my_tokennnn ${token}");
-
-  try {
-    final http.Response response = await http.get(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token", // ✅ BEARER TOKEN
-      },
+    final Uri url = Uri.parse(
+      "${ApiPath.baseUri}/driver/getDriverProfile/${userId}",
     );
 
-    print("Status Code : ${response.statusCode}");
-    print("drievrrrrrid>>>>>>> resss >>>> Response Body : ${response.body}");
+    print("========== CREATE VEHICLE API ==========");
+    print("URL : $url");
+    print("Token : $token");
+    print("my_tokennnn ${token}");
 
-    final Map<String, dynamic> data = jsonDecode(response.body);
-    final DriverIdResponse driverIdResponse = DriverIdResponse.fromJson(data);
+    try {
+      final http.Response response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token", // ✅ BEARER TOKEN
+        },
+      );
 
-    // Store driver basic info
-    await prefs.setString("driver_name", driverIdResponse.driver!.name ?? "");
-    await prefs.setString("driver_mobile", driverIdResponse.driver!.phone ?? "");
-    
-    // Store vehicle info if available
-    if (driverIdResponse.driver?.vehicle != null) {
-      final vehicle = driverIdResponse.driver!.vehicle!;
-      
-      // Store vehicle ID
-      if (vehicle.id != null && vehicle.id!.isNotEmpty) {
-        await prefs.setString("vehicle_id", vehicle.id!);
-        print("✅ Vehicle ID stored: ${vehicle.id}");
+      print("Status Code : ${response.statusCode}");
+      print("drievrrrrrid>>>>>>> resss >>>> Response Body : ${response.body}");
+
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      final DriverIdResponse driverIdResponse = DriverIdResponse.fromJson(data);
+
+      // Store driver basic info
+      await prefs.setString("driver_name", driverIdResponse.driver!.name ?? "");
+      await prefs.setString(
+        "driver_mobile",
+        driverIdResponse.driver!.phone ?? "",
+      );
+
+      // Store vehicle info if available
+      if (driverIdResponse.driver?.vehicle != null) {
+        final vehicle = driverIdResponse.driver!.vehicle!;
+
+        // Store vehicle ID
+        if (vehicle.id != null && vehicle.id!.isNotEmpty) {
+          await prefs.setString("vehicle_id", vehicle.id!);
+          print("✅ Vehicle ID stored: ${vehicle.id}");
+        }
+
+        // Store vehicle type ID
+        if (vehicle.vehicleType != null && vehicle.vehicleType!.isNotEmpty) {
+          await prefs.setString("vehicle_type_id", vehicle.vehicleType!);
+          print("✅ Vehicle Type ID stored: ${vehicle.vehicleType}");
+        }
+
+        // Optionally store other vehicle info if needed
+        await prefs.setString("vehicle_name", vehicle.vehicleName ?? "");
+        await prefs.setString("vehicle_number", vehicle.vehicleNumber ?? "");
+        await prefs.setString("vehicle_color", vehicle.vehicleColor ?? "");
+        await prefs.setString("vehicle_model", vehicle.vehicleModel ?? "");
+        await prefs.setInt("vehicle_capacity", vehicle.vehicleCapacity ?? 0);
+      } else {
+        print("⚠️ No vehicle data available");
       }
-      
-      // Store vehicle type ID
-      if (vehicle.vehicleType != null && vehicle.vehicleType!.isNotEmpty) {
-        await prefs.setString("vehicle_type_id", vehicle.vehicleType!);
-        print("✅ Vehicle Type ID stored: ${vehicle.vehicleType}");
-      }
-      
-      // Optionally store other vehicle info if needed
-      await prefs.setString("vehicle_name", vehicle.vehicleName ?? "");
-      await prefs.setString("vehicle_number", vehicle.vehicleNumber ?? "");
-      await prefs.setString("vehicle_color", vehicle.vehicleColor ?? "");
-      await prefs.setString("vehicle_model", vehicle.vehicleModel ?? "");
-      await prefs.setInt("vehicle_capacity", vehicle.vehicleCapacity ?? 0);
-    } else {
-      print("⚠️ No vehicle data available");
+
+      return driverIdResponse;
+    } catch (e) {
+      print("❌ Exception in Create Vehicle5 : $e");
+      return DriverIdResponse(success: false, message: "Connection error: $e");
     }
-
-    return driverIdResponse;
-  } catch (e) {
-    print("❌ Exception in Create Vehicle5 : $e");
-    return DriverIdResponse(success: false, message: "Connection error: $e");
   }
-}
 
-//   static Future<DriverIdResponse> get_driverid_data() async {
-//     /// 🔐 GET TOKEN
-//     final prefs = await SharedPreferences.getInstance();
-//     final String? token = prefs.getString("auth_token");
+  //   static Future<DriverIdResponse> get_driverid_data() async {
+  //     /// 🔐 GET TOKEN
+  //     final prefs = await SharedPreferences.getInstance();
+  //     final String? token = prefs.getString("auth_token");
 
-//     final String? userId = prefs.getString("driver_userid");
+  //     final String? userId = prefs.getString("driver_userid");
 
+  //   print("herrrerrere_the_driverrrriddd_calling>>>>")
+  // ;
+  //     print("theeeee____ useriddddd ${userId}");
 
+  //     final Uri url = Uri.parse(
+  //       "${ApiPath.baseUri}/driver/getDriverProfile/${userId}",
+  //     );
 
+  //     print("========== CREATE VEHICLE API ==========");
+  //     print("URL : $url");
+  //     print("Token : $token");
+  //     // print("Request Body : ${jsonEncode(requestBody)}");
+  //     print("my_tokennnn ${token}");
 
-//   print("herrrerrere_the_driverrrriddd_calling>>>>")
-// ;
-//     print("theeeee____ useriddddd ${userId}");
+  //     try {
+  //       final http.Response response = await http.get(
+  //         url,
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           "Authorization": "Bearer $token", // ✅ BEARER TOKEN
+  //         },
+  //         // body: jsonEncode(requestBody),
+  //       );
 
-//     final Uri url = Uri.parse(
-//       "${ApiPath.baseUri}/driver/getDriverProfile/${userId}",
-//     );
+  //       print("Status Code : ${response.statusCode}");
+  //       print("drievrrrrrid>>>>>>> resss >>>> Response Body : ${response.body}");
 
-//     print("========== CREATE VEHICLE API ==========");
-//     print("URL : $url");
-//     print("Token : $token");
-//     // print("Request Body : ${jsonEncode(requestBody)}");
-//     print("my_tokennnn ${token}");
+  //       final Map<String, dynamic> data = jsonDecode(response.body);
+  //       final DriverIdResponse driverIdResponse = DriverIdResponse.fromJson(data);
 
-//     try {
-//       final http.Response response = await http.get(
-//         url,
-//         headers: {
-//           "Content-Type": "application/json",
-//           "Authorization": "Bearer $token", // ✅ BEARER TOKEN
-//         },
-//         // body: jsonEncode(requestBody),
-//       );
+  //   final prefs = await SharedPreferences.getInstance();
 
-//       print("Status Code : ${response.statusCode}");
-//       print("drievrrrrrid>>>>>>> resss >>>> Response Body : ${response.body}");
+  //         await prefs.setString("driver_name", driverIdResponse.driver!.name ?? "");
 
-//       final Map<String, dynamic> data = jsonDecode(response.body);
-//       final DriverIdResponse driverIdResponse = DriverIdResponse.fromJson(data);
+  //         await prefs.setString("driver_mobile", driverIdResponse.driver!.phone ?? "");
 
-//   final prefs = await SharedPreferences.getInstance();
-        
-//         await prefs.setString("driver_name", driverIdResponse.driver!.name ?? "");
+  // //  if (driverIdResponse.token != null &&
+  // //           otpResponse.token!.isNotEmpty &&
+  // //           driverId != null &&
+  // //           driverId.isNotEmpty) {
 
-//         await prefs.setString("driver_mobile", driverIdResponse.driver!.phone ?? "");
-
-// //  if (driverIdResponse.token != null &&
-// //           otpResponse.token!.isNotEmpty &&
-// //           driverId != null &&
-// //           driverId.isNotEmpty) {
-       
-// //       }
-//       return driverIdResponse;
-//     } catch (e) {
-//       print("❌ Exception in Create Vehicle5 : $e");
-//       return DriverIdResponse(success: false, message: "Connection error: $e");
-//     }
-//   }
+  // //       }
+  //       return driverIdResponse;
+  //     } catch (e) {
+  //       print("❌ Exception in Create Vehicle5 : $e");
+  //       return DriverIdResponse(success: false, message: "Connection error: $e");
+  //     }
+  //   }
 
   static Future<AddMoneyWalletResponse> initializeWalletTopUp({
     required dynamic amount,
@@ -618,9 +616,6 @@ class ProfileApiServices {
           "amount": amount,
           // "promoCodeId": "696f52cdfa3339f023632110",
           "promoCodeId": promoCodeId,
-
-          
-
         }),
       );
       print("Status Code : ${response.statusCode}");
@@ -865,10 +860,31 @@ class ProfileApiServices {
 
       print("✅ Response Status: ${response.statusCode}");
 
+      print("myyyy_fulllll_respsoneeeee ${response.body}");
       if (response.statusCode == 200) {
         final decodedJson = jsonDecode(response.body);
 
-        print("myyyy_fulllll_respsoneeeee ${decodedJson}");
+        // print("myyyy_fulllll_respsoneeeee ${decodedJson}");
+
+        final prettyJson = const JsonEncoder.withIndent(
+          '  ',
+        ).convert(decodedJson);
+
+        for (var i = 0; i < prettyJson.length; i += 800) {
+          debugPrint(
+            prettyJson.substring(
+              i,
+              i + 800 > prettyJson.length ? prettyJson.length : i + 800,
+            ),
+          );
+        }
+
+        print("herrrrrrrrrrrrrrrrrrrrrr ${prettyJson}");
+
+        //         print(
+        //   "myyyy_fulllll_respsoneeeee\n"
+        //   "${const JsonEncoder.withIndent('  ').convert(decodedJson)}"
+        // );
         return Updateorderresposne.fromJson(decodedJson);
       } else if (response.statusCode == 401) {
         return Updateorderresposne(
@@ -899,6 +915,7 @@ class ProfileApiServices {
       );
     }
   }
+
   // static Future<Updateorderresposne> order_update_data({
   //   required dynamic orderstatus,
   //   required dynamic orderid,
@@ -1096,18 +1113,9 @@ class ProfileApiServices {
     }
   }
 
-
-
-
-
- static Future<Getpromocodedata> get_promocode_data(
-  
-
-  ) async {
+  static Future<Getpromocodedata> get_promocode_data() async {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
-
-    
 
     final Uri url = Uri.parse("${ApiPath.baseUri}/promocodes/eligible");
 
@@ -1127,8 +1135,7 @@ class ProfileApiServices {
 
       print("✅ Status Code : ${response.statusCode}");
 
-
-print("thee_response_promocode_bodyyyyyy ${response.body}");
+      print("thee_response_promocode_bodyyyyyy ${response.body}");
       // Check if response is valid JSON
       if (response.body.trim().isEmpty) {
         throw FormatException("Empty response from server");
@@ -1160,8 +1167,9 @@ print("thee_response_promocode_bodyyyyyy ${response.body}");
       print(prettyJson);
 
       // Parse the response
-      final Getpromocodedata  getpromocodedata =
-          Getpromocodedata .fromJson(decodedJson);
+      final Getpromocodedata getpromocodedata = Getpromocodedata.fromJson(
+        decodedJson,
+      );
 
       print("🎯 Parsed Model Object 👇");
       print(getpromocodedata);
@@ -1172,19 +1180,16 @@ print("thee_response_promocode_bodyyyyyy ${response.body}");
       print(e.toString());
 
       // Return a proper error response
-      return Getpromocodedata (
+      return Getpromocodedata(
         success: false,
         message: "Connection error: ${e.toString()}",
       );
     }
   }
 
-
-    static Future<GetAllVehicleCategoriesResponse> get_vehical_data() async {
+  static Future<GetAllVehicleCategoriesResponse> get_vehical_data() async {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
-
-    
 
     final Uri url = Uri.parse("${ApiPath.baseUri}/getAllVehicleCategories");
 
@@ -1199,7 +1204,6 @@ print("thee_response_promocode_bodyyyyyy ${response.body}");
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
         },
-       
       );
 
       print("✅ Status Code : ${response.statusCode}");
@@ -1607,45 +1611,42 @@ print("thee_response_promocode_bodyyyyyy ${response.body}");
     }
   }
 
-
   static Future<ChatResponse> get_chat_messages_data({
-  required String chatId,
-}) async {
-  final prefs = await SharedPreferences.getInstance();
-  final String? token = prefs.getString("auth_token");
+    required String chatId,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
 
-  final Uri url =
-      Uri.parse("${ApiPath.baseUri}/chat/$chatId/messages");
+    final Uri url = Uri.parse("${ApiPath.baseUri}/chat/$chatId/messages");
 
-  print("========== 🔵 GET CHAT MESSAGES API ==========");
-  print("URL : $url");
-  print("Token : $token");
+    print("========== 🔵 GET CHAT MESSAGES API ==========");
+    print("URL : $url");
+    print("Token : $token");
 
-  try {
-    final http.Response response = await http.get(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-    );
+    try {
+      final http.Response response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
 
-    print("✅ Status Code : ${response.statusCode}");
+      print("✅ Status Code : ${response.statusCode}");
 
-    final decodedJson = jsonDecode(response.body);
+      final decodedJson = jsonDecode(response.body);
 
-    print("📦 FULL RESPONSE 👇");
-    print(const JsonEncoder.withIndent('  ').convert(decodedJson));
+      print("📦 FULL RESPONSE 👇");
+      print(const JsonEncoder.withIndent('  ').convert(decodedJson));
 
-    if (response.statusCode == 200) {
-      return ChatResponse.fromJson(decodedJson);
-    } else {
-      throw Exception(decodedJson['message'] ?? 'Something went wrong');
+      if (response.statusCode == 200) {
+        return ChatResponse.fromJson(decodedJson);
+      } else {
+        throw Exception(decodedJson['message'] ?? 'Something went wrong');
+      }
+    } catch (e) {
+      print("❌ Exception in get_chat_messages_data");
+      throw Exception(e);
     }
-  } catch (e) {
-    print("❌ Exception in get_chat_messages_data");
-    throw Exception(e);
   }
-}
-
 }

@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
@@ -248,15 +246,15 @@ class _ArrivingClientState extends State<ArrivingClient> {
       // Restart location tracking
       _positionStreamSubscription?.cancel();
       await _startLocationTracking();
-      
+
       // Recalculate directions
       await _getDirections();
-      
+
       // Update markers and polylines
       _setMarkers();
       _updatePolylines();
       _fitMapToAllMarkers();
-      
+
       print('✅ Screen refresh complete');
     }
   }
@@ -286,13 +284,41 @@ class _ArrivingClientState extends State<ArrivingClient> {
   void _extractAndStoreRideData() {
     print("📦 Ride Data Received: ${widget.rideData}");
 
+    // Extract rider data - handle both nested 'rider' object and flat structure
+    final riderData = widget.rideData?['rider'];
+    final userId = widget.rideData?['userId'];
+
     _rideData = {
-      'orderId': widget.rideData?['orderId']?.toString() ?? widget.rideData?['_id']?.toString() ?? 'N/A',
-      'riderId': widget.rideData?['riderId'] ?? widget.rideData?['userId']?['_id'],
-      'riderName': widget.rideData?['riderName']?.toString() ?? widget.rideData?['userId']?['name']?.toString() ?? 'Customer',
-      'riderPhone': widget.rideData?['riderNumber']?.toString() ?? widget.rideData?['riderPhone']?.toString() ?? widget.rideData?['userId']?['phone']?.toString() ?? 'N/A',
-      'riderEmail': widget.rideData?['riderEmail']?.toString() ?? widget.rideData?['userId']?['email']?.toString() ?? '',
-      'riderImage': widget.rideData?['riderImage']?.toString() ?? '',
+      'orderId':
+          widget.rideData?['orderId']?.toString() ??
+          widget.rideData?['_id']?.toString() ??
+          'N/A',
+      'riderId':
+          riderData?['id']?.toString() ??
+          widget.rideData?['riderId']?.toString() ??
+          userId?['_id']?.toString() ??
+          'N/A',
+      'riderName':
+          riderData?['name']?.toString() ??
+          widget.rideData?['riderName']?.toString() ??
+          userId?['name']?.toString() ??
+          'Customer',
+      'riderPhone':
+          riderData?['phone']?.toString() ??
+          widget.rideData?['riderNumber']?.toString() ??
+          widget.rideData?['riderPhone']?.toString() ??
+          userId?['phone']?.toString() ??
+          'N/A',
+      'riderEmail':
+          riderData?['email']?.toString() ??
+          widget.rideData?['riderEmail']?.toString() ??
+          userId?['email']?.toString() ??
+          '',
+      'riderImage':
+          riderData?['profileImage']?.toString() ??
+          riderData?['image']?.toString() ??
+          widget.rideData?['riderImage']?.toString() ??
+          '',
       'pickupLocation':
           widget.rideData?['startLocation']?['address']?.toString() ??
           widget.rideData?['pickup']?['address']?.toString() ??
@@ -302,15 +328,20 @@ class _ArrivingClientState extends State<ArrivingClient> {
           widget.rideData?['destination']?['address']?.toString() ??
           widget.rideData?['dropoff']?['address']?.toString() ??
           'Drop location',
-      'fare': widget.rideData?['totalFare']?.toString() ?? widget.rideData?['fare']?.toString() ?? '100',
+      'fare':
+          widget.rideData?['totalFare']?.toString() ??
+          widget.rideData?['fare']?.toString() ??
+          '100',
       'distance': widget.rideData?['distance']?.toString() ?? '0',
       'otpVerified': widget.rideData?['otpVerified'] ?? false,
       'orderStatus': widget.rideData?['orderStatus']?.toString() ?? 'Pending',
       'vehicleType': widget.rideData?['vehicleType']?.toString() ?? '',
+      'orderType': widget.rideData?['orderType']?.toString() ?? '',
     };
 
     _extractCoordinates();
     print('✅ Ride data extracted successfully');
+    print('📋 Final extracted data: $_rideData');
   }
 
   void _extractCoordinates() {
@@ -325,10 +356,28 @@ class _ArrivingClientState extends State<ArrivingClient> {
         final startLocation = widget.rideData!['startLocation'];
         if (startLocation['coordinates'] != null &&
             startLocation['coordinates'].length >= 2) {
-          _rideData!['pickupCoordinates'] = LatLng(
-            startLocation['coordinates'][1]?.toDouble() ?? 23.2599,
-            startLocation['coordinates'][0]?.toDouble() ?? 77.4126,
-          );
+          // Backend sends coordinates as [latitude, longitude]
+          // First check if it looks like [lat, lng] format (lat is typically smaller for India region)
+          final coord0 = startLocation['coordinates'][0]?.toDouble() ?? 0;
+          final coord1 = startLocation['coordinates'][1]?.toDouble() ?? 0;
+
+          // Determine if coordinates are in [lat, lng] or [lng, lat] format
+          // Latitude for India: 8-37, Longitude for India: 68-97
+          // If coord0 is in latitude range and coord1 is in longitude range, it's [lat, lng]
+          final bool isLatLngFormat =
+              (coord0 >= 8 && coord0 <= 37) && (coord1 >= 68 && coord1 <= 97);
+
+          if (isLatLngFormat) {
+            // Backend format: [latitude, longitude]
+            _rideData!['pickupCoordinates'] = LatLng(coord0, coord1);
+            print('📍 Pickup: Using [lat, lng] format: $coord0, $coord1');
+          } else {
+            // GeoJSON format: [longitude, latitude]
+            _rideData!['pickupCoordinates'] = LatLng(coord1, coord0);
+            print(
+              '📍 Pickup: Using GeoJSON [lng, lat] format: $coord1, $coord0',
+            );
+          }
         }
       }
 
@@ -342,10 +391,23 @@ class _ArrivingClientState extends State<ArrivingClient> {
         final endLocation = widget.rideData!['endLocation'];
         if (endLocation['coordinates'] != null &&
             endLocation['coordinates'].length >= 2) {
-          _rideData!['dropoffCoordinates'] = LatLng(
-            endLocation['coordinates'][1]?.toDouble() ?? 18.5204,
-            endLocation['coordinates'][0]?.toDouble() ?? 73.8567,
-          );
+          // Backend sends coordinates as [latitude, longitude]
+          final coord0 = endLocation['coordinates'][0]?.toDouble() ?? 0;
+          final coord1 = endLocation['coordinates'][1]?.toDouble() ?? 0;
+
+          // Determine if coordinates are in [lat, lng] or [lng, lat] format
+          final bool isLatLngFormat =
+              (coord0 >= 8 && coord0 <= 37) && (coord1 >= 68 && coord1 <= 97);
+
+          if (isLatLngFormat) {
+            // Backend format: [latitude, longitude]
+            _rideData!['dropoffCoordinates'] = LatLng(coord0, coord1);
+            print('📍 Drop: Using [lat, lng] format: $coord0, $coord1');
+          } else {
+            // GeoJSON format: [longitude, latitude]
+            _rideData!['dropoffCoordinates'] = LatLng(coord1, coord0);
+            print('📍 Drop: Using GeoJSON [lng, lat] format: $coord1, $coord0');
+          }
         }
       }
 
@@ -729,7 +791,8 @@ class _ArrivingClientState extends State<ArrivingClient> {
       for (var leg in route['legs']) {
         if (leg['steps'] != null && leg['steps'].isNotEmpty) {
           for (var step in leg['steps']) {
-            if (step['polyline'] != null && step['polyline']['points'] != null) {
+            if (step['polyline'] != null &&
+                step['polyline']['points'] != null) {
               final stepPoints = _decodePolyline(step['polyline']['points']);
               allPoints.addAll(stepPoints);
             }
@@ -775,7 +838,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
             final route = data['routes'][0];
             // Use detailed polyline from steps instead of overview
             _routeCoordinates = _getDetailedPolylineFromSteps(route);
-            print('🛣️ Route Driver → Pickup calculated (${_routeCoordinates.length} points)');
+            print(
+              '🛣️ Route Driver → Pickup calculated (${_routeCoordinates.length} points)',
+            );
           } else {
             print('⚠️ No routes found from driver to pickup');
           }
@@ -791,7 +856,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
         final dropoffCoords = _rideData!['dropoffCoordinates'] as LatLng;
 
         print('📍 Pickup: ${pickupCoords.latitude}, ${pickupCoords.longitude}');
-        print('📍 Dropoff: ${dropoffCoords.latitude}, ${dropoffCoords.longitude}');
+        print(
+          '📍 Dropoff: ${dropoffCoords.latitude}, ${dropoffCoords.longitude}',
+        );
 
         final url = Uri.parse(
           'https://maps.googleapis.com/maps/api/directions/json'
@@ -812,7 +879,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
             if (route['legs'] != null || route['overview_polyline'] != null) {
               // Use detailed polyline from steps instead of overview
               _pickupToDropCoordinates = _getDetailedPolylineFromSteps(route);
-              print('✅ Route Pickup → Drop calculated (${_pickupToDropCoordinates.length} points)');
+              print(
+                '✅ Route Pickup → Drop calculated (${_pickupToDropCoordinates.length} points)',
+              );
             } else {
               print('⚠️ No polyline data in route');
             }
@@ -959,7 +1028,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
     switch (command.route) {
       case 'bottom_nav':
-        Get.offAll(() => BottomnavmainScreen(isOnDuty: true,));
+        Get.offAll(() => BottomnavmainScreen(isOnDuty: true));
         break;
       case 'arriving_screen':
         _navigateToOtpScreen();
@@ -980,31 +1049,31 @@ class _ArrivingClientState extends State<ArrivingClient> {
     final w = MediaQuery.of(context).size.width;
 
     return PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, result) {
-          if (didPop) return;
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
 
-          Fluttertoast.showToast(
-            msg: "Please complete the ride verification first",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            backgroundColor: Colors.black87,
-            textColor: Colors.white,
-            fontSize: 14,
-          );
-        },
-        child: Scaffold(
-          backgroundColor: ColorsList.scaffoldColor,
-          resizeToAvoidBottomInset: false,
-          appBar: _buildAppBar(w),
-          body: Column(
-            children: [
-              _buildLocationInputs(w),
-              Expanded(child: _buildMapSection(w)),
-              _buildBottomSheet(w),
-            ],
-          ),
+        Fluttertoast.showToast(
+          msg: "Please complete the ride verification first",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.black87,
+          textColor: Colors.white,
+          fontSize: 14,
+        );
+      },
+      child: Scaffold(
+        backgroundColor: ColorsList.scaffoldColor,
+        resizeToAvoidBottomInset: false,
+        appBar: _buildAppBar(w),
+        body: Column(
+          children: [
+            _buildLocationInputs(w),
+            Expanded(child: _buildMapSection(w)),
+            _buildBottomSheet(w),
+          ],
         ),
+      ),
     );
   }
 
@@ -1189,99 +1258,95 @@ class _ArrivingClientState extends State<ArrivingClient> {
                   "📱 Chat button tapped with ride data: ${widget.rideData}",
                 );
 
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatScreen(rideData: widget.rideData),
+                  ),
+                );
 
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ChatScreen(rideData: widget.rideData),
-                      ),
-                    );
+                //                 try {
+                //                   // Show loading
+                //                   ScaffoldMessenger.of(context).showSnackBar(
+                //                     const SnackBar(
+                //                       content: Text('Opening chat...'),
+                //                       duration: Duration(seconds: 1),
+                //                     ),
+                //                   );
 
-//                 try {
-//                   // Show loading
-//                   ScaffoldMessenger.of(context).showSnackBar(
-//                     const SnackBar(
-//                       content: Text('Opening chat...'),
-//                       duration: Duration(seconds: 1),
-//                     ),
-//                   );
+                //                   // Get chart ID first
+                //                   await _getchartidmethod();
 
-//                   // Get chart ID first
-//                   await _getchartidmethod();
+                //                   // Wait for controller to update
+                //                   await Future.delayed(const Duration(milliseconds: 1000));
 
-//                   // Wait for controller to update
-//                   await Future.delayed(const Duration(milliseconds: 1000));
+                //                   // Check if we have chart response
+                //                   if (chartidController.chartresposne.value != null &&
+                //                       chartidController.chartresposne.value!.success == true &&
+                //                       chartidController.chartresposne.value!.data != null &&
+                //                       chartidController.chartresposne.value!.data!.id != null &&
+                //                       chartidController
+                //                           .chartresposne
+                //                           .value!
+                //                           .data!
+                //                           .id!
+                //                           .isNotEmpty) {
+                //                     final chatId =
+                //                         chartidController.chartresposne.value!.data!.id!;
+                //                     print("✅ Chat ID obtained: $chatId");
 
-//                   // Check if we have chart response
-//                   if (chartidController.chartresposne.value != null &&
-//                       chartidController.chartresposne.value!.success == true &&
-//                       chartidController.chartresposne.value!.data != null &&
-//                       chartidController.chartresposne.value!.data!.id != null &&
-//                       chartidController
-//                           .chartresposne
-//                           .value!
-//                           .data!
-//                           .id!
-//                           .isNotEmpty) {
-//                     final chatId =
-//                         chartidController.chartresposne.value!.data!.id!;
-//                     print("✅ Chat ID obtained: $chatId");
+                //                     // Navigate to chat screen
+                //                     // await CustomNavigator.push(
+                //                     //   context,
+                //                     //   ChatScreen(rideData: widget.rideData),
+                //                     // );
+                // Navigator.push(
+                //                       context,
+                //                       MaterialPageRoute(
+                //                         builder: (context) =>
+                //                             ChatScreen(rideData: widget.rideData),
+                //                       ),
+                //                     );
 
-//                     // Navigate to chat screen
-//                     // await CustomNavigator.push(
-//                     //   context,
-//                     //   ChatScreen(rideData: widget.rideData),
-//                     // );
-// Navigator.push(
-//                       context,
-//                       MaterialPageRoute(
-//                         builder: (context) =>
-//                             ChatScreen(rideData: widget.rideData),
-//                       ),
-//                     );
-                    
-//                   } else if (chartidController.isLoading.value) {
-//                     print("⏳ Still loading chart ID...");
-//                     ScaffoldMessenger.of(context).showSnackBar(
-//                       const SnackBar(
-//                         content: Text('Loading chat... Please wait.'),
-//                         backgroundColor: Colors.orange,
-//                       ),
-//                     );
-//                   } else if (chartidController.errorMessage.value.isNotEmpty) {
-//                     print(
-//                       "❌ Error getting chart ID: ${chartidController.errorMessage.value}",
-//                     );
-//                     ScaffoldMessenger.of(context).showSnackBar(
-//                       SnackBar(
-//                         content: Text(
-//                           'Chat error: ${chartidController.errorMessage.value}',
-//                         ),
-//                         backgroundColor: Colors.red,
-//                       ),
-//                     );
-//                   } else {
-//                     print("❌ No chart ID available after loading");
-//                     ScaffoldMessenger.of(context).showSnackBar(
-//                       const SnackBar(
-//                         content: Text('Chat not available. Please try again.'),
-//                         backgroundColor: Colors.orange,
-//                       ),
-//                     );
-//                   }
-//                 } catch (e) {
-//                   print("❌ Error navigating to chat: $e");
-//                   ScaffoldMessenger.of(context).showSnackBar(
-//                     SnackBar(
-//                       content: Text('Failed to open chat: ${e.toString()}'),
-//                       backgroundColor: Colors.red,
-//                     ),
-//                   );
-//                 }
+                //                   } else if (chartidController.isLoading.value) {
+                //                     print("⏳ Still loading chart ID...");
+                //                     ScaffoldMessenger.of(context).showSnackBar(
+                //                       const SnackBar(
+                //                         content: Text('Loading chat... Please wait.'),
+                //                         backgroundColor: Colors.orange,
+                //                       ),
+                //                     );
+                //                   } else if (chartidController.errorMessage.value.isNotEmpty) {
+                //                     print(
+                //                       "❌ Error getting chart ID: ${chartidController.errorMessage.value}",
+                //                     );
+                //                     ScaffoldMessenger.of(context).showSnackBar(
+                //                       SnackBar(
+                //                         content: Text(
+                //                           'Chat error: ${chartidController.errorMessage.value}',
+                //                         ),
+                //                         backgroundColor: Colors.red,
+                //                       ),
+                //                     );
+                //                   } else {
+                //                     print("❌ No chart ID available after loading");
+                //                     ScaffoldMessenger.of(context).showSnackBar(
+                //                       const SnackBar(
+                //                         content: Text('Chat not available. Please try again.'),
+                //                         backgroundColor: Colors.orange,
+                //                       ),
+                //                     );
+                //                   }
+                //                 } catch (e) {
+                //                   print("❌ Error navigating to chat: $e");
+                //                   ScaffoldMessenger.of(context).showSnackBar(
+                //                     SnackBar(
+                //                       content: Text('Failed to open chat: ${e.toString()}'),
+                //                       backgroundColor: Colors.red,
+                //                     ),
+                //                   );
+                //                 }
               }),
-
-     
             ],
           ),
           SizedBox(height: w * .03),

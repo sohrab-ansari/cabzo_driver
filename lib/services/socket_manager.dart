@@ -569,17 +569,28 @@ class SocketManager {
       onRideLocationUpdate?.call(data);
     });
 
-    _socket!.on('ride:reconnected', (data) {
+    _socket!.on('ride:reconnected', (data) async {
       print('>>>>>>>>>>> Reconnected to active ride: $data');
 
       final fullRideData = Map<String, dynamic>.from(data);
       final orderId = fullRideData['orderId']?.toString();
       final orderStatus = fullRideData['orderStatus']?.toString() ?? '';
 
-      _currentRide = {
-        'orderId': orderId,
-        'status': orderStatus,
-      };
+      // ✅ Store FULL ride data (not just orderId and status)
+      _currentRide = fullRideData;
+      _activeRideId = orderId;
+      _isRideInProgress = true;
+      _rideStartTime = DateTime.now();
+
+      // ✅ Save full backend data to SharedPreferences
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('active_ride_full_data', jsonEncode(fullRideData));
+        await prefs.setString('active_order_id', orderId.toString());
+        print('💾 Reconnected ride data saved to SharedPreferences');
+      } catch (e) {
+        print('⚠️ Error saving reconnected ride data: $e');
+      }
 
       onRideReconnected?.call(fullRideData);
 

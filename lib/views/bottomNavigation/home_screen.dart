@@ -419,6 +419,11 @@ String? driverName;
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
 
+    // Show loading screen while socket is connecting (from splash screen)
+    if (!socketManager.isSocketConnected && widget.isFirstLaunch) {
+      return _buildLoadingScreen();
+    }
+
     // Show loading screen only while restoration is in progress (app startup)
     if (socketManager.isRestorationInProgress) {
       return _buildLoadingScreen();
@@ -426,7 +431,7 @@ String? driverName;
 
     return socketManager.isOnDuty == false
         ? _buildOfflineScreen(w)
-        : _buildOnlineScreen(w);
+        : _buildOnlineScreen(w, widget.isFirstLaunch);
   }
 
   /// Loading screen shown during app startup while restoring online status
@@ -438,10 +443,10 @@ String? driverName;
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Loading spinner
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-              strokeWidth: 3,
-            ),
+            // const CircularProgressIndicator(
+            //   valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            //   strokeWidth: 3,
+            // ),
             const SizedBox(height: 20),
             Text(
               'Loading...',
@@ -897,7 +902,7 @@ Navigator.push(context, MaterialPageRoute(builder: (context) => AgreementScreen(
     );
   }
 
-  Widget _buildOnlineScreen(double w) {
+  Widget _buildOnlineScreen(double w, isFirstLaunc) {
     return Scaffold(
       body:
       
@@ -916,6 +921,8 @@ Navigator.push(context, MaterialPageRoute(builder: (context) => AgreementScreen(
               markers: markers,
               circles: circles,
             ),
+
+
 
             /// 2️⃣ Book Ride Button (Top Right)
             Positioned(

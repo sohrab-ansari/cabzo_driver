@@ -20,6 +20,8 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
+    _initializeApp();
+
     Future.delayed(const Duration(seconds: 3), () {
       if (!mounted) return;
  
@@ -31,6 +33,27 @@ class _SplashScreenState extends State<SplashScreen> {
     });
 
     tokenbasednav();
+  }
+    // Socket Manager instance
+  final SocketManager socketManager = SocketManager();
+
+    Future<void> _initializeApp() async {
+    // Request permissions
+    // await _requestPermissions();
+
+    // // Load custom icons
+    // await _loadCustomBikeMarker();
+    // await _loadVehicleIcons();
+    
+
+    // // Initialize socket manager with callbacks
+    // _setupSocketCallbacks();
+
+    // Start socket connection
+    await socketManager.initialize();
+
+    // Start location listener
+    // _startLocationListener();
   }
 
   Future<void> tokenbasednav() async {

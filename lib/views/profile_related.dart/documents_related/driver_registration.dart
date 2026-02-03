@@ -158,6 +158,41 @@ class _DriverRegistrationState extends State<DriverRegistration> {
     });
   }
 
+  // Validation helper methods
+  bool _isVehicleDetailsValid() {
+    return vehicleNameController.text.isNotEmpty &&
+        vehicleNumberController.text.isNotEmpty &&
+        vehicleTypeController.text.isNotEmpty &&
+        modelController.text.isNotEmpty &&
+        yearController.text.isNotEmpty &&
+        colorController.text.isNotEmpty &&
+        plateNumberController.text.isNotEmpty &&
+        _registrationCertificateImage != null &&
+        _licencePlateImage != null &&
+        _vehicleInsuranceImage != null;
+  }
+
+  bool _isPersonalDetailsValid() {
+    return nameController.text.isNotEmpty &&
+        phoneNumberController.text.isNotEmpty &&
+        emailController.text.isNotEmpty &&
+        dobController.text.isNotEmpty &&
+        alternateContact1Controller.text.isNotEmpty &&
+        relation1Controller.text.isNotEmpty &&
+        address1Controller.text.isNotEmpty &&
+        alternateContact2Controller.text.isNotEmpty &&
+        relation2Controller.text.isNotEmpty &&
+        address2Controller.text.isNotEmpty &&
+        _aadharFrontImage != null &&
+        _aadharBackImage != null &&
+        _panCardImage != null &&
+        _driverLicenseImage != null;
+  }
+
+  bool _isProfilePhotoValid() {
+    return _profilePhotoImage != null;
+  }
+
   // Method to clear profile photo
   void _clearProfilePhoto() {
     setState(() {
@@ -166,6 +201,17 @@ class _DriverRegistrationState extends State<DriverRegistration> {
   }
 
   Future<void> _submitVehicleDetails() async {
+    // Check if all fields are valid before proceeding
+    if (!_isVehicleDetailsValid()) {
+      Get.snackbar(
+        'Incomplete Form',
+        'Please fill all fields and upload all required documents',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
     print("myyy_vehicallll_number ${vehicleNumberController.text}");
 
     // Debug all fields
@@ -323,6 +369,17 @@ class _DriverRegistrationState extends State<DriverRegistration> {
  
 
   Future<void> _submitPersonalDetails() async {
+    // Check if all fields are valid before proceeding
+    if (!_isPersonalDetailsValid()) {
+      Get.snackbar(
+        'Incomplete Form',
+        'Please fill all fields and upload all required documents',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
     print("Starting personal details submission...");
     print("Current _isSubmitting state: $_isSubmitting");
 
@@ -1300,21 +1357,20 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                                     maxLines: 2,
                                   ),
                                   SizedBox(height: w * .04),
-                                  _isLoading
-                                      ? Center(
-                                          child: CircularProgressIndicator(),
-                                        )
-                                      : AppButtons.solid(
-                                          context: context,
-                                          text: "Continue",
-                                          onClicked: _submitVehicleDetails,
-                                          isFullWidth: true,
-                                          backgroundColor: AppColors.primaryRed,
-                                          textColor: AppColors.white,
-                                          fontSize: w * .045,
-                                          height: w * .140,
-                                          radius: 12.0,
-                                        ),
+                                  AppButtons.solid(
+                                    context: context,
+                                    text: "Continue",
+                                    onClicked: _submitVehicleDetails,
+                                    isLoading: _isLoading,
+                                    isFullWidth: true,
+                                    backgroundColor: _isVehicleDetailsValid()
+                                        ? AppColors.primaryRed
+                                        : AppColors.primaryRed.withOpacity(0.5),
+                                    textColor: AppColors.white,
+                                    fontSize: w * .045,
+                                    height: w * .140,
+                                    radius: 12.0,
+                                  ),
                                   SizedBox(height: w * .1),
                                 ],
                               )
@@ -1696,21 +1752,20 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                                     maxLines: 2,
                                   ),
                                   SizedBox(height: w * .1),
-                                  _isSubmitting
-                                      ? Center(
-                                          child: CircularProgressIndicator(),
-                                        )
-                                      : AppButtons.solid(
-                                          context: context,
-                                          text: "Continue",
-                                          onClicked: _submitPersonalDetails,
-                                          isFullWidth: true,
-                                          backgroundColor: AppColors.primaryRed,
-                                          textColor: AppColors.white,
-                                          fontSize: w * .045,
-                                          height: w * .140,
-                                          radius: 12.0,
-                                        ),
+                                  AppButtons.solid(
+                                    context: context,
+                                    text: "Continue",
+                                    onClicked: _submitPersonalDetails,
+                                    isLoading: _isSubmitting,
+                                    isFullWidth: true,
+                                    backgroundColor: _isPersonalDetailsValid()
+                                        ? AppColors.primaryRed
+                                        : AppColors.primaryRed.withOpacity(0.5),
+                                    textColor: AppColors.white,
+                                    fontSize: w * .045,
+                                    height: w * .140,
+                                    radius: 12.0,
+                                  ),
                                   SizedBox(height: w * .1),
                                 ],
                               )
@@ -1785,21 +1840,20 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                                     ),
                                   ),
                                   SizedBox(height: w * .4),
-                                  _isSubmitting
-                                      ? Center(
-                                          child: CircularProgressIndicator(),
-                                        )
-                                      : AppButtons.solid(
-                                          context: context,
-                                          text: "Submit",
-                                          onClicked: _submitProfilePhoto,
-                                          isFullWidth: true,
-                                          backgroundColor: AppColors.primaryRed,
-                                          textColor: AppColors.white,
-                                          fontSize: w * .045,
-                                          height: w * .140,
-                                          radius: 12.0,
-                                        ),
+                                  AppButtons.solid(
+                                    context: context,
+                                    text: "Submit",
+                                    onClicked: _submitProfilePhoto,
+                                    isLoading: _isSubmitting,
+                                    isFullWidth: true,
+                                    backgroundColor: _isProfilePhotoValid()
+                                        ? AppColors.primaryRed
+                                        : AppColors.primaryRed.withOpacity(0.5),
+                                    textColor: AppColors.white,
+                                    fontSize: w * .045,
+                                    height: w * .140,
+                                    radius: 12.0,
+                                  ),
                                   SizedBox(height: w * .1),
                                 ],
                               )
