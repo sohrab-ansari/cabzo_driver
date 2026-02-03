@@ -1,7 +1,7 @@
-import 'package:corezap_driver/utilities/navigator.dart';
-import 'package:corezap_driver/views/profile_related.dart/payment_related/add_money.dart';
-import 'package:corezap_driver/views/profile_related.dart/payment_related/money_transfer_screen.dart';
-import 'package:corezap_driver/views/profile_related.dart/payment_related/transactions.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/views/profile_related.dart/payment_related/add_money.dart';
+import 'package:nzcu_driver/views/profile_related.dart/payment_related/money_transfer_screen.dart';
+import 'package:nzcu_driver/views/profile_related.dart/payment_related/transactions.dart';
 import 'package:flutter/material.dart';
 
 class WalletScreen extends StatefulWidget {

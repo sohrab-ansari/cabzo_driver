@@ -3,10 +3,10 @@
 // // controllers/signup_controller.dart
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
-// import 'package:corezap_driver/apis/auth.api.dart';
-// import 'package:corezap_driver/utilities/Custom_Snackbar.dart';
-// import 'package:corezap_driver/utilities/navigator.dart';
-// import 'package:corezap_driver/views/auth/enter_otp_screen.dart';
+// import 'package:nzcu_driver/apis/auth.api.dart';
+// import 'package:nzcu_driver/utilities/Custom_Snackbar.dart';
+// import 'package:nzcu_driver/utilities/navigator.dart';
+// import 'package:nzcu_driver/views/auth/enter_otp_screen.dart';
 
 // class SignupController extends GetxController {
 //   late final AuthApi authApi;

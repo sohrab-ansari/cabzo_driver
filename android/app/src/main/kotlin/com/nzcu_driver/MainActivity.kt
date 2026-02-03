@@ -1,4 +1,4 @@
-package com.nzcudriver
+package com.nzcu_driver
 
 import io.flutter.embedding.android.FlutterActivity
 

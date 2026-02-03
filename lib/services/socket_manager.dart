@@ -8,8 +8,8 @@ import 'package:get/get.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
-import 'package:corezap_driver/views/scheduled_pickups/accepted_screen.dart';
+import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
+import 'package:nzcu_driver/views/scheduled_pickups/accepted_screen.dart';
 
 class SocketManager {
   // Singleton instance

@@ -1,10 +1,10 @@
-import 'package:corezap_driver/controllers/auth_controllers/other_text_controller.dart';
-import 'package:corezap_driver/controllers/auth_controllers/raise_request_controller.dart';
-import 'package:corezap_driver/utilities/app_buttons.dart';
-import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/utilities/custom_font.dart';
-import 'package:corezap_driver/utilities/custom_images.dart';
-import 'package:corezap_driver/utilities/form_field.dart';
+import 'package:nzcu_driver/controllers/auth_controllers/other_text_controller.dart';
+import 'package:nzcu_driver/controllers/auth_controllers/raise_request_controller.dart';
+import 'package:nzcu_driver/utilities/app_buttons.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/custom_font.dart';
+import 'package:nzcu_driver/utilities/custom_images.dart';
+import 'package:nzcu_driver/utilities/form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

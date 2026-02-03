@@ -1,13 +1,13 @@
-// // import 'package:corezap_driver/controller/controllers.dart';
-// // import 'package:corezap_driver/utilities/app_buttons.dart';
-// // import 'package:corezap_driver/utilities/colors.dart';
-// // import 'package:corezap_driver/utilities/colors/colors_list.dart';
-// // import 'package:corezap_driver/utilities/custom_font.dart';
-// // import 'package:corezap_driver/utilities/custom_images.dart';
-// // import 'package:corezap_driver/utilities/navigator.dart';
-// // import 'package:corezap_driver/views/payment_modes_screen.dart/cash_payment_screen.dart';
-// // import 'package:corezap_driver/views/payment_modes_screen.dart/qr_code_screen.dart';
-// // import 'package:corezap_driver/views/scheduled_pickups/details.dart';
+// // import 'package:nzcu_driver/controller/controllers.dart';
+// // import 'package:nzcu_driver/utilities/app_buttons.dart';
+// // import 'package:nzcu_driver/utilities/colors.dart';
+// // import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+// // import 'package:nzcu_driver/utilities/custom_font.dart';
+// // import 'package:nzcu_driver/utilities/custom_images.dart';
+// // import 'package:nzcu_driver/utilities/navigator.dart';
+// // import 'package:nzcu_driver/views/payment_modes_screen.dart/cash_payment_screen.dart';
+// // import 'package:nzcu_driver/views/payment_modes_screen.dart/qr_code_screen.dart';
+// // import 'package:nzcu_driver/views/scheduled_pickups/details.dart';
 // // import 'package:flutter/material.dart';
 // // import 'package:flutter_animate/flutter_animate.dart';
 // // import 'package:get/get.dart';
@@ -177,18 +177,18 @@
 // //   }
 // // }
 
-// import 'package:corezap_driver/controllers/controllers.dart';
-// import 'package:corezap_driver/controllers/home_controllers/cash_controller.dart';
-// import 'package:corezap_driver/utilities/app_buttons.dart';
-// import 'package:corezap_driver/utilities/colors.dart';
-// import 'package:corezap_driver/utilities/colors/colors_list.dart';
-// import 'package:corezap_driver/utilities/custom_font.dart';
-// import 'package:corezap_driver/utilities/custom_images.dart';
-// import 'package:corezap_driver/utilities/navigator.dart';
-// import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
-// import 'package:corezap_driver/views/payment_modes_screen.dart/cash_payment_screen.dart';
-// import 'package:corezap_driver/views/payment_modes_screen.dart/qr_code_screen.dart';
-// import 'package:corezap_driver/views/scheduled_pickups/details.dart';
+// import 'package:nzcu_driver/controllers/controllers.dart';
+// import 'package:nzcu_driver/controllers/home_controllers/cash_controller.dart';
+// import 'package:nzcu_driver/utilities/app_buttons.dart';
+// import 'package:nzcu_driver/utilities/colors.dart';
+// import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+// import 'package:nzcu_driver/utilities/custom_font.dart';
+// import 'package:nzcu_driver/utilities/custom_images.dart';
+// import 'package:nzcu_driver/utilities/navigator.dart';
+// import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
+// import 'package:nzcu_driver/views/payment_modes_screen.dart/cash_payment_screen.dart';
+// import 'package:nzcu_driver/views/payment_modes_screen.dart/qr_code_screen.dart';
+// import 'package:nzcu_driver/views/scheduled_pickups/details.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_animate/flutter_animate.dart';
 // import 'package:get/get.dart';
@@ -390,16 +390,16 @@
 //   }
 // }
 
-import 'package:corezap_driver/controllers/controllers.dart';
-import 'package:corezap_driver/controllers/home_controllers/cash_controller.dart';
-import 'package:corezap_driver/utilities/app_buttons.dart';
-import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/utilities/colors/colors_list.dart';
-import 'package:corezap_driver/utilities/custom_font.dart';
-import 'package:corezap_driver/utilities/custom_images.dart';
-import 'package:corezap_driver/views/payment_modes_screen.dart/qr_code_screen.dart';
-// import 'package:corezap_driver/views/payment_modes_screen/qr_code_screen.dart';
-import 'package:corezap_driver/views/scheduled_pickups/details.dart';
+import 'package:nzcu_driver/controllers/controllers.dart';
+import 'package:nzcu_driver/controllers/home_controllers/cash_controller.dart';
+import 'package:nzcu_driver/utilities/app_buttons.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+import 'package:nzcu_driver/utilities/custom_font.dart';
+import 'package:nzcu_driver/utilities/custom_images.dart';
+import 'package:nzcu_driver/views/payment_modes_screen.dart/qr_code_screen.dart';
+// import 'package:nzcu_driver/views/payment_modes_screen/qr_code_screen.dart';
+import 'package:nzcu_driver/views/scheduled_pickups/details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';

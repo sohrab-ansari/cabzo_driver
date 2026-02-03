@@ -1,10 +1,10 @@
-import 'package:corezap_driver/controllers/controllers.dart';
-import 'package:corezap_driver/utilities/app_buttons.dart';
-import 'package:corezap_driver/utilities/colors/colors_list.dart';
-import 'package:corezap_driver/utilities/custom_images.dart';
-import 'package:corezap_driver/utilities/custom_text.dart';
-import 'package:corezap_driver/utilities/navigator.dart';
-import 'package:corezap_driver/views/popups/pop_ups.dart';
+import 'package:nzcu_driver/controllers/controllers.dart';
+import 'package:nzcu_driver/utilities/app_buttons.dart';
+import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+import 'package:nzcu_driver/utilities/custom_images.dart';
+import 'package:nzcu_driver/utilities/custom_text.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/views/popups/pop_ups.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:get/instance_manager.dart';

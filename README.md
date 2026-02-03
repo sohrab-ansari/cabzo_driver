@@ -1,4 +1,4 @@
-# corezap_driver
+# nzcu_driver
 
 A new Flutter project.
 

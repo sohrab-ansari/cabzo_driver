@@ -1,8 +1,8 @@
-import 'package:corezap_driver/utilities/app_buttons.dart';
-import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/utilities/custom_font.dart';
-import 'package:corezap_driver/utilities/navigator.dart';
-import 'package:corezap_driver/views/auth/login_screen.dart';
+import 'package:nzcu_driver/utilities/app_buttons.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/custom_font.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/views/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 

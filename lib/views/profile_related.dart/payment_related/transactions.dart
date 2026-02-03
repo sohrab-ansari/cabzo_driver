@@ -1,9 +1,9 @@
-// import 'package:corezap_driver/controller/profilecontoller/transaction_controller.dart';
-// import 'package:corezap_driver/utilities/colors.dart';
-// import 'package:corezap_driver/utilities/colors/colors_list.dart';
-// import 'package:corezap_driver/utilities/custom_font.dart';
-// import 'package:corezap_driver/utilities/custom_text.dart';
-// import 'package:corezap_driver/utilities/navigator.dart';
+// import 'package:nzcu_driver/controller/profilecontoller/transaction_controller.dart';
+// import 'package:nzcu_driver/utilities/colors.dart';
+// import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+// import 'package:nzcu_driver/utilities/custom_font.dart';
+// import 'package:nzcu_driver/utilities/custom_text.dart';
+// import 'package:nzcu_driver/utilities/navigator.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_animate/flutter_animate.dart';
 // import 'package:get/get_core/src/get_main.dart';
@@ -189,13 +189,13 @@
 //   }
 // }
 
-import 'package:corezap_driver/controllers/profile_controllers/transaction_controller.dart';
-import 'package:corezap_driver/modals/transactions_response.dart';
-import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/utilities/colors/colors_list.dart';
-import 'package:corezap_driver/utilities/custom_font.dart';
-import 'package:corezap_driver/utilities/custom_text.dart';
-import 'package:corezap_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/transaction_controller.dart';
+import 'package:nzcu_driver/modals/transactions_response.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+import 'package:nzcu_driver/utilities/custom_font.dart';
+import 'package:nzcu_driver/utilities/custom_text.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';

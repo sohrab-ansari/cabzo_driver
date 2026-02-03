@@ -1,23 +1,23 @@
 
 
-import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/utilities/colors/colors_list.dart';
-import 'package:corezap_driver/utilities/custom_font.dart';
-import 'package:corezap_driver/utilities/custom_images.dart';
-import 'package:corezap_driver/utilities/custom_text.dart';
-import 'package:corezap_driver/utilities/navigator.dart';
-import 'package:corezap_driver/views/auth/login_screen.dart';
-import 'package:corezap_driver/views/popups/pop_ups.dart';
-import 'package:corezap_driver/views/profile_related.dart/documents.dart';
-import 'package:corezap_driver/views/profile_related.dart/edit_profile.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+import 'package:nzcu_driver/utilities/custom_font.dart';
+import 'package:nzcu_driver/utilities/custom_images.dart';
+import 'package:nzcu_driver/utilities/custom_text.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/views/auth/login_screen.dart';
+import 'package:nzcu_driver/views/popups/pop_ups.dart';
+import 'package:nzcu_driver/views/profile_related.dart/documents.dart';
+import 'package:nzcu_driver/views/profile_related.dart/edit_profile.dart';
 
-import 'package:corezap_driver/views/profile_related.dart/help_related/help_screen.dart';
-import 'package:corezap_driver/views/profile_related.dart/notification.dart';
-import 'package:corezap_driver/views/profile_related.dart/notification_screen.dart';
-import 'package:corezap_driver/views/profile_related.dart/payment_screen.dart';
-import 'package:corezap_driver/views/profile_related.dart/privacy_policy.dart';
-import 'package:corezap_driver/views/profile_related.dart/rating.dart';
-import 'package:corezap_driver/views/profile_related.dart/terms_condition.dart';
+import 'package:nzcu_driver/views/profile_related.dart/help_related/help_screen.dart';
+import 'package:nzcu_driver/views/profile_related.dart/notification.dart';
+import 'package:nzcu_driver/views/profile_related.dart/notification_screen.dart';
+import 'package:nzcu_driver/views/profile_related.dart/payment_screen.dart';
+import 'package:nzcu_driver/views/profile_related.dart/privacy_policy.dart';
+import 'package:nzcu_driver/views/profile_related.dart/rating.dart';
+import 'package:nzcu_driver/views/profile_related.dart/terms_condition.dart';
 
 
 import 'package:flutter/material.dart';

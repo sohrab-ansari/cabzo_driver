@@ -1,9 +1,9 @@
-import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/views/bottomNavigation/earnings.dart';
-import 'package:corezap_driver/views/bottomNavigation/home_screen.dart';
-import 'package:corezap_driver/views/bottomNavigation/home_maps_screen.dart';
-import 'package:corezap_driver/views/bottomNavigation/profile_screen.dart';
-import 'package:corezap_driver/views/bottomNavigation/rideHistory_screen.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/views/bottomNavigation/earnings.dart';
+import 'package:nzcu_driver/views/bottomNavigation/home_screen.dart';
+import 'package:nzcu_driver/views/bottomNavigation/home_maps_screen.dart';
+import 'package:nzcu_driver/views/bottomNavigation/profile_screen.dart';
+import 'package:nzcu_driver/views/bottomNavigation/rideHistory_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';

@@ -1,6 +1,6 @@
-import 'package:corezap_driver/controllers/controllers.dart';
-import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/utilities/custom_font.dart';
+import 'package:nzcu_driver/controllers/controllers.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/custom_font.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';

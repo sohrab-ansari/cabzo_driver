@@ -1,9 +1,9 @@
-// import 'package:corezap_driver/controller/controllers.dart';
-// import 'package:corezap_driver/controller/ridescontroller/rieds_history_controller.dart';
-// import 'package:corezap_driver/controller/ridescontroller/rieds_history_controller2.dart';
-// import 'package:corezap_driver/modals/ride_history_response.dart';
-// import 'package:corezap_driver/utilities/colors.dart';
-// import 'package:corezap_driver/utilities/custom_font.dart';
+// import 'package:nzcu_driver/controller/controllers.dart';
+// import 'package:nzcu_driver/controller/ridescontroller/rieds_history_controller.dart';
+// import 'package:nzcu_driver/controller/ridescontroller/rieds_history_controller2.dart';
+// import 'package:nzcu_driver/modals/ride_history_response.dart';
+// import 'package:nzcu_driver/utilities/colors.dart';
+// import 'package:nzcu_driver/utilities/custom_font.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_animate/flutter_animate.dart';
 // import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -563,11 +563,11 @@
 
 
 
-import 'package:corezap_driver/controllers/controllers.dart';
-import 'package:corezap_driver/controllers/rides_controllers/rieds_history_controller.dart';
-import 'package:corezap_driver/modals/ride_history_response2.dart';
-import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/utilities/custom_font.dart';
+import 'package:nzcu_driver/controllers/controllers.dart';
+import 'package:nzcu_driver/controllers/rides_controllers/rieds_history_controller.dart';
+import 'package:nzcu_driver/modals/ride_history_response2.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/custom_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';

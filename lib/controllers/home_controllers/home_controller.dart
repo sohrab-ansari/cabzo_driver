@@ -1,7 +1,7 @@
 
 
-import 'package:corezap_driver/apiervices/services/profile_api_services.dart';
-import 'package:corezap_driver/modals/home_modal_response.dart';
+import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
+import 'package:nzcu_driver/modals/home_modal_response.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

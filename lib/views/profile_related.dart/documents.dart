@@ -1,12 +1,12 @@
-import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
-import 'package:corezap_driver/controllers/auth_controllers/vehicle_form_controller.dart';
-import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/utilities/colors/colors_list.dart';
-import 'package:corezap_driver/utilities/custom_font.dart';
-import 'package:corezap_driver/utilities/custom_images.dart';
-import 'package:corezap_driver/utilities/custom_text.dart';
-import 'package:corezap_driver/utilities/navigator.dart';
-import 'package:corezap_driver/views/profile_related.dart/documents_related/driver_registration.dart';
+import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
+import 'package:nzcu_driver/controllers/auth_controllers/vehicle_form_controller.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+import 'package:nzcu_driver/utilities/custom_font.dart';
+import 'package:nzcu_driver/utilities/custom_images.dart';
+import 'package:nzcu_driver/utilities/custom_text.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/views/profile_related.dart/documents_related/driver_registration.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

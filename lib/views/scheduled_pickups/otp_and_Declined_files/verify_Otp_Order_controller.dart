@@ -1,8 +1,8 @@
-// import 'package:corezap_driver/apiervices/services/profile_api_services.dart';
-// import 'package:corezap_driver/modals/home_modal_response.dart';
-// import 'package:corezap_driver/modals/order_complete_cash_response.dart';
-// import 'package:corezap_driver/modals/update_order_response.dart';
-// import 'package:corezap_driver/views/scheduled_pickups/otp_and_Declined_files/verify_Otp_Order_response.dart';
+// import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
+// import 'package:nzcu_driver/modals/home_modal_response.dart';
+// import 'package:nzcu_driver/modals/order_complete_cash_response.dart';
+// import 'package:nzcu_driver/modals/update_order_response.dart';
+// import 'package:nzcu_driver/views/scheduled_pickups/otp_and_Declined_files/verify_Otp_Order_response.dart';
 
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
@@ -78,8 +78,8 @@
 //   }
 // }
 
-import 'package:corezap_driver/apiervices/services/profile_api_services.dart';
-import 'package:corezap_driver/views/scheduled_pickups/otp_and_Declined_files/verify_Otp_Order_response.dart';
+import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
+import 'package:nzcu_driver/views/scheduled_pickups/otp_and_Declined_files/verify_Otp_Order_response.dart';
 import 'package:get/get.dart';
 
 class VerifyOtpOrderController extends GetxController {

@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:corezap_driver/apiervices/api_path.dart';
+import 'package:nzcu_driver/apiervices/api_path.dart';
 
 class EarningsService {
   // Get earning report based on period (today, weekly, monthly)

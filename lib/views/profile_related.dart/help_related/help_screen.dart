@@ -1,8 +1,8 @@
-// import 'package:corezap_driver/utilities/colors/colors_list.dart';
-// import 'package:corezap_driver/utilities/custom_images.dart';
-// import 'package:corezap_driver/utilities/custom_text.dart';
-// import 'package:corezap_driver/utilities/navigator.dart';
-// import 'package:corezap_driver/views/profile_related.dart/help_related/F_a_qs.dart';
+// import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+// import 'package:nzcu_driver/utilities/custom_images.dart';
+// import 'package:nzcu_driver/utilities/custom_text.dart';
+// import 'package:nzcu_driver/utilities/navigator.dart';
+// import 'package:nzcu_driver/views/profile_related.dart/help_related/F_a_qs.dart';
 // import 'package:flutter/material.dart';
 
 // class HelpScreen extends StatefulWidget {
@@ -211,11 +211,11 @@
 //   }
 // }
 
-import 'package:corezap_driver/utilities/colors/colors_list.dart';
-import 'package:corezap_driver/utilities/custom_images.dart';
-import 'package:corezap_driver/utilities/custom_text.dart';
-import 'package:corezap_driver/utilities/navigator.dart';
-import 'package:corezap_driver/views/profile_related.dart/help_related/F_a_qs.dart';
+import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+import 'package:nzcu_driver/utilities/custom_images.dart';
+import 'package:nzcu_driver/utilities/custom_text.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/views/profile_related.dart/help_related/F_a_qs.dart';
 import 'package:flutter/material.dart';
 
 class HelpScreen extends StatefulWidget {

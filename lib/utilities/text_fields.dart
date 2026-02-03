@@ -1,4 +1,4 @@
-import 'package:corezap_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';

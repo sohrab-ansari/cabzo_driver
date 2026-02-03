@@ -4,8 +4,8 @@
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
 // import 'package:geolocator/geolocator.dart';
 // import 'package:permission_handler/permission_handler.dart';
-// import 'package:corezap_driver/apiervices/services/driver_socket_service.dart';
-// import 'package:corezap_driver/utilities/colors.dart';
+// import 'package:nzcu_driver/apiervices/services/driver_socket_service.dart';
+// import 'package:nzcu_driver/utilities/colors.dart';
 // import 'package:flutter_svg/flutter_svg.dart';
 
 // class DriverMapScreen extends StatefulWidget {

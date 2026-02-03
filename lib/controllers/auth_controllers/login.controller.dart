@@ -1,15 +1,15 @@
 import 'dart:io';
 
-import 'package:corezap_driver/apiervices/services/auth_api_service.dart';
-import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
-import 'package:corezap_driver/modals/Otp_verify_res.dart';
-import 'package:corezap_driver/modals/create_vehicle_res.dart';
-import 'package:corezap_driver/modals/driver_Image_upload_res.dart';
-import 'package:corezap_driver/modals/register_profile_res.dart';
-import 'package:corezap_driver/utilities/navigator.dart';
-import 'package:corezap_driver/views/auth/login_screen.dart';
-import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
-// import 'package:corezap_driver/apiServices/services/auth_api_service.dart';
+import 'package:nzcu_driver/apiervices/services/auth_api_service.dart';
+import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
+import 'package:nzcu_driver/modals/Otp_verify_res.dart';
+import 'package:nzcu_driver/modals/create_vehicle_res.dart';
+import 'package:nzcu_driver/modals/driver_Image_upload_res.dart';
+import 'package:nzcu_driver/modals/register_profile_res.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/views/auth/login_screen.dart';
+import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
+// import 'package:nzcu_driver/apiServices/services/auth_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

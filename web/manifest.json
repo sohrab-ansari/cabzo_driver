@@ -1,6 +1,6 @@
 {
-    "name": "corezap_driver",
-    "short_name": "corezap_driver",
+    "name": "nzcu_driver",
+    "short_name": "nzcu_driver",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

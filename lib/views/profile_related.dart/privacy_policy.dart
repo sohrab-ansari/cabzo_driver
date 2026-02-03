@@ -1,6 +1,6 @@
-// import 'package:corezap_driver/utilities/colors/colors_list.dart';
-// import 'package:corezap_driver/utilities/custom_text.dart';
-// import 'package:corezap_driver/utilities/navigator.dart';
+// import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+// import 'package:nzcu_driver/utilities/custom_text.dart';
+// import 'package:nzcu_driver/utilities/navigator.dart';
 // import 'package:flutter/material.dart';
 
 // class PrivacyPolicy extends StatelessWidget {
@@ -165,10 +165,10 @@
 
 
 
-import 'package:corezap_driver/controllers/profile_controllers/terms_and_policy_controller.dart';
-import 'package:corezap_driver/utilities/colors/colors_list.dart';
-import 'package:corezap_driver/utilities/custom_text.dart';
-import 'package:corezap_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/terms_and_policy_controller.dart';
+import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+import 'package:nzcu_driver/utilities/custom_text.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';

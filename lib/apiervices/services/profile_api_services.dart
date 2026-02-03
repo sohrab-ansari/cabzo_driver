@@ -3,33 +3,33 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:corezap_driver/apiervices/api_path.dart';
-import 'package:corezap_driver/modals/add_money_wallet_response.dart';
-import 'package:corezap_driver/modals/bank_account_add_Res.dart';
-import 'package:corezap_driver/modals/chartid_response.dart';
-import 'package:corezap_driver/modals/driverId_response.dart';
-import 'package:corezap_driver/modals/driver_Image_upload_res.dart';
-import 'package:corezap_driver/modals/get_all_vehicle_categories_response.dart';
-import 'package:corezap_driver/modals/get_bank_accounts_response.dart';
-import 'package:corezap_driver/modals/get_promo_code_data.dart';
-import 'package:corezap_driver/modals/home_modal_response.dart';
-import 'package:corezap_driver/modals/order_complete_cash_response.dart';
-import 'package:corezap_driver/modals/payments_withdraw_response.dart';
-import 'package:corezap_driver/modals/review_rating_response.dart';
+import 'package:nzcu_driver/apiervices/api_path.dart';
+import 'package:nzcu_driver/modals/add_money_wallet_response.dart';
+import 'package:nzcu_driver/modals/bank_account_add_Res.dart';
+import 'package:nzcu_driver/modals/chartid_response.dart';
+import 'package:nzcu_driver/modals/driverId_response.dart';
+import 'package:nzcu_driver/modals/driver_Image_upload_res.dart';
+import 'package:nzcu_driver/modals/get_all_vehicle_categories_response.dart';
+import 'package:nzcu_driver/modals/get_bank_accounts_response.dart';
+import 'package:nzcu_driver/modals/get_promo_code_data.dart';
+import 'package:nzcu_driver/modals/home_modal_response.dart';
+import 'package:nzcu_driver/modals/order_complete_cash_response.dart';
+import 'package:nzcu_driver/modals/payments_withdraw_response.dart';
+import 'package:nzcu_driver/modals/review_rating_response.dart';
 
-import 'package:corezap_driver/modals/ride_history_response2.dart';
-import 'package:corezap_driver/modals/terms_and_policy_response.dart';
-import 'package:corezap_driver/modals/transactions_response.dart';
-import 'package:corezap_driver/modals/update_order_response.dart';
-import 'package:corezap_driver/modals/wallet_response.dart';
-import 'package:corezap_driver/views/profile_related.dart/edit_profile.dart';
-import 'package:corezap_driver/views/scheduled_pickups/otp_and_Declined_files/verify_Otp_Order_response.dart';
+import 'package:nzcu_driver/modals/ride_history_response2.dart';
+import 'package:nzcu_driver/modals/terms_and_policy_response.dart';
+import 'package:nzcu_driver/modals/transactions_response.dart';
+import 'package:nzcu_driver/modals/update_order_response.dart';
+import 'package:nzcu_driver/modals/wallet_response.dart';
+import 'package:nzcu_driver/views/profile_related.dart/edit_profile.dart';
+import 'package:nzcu_driver/views/scheduled_pickups/otp_and_Declined_files/verify_Otp_Order_response.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:http/http.dart' as http;
 
-// import 'package:corezap_driver/apiServices/api_path.dart';
+// import 'package:nzcu_driver/apiServices/api_path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileApiServices {

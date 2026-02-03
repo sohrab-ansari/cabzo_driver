@@ -1,6 +1,6 @@
 
-import 'package:corezap_driver/controllers/home_controllers/order_update_controller.dart';
-import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
+import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
+import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
@@ -8,7 +8,7 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:corezap_driver/views/scheduled_pickups/accepted_screen.dart';
+import 'package:nzcu_driver/views/scheduled_pickups/accepted_screen.dart';
 
 class ArrivedOtpScreen extends StatefulWidget {
   final bool? bookridetypecheck;
@@ -185,6 +185,8 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
         // Navigate after successful verification
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted && !_isDisposed) {
+
+            print("naviagtionnnnn>>>   ");
             stepperController.nextStep();
 
             Navigator.pop(context);

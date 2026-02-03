@@ -1,16 +1,16 @@
-// // // import 'package:corezap_driver/controllers/profile_controllers/add_money_wallet_controller.dart';
-// // // import 'package:corezap_driver/controllers/promo_code_controller/get_promo_code_controller.dart';
-// // // import 'package:corezap_driver/utilities/app_buttons.dart';
-// // // import 'package:corezap_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
-// // // import 'package:corezap_driver/utilities/colors.dart';
-// // // import 'package:corezap_driver/utilities/colors/colors_list.dart';
-// // // import 'package:corezap_driver/utilities/custom_cupon_card.dart';
-// // // import 'package:corezap_driver/utilities/custom_font.dart';
-// // // import 'package:corezap_driver/utilities/custom_images.dart';
-// // // import 'package:corezap_driver/utilities/custom_text.dart';
-// // // import 'package:corezap_driver/utilities/navigator.dart';
-// // // import 'package:corezap_driver/views/popups/pop_ups.dart';
-// // // import 'package:corezap_driver/views/profile_related.dart/payment_related/money_transfer_screen.dart';
+// // // import 'package:nzcu_driver/controllers/profile_controllers/add_money_wallet_controller.dart';
+// // // import 'package:nzcu_driver/controllers/promo_code_controller/get_promo_code_controller.dart';
+// // // import 'package:nzcu_driver/utilities/app_buttons.dart';
+// // // import 'package:nzcu_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
+// // // import 'package:nzcu_driver/utilities/colors.dart';
+// // // import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+// // // import 'package:nzcu_driver/utilities/custom_cupon_card.dart';
+// // // import 'package:nzcu_driver/utilities/custom_font.dart';
+// // // import 'package:nzcu_driver/utilities/custom_images.dart';
+// // // import 'package:nzcu_driver/utilities/custom_text.dart';
+// // // import 'package:nzcu_driver/utilities/navigator.dart';
+// // // import 'package:nzcu_driver/views/popups/pop_ups.dart';
+// // // import 'package:nzcu_driver/views/profile_related.dart/payment_related/money_transfer_screen.dart';
 // // // import 'package:flutter/material.dart';
 // // // import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 // // // import 'package:get/get_core/src/get_main.dart';
@@ -364,18 +364,18 @@
 // // // }
 
 
-// // import 'package:corezap_driver/controllers/profile_controllers/add_money_wallet_controller.dart';
-// // import 'package:corezap_driver/controllers/promo_code_controller/get_promo_code_controller.dart';
-// // import 'package:corezap_driver/utilities/app_buttons.dart';
-// // import 'package:corezap_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
-// // import 'package:corezap_driver/utilities/colors.dart';
-// // import 'package:corezap_driver/utilities/colors/colors_list.dart';
-// // import 'package:corezap_driver/utilities/custom_cupon_card.dart';
-// // import 'package:corezap_driver/utilities/custom_font.dart';
-// // import 'package:corezap_driver/utilities/custom_images.dart';
-// // import 'package:corezap_driver/utilities/custom_text.dart';
-// // import 'package:corezap_driver/utilities/navigator.dart';
-// // import 'package:corezap_driver/views/popups/pop_ups.dart';
+// // import 'package:nzcu_driver/controllers/profile_controllers/add_money_wallet_controller.dart';
+// // import 'package:nzcu_driver/controllers/promo_code_controller/get_promo_code_controller.dart';
+// // import 'package:nzcu_driver/utilities/app_buttons.dart';
+// // import 'package:nzcu_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
+// // import 'package:nzcu_driver/utilities/colors.dart';
+// // import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+// // import 'package:nzcu_driver/utilities/custom_cupon_card.dart';
+// // import 'package:nzcu_driver/utilities/custom_font.dart';
+// // import 'package:nzcu_driver/utilities/custom_images.dart';
+// // import 'package:nzcu_driver/utilities/custom_text.dart';
+// // import 'package:nzcu_driver/utilities/navigator.dart';
+// // import 'package:nzcu_driver/views/popups/pop_ups.dart';
 // // import 'package:flutter/material.dart';
 // // import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 // // import 'package:get/get.dart';
@@ -1013,19 +1013,19 @@
 // // }
 
 
-// import 'package:corezap_driver/controllers/profile_controllers/add_money_wallet_controller.dart';
-// import 'package:corezap_driver/controllers/promo_code_controller/get_promo_code_controller.dart';
-// import 'package:corezap_driver/modals/get_promo_code_data.dart';
-// import 'package:corezap_driver/utilities/app_buttons.dart';
-// import 'package:corezap_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
-// import 'package:corezap_driver/utilities/colors.dart';
-// import 'package:corezap_driver/utilities/colors/colors_list.dart';
-// import 'package:corezap_driver/utilities/custom_cupon_card.dart';
-// import 'package:corezap_driver/utilities/custom_font.dart';
-// import 'package:corezap_driver/utilities/custom_images.dart';
-// import 'package:corezap_driver/utilities/custom_text.dart';
-// import 'package:corezap_driver/utilities/navigator.dart';
-// import 'package:corezap_driver/views/popups/pop_ups.dart';
+// import 'package:nzcu_driver/controllers/profile_controllers/add_money_wallet_controller.dart';
+// import 'package:nzcu_driver/controllers/promo_code_controller/get_promo_code_controller.dart';
+// import 'package:nzcu_driver/modals/get_promo_code_data.dart';
+// import 'package:nzcu_driver/utilities/app_buttons.dart';
+// import 'package:nzcu_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
+// import 'package:nzcu_driver/utilities/colors.dart';
+// import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+// import 'package:nzcu_driver/utilities/custom_cupon_card.dart';
+// import 'package:nzcu_driver/utilities/custom_font.dart';
+// import 'package:nzcu_driver/utilities/custom_images.dart';
+// import 'package:nzcu_driver/utilities/custom_text.dart';
+// import 'package:nzcu_driver/utilities/navigator.dart';
+// import 'package:nzcu_driver/views/popups/pop_ups.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 // import 'package:get/get.dart';
@@ -1660,19 +1660,19 @@
 //   }
 // }
 
-import 'package:corezap_driver/controllers/profile_controllers/add_money_wallet_controller.dart';
-import 'package:corezap_driver/controllers/promo_code_controller/get_promo_code_controller.dart';
-import 'package:corezap_driver/modals/get_promo_code_data.dart';
-import 'package:corezap_driver/utilities/app_buttons.dart';
-import 'package:corezap_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
-import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/utilities/colors/colors_list.dart';
-import 'package:corezap_driver/utilities/custom_cupon_card.dart';
-import 'package:corezap_driver/utilities/custom_font.dart';
-import 'package:corezap_driver/utilities/custom_images.dart';
-import 'package:corezap_driver/utilities/custom_text.dart';
-import 'package:corezap_driver/utilities/navigator.dart';
-import 'package:corezap_driver/views/popups/pop_ups.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/add_money_wallet_controller.dart';
+import 'package:nzcu_driver/controllers/promo_code_controller/get_promo_code_controller.dart';
+import 'package:nzcu_driver/modals/get_promo_code_data.dart';
+import 'package:nzcu_driver/utilities/app_buttons.dart';
+import 'package:nzcu_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+import 'package:nzcu_driver/utilities/custom_cupon_card.dart';
+import 'package:nzcu_driver/utilities/custom_font.dart';
+import 'package:nzcu_driver/utilities/custom_images.dart';
+import 'package:nzcu_driver/utilities/custom_text.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/views/popups/pop_ups.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:get/get.dart';

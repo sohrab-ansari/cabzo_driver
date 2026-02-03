@@ -2,21 +2,21 @@
 
 
 import 'dart:io';
-import 'package:corezap_driver/controllers/home_controllers/home_controller.dart';
-import 'package:corezap_driver/controllers/profile_controllers/driverid_controller.dart';
-import 'package:corezap_driver/controllers/profile_controllers/edit_profile_controller.dart';
-import 'package:corezap_driver/utilities/app_buttons.dart';
-import 'package:corezap_driver/utilities/colors/colors_list.dart';
-import 'package:corezap_driver/utilities/custom_images.dart';
-import 'package:corezap_driver/utilities/custom_text.dart';
-import 'package:corezap_driver/utilities/form_field.dart';
-import 'package:corezap_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/driverid_controller.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/edit_profile_controller.dart';
+import 'package:nzcu_driver/utilities/app_buttons.dart';
+import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+import 'package:nzcu_driver/utilities/custom_images.dart';
+import 'package:nzcu_driver/utilities/custom_text.dart';
+import 'package:nzcu_driver/utilities/form_field.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/utilities/custom_font.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/custom_font.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});

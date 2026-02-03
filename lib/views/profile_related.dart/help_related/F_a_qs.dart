@@ -1,7 +1,7 @@
-import 'package:corezap_driver/utilities/colors/colors_list.dart';
-import 'package:corezap_driver/utilities/custom_text.dart';
-import 'package:corezap_driver/utilities/navigator.dart';
-import 'package:corezap_driver/views/profile_related.dart/faqs_details_screen.dart';
+import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+import 'package:nzcu_driver/utilities/custom_text.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/views/profile_related.dart/faqs_details_screen.dart';
 import 'package:flutter/material.dart';
 
 class FAQs extends StatefulWidget {

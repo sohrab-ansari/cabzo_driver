@@ -1,16 +1,16 @@
 import 'dart:convert';
-// import 'package:corezap_driver/apiServices/services/payments/razorpay_service.dart';
-import 'package:corezap_driver/apiervices/services/payments/razorpay_service.dart';
-import 'package:corezap_driver/apiervices/services/profile_api_services.dart';
-import 'package:corezap_driver/views/profile_related.dart/payment_screen.dart';
+// import 'package:nzcu_driver/apiServices/services/payments/razorpay_service.dart';
+import 'package:nzcu_driver/apiervices/services/payments/razorpay_service.dart';
+import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
+import 'package:nzcu_driver/views/profile_related.dart/payment_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:corezap_driver/apiServices/services/profile_api_services.dart';
-import 'package:corezap_driver/modals/add_money_wallet_response.dart';
-// import 'package:corezap_driver/services/razorpay_service.dart';
+// import 'package:nzcu_driver/apiServices/services/profile_api_services.dart';
+import 'package:nzcu_driver/modals/add_money_wallet_response.dart';
+// import 'package:nzcu_driver/services/razorpay_service.dart';
 import 'package:http/http.dart' as http;
 
 class AddMoneyWalletController extends GetxController {

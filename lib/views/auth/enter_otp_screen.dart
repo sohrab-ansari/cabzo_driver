@@ -1,18 +1,18 @@
 
 
-// import 'package:corezap_driver/controller/login.controller.dart'; // Make sure this is the correct path
-// import 'package:corezap_driver/utilities/colors.dart';
-// import 'package:corezap_driver/views/profile_related.dart/documents_related/driver_registration.dart';
-// import 'package:corezap_driver/views/profile_related.dart/documents_related/preference.dart';
+// import 'package:nzcu_driver/controller/login.controller.dart'; // Make sure this is the correct path
+// import 'package:nzcu_driver/utilities/colors.dart';
+// import 'package:nzcu_driver/views/profile_related.dart/documents_related/driver_registration.dart';
+// import 'package:nzcu_driver/views/profile_related.dart/documents_related/preference.dart';
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
-// import 'package:corezap_driver/controller/controllers.dart';
-// import 'package:corezap_driver/controller/otp_controller.dart';
-// import 'package:corezap_driver/utilities/colors/colors_list.dart';
-// import 'package:corezap_driver/utilities/custom_text.dart';
-// import 'package:corezap_driver/utilities/navigator.dart';
-// import 'package:corezap_driver/utilities/app_buttons.dart';
-// import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
+// import 'package:nzcu_driver/controller/controllers.dart';
+// import 'package:nzcu_driver/controller/otp_controller.dart';
+// import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+// import 'package:nzcu_driver/utilities/custom_text.dart';
+// import 'package:nzcu_driver/utilities/navigator.dart';
+// import 'package:nzcu_driver/utilities/app_buttons.dart';
+// import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
 
 // class EnterOtpScreen extends StatefulWidget {
 //   final dynamic typecheck;
@@ -486,18 +486,18 @@
 // }
 
 
-import 'package:corezap_driver/controllers/auth_controllers/login.controller.dart';
-import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/views/profile_related.dart/documents_related/driver_registration.dart';
+import 'package:nzcu_driver/controllers/auth_controllers/login.controller.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/views/profile_related.dart/documents_related/driver_registration.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:corezap_driver/controllers/controllers.dart';
-import 'package:corezap_driver/controllers/auth_controllers/otp_controller.dart';
-import 'package:corezap_driver/utilities/colors/colors_list.dart';
-import 'package:corezap_driver/utilities/custom_text.dart';
-import 'package:corezap_driver/utilities/navigator.dart';
-import 'package:corezap_driver/utilities/app_buttons.dart';
-import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/controllers/controllers.dart';
+import 'package:nzcu_driver/controllers/auth_controllers/otp_controller.dart';
+import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+import 'package:nzcu_driver/utilities/custom_text.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/utilities/app_buttons.dart';
+import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
 
 class EnterOtpScreen extends StatefulWidget {
   final dynamic typecheck;

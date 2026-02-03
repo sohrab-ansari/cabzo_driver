@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "56223773396",
+    "project_id": "nzcu-d2241",
+    "storage_bucket": "nzcu-d2241.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:56223773396:android:d252876c1e651678d48141",
+        "android_client_info": {
+          "package_name": "com.nzcu_user.user"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwlJycr7BnnLWA7IHgCsnnnGcDmiZRVP4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

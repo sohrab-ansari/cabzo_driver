@@ -1,18 +1,18 @@
 import 'dart:io';
 
-import 'package:corezap_driver/controllers/home_controllers/home_controller.dart';
-import 'package:corezap_driver/modals/driver_Image_upload_res.dart';
-import 'package:corezap_driver/modals/home_modal_response.dart';
+import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
+import 'package:nzcu_driver/modals/driver_Image_upload_res.dart';
+import 'package:nzcu_driver/modals/home_modal_response.dart';
 
-import 'package:corezap_driver/modals/ride_history_response2.dart';
-import 'package:corezap_driver/modals/transactions_response.dart';
-import 'package:corezap_driver/modals/wallet_response.dart';
-import 'package:corezap_driver/apiervices/services/profile_api_services.dart';
+import 'package:nzcu_driver/modals/ride_history_response2.dart';
+import 'package:nzcu_driver/modals/transactions_response.dart';
+import 'package:nzcu_driver/modals/wallet_response.dart';
+import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
 
-// import 'package:corezap_driver/apiServices/services/auth_api_service.dart';
-// import 'package:corezap_driver/apiServices/services/profile_api_services.dart';
-import 'package:corezap_driver/utilities/navigator.dart';
-import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
+// import 'package:nzcu_driver/apiServices/services/auth_api_service.dart';
+// import 'package:nzcu_driver/apiServices/services/profile_api_services.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';

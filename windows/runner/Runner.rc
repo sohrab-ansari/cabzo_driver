@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "corezap_driver" "\0"
+            VALUE "FileDescription", "nzcu_driver" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "corezap_driver" "\0"
+            VALUE "InternalName", "nzcu_driver" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "corezap_driver.exe" "\0"
-            VALUE "ProductName", "corezap_driver" "\0"
+            VALUE "OriginalFilename", "nzcu_driver.exe" "\0"
+            VALUE "ProductName", "nzcu_driver" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

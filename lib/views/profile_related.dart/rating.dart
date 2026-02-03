@@ -1,7 +1,7 @@
-// // import 'package:corezap_driver/utilities/colors.dart';
-// // import 'package:corezap_driver/utilities/colors/colors_list.dart';
-// // import 'package:corezap_driver/utilities/custom_text.dart';
-// // import 'package:corezap_driver/utilities/navigator.dart';
+// // import 'package:nzcu_driver/utilities/colors.dart';
+// // import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+// // import 'package:nzcu_driver/utilities/custom_text.dart';
+// // import 'package:nzcu_driver/utilities/navigator.dart';
 // // import 'package:flutter/material.dart';
 
 // // class Rating extends StatefulWidget {
@@ -292,10 +292,10 @@
 // // }
 
 
-// import 'package:corezap_driver/utilities/app_buttons.dart';
-// import 'package:corezap_driver/utilities/colors.dart';
-// import 'package:corezap_driver/utilities/custom_font.dart';
-// import 'package:corezap_driver/utilities/navigator.dart';
+// import 'package:nzcu_driver/utilities/app_buttons.dart';
+// import 'package:nzcu_driver/utilities/colors.dart';
+// import 'package:nzcu_driver/utilities/custom_font.dart';
+// import 'package:nzcu_driver/utilities/navigator.dart';
 // import 'package:flutter/material.dart';
 // // import 'package:nzcu_user/utils/custom_images.dart';
 // // import 'package:nzcu_user/utils/with_animations/app_buttons.dart';
@@ -589,11 +589,11 @@
 // }
 
 
-import 'package:corezap_driver/controllers/profile_controllers/review_and_rating_controller.dart';
-import 'package:corezap_driver/utilities/app_buttons.dart';
-import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/utilities/custom_font.dart';
-import 'package:corezap_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/review_and_rating_controller.dart';
+import 'package:nzcu_driver/utilities/app_buttons.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/custom_font.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

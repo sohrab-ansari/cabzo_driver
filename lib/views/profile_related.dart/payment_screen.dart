@@ -1,19 +1,19 @@
 
 
 
-// import 'package:corezap_driver/controllers/profile_controllers/wallet_controller.dart';
-// import 'package:corezap_driver/utilities/app_buttons.dart';
-// import 'package:corezap_driver/utilities/colors.dart';
-// import 'package:corezap_driver/utilities/colors/colors_list.dart';
-// import 'package:corezap_driver/utilities/custom_font.dart';
-// import 'package:corezap_driver/utilities/custom_images.dart';
-// import 'package:corezap_driver/utilities/custom_text.dart';
-// import 'package:corezap_driver/utilities/navigator.dart';
-// import 'package:corezap_driver/views/profile_related.dart/payment_related/add_bank.dart';
-// import 'package:corezap_driver/views/profile_related.dart/payment_related/add_upi.dart';
-// import 'package:corezap_driver/views/profile_related.dart/payment_related/transactions.dart';
-// import 'package:corezap_driver/views/profile_related.dart/payment_related/wallet.dart';
-// import 'package:corezap_driver/views/profile_related.dart/payment_related/walletscreen.dart';
+// import 'package:nzcu_driver/controllers/profile_controllers/wallet_controller.dart';
+// import 'package:nzcu_driver/utilities/app_buttons.dart';
+// import 'package:nzcu_driver/utilities/colors.dart';
+// import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+// import 'package:nzcu_driver/utilities/custom_font.dart';
+// import 'package:nzcu_driver/utilities/custom_images.dart';
+// import 'package:nzcu_driver/utilities/custom_text.dart';
+// import 'package:nzcu_driver/utilities/navigator.dart';
+// import 'package:nzcu_driver/views/profile_related.dart/payment_related/add_bank.dart';
+// import 'package:nzcu_driver/views/profile_related.dart/payment_related/add_upi.dart';
+// import 'package:nzcu_driver/views/profile_related.dart/payment_related/transactions.dart';
+// import 'package:nzcu_driver/views/profile_related.dart/payment_related/wallet.dart';
+// import 'package:nzcu_driver/views/profile_related.dart/payment_related/walletscreen.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_animate/flutter_animate.dart';
 // import 'package:get/get.dart';
@@ -340,19 +340,19 @@
 //   }
 // }
 
-import 'package:corezap_driver/controllers/profile_controllers/wallet_controller.dart';
-import 'package:corezap_driver/utilities/app_buttons.dart';
-import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/utilities/colors/colors_list.dart';
-import 'package:corezap_driver/utilities/custom_font.dart';
-import 'package:corezap_driver/utilities/custom_images.dart';
-import 'package:corezap_driver/utilities/custom_text.dart';
-import 'package:corezap_driver/utilities/navigator.dart';
-import 'package:corezap_driver/views/profile_related.dart/payment_related/add_bank.dart';
-import 'package:corezap_driver/views/profile_related.dart/payment_related/add_upi.dart';
-import 'package:corezap_driver/views/profile_related.dart/payment_related/transactions.dart';
-import 'package:corezap_driver/views/profile_related.dart/payment_related/wallet.dart';
-import 'package:corezap_driver/views/profile_related.dart/payment_related/walletscreen.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/wallet_controller.dart';
+import 'package:nzcu_driver/utilities/app_buttons.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+import 'package:nzcu_driver/utilities/custom_font.dart';
+import 'package:nzcu_driver/utilities/custom_images.dart';
+import 'package:nzcu_driver/utilities/custom_text.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/views/profile_related.dart/payment_related/add_bank.dart';
+import 'package:nzcu_driver/views/profile_related.dart/payment_related/add_upi.dart';
+import 'package:nzcu_driver/views/profile_related.dart/payment_related/transactions.dart';
+import 'package:nzcu_driver/views/profile_related.dart/payment_related/wallet.dart';
+import 'package:nzcu_driver/views/profile_related.dart/payment_related/walletscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';

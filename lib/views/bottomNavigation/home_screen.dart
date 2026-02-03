@@ -1,16 +1,16 @@
 import 'dart:ui' as ui;
 import 'dart:convert';
-import 'package:corezap_driver/controllers/controllers.dart';
-import 'package:corezap_driver/controllers/home_controllers/home_controller.dart';
-import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
-import 'package:corezap_driver/controllers/profile_controllers/driverid_controller.dart';
-import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/utilities/custom_font.dart';
-import 'package:corezap_driver/utilities/map_helper.dart';
-import 'package:corezap_driver/views/book_ride/book_ride.dart';
-import 'package:corezap_driver/views/bottomNavigation/Agreement_screen.dart';
-import 'package:corezap_driver/views/home_related/live_ride.dart';
-import 'package:corezap_driver/views/widgets/home_screen_widgets.dart';
+import 'package:nzcu_driver/controllers/controllers.dart';
+import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
+import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/driverid_controller.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/custom_font.dart';
+import 'package:nzcu_driver/utilities/map_helper.dart';
+import 'package:nzcu_driver/views/book_ride/book_ride.dart';
+import 'package:nzcu_driver/views/bottomNavigation/Agreement_screen.dart';
+import 'package:nzcu_driver/views/home_related/live_ride.dart';
+import 'package:nzcu_driver/views/widgets/home_screen_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:geolocator/geolocator.dart';
@@ -20,7 +20,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 // Import the SocketManager
-import 'package:corezap_driver/services/socket_manager.dart' hide LatLng;
+import 'package:nzcu_driver/services/socket_manager.dart' hide LatLng;
 
 class HomeScreen extends StatefulWidget {
    final bool? isOnDuty;

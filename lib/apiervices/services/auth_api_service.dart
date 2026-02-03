@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'package:corezap_driver/apiervices/api_path.dart';
-import 'package:corezap_driver/modals/Otp_verify_res.dart';
-import 'package:corezap_driver/modals/create_vehicle_res.dart';
-import 'package:corezap_driver/modals/driver_Image_upload_res.dart';
-import 'package:corezap_driver/modals/home_modal_response.dart';
-import 'package:corezap_driver/modals/register_profile_res.dart';
+import 'package:nzcu_driver/apiervices/api_path.dart';
+import 'package:nzcu_driver/modals/Otp_verify_res.dart';
+import 'package:nzcu_driver/modals/create_vehicle_res.dart';
+import 'package:nzcu_driver/modals/driver_Image_upload_res.dart';
+import 'package:nzcu_driver/modals/home_modal_response.dart';
+import 'package:nzcu_driver/modals/register_profile_res.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';

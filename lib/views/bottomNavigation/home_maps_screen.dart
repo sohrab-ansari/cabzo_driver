@@ -1,13 +1,13 @@
-import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/utilities/custom_font.dart';
-import 'package:corezap_driver/views/book_ride/book_ride.dart';
-import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/custom_font.dart';
+import 'package:nzcu_driver/views/book_ride/book_ride.dart';
+import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:corezap_driver/views/home_related/live_ride.dart';
+import 'package:nzcu_driver/views/home_related/live_ride.dart';
 
 class HomeMapsScreen extends StatefulWidget {
 

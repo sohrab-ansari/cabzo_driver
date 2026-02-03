@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:corezap_driver/controllers/chart_id_controller/chartid_controller.dart';
-import 'package:corezap_driver/services/socket_manager.dart';
-import 'package:corezap_driver/utilities/custom_font.dart';
-import 'package:corezap_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/controllers/chart_id_controller/chartid_controller.dart';
+import 'package:nzcu_driver/services/socket_manager.dart';
+import 'package:nzcu_driver/utilities/custom_font.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;

@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
-import 'package:corezap_driver/controllers/auth_controllers/signup_controller.dart';
-import 'package:corezap_driver/controllers/auth_controllers/login.controller.dart';
-import 'package:corezap_driver/controllers/home_controllers/stepper_controller.dart';
-import 'package:corezap_driver/utilities/Custom_Snackbar.dart';
-import 'package:corezap_driver/utilities/app_buttons.dart';
-import 'package:corezap_driver/utilities/colors.dart';
-import 'package:corezap_driver/utilities/custom_font.dart';
-import 'package:corezap_driver/utilities/form_field.dart';
-import 'package:corezap_driver/utilities/navigator.dart';
-import 'package:corezap_driver/views/auth/login_screen.dart';
-import 'package:corezap_driver/views/profile_related.dart/terms_condition.dart';
-import 'package:corezap_driver/views/auth/enter_otp_screen.dart';
+import 'package:nzcu_driver/controllers/auth_controllers/signup_controller.dart';
+import 'package:nzcu_driver/controllers/auth_controllers/login.controller.dart';
+import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
+import 'package:nzcu_driver/utilities/Custom_Snackbar.dart';
+import 'package:nzcu_driver/utilities/app_buttons.dart';
+import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/custom_font.dart';
+import 'package:nzcu_driver/utilities/form_field.dart';
+import 'package:nzcu_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/views/auth/login_screen.dart';
+import 'package:nzcu_driver/views/profile_related.dart/terms_condition.dart';
+import 'package:nzcu_driver/views/auth/enter_otp_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});

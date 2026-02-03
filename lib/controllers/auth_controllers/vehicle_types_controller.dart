@@ -1,8 +1,8 @@
 
-import 'package:corezap_driver/apiervices/services/profile_api_services.dart';
-import 'package:corezap_driver/modals/get_all_vehicle_categories_response.dart';
-import 'package:corezap_driver/modals/order_complete_cash_response.dart';
-import 'package:corezap_driver/views/bottomNavigation/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
+import 'package:nzcu_driver/modals/get_all_vehicle_categories_response.dart';
+import 'package:nzcu_driver/modals/order_complete_cash_response.dart';
+import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
