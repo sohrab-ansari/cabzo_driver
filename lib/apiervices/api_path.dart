@@ -1,5 +1,5 @@
 class ApiPath {
-  // static const String baseUri = "https://corezap.smarttechbros.com/api/v1";  // asad server
+  static const String baseUri2 = "https://corezap.smarttechbros.com/api/v1";  // asad server
 
   // static const String baseUri = "http://api.corezap.framekarts.com:7000/api/v1";
 // 
@@ -27,7 +27,10 @@ class ApiPath {
 
   static String transactions_api = "$baseUri/transactions";
 
-  static String ratings_api = "$baseUri/rating/getDriver";
+  // static String ratings_api = "$baseUri/rating/getDriver";
+
+
+   static String ratings_api = "$baseUri2/rating/getDriver";
 
   static String bank_account_add = "$baseUri/bank-accounts/add";
 

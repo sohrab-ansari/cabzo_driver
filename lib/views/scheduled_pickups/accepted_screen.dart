@@ -129,9 +129,15 @@ class _ArrivingClientState extends State<ArrivingClient> {
     super.didChangeDependencies();
     print('🔄 ArrivingClient didChangeDependencies called');
 
-    if (_isScreenActive && !_isInitialized) {
+    if (_isScreenActive) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await _refreshOnReturn();
+        if (!_isInitialized) {
+          print('📍 First time initialization');
+          await _initializeAll();
+        } else {
+          print('🔄 Refreshing screen on return');
+          await _refreshOnReturn();
+        }
       });
     }
   }
@@ -226,6 +232,10 @@ class _ArrivingClientState extends State<ArrivingClient> {
     print('🔄 Refreshing on return...');
     if (!mounted || !_isScreenActive) return;
 
+    // Hide keyboard if visible
+    FocusScope.of(context).unfocus();
+
+    // Clear previous data
     setState(() {
       markers.clear();
       circles.clear();
@@ -235,10 +245,19 @@ class _ArrivingClientState extends State<ArrivingClient> {
     await Future.delayed(const Duration(milliseconds: 300));
 
     if (mounted && _isScreenActive) {
+      // Restart location tracking
+      _positionStreamSubscription?.cancel();
       await _startLocationTracking();
+      
+      // Recalculate directions
+      await _getDirections();
+      
+      // Update markers and polylines
       _setMarkers();
       _updatePolylines();
       _fitMapToAllMarkers();
+      
+      print('✅ Screen refresh complete');
     }
   }
 
@@ -700,6 +719,34 @@ class _ArrivingClientState extends State<ArrivingClient> {
     return points;
   }
 
+  /// Extract all polyline points from route steps for maximum detail
+  /// This provides many more points than overview_polyline alone
+  /// Perfect for long distances (100km+) to follow roads accurately
+  List<LatLng> _getDetailedPolylineFromSteps(Map<String, dynamic> route) {
+    final List<LatLng> allPoints = [];
+
+    if (route['legs'] != null && route['legs'].isNotEmpty) {
+      for (var leg in route['legs']) {
+        if (leg['steps'] != null && leg['steps'].isNotEmpty) {
+          for (var step in leg['steps']) {
+            if (step['polyline'] != null && step['polyline']['points'] != null) {
+              final stepPoints = _decodePolyline(step['polyline']['points']);
+              allPoints.addAll(stepPoints);
+            }
+          }
+        }
+      }
+    }
+
+    // If no steps polyline available, fall back to overview polyline
+    if (allPoints.isEmpty && route['overview_polyline'] != null) {
+      return _decodePolyline(route['overview_polyline']['points']);
+    }
+
+    print('📍 Detailed polyline has ${allPoints.length} points');
+    return allPoints;
+  }
+
   Future<void> _getDirections() async {
     if (_rideData?['pickupCoordinates'] == null ||
         _rideData?['dropoffCoordinates'] == null) {
@@ -708,6 +755,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
     }
 
     try {
+      // Route 1: Driver Location to Pickup
       if (_driverLocation != null && _rideData!['pickupCoordinates'] != null) {
         final pickupCoords = _rideData!['pickupCoordinates'] as LatLng;
         final url = Uri.parse(
@@ -725,17 +773,25 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
           if (data['routes'] != null && data['routes'].isNotEmpty) {
             final route = data['routes'][0];
-            final polylineEncoded = route['overview_polyline']['points'];
-            _routeCoordinates = _decodePolyline(polylineEncoded);
-            print('🛣️ Route Driver → Pickup calculated');
+            // Use detailed polyline from steps instead of overview
+            _routeCoordinates = _getDetailedPolylineFromSteps(route);
+            print('🛣️ Route Driver → Pickup calculated (${_routeCoordinates.length} points)');
+          } else {
+            print('⚠️ No routes found from driver to pickup');
           }
+        } else {
+          print('⚠️ Directions API error: ${response.statusCode}');
         }
       }
 
+      // Route 2: Pickup to Drop-off
       if (_rideData!['pickupCoordinates'] != null &&
           _rideData!['dropoffCoordinates'] != null) {
         final pickupCoords = _rideData!['pickupCoordinates'] as LatLng;
         final dropoffCoords = _rideData!['dropoffCoordinates'] as LatLng;
+
+        print('📍 Pickup: ${pickupCoords.latitude}, ${pickupCoords.longitude}');
+        print('📍 Dropoff: ${dropoffCoords.latitude}, ${dropoffCoords.longitude}');
 
         final url = Uri.parse(
           'https://maps.googleapis.com/maps/api/directions/json'
@@ -749,17 +805,28 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
+          print('📦 Directions response: ${data['status']}');
 
           if (data['routes'] != null && data['routes'].isNotEmpty) {
             final route = data['routes'][0];
-            final polylineEncoded = route['overview_polyline']['points'];
-            _pickupToDropCoordinates = _decodePolyline(polylineEncoded);
-            print('🛣️ Route Pickup → Drop calculated');
+            if (route['legs'] != null || route['overview_polyline'] != null) {
+              // Use detailed polyline from steps instead of overview
+              _pickupToDropCoordinates = _getDetailedPolylineFromSteps(route);
+              print('✅ Route Pickup → Drop calculated (${_pickupToDropCoordinates.length} points)');
+            } else {
+              print('⚠️ No polyline data in route');
+            }
+          } else {
+            print('⚠️ No routes found from pickup to drop');
           }
+        } else {
+          print('⚠️ Directions API error: ${response.statusCode}');
         }
       }
 
-      _updatePolylines();
+      if (mounted) {
+        _updatePolylines();
+      }
     } catch (e) {
       print('❌ Error fetching directions: $e');
     }
@@ -913,34 +980,31 @@ class _ArrivingClientState extends State<ArrivingClient> {
     final w = MediaQuery.of(context).size.width;
 
     return PopScope(
-
         canPop: false,
-  onPopInvokedWithResult: (didPop, result) {
-    if (didPop) return;
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
 
-    Fluttertoast.showToast(
-      msg: "Please complete the ride verification first",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.black87,
-      textColor: Colors.white,
-      fontSize: 14,
-    );
-  },
-    
-      child: Scaffold(
-        backgroundColor: ColorsList.scaffoldColor,
-        appBar: _buildAppBar(w),
-        body: Column(
-          children: [
-            // Text("hiii  ${_rideData?['pickupLocation']}"),
-            // Text("hiii  ${_rideData?['dropLocation']}"),
-            _buildLocationInputs(w),
-            Expanded(child: _buildMapSection(w)),
-            _buildBottomSheet(w),
-          ],
+          Fluttertoast.showToast(
+            msg: "Please complete the ride verification first",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.black87,
+            textColor: Colors.white,
+            fontSize: 14,
+          );
+        },
+        child: Scaffold(
+          backgroundColor: ColorsList.scaffoldColor,
+          resizeToAvoidBottomInset: false,
+          appBar: _buildAppBar(w),
+          body: Column(
+            children: [
+              _buildLocationInputs(w),
+              Expanded(child: _buildMapSection(w)),
+              _buildBottomSheet(w),
+            ],
+          ),
         ),
-      ),
     );
   }
 
@@ -1020,36 +1084,38 @@ class _ArrivingClientState extends State<ArrivingClient> {
   }
 
   Widget _buildBottomSheet(double w) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      padding: EdgeInsets.all(w * .04),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: w * .03),
-          const Text(
-            "to pickup location",
-            style: TextStyle(color: Colors.black54),
-          ),
-          SizedBox(height: w * .04),
+    return SingleChildScrollView(
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.all(w * .04),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: w * .03),
+            const Text(
+              "to pickup location",
+              style: TextStyle(color: Colors.black54),
+            ),
+            SizedBox(height: w * .04),
 
-          if (widget.typeCheck == true) ...[
-            _buildClientCard2(w),
-          ] else ...[
-            _buildClientCard(w),
+            if (widget.typeCheck == true) ...[
+              _buildClientCard2(w),
+            ] else ...[
+              _buildClientCard(w),
+            ],
+
+            SizedBox(height: w * .04),
+
+            if (widget.typeCheck == true) ...[
+              // _buildActionButtons2(w), // Implement if needed
+            ] else ...[
+              _buildActionButtons(w),
+            ],
           ],
-
-          SizedBox(height: w * .04),
-
-          if (widget.typeCheck == true) ...[
-            // _buildActionButtons2(w), // Implement if needed
-          ] else ...[
-            _buildActionButtons(w),
-          ],
-        ],
+        ),
       ),
     );
   }
