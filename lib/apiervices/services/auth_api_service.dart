@@ -195,6 +195,7 @@ static Future<CreateVehicleRes> createVehicle_Api({
   String? vehicleModel,
   int? vehicleCapacity,
   String? driverId,
+  String? vehicleSubType,
   int? vehicleYear,
   File? rcImage,
   File? vehicleInsuraneImage,
@@ -210,6 +211,7 @@ static Future<CreateVehicleRes> createVehicle_Api({
   print("├─ vehicleModel: $vehicleModel");
   print("├─ vehicleCapacity: $vehicleCapacity (type: ${vehicleCapacity.runtimeType})");
   print("├─ driverId: $driverId");
+  print("├─ vehicleSubType: $vehicleSubType");
   print("├─ vehicleYear: $vehicleYear");
   print("├─ rcImage: ${rcImage?.path ?? 'NULL'}");
   print("├─ vehicleInsuraneImage: ${vehicleInsuraneImage?.path ?? 'NULL'}");
@@ -243,6 +245,7 @@ static Future<CreateVehicleRes> createVehicle_Api({
     request.fields['vehicleType'] = vehicleType ?? "";
     request.fields['vehicleStatus'] = vehicleStatus ?? "Active";
     request.fields['vehicleModel'] = vehicleModel ?? "";
+    request.fields['vehicleSubType'] = vehicleSubType ?? "";
     
     // Handle vehicleCapacity - convert int to string
     if (vehicleCapacity != null) {

@@ -1,5 +1,4 @@
-
-
+import 'package:nzcu_driver/apiervices/api_path.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/review_and_rating_controller.dart';
 import 'package:nzcu_driver/utilities/app_buttons.dart';
 import 'package:nzcu_driver/utilities/colors.dart';
@@ -17,14 +16,9 @@ class Review extends StatefulWidget {
 
 class _ReviewState extends State<Review> {
   String imagePath = "";
-  
-  
 
-
-  
-final ReviewAndRatingController reviewAndRatingController = Get.find<ReviewAndRatingController>();
-
-
+  final ReviewAndRatingController reviewAndRatingController =
+      Get.find<ReviewAndRatingController>();
 
   @override
   void initState() {
@@ -55,7 +49,7 @@ final ReviewAndRatingController reviewAndRatingController = Get.find<ReviewAndRa
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
-    
+
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBar(
@@ -115,14 +109,13 @@ final ReviewAndRatingController reviewAndRatingController = Get.find<ReviewAndRa
         // Show loading state
         if (reviewAndRatingController.isLoading.value) {
           return Center(
-            child: CircularProgressIndicator(
-              color: AppColors.primaryblue,
-            ),
+            child: CircularProgressIndicator(color: AppColors.primaryblue),
           );
         }
 
         // Get reviews data
-        final reviews = reviewAndRatingController.reviewRatingResponse.value?.data;
+        final reviews =
+            reviewAndRatingController.reviewRatingResponse.value?.data;
         final averageRating = reviewAndRatingController.averageRating;
         final totalReviews = reviewAndRatingController.totalReviews;
 
@@ -130,101 +123,101 @@ final ReviewAndRatingController reviewAndRatingController = Get.find<ReviewAndRa
           padding: EdgeInsets.symmetric(horizontal: w * .03, vertical: w * .03),
           child: Column(
             children: [
-              // Rating Summary Card
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  boxShadow: [
-                    BoxShadow(
-                      blurRadius: 1,
-                      spreadRadius: 0.5,
-                      color: Colors.grey.shade200,
-                    ),
-                  ],
-                  color: AppColors.primaryblue.withOpacity(0.1),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: w * .04,
-                    vertical: w * .04,
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            children: [
-                              CircleAvatar(
-                                radius: w * .05,
-                                backgroundColor: Colors.grey.shade300,
-                                backgroundImage:
-                                    imagePath.isNotEmpty
-                                    ? AssetImage(imagePath)
-                                    : null,
-                                child: imagePath.isEmpty
-                                    ? Icon(
-                                        Icons.person,
-                                        size: w * .08,
-                                        color: Colors.grey.shade700,
-                                      )
-                                    : null,
-                              ),
-                              SizedBox(height: w * .01),
-                              AppFonts.textPoppins(
-                                context,
-                                "Niraj Ray", // You can replace this with actual driver name from API if available
-                                w * .04,
-                                FontWeight.w500,
-                                AppColors.black,
-                                TextAlign.start,
-                                TextOverflow.visible,
-                              ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  AppFonts.textPoppins(
-                                    context,
-                                    averageRating.toStringAsFixed(1),
-                                    w * .06,
-                                    FontWeight.w500,
-                                    AppColors.black,
-                                    TextAlign.start,
-                                    TextOverflow.visible,
-                                  ),
-                                  Icon(
-                                    Icons.star,
-                                    color: AppColors.yellow,
-                                    size: w * .08,
-                                  ),
-                                ],
-                              ),
-                              AppFonts.textPoppins(
-                                context,
-                                totalReviews > 0 
-                                    ? "Rated by $totalReviews customer${totalReviews > 1 ? 's' : ''}"
-                                    : "No ratings yet",
-                                w * .022,
-                                FontWeight.w500,
-                                AppColors.black,
-                                TextAlign.start,
-                                TextOverflow.visible,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: w * .03),
-              
+              // // Rating Summary Card
+              // Container(
+              //   decoration: BoxDecoration(
+              //     borderRadius: BorderRadius.circular(5),
+              //     boxShadow: [
+              //       BoxShadow(
+              //         blurRadius: 1,
+              //         spreadRadius: 0.5,
+              //         color: Colors.grey.shade200,
+              //       ),
+              //     ],
+              //     color: AppColors.primaryblue.withOpacity(0.1),
+              //   ),
+              //   child: Padding(
+              //     padding: EdgeInsets.symmetric(
+              //       horizontal: w * .04,
+              //       vertical: w * .04,
+              //     ),
+              //     child: Column(
+              //       children: [
+              //         Row(
+              //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //           children: [
+              //             Column(
+              //               children: [
+              //                 CircleAvatar(
+              //                   radius: w * .05,
+              //                   backgroundColor: Colors.grey.shade300,
+              //                   backgroundImage:
+              //                       imagePath.isNotEmpty
+              //                       ? AssetImage(imagePath)
+              //                       : null,
+              //                   child: imagePath.isEmpty
+              //                       ? Icon(
+              //                           Icons.person,
+              //                           size: w * .08,
+              //                           color: Colors.grey.shade700,
+              //                         )
+              //                       : null,
+              //                 ),
+              //                 SizedBox(height: w * .01),
+              //                 AppFonts.textPoppins(
+              //                   context,
+              //                   "Nirddaj Ray", // You can replace this with actual driver name from API if available
+              //                   w * .04,
+              //                   FontWeight.w500,
+              //                   AppColors.black,
+              //                   TextAlign.start,
+              //                   TextOverflow.visible,
+              //                 ),
+              //               ],
+              //             ),
+              //             Column(
+              //               crossAxisAlignment: CrossAxisAlignment.end,
+              //               children: [
+              //                 Row(
+              //                   mainAxisAlignment: MainAxisAlignment.end,
+              //                   children: [
+              //                     AppFonts.textPoppins(
+              //                       context,
+              //                       averageRating.toStringAsFixed(1),
+              //                       w * .06,
+              //                       FontWeight.w500,
+              //                       AppColors.black,
+              //                       TextAlign.start,
+              //                       TextOverflow.visible,
+              //                     ),
+              //                     Icon(
+              //                       Icons.star,
+              //                       color: AppColors.yellow,
+              //                       size: w * .08,
+              //                     ),
+              //                   ],
+              //                 ),
+              //                 AppFonts.textPoppins(
+              //                   context,
+              //                   totalReviews > 0
+              //                       ? "Rated by $totalReviews customer${totalReviews > 1 ? 's' : ''}"
+              //                       : "No ratings yet",
+              //                   w * .022,
+              //                   FontWeight.w500,
+              //                   AppColors.black,
+              //                   TextAlign.start,
+              //                   TextOverflow.visible,
+              //                 ),
+              //               ],
+              //             ),
+              //           ],
+              //         ),
+              //       ],
+              //     ),
+              //   ),
+              // ),
+              // SizedBox(height: w * .03),
+
               // Reviews List
               Expanded(
                 child: SingleChildScrollView(
@@ -233,92 +226,115 @@ final ReviewAndRatingController reviewAndRatingController = Get.find<ReviewAndRa
                         ? reviews.map((review) {
                             final userName = review.user?.name ?? "Customer";
                             final userRating = review.rating ?? 0;
-                            final experienceDescription = review.experienceDescription ?? "No comment provided";
-                            
+                            final experienceDescription =
+                                review.experienceDescription ??
+                                "No comment provided";
+
                             return Padding(
                               padding: EdgeInsets.symmetric(vertical: w * .02),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: AppColors.lightGray.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(w * .02),
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: w * .03,
-                                    vertical: w * .02,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Column(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: AppColors.lightGray.withOpacity(
+                                        0.2,
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        w * .02,
+                                      ),
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: w * .03,
+                                        vertical: w * .02,
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
-                                          CircleAvatar(
-                                            radius: w * .05,
-                                            backgroundColor: Colors.grey.shade300,
-                                            backgroundImage:
-                                                imagePath.isNotEmpty
-                                                ? AssetImage(imagePath)
-                                                : null,
-                                            child: imagePath.isEmpty
-                                                ? Icon(
-                                                    Icons.person,
-                                                    size: w * .065,
-                                                    color: Colors.grey.shade700,
-                                                  )
-                                                : null,
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              CircleAvatar(
+                                                radius: w * .05,
+                                                backgroundColor:
+                                                    Colors.grey.shade300,
+                                                backgroundImage:
+                                                    imagePath.isNotEmpty
+                                                    // ? AssetImage(imagePath)
+                                                    ? AssetImage(
+                                                        ApiPath.imagebaseUrl +
+                                                            imagePath,
+                                                      )
+                                                    : null,
+                                                child: imagePath.isEmpty
+                                                    ? Icon(
+                                                        Icons.person,
+                                                        size: w * .065,
+                                                        color: Colors
+                                                            .grey
+                                                            .shade700,
+                                                      )
+                                                    : null,
+                                              ),
+                                              SizedBox(height: w * .01),
+                                              AppFonts.textPoppins(
+                                                context,
+                                                userName,
+                                                w * .03,
+                                                FontWeight.w500,
+                                                AppColors.black,
+                                                TextAlign.start,
+                                                TextOverflow.visible,
+                                              ),
+                                              SizedBox(height: w * .01),
+                                              AppFonts.textPoppins(
+                                                context,
+                                                experienceDescription,
+                                                w * .025,
+                                                FontWeight.w500,
+                                                AppColors.mediumGray,
+                                                TextAlign.start,
+                                                TextOverflow.visible,
+                                              ),
+                                            ],
                                           ),
-                                          SizedBox(height: w * .01),
-                                          AppFonts.textPoppins(
-                                            context,
-                                            userName,
-                                            w * .03,
-                                            FontWeight.w500,
-                                            AppColors.black,
-                                            TextAlign.start,
-                                            TextOverflow.visible,
-                                          ),
-                                          SizedBox(height: w * .01),
-                                          AppFonts.textPoppins(
-                                            context,
-                                            experienceDescription,
-                                            w * .025,
-                                            FontWeight.w500,
-                                            AppColors.mediumGray,
-                                            TextAlign.start,
-                                            TextOverflow.visible,
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: List.generate(5, (
+                                                  index,
+                                                ) {
+                                                  return Icon(
+                                                    Icons.star_rate_rounded,
+                                                    color: index < userRating
+                                                        ? Colors.amber
+                                                        : Colors.grey.shade300,
+                                                    size: w * .07,
+                                                  );
+                                                }),
+                                              ),
+                                              AppFonts.textPoppins(
+                                                context,
+                                                getRatingText(userRating),
+                                                w * .035,
+                                                FontWeight.w500,
+                                                getRatingColor(userRating),
+                                                TextAlign.start,
+                                                TextOverflow.visible,
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.end,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: List.generate(5, (index) {
-                                              return Icon(
-                                                Icons.star_rate_rounded,
-                                                color: index < userRating 
-                                                    ? Colors.amber 
-                                                    : Colors.grey.shade300,
-                                                size: w * .07,
-                                              );
-                                            }),
-                                          ),
-                                          AppFonts.textPoppins(
-                                            context,
-                                            getRatingText(userRating),
-                                            w * .035,
-                                            FontWeight.w500,
-                                            getRatingColor(userRating),
-                                            TextAlign.start,
-                                            TextOverflow.visible,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
                             );
                           }).toList()

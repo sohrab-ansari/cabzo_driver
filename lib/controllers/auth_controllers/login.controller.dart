@@ -257,6 +257,7 @@ class LoginController extends GetxController {
     File? rcImage,
     File? vehicleInsuraneImage,
     File? vehicleNumberImage,
+    String? vehicleSubType,
   }) async {
     try {
       isLoading.value = true;
@@ -275,6 +276,7 @@ class LoginController extends GetxController {
         rcImage: rcImage,
         vehicleInsuraneImage: vehicleInsuraneImage,
         vehicleNumberImage: vehicleNumberImage,
+        vehicleSubType: vehicleSubType,
       );
 
       if (res.success == true) {

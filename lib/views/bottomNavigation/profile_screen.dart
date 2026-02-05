@@ -1,5 +1,6 @@
 
 
+import 'package:nzcu_driver/apiervices/api_path.dart';
 import 'package:nzcu_driver/utilities/colors.dart';
 import 'package:nzcu_driver/utilities/colors/colors_list.dart';
 import 'package:nzcu_driver/utilities/custom_font.dart';
@@ -83,6 +84,9 @@ String? driverName;
 
 String? driverphone;
 
+dynamic profileimage;
+
+
 initState() {
     super.initState();
     
@@ -99,9 +103,12 @@ initState() {
         driverName = prefs.getString("driver_name");
 
         driverphone =   prefs.getString("driver_mobile");
+
+        profileimage =   prefs.getString("driver_image");
      });
     print("Driver__Name from SharedPreferences: $driverName");
     print("Driver__Phone from SharedPreferences: $driverphone");  
+    print("Driver__Image from SharedPreferences: $profileimage");  
   }
 
   @override
@@ -134,7 +141,7 @@ initState() {
         padding: EdgeInsets.symmetric(horizontal: w * .02),
         children: [
           SizedBox(height: w * .02),
-          _profileCard(w),
+          _profileCard(w,profileimage),
           SizedBox(height: w * .02),
           _menuCard(w, firstImagePathList, firstTitleList, firstScreens),
           SizedBox(height: w * .02),
@@ -148,7 +155,7 @@ initState() {
   }
 
   /// PROFILE CARD
-  Widget _profileCard(double w) {
+  Widget _profileCard(double w , String? profileimage) {
     return Card(
       elevation: 1,
       color: ColorsList.scaffoldColor,
@@ -161,7 +168,10 @@ initState() {
                 CircleAvatar(
                   radius: w * .07,
                   backgroundColor: Colors.grey.shade300,
-                  child: imagePath.isEmpty
+                  backgroundImage: profileimage != null
+                      ? NetworkImage(ApiPath.imagebaseUrl + profileimage)
+                      : null,
+                  child: profileimage == null
                       ? Icon(Icons.person, size: w * .08)
                       : null,
                 ),
@@ -248,17 +258,18 @@ CustomText(
 
   /// LOGOUT
   /// 
+  /// 
   Widget _logoutButton(double w) {
   return GestureDetector(
     onTap: () async {
       // 1️⃣ Get SharedPreferences instance
       final prefs = await SharedPreferences.getInstance();
 
-      // 2️⃣ Clear all stored data
-      await prefs.clear();
-      // OR remove specific keys:
-      // await prefs.remove("user_id");
-      // await prefs.remove("auth_token");
+      // 2️⃣ Remove auth token (logout)
+      await prefs.remove("auth_token");
+
+      // If you want full clear instead, use:
+      // await prefs.clear();
 
       // 3️⃣ Navigate to Login screen (remove all previous routes)
       CustomNavigator.removeUntil(
@@ -290,6 +301,53 @@ CustomText(
     ),
   );
 }
+
+//   Widget _logoutButton(double w) {
+//   return GestureDetector(
+//     onTap: () async {
+
+      
+//       // 1️⃣ Get SharedPreferences instance
+//       final prefs = await SharedPreferences.getInstance();
+
+//         final String? token = prefs.getString("auth_token");
+
+//       // 2️⃣ Clear all stored data
+//       await prefs.clear();
+//       // OR remove specific keys:
+//       // await prefs.remove("user_id");
+//       // await prefs.remove("auth_token");
+
+//       // 3️⃣ Navigate to Login screen (remove all previous routes)
+//       CustomNavigator.removeUntil(
+//         context,
+//         const LoginScreen(),
+//         transition: TransitionType.fade,
+//       );
+//     },
+//     child: Card(
+//       elevation: 1,
+//       child: Padding(
+//         padding: EdgeInsets.all(w * .04),
+//         child: Row(
+//           children: [
+//             CustomImages.images(
+//               "assets/icons/Sign_Out.png",
+//               w * .06,
+//               w * .06,
+//             ),
+//             SizedBox(width: w * .03),
+//             CustomText(
+//               text: "Logout",
+//               textFontSize: w * .04,
+//               textFontWeight: FontWeight.w500,
+//             ),
+//           ],
+//         ),
+//       ),
+//     ),
+//   );
+// }
 
   // Widget _logoutButton(double w) {
   //   return GestureDetector(

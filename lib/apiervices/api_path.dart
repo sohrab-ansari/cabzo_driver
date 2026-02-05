@@ -1,9 +1,26 @@
 class ApiPath {
-  static const String baseUri2 = "https://corezap.smarttechbros.com/api/v1";  // asad server
+  // static const String baseUri2 = "https://corezap.smarttechbros.com/api/v1"; 
+   // asad server
+
+  static const String baseUri2 = "https://api.nzcu.framekarts.com/api/v1"; 
 
   // static const String baseUri = "http://api.corezap.framekarts.com:7000/api/v1";
 // 
-  static const String baseUri = "https://api.corezap.framekarts.com/api/v1"; //
+  // static const String baseUri = "https://api.corezap.framekarts.com/api/v1"; //
+
+
+  //  static const String baseUri = "https://corezap.smarttechbros.com/api/v1";
+
+
+  static const String baseUri = "https://api.nzcu.framekarts.com/api/v1";
+
+
+  static const String imagebaseUrl = "https://sgp1.digitaloceanspaces.com/satyakabir-bucket/";
+
+
+
+
+
 
   // https://api.corezap.framekarts.com
 

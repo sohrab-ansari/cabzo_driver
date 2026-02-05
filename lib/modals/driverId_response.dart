@@ -958,6 +958,8 @@ class Vehicle {
   String? vehicleName;
   String? vehicleNumber;
   String? vehicleType;
+  String? vehicleSubType;
+
   String? vehicleColor;
   String? vehicleModel;
   int? vehicleYear;
@@ -989,6 +991,7 @@ class Vehicle {
     this.verificationStatus,
     this.createdAt,
     this.updatedAt,
+    this.vehicleSubType,
     this.v,
   });
 
@@ -1018,6 +1021,7 @@ class Vehicle {
       vehicleName: json['vehicleName'],
       vehicleNumber: json['vehicleNumber'],
       vehicleType: json['vehicleType'],
+      vehicleSubType: json['vehicleSubType'],
       vehicleColor: json['vehicleColor'],
       vehicleModel: json['vehicleModel'],
       vehicleYear: vehicleYear,
@@ -1054,6 +1058,7 @@ class Vehicle {
       'createdByModel': createdByModel,
       'disable': disable,
       'verificationStatus': verificationStatus,
+      'vehicleSubType': vehicleSubType,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
       '__v': v,

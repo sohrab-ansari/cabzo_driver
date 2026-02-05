@@ -1,3 +1,4 @@
+import 'package:nzcu_driver/controllers/auth_controllers/vehicle_subtypes_controller.dart';
 import 'package:nzcu_driver/controllers/auth_controllers/vehicle_types_controller.dart';
 import 'package:nzcu_driver/controllers/chart_id_controller/chartid_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/cash_controller.dart';
@@ -49,6 +50,10 @@ Get.put(GetPromoCodeController(), permanent: true);
 
 
 Get.put(NotificationController(), permanent: true);
+
+
+Get.put(VehicleSubtypesController(), permanent: true);
+
 
 
     

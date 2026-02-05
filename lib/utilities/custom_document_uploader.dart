@@ -354,6 +354,7 @@ class CustomDocumentUploader extends StatefulWidget {
   final Function(File?)? onImageSelected; // Callback for selected image
   final bool isImageUploaded; // Add this parameter
   final Function()? onClearImage; // Add this callback
+  final String? errorText; // Validation error text
 
   const CustomDocumentUploader({
     super.key,
@@ -369,6 +370,7 @@ class CustomDocumentUploader extends StatefulWidget {
     this.onImageSelected,
     this.isImageUploaded = false, // Default value
     this.onClearImage, // Add this parameter
+    this.errorText,
   });
 
   @override
@@ -459,92 +461,112 @@ class _CustomDocumentUploaderState extends State<CustomDocumentUploader> {
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: w * .03),
-      child: SizedBox(
-        width: effectiveWidth,
-        height: effectiveHeight,
-        child: DottedBorder(
-          options: RoundedRectDottedBorderOptions(
-            radius: Radius.circular(effectiveRadius),
-            color: widget.borderColor,
-            strokeWidth: widget.borderWidth,
-            dashPattern: const [6, 2],
-            padding: EdgeInsets.zero,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppColors.lightGray,
-              borderRadius: BorderRadius.circular(effectiveRadius),
-            ),
-            child: !showImage
-                ? Center(
-                    child: AppButtons.solid(
-                      context: context,
-                      text: widget.uploadText ?? "Upload",
-                      onClicked: _pickImage,
-                      prefixIcon: Icon(
-                        Icons.file_upload_outlined,
-                        color: AppColors.white,
-                        size: w * .05,
-                      ),
-                      width: w * .3,
-                      height: w * .1,
-                      backgroundColor: AppColors.black,
-                      textColor: AppColors.white,
-                      fontSize: w * .04,
-                      radius: w * .1,
-                      fontWeight: FontWeight.w500,
-                      padding: EdgeInsets.zero,
-                    ),
-                  )
-                : Stack(
-                    children: [
-                      Center(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(effectiveRadius),
-                          child: _selectedImage != null
-                              ? Image.file(
-                                  _selectedImage!,
-                                  width: effectiveWidth,
-                                  height: effectiveHeight,
-                                  fit: BoxFit.fill,
-                                )
-                              : Container(
-                                  width: effectiveWidth,
-                                  height: effectiveHeight,
-                                  color: AppColors.lightGray,
-                                  child: Center(
-                                    child: Icon(
-                                      Icons.image,
-                                      size: w * .1,
-                                      color: AppColors.mediumGray,
-                                    ),
-                                  ),
-                                ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: effectiveWidth,
+            height: effectiveHeight,
+            child: DottedBorder(
+              options: RoundedRectDottedBorderOptions(
+                radius: Radius.circular(effectiveRadius),
+                color: widget.borderColor,
+                strokeWidth: widget.borderWidth,
+                dashPattern: const [6, 2],
+                padding: EdgeInsets.zero,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.lightGray,
+                  borderRadius: BorderRadius.circular(effectiveRadius),
+                ),
+                child: !showImage
+                    ? Center(
+                        child: AppButtons.solid(
+                          context: context,
+                          text: widget.uploadText ?? "Upload",
+                          onClicked: _pickImage,
+                          prefixIcon: Icon(
+                            Icons.file_upload_outlined,
+                            color: AppColors.white,
+                            size: w * .05,
+                          ),
+                          width: w * .3,
+                          height: w * .1,
+                          backgroundColor: AppColors.black,
+                          textColor: AppColors.white,
+                          fontSize: w * .04,
+                          radius: w * .1,
+                          fontWeight: FontWeight.w500,
+                          padding: EdgeInsets.zero,
                         ),
-                      ),
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: GestureDetector(
-                          onTap: _clearImage,
-                          child: Container(
-                            padding: EdgeInsets.all(w * .01),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.6),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.close,
-                              color: AppColors.white,
-                              size: w * .04,
+                      )
+                    : Stack(
+                        children: [
+                          Center(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                effectiveRadius,
+                              ),
+                              child: _selectedImage != null
+                                  ? Image.file(
+                                      _selectedImage!,
+                                      width: effectiveWidth,
+                                      height: effectiveHeight,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Container(
+                                      width: effectiveWidth,
+                                      height: effectiveHeight,
+                                      color: AppColors.lightGray,
+                                      child: Center(
+                                        child: Icon(
+                                          Icons.image,
+                                          size: w * .1,
+                                          color: AppColors.mediumGray,
+                                        ),
+                                      ),
+                                    ),
                             ),
                           ),
-                        ),
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: GestureDetector(
+                              onTap: _clearImage,
+                              child: Container(
+                                padding: EdgeInsets.all(w * .01),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.6),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.close,
+                                  color: AppColors.white,
+                                  size: w * .04,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+              ),
+            ),
           ),
-        ),
+          if (widget.errorText != null && widget.errorText!.isNotEmpty)
+            Padding(
+              padding: EdgeInsets.only(top: 8.0, left: 4.0),
+              child: Text(
+                widget.errorText!,
+                style: TextStyle(
+                  color: Colors
+                      .red, // Or AppColors.primaryRed if available in context
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

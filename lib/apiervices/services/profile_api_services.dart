@@ -9,6 +9,7 @@ import 'package:nzcu_driver/modals/bank_account_add_Res.dart';
 import 'package:nzcu_driver/modals/chartid_response.dart';
 import 'package:nzcu_driver/modals/driverId_response.dart';
 import 'package:nzcu_driver/modals/driver_Image_upload_res.dart';
+import 'package:nzcu_driver/modals/get_all_sub_vehicle_categories_response.dart';
 import 'package:nzcu_driver/modals/get_all_vehicle_categories_response.dart';
 import 'package:nzcu_driver/modals/get_bank_accounts_response.dart';
 import 'package:nzcu_driver/modals/get_promo_code_data.dart';
@@ -485,12 +486,29 @@ class ProfileApiServices {
       final Map<String, dynamic> data = jsonDecode(response.body);
       final DriverIdResponse driverIdResponse = DriverIdResponse.fromJson(data);
 
-      // Store driver basic info
-      await prefs.setString("driver_name", driverIdResponse.driver!.name ?? "");
-      await prefs.setString(
-        "driver_mobile",
-        driverIdResponse.driver!.phone ?? "",
+      print(
+        "vehicleSubType>>>>> comingggg >>>>> ${driverIdResponse.driver?.vehicle?.vehicleSubType}",
       );
+
+      // Store driver basic info
+      if (driverIdResponse.driver?.name != null) {
+        await prefs.setString("driver_name", driverIdResponse.driver!.name!);
+      }
+
+      if (driverIdResponse.driver?.image != null) {
+        await prefs.setString("driver_image", driverIdResponse.driver!.image!);
+      }
+
+      if (driverIdResponse.driver?.vehicle?.vehicleSubType != null) {
+        await prefs.setString(
+          "vehicle_SubType",
+          driverIdResponse.driver!.vehicle!.vehicleSubType!,
+        );
+      }
+
+      if (driverIdResponse.driver?.phone != null) {
+        await prefs.setString("driver_mobile", driverIdResponse.driver!.phone!);
+      }
 
       // Store vehicle info if available
       if (driverIdResponse.driver?.vehicle != null) {
@@ -513,7 +531,7 @@ class ProfileApiServices {
         await prefs.setString("vehicle_number", vehicle.vehicleNumber ?? "");
         await prefs.setString("vehicle_color", vehicle.vehicleColor ?? "");
         await prefs.setString("vehicle_model", vehicle.vehicleModel ?? "");
-        await prefs.setInt("vehicle_capacity", vehicle.vehicleCapacity ?? 0);
+        // await prefs.setInt("vehicle_capacity", vehicle.vehicleCapacity ?? 0);
       } else {
         print("⚠️ No vehicle data available");
       }
@@ -621,13 +639,21 @@ class ProfileApiServices {
       print("Status Code : ${response.statusCode}");
       print("total__Response Body : ${response.body}");
 
+      // Fluttertoast.showToast(msg:  response.body['message']);
+
       final Map<String, dynamic> data = jsonDecode(response.body);
+
+      // final Map<String, dynamic> data = jsonDecode(response.body);
+
+      // 👇 show message in toast
+      Fluttertoast.showToast(msg: data['message'] ?? 'Something went wrong');
+
       final AddMoneyWalletResponse walletResponse =
           AddMoneyWalletResponse.fromJson(data);
 
       return walletResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle7 : $e");
+      print("❌ Exception in promo code craete : $e");
       return AddMoneyWalletResponse(
         success: false,
         message: "Connection error: $e",
@@ -728,6 +754,8 @@ class ProfileApiServices {
       final Map<String, dynamic> data = jsonDecode(response.body);
       final GetBankAccountsResponse walletResponse =
           GetBankAccountsResponse.fromJson(data);
+
+      Fluttertoast.showToast(msg: data['message'] ?? "Something went wrong");
 
       return walletResponse;
     } catch (e) {
@@ -1187,11 +1215,16 @@ class ProfileApiServices {
     }
   }
 
-  static Future<GetAllVehicleCategoriesResponse> get_vehical_data() async {
+  static Future<GetAllVehicleCategoriesResponse> get_vehical_data({
+    required int limit,
+    required int page,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
 
-    final Uri url = Uri.parse("${ApiPath.baseUri}/getAllVehicleCategories");
+    final Uri url = Uri.parse(
+      "${ApiPath.baseUri}/getAllVehicleCategories?limit=$limit&page=$page",
+    );
 
     print("========== 🔵 CASH PAYMENT API ==========");
     print("URL : $url");
@@ -1252,6 +1285,101 @@ class ProfileApiServices {
 
       // Return a proper error response
       return GetAllVehicleCategoriesResponse(
+        success: false,
+        message: "Connection error: ${e.toString()}",
+      );
+    }
+  }
+
+  static Future<GetAllsubVehicleCategoriesResponse> get_sub_vehical_data({
+    required String vehicalCategoryId,
+    required int limit,
+    required int page,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+
+    // final Uri url = Uri.parse("${ApiPath.baseUri}/getAllVehicleCategories");
+
+    // final Uri url = Uri.parse(
+    //   "${ApiPath.baseUri}/getAllVehicleSubCategories/vehicleCategoryId${idis}",
+    // );
+
+    final Uri url = Uri.parse(
+      "${ApiPath.baseUri}/getAllVehicleSubCategories?vehicleCategoryId=${vehicalCategoryId}&limit=$limit&page=$page",
+    );
+
+    print("========== 🔵 CASH PAYMENT API ==========");
+    print("URL : $url");
+    print("Token : $token");
+
+    try {
+      final http.Response response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      print("✅ Status Code : ${response.statusCode}");
+
+      // Check if response is valid JSON
+      if (response.body.trim().isEmpty) {
+        throw FormatException("Empty response from server");
+      }
+
+      // Check if response is HTML (error page)
+      if (response.body.trim().startsWith('<!DOCTYPE html>') ||
+          response.body.trim().startsWith('<html')) {
+        throw FormatException(
+          "Server returned HTML error page. Check endpoint URL.",
+        );
+      }
+
+      print("hellooo3");
+
+      // Try to parse JSON
+      dynamic decodedJson;
+      try {
+        print("hellooo2");
+        print(
+          "myyyyy_fulll_body_Resposneeee>>>> sub_vehicaldattaaa ${decodedJson}",
+        );
+        decodedJson = jsonDecode(response.body);
+      } catch (jsonError) {
+        print("hellooo4");
+
+        print("JSON Parse Error: $jsonError");
+        print("Raw Response: ${response.body}");
+        throw FormatException("Invalid JSON response from server");
+      }
+
+      // Pretty print for debugging
+      final prettyJson = const JsonEncoder.withIndent(
+        '  ',
+      ).convert(decodedJson);
+      print("📦 FULL RESPONSE (Pretty Print) 👇");
+      print(prettyJson);
+
+      print("hellooo6");
+
+      // Parse the response
+      final GetAllsubVehicleCategoriesResponse getAllVehicleCategoriesResponse =
+          GetAllsubVehicleCategoriesResponse.fromJson(decodedJson);
+
+      print("🎯 Parsed Model Object 👇");
+      print(getAllVehicleCategoriesResponse);
+
+      return getAllVehicleCategoriesResponse;
+    } catch (e) {
+      print("hellooo5");
+
+      print("❌ Exception in cash_update_data");
+      print(e.toString());
+
+      // Return a proper error response
+      return GetAllsubVehicleCategoriesResponse(
         success: false,
         message: "Connection error: ${e.toString()}",
       );

@@ -246,7 +246,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             // Terms text
                             AppFonts.textPoppins(
                               context,
-                              "I agree to Indrive ",
+                              "I agree to NZCU ",
                               w * 0.032,
                               FontWeight.w500,
                               AppColors.black.withOpacity(0.7),

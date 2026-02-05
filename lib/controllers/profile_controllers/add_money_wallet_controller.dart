@@ -2,6 +2,7 @@ import 'dart:convert';
 // import 'package:nzcu_driver/apiServices/services/payments/razorpay_service.dart';
 import 'package:nzcu_driver/apiervices/services/payments/razorpay_service.dart';
 import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/wallet_controller.dart';
 import 'package:nzcu_driver/views/profile_related.dart/payment_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -27,7 +28,7 @@ class AddMoneyWalletController extends GetxController {
 
   // Payment verification data
   String? currentOrderId;
-  String? currentAmount;
+  int? currentAmount;
 
   @override
   void onInit() {
@@ -48,13 +49,16 @@ class AddMoneyWalletController extends GetxController {
     super.onClose();
   }
 
-  Future<void> add_wallet_method({required dynamic amount, dynamic promoCodeId}) async {
+  Future<void> add_wallet_method({
+    required dynamic amount,
+    dynamic promoCodeId,
+  }) async {
     print("💰 add_wallet_method called with amount: $amount");
 
     // Validate amount
     if (amount.toString().isEmpty) {
       _showError('Please enter amount');
-    return;
+      return;
     }
 
     final amountNum = double.tryParse(amount.toString());
@@ -104,7 +108,7 @@ class AddMoneyWalletController extends GetxController {
         razorpayService.openCheckout(
           keyId: res.data!.razorpayKeyId!,
           orderId: res.data!.orderId!,
-          amount: res.data!.amount!,
+          amount: res.data!.amount!.toString(),
           currency: res.data!.currency ?? 'INR',
           name: 'NZCU Driver Wallet',
           description: 'Wallet Top-up of ₹$amount',
@@ -188,7 +192,9 @@ class AddMoneyWalletController extends GetxController {
         // Future.delayed(Duration(seconds: 2), () {
         //   Get.back(); // Close payment screen
         // });
+          final WalletController walletController = Get.find<WalletController>();
 
+ walletController.wallet_method();
         Get.off(PaymentScreen());
       } else {
         Fluttertoast.showToast(

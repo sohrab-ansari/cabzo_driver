@@ -1,15 +1,14 @@
-
-
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/views/scheduled_pickups/accepted_screen.dart';
+import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
 
 class SocketManager {
   // Singleton instance
@@ -25,10 +24,13 @@ class SocketManager {
   bool isRestorationInProgress = false;
 
   // Configuration
-  static const String SOCKET_URL = 'https://api.corezap.framekarts.com';
+  // static const String SOCKET_URL = 'https://api.corezap.framekarts.com';
 
-//  static const String SOCKET_URL = 'https://corezap.smarttechbros.com';
-  
+  // static const String SOCKET_URL = 'https://corezap.smarttechbros.com';
+
+  //nzcu url
+  static const String SOCKET_URL = 'https://api.nzcu.framekarts.com';
+
   static const int MAX_RECONNECT_ATTEMPTS = 5;
   static const int CONNECTION_TIMEOUT = 10000;
   static const int LOCATION_UPDATE_INTERVAL = 2000;
@@ -40,6 +42,7 @@ class SocketManager {
   String? _driverPhone;
   String? _driverImage;
   String? _vehicleType;
+  String? _vehicleType2;
   String? _vehicleNumber;
   String? _vehicleImage;
   String? _fleetId;
@@ -118,34 +121,44 @@ class SocketManager {
 
       // Load vehicle data from SharedPreferences FIRST
       _vehicleType = prefs.getString("vehicle_type_id");
+      _vehicleType2 = prefs.getString("vehicle_SubType");
       _vehicleNumber = prefs.getString("vehicle_id");
-      
+
       print('✅ Vehicle Type ID loaded from prefs: $_vehicleType');
+      print('✅ Vehicle SubType loaded from prefs: $_vehicleType2');
       print('✅ Vehicle ID loaded from prefs: $_vehicleNumber');
 
       // Load driver basic info from prefs
       _driverName = prefs.getString("driver_name");
       _driverPhone = prefs.getString("driver_mobile");
+      // _driverImage = prefs.getString("driver_image");
+
+
+      // _driverImage = prefs.getString("driver_image");
       _driverImage = prefs.getString("driver_image");
+
 
       // Also try to load from stored driverData JSON
       final storedDriverData = prefs.getString('driverData');
+
       if (storedDriverData != null) {
         final driverData = json.decode(storedDriverData);
-        
+
         // Use data from JSON if not already loaded from prefs
         _driverName ??= driverData['name'] ?? driverData['driverName'];
         _driverPhone ??= driverData['phone'] ?? driverData['phoneNumber'];
         _driverImage ??= driverData['profileImage'] ?? driverData['image'];
-        
+
         // Only use vehicle data from JSON if not already loaded from prefs
         if (_vehicleType == null) {
           _vehicleType = driverData['vehicleType'];
         }
         if (_vehicleNumber == null) {
-          _vehicleNumber = driverData['vehicleNumber'] ?? driverData['vehicleNo'];
+          _vehicleNumber =
+              driverData['vehicleNumber'] ?? driverData['vehicleNo'];
         }
-        
+
+
         _vehicleImage = driverData['vehicleImage'];
         _fleetId = driverData['fleetId'];
 
@@ -165,16 +178,19 @@ class SocketManager {
   void updateVehicleData(String vehicleId, String vehicleTypeId) {
     _vehicleType = vehicleTypeId;
     _vehicleNumber = vehicleId;
-    
+
     print('🚗 Vehicle data updated:');
     print('   - Type ID: $vehicleTypeId');
     print('   - Vehicle ID: $vehicleId');
-    
+
     // Save to SharedPreferences for persistence
     _saveVehicleDataToPrefs(vehicleId, vehicleTypeId);
   }
 
-  Future<void> _saveVehicleDataToPrefs(String vehicleId, String vehicleTypeId) async {
+  Future<void> _saveVehicleDataToPrefs(
+    String vehicleId,
+    String vehicleTypeId,
+  ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString("vehicle_id", vehicleId);
@@ -188,21 +204,24 @@ class SocketManager {
   Future<void> refreshVehicleData() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       // Reload vehicle data from SharedPreferences
       _vehicleType = prefs.getString("vehicle_type_id");
+      _vehicleType2 = prefs.getString("vehicle_SubType");
+
       _vehicleNumber = prefs.getString("vehicle_id");
-      
+
       // Also load other vehicle info if you need it
       final vehicleName = prefs.getString("vehicle_name");
       final vehicleNumberPlate = prefs.getString("vehicle_number");
-      
+
       print('🔄 Vehicle data refreshed:');
       print('   - Type ID: $_vehicleType');
+
+      print("vehicallltype_camee>>> ${_vehicleType2}");
       print('   - Vehicle ID: $_vehicleNumber');
       print('   - Name: $vehicleName');
       print('   - Number Plate: $vehicleNumberPlate');
-      
     } catch (error) {
       print('❌ Error refreshing vehicle data: $error');
     }
@@ -232,7 +251,7 @@ class SocketManager {
 
       final prefs = await SharedPreferences.getInstance();
       final wasOnline = prefs.getBool("driver_is_online") ?? false;
-      
+
       if (wasOnline) {
         print('🔄 Restoring online status from prefs...');
         // Wait for socket to be ready before going online
@@ -241,16 +260,18 @@ class SocketManager {
           await Future.delayed(const Duration(milliseconds: 200));
           retries++;
         }
-        
+
         if (_isSocketConnected) {
           print('✅ Socket connected, restoring online status...');
           await goOnline();
         } else {
-          print('⚠️ Socket not connected, but user was online - marking as ready');
+          print(
+            '⚠️ Socket not connected, but user was online - marking as ready',
+          );
           isOnDuty = true;
         }
       }
-      
+
       isRestorationInProgress = false;
     } catch (error) {
       print('❌ Error restoring online status: $error');
@@ -548,6 +569,9 @@ class SocketManager {
     });
 
     _socket!.on('ride:orderCancelled', (data) {
+      print("myyyy_cancelledddddd2>>>>>");
+
+      print("my_cancelledddd_full_datatattt ${data}");
       print('❌ Ride cancelled: $data');
 
       // FIX: Use rideId instead of orderId
@@ -558,7 +582,10 @@ class SocketManager {
         _currentRide = null;
         onRideCancelled?.call(data);
 
-        Get.back();
+
+        Get.offAll(BottomnavmainScreen(isOnDuty: true,));
+
+        // Get.back();
       } else {
         print('⚠️ No valid rideId found in cancellation data');
       }
@@ -585,7 +612,10 @@ class SocketManager {
       // ✅ Save full backend data to SharedPreferences
       try {
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('active_ride_full_data', jsonEncode(fullRideData));
+        await prefs.setString(
+          'active_ride_full_data',
+          jsonEncode(fullRideData),
+        );
         await prefs.setString('active_order_id', orderId.toString());
         print('💾 Reconnected ride data saved to SharedPreferences');
       } catch (e) {
@@ -745,33 +775,52 @@ class SocketManager {
       }
 
       print('📍 Using current location: $_currentLatitude, $_currentLongitude');
-      
+
       // Debug print to show what vehicle data we have
       print('🚗 Vehicle Type ID: $_vehicleType');
       print('🚗 Vehicle ID: $_vehicleNumber');
-      
+
       // Check if we have vehicle data
-      if (_vehicleType == null || _vehicleNumber == null) {
+      if (_vehicleType == null ||
+          _vehicleNumber == null ||
+          _vehicleType2 == null) {
         print('⚠️ Missing vehicle data! Trying to load from prefs...');
         await refreshVehicleData();
-        
+
         if (_vehicleType == null || _vehicleNumber == null) {
-          print('❌ Still missing vehicle data. Cannot go online.');
-          _handleOnlineFailure('Vehicle data not found. Please complete your vehicle registration.');
-          return;
+          print('⚠️ Still missing data. Attempting to fetch from API...');
+          try {
+            await ProfileApiServices.get_driverid_data();
+            await refreshVehicleData();
+
+            if (_vehicleType == null || _vehicleNumber == null) {
+              print(
+                '❌ Still missing vehicle data after API fetch. Cannot go online.',
+              );
+              _handleOnlineFailure(
+                'Vehicle data not found. Please complete your vehicle registration.',
+              );
+              return;
+            }
+          } catch (e) {
+            print("❌ Error fetching driver data during online attempt: $e");
+            _handleOnlineFailure('Failed to fetch vehicle details.');
+            return;
+          }
         }
       }
 
       final payload = {
         'latitude': _currentLatitude,
         'longitude': _currentLongitude,
-        'vehicleType': _vehicleType, // This is the vehicle type ID
-        'vehicleId': _vehicleNumber, // This is the vehicle ID (from vehicle._id)
+        'vehicleType': _vehicleType2,
+        'vehicleId': _vehicleNumber,
         'vehicleImage': _vehicleImage,
         'fleetId': _fleetId,
         'timestamp': DateTime.now().toIso8601String(),
       };
 
+      print("vehical_subtyp[e_coming>>>  ${_vehicleType2}");
       print('>>>>>>   Emitting user:online: $payload');
       _socket!.emit('user:online', payload);
 
@@ -808,7 +857,7 @@ class SocketManager {
 
       isOnDuty = false;
       _isProcessingOnline = false;
-      
+
       // Save offline status to SharedPreferences
       await _saveOnlineStatusToPrefs(false);
 
@@ -826,7 +875,7 @@ class SocketManager {
     print('✅ DRIVER ONLINE SUCCESS');
     isOnDuty = true;
     _isProcessingOnline = false;
-    
+
     // Save online status to SharedPreferences
     _saveOnlineStatusToPrefs(true);
 
@@ -1030,10 +1079,7 @@ class SocketManager {
       // Navigate to ArrivingClient screen with full ride data
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Get.to(
-          () => ArrivingClient(
-            rideData: rideData,
-            typeCheck: false,
-          ),
+          () => ArrivingClient(rideData: rideData, typeCheck: false),
           arguments: rideData,
         );
       });
@@ -1415,10 +1461,10 @@ class SocketManager {
   Future<void> logout() async {
     try {
       print('🚪 Logging out driver...');
-      
+
       // Go offline first
       await goOffline();
-      
+
       // Clear all SharedPreferences data
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove("driver_is_online");
@@ -1429,13 +1475,13 @@ class SocketManager {
       await prefs.remove("driver_name");
       await prefs.remove("driver_mobile");
       await prefs.remove("driver_image");
-      
+
       // Reset internal state
       isOnDuty = false;
       _activeRideId = null;
       _currentRide = null;
       _isRideInProgress = false;
-      
+
       print('✅ All data cleared on logout');
     } catch (error) {
       print('❌ Error during logout: $error');

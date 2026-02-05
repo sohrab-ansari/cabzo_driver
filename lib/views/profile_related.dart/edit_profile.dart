@@ -2,6 +2,7 @@
 
 
 import 'dart:io';
+import 'package:nzcu_driver/apiervices/api_path.dart';
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/driverid_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/edit_profile_controller.dart';
@@ -254,7 +255,12 @@ class _EditProfileState extends State<EditProfile> {
                   backgroundImage: _profileImage != null
                       ? FileImage(_profileImage!)
                       : driveridController.driveridresponse.value?.driver?.image != null
-                          ? NetworkImage(driveridController.driveridresponse.value!.driver!.image!)
+                          ? NetworkImage(
+                            
+                            ApiPath.imagebaseUrl+
+                            driveridController.driveridresponse.value!.driver!.image!
+                            
+                            )
                           : null,
                   child: _profileImage == null && 
                          (driveridController.driveridresponse.value?.driver?.image == null)

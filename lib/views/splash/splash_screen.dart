@@ -1,3 +1,6 @@
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/driverid_controller.dart';
 import 'package:nzcu_driver/services/socket_manager.dart';
 import 'package:nzcu_driver/utilities/colors.dart';
 import 'package:nzcu_driver/utilities/navigator.dart';
@@ -50,6 +53,9 @@ class _SplashScreenState extends State<SplashScreen> {
     // _setupSocketCallbacks();
 
     // Start socket connection
+    final DriveridController driveridController = Get.put(DriveridController());
+
+       driveridController.driverid_mdethod();
     await socketManager.initialize();
 
     // Start location listener

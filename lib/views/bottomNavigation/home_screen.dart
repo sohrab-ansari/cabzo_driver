@@ -23,9 +23,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:nzcu_driver/services/socket_manager.dart' hide LatLng;
 
 class HomeScreen extends StatefulWidget {
-   final bool? isOnDuty;
-   final bool isFirstLaunch;
-   HomeScreen({super.key, this.isOnDuty = false, this.isFirstLaunch = false});
+  final bool? isOnDuty;
+  final bool isFirstLaunch;
+  HomeScreen({super.key, this.isOnDuty = false, this.isFirstLaunch = false});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final HomeController homeController = Get.find<HomeController>();
   final StepperController stepperController = Get.find<StepperController>();
 
-    final DriveridController driveridController = Get.put(DriveridController());
+  final DriveridController driveridController = Get.put(DriveridController());
 
   // Socket Manager instance
   final SocketManager socketManager = SocketManager();
@@ -65,11 +65,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   List<Map<String, dynamic>> _nearbyRiders = [];
   Map<String, BitmapDescriptor> _vehicleIcons = {};
 
-String? driverName;
+  String? driverName;
   @override
   void initState() {
     super.initState(); // Call super first
-    
+
     // handleonline();
     homeController.home_data_method();
     driveridController.driverid_mdethod();
@@ -77,7 +77,7 @@ String? driverName;
     WidgetsBinding.instance.addObserver(this);
     _initializeApp();
     sharedpreferences();
-    
+
     // Ensure build is called after state is set
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {});
@@ -86,20 +86,20 @@ String? driverName;
 
   Future<void> sharedpreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    
 
-     setState(() {
-        driverName = prefs.getString("driver_name");
-     });
+    setState(() {
+      driverName = prefs.getString("driver_name");
+    });
     print("Driver Name from SharedPreferences: $driverName");
   }
 
+  void handleonline() {
+    print(
+      "online status in home screen is ::::::::::::::::::::::::::: ${widget.isOnDuty}",
+    );
 
-  void handleonline () {
-    print("online status in home screen is ::::::::::::::::::::::::::: ${widget.isOnDuty}");
-    
     // Set socketManager status based on widget parameter
-    if(widget.isOnDuty == true){
+    if (widget.isOnDuty == true) {
       socketManager.isOnDuty = true;
       print("✅ Driver set to ONLINE");
     } else {
@@ -115,7 +115,6 @@ String? driverName;
     // Load custom icons
     await _loadCustomBikeMarker();
     await _loadVehicleIcons();
-    
 
     // Initialize socket manager with callbacks
     _setupSocketCallbacks();
@@ -129,20 +128,14 @@ String? driverName;
 
   void _setupSocketCallbacks() {
     socketManager.onNewRide = (rideData) {
-
-
-           print("hellooooooooooooooooooo>>>>>>>>>>>>>>>>  11111111111111111111");
+      print("hellooooooooooooooooooo>>>>>>>>>>>>>>>>  11111111111111111111");
 
       _processRideRequest(rideData);
     };
 
     socketManager.onRideConfirmed = (rideData) {
-
-
-     print("hellooooooooooooooooooo>>>>>>>>>>>>>>>>  222222222222222");
+      print("hellooooooooooooooooooo>>>>>>>>>>>>>>>>  222222222222222");
       _navigateToRideScreen(rideData);
-
-
     };
 
     socketManager.onRideCancelled = (data) {
@@ -354,7 +347,7 @@ String? driverName;
 
     if (_appInBackground) {
       _appInBackground = false;
-      
+
       // ✅ FIX: Restore online status after app restart
       _restoreOnlineStatusAfterResume();
     }
@@ -363,11 +356,11 @@ String? driverName;
   /// Restore online status if driver was online before app was paused/restarted
   Future<void> _restoreOnlineStatusAfterResume() async {
     print('🔄 Checking if driver was online before pause...');
-    
+
     try {
       // Wait a moment for socket to stabilize
       await Future.delayed(const Duration(milliseconds: 500));
-      
+
       // Try to restore online status
       // await socketManager.restoreOnlineStatus();
     } catch (error) {
@@ -500,6 +493,7 @@ String? driverName;
                                 ),
                               ),
                               SizedBox(width: w * 0.03),
+
                               // AppFonts.textPoppins(
                               //   context,
                               //   "Ayaan Malviya ${driverName}",
@@ -509,10 +503,9 @@ String? driverName;
                               //   TextAlign.left,
                               //   TextOverflow.visible,
                               // ),
-
-                                AppFonts.textPoppins(
+                              AppFonts.textPoppins(
                                 context,
-                                "${driverName}",
+                                driverName ?? "",
                                 w * 0.05,
                                 FontWeight.w600,
                                 AppColors.black,
@@ -577,16 +570,12 @@ String? driverName;
                   end: const Offset(1, 1),
                 ),
       ),
-      body:
-      
-       SingleChildScrollView(
+      body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: w * 0.04),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-
-             
               SizedBox(height: w * 0.04),
               Image.asset("assets/images/offline_image.png", height: w * 0.5),
               Text(
@@ -639,87 +628,87 @@ String? driverName;
               ),
               SizedBox(height: w * 0.03),
 
-
- 
- 
-    Card(
-      margin: const EdgeInsets.all(16.0),
-      elevation: 2.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.info_outline,
-                  color: Theme.of(context).primaryColor,
-                  size: 24.0,
+              Card(
+                margin: const EdgeInsets.all(16.0),
+                elevation: 2.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
-                const SizedBox(width: 12.0),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-   Text(
-                        'Driver Agreement View',
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
-                        ),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            color: Theme.of(context).primaryColor,
+                            size: 24.0,
+                          ),
+                          const SizedBox(width: 12.0),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Driver Agreement View',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[800],
+                                  ),
+                                ),
+                                const SizedBox(height: 4.0),
+                                Text(
+                                  'Please View your driver driver agreement to continue accepting rides.',
+                                  style: TextStyle(
+                                    fontSize: 14.0,
+                                    color: Colors.grey[600],
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 4.0),
-                      Text(
-                        'Please View your driver driver agreement to continue accepting rides.',
-                        style: TextStyle(
-                          fontSize: 14.0,
-                          color: Colors.grey[600],
-                          height: 1.4,
-                        ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 12.0,
                       ),
- 
-
-                    ],
-                  ),
+                      color: Colors.grey[50],
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => AgreementScreen(),
+                                  ),
+                                );
+                              },
+                              child: const Text('Continue'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-            color: Colors.grey[50],
-            child: Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: (){
-
-
-Navigator.push(context, MaterialPageRoute(builder: (context) => AgreementScreen()));
-                    },
-                    child: const Text('Continue'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ),
+              ),
 
               // Text("dhjshafj"),
 
               //  KYCNoticeCardWidget(isKycCompleted: true,
-              
+
               // onContinuePressed: (){
               //   print("Continue Pressed");
 
-                
               // },
               // ),
               Align(
@@ -798,7 +787,9 @@ Navigator.push(context, MaterialPageRoute(builder: (context) => AgreementScreen(
                                 const SizedBox(height: 4),
                                 Text(
                                   "${formatCurrency(earnings?.online)} Total",
-                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ],
                             ),
@@ -822,7 +813,9 @@ Navigator.push(context, MaterialPageRoute(builder: (context) => AgreementScreen(
                                 const SizedBox(height: 4),
                                 Text(
                                   "${formatCurrency(earnings?.cash)} On Hand",
-                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ],
                             ),
@@ -893,7 +886,7 @@ Navigator.push(context, MaterialPageRoute(builder: (context) => AgreementScreen(
                   ],
                 );
               }),
-             
+
               SizedBox(height: w * 0.04),
             ],
           ),
@@ -904,9 +897,7 @@ Navigator.push(context, MaterialPageRoute(builder: (context) => AgreementScreen(
 
   Widget _buildOnlineScreen(double w, isFirstLaunc) {
     return Scaffold(
-      body:
-      
-       SafeArea(
+      body: SafeArea(
         child: Stack(
           children: [
             /// 1️⃣ Google Map (BOTTOM)
@@ -921,8 +912,6 @@ Navigator.push(context, MaterialPageRoute(builder: (context) => AgreementScreen(
               markers: markers,
               circles: circles,
             ),
-
-
 
             /// 2️⃣ Book Ride Button (Top Right)
             Positioned(
@@ -1080,8 +1069,7 @@ Navigator.push(context, MaterialPageRoute(builder: (context) => AgreementScreen(
       final earnings = homeData?.todayStats?.earnings;
       final rides = homeData?.todayStats?.rides;
 
-
-   print("myyyy_dattatt  ${earnings?.total}");
+      print("myyyy_dattatt  ${earnings?.total}");
       // Format currency
       String formatCurrency(double? amount) {
         return '₹${(amount ?? 0).toStringAsFixed(0)}';
@@ -1125,7 +1113,10 @@ Navigator.push(context, MaterialPageRoute(builder: (context) => AgreementScreen(
                     const SizedBox(height: 1),
                     Text(
                       formatCurrency(earnings?.total),
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -1275,14 +1266,10 @@ Navigator.push(context, MaterialPageRoute(builder: (context) => AgreementScreen(
   }
 }
 
-
-
-
-
 class KYCNoticeWidget extends StatelessWidget {
   final bool isKycCompleted;
   final VoidCallback onContinuePressed;
-  
+
   const KYCNoticeWidget({
     Key? key,
     required this.isKycCompleted,
@@ -1378,10 +1365,13 @@ class KYCNoticeWidget extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Button Section
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 12.0,
+            ),
             decoration: BoxDecoration(
               color: Colors.grey[50],
               borderRadius: const BorderRadius.only(
@@ -1404,10 +1394,7 @@ class KYCNoticeWidget extends StatelessWidget {
                 ),
                 child: const Text(
                   'Continue',
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
                 ),
               ),
             ),
@@ -1422,7 +1409,7 @@ class KYCNoticeWidget extends StatelessWidget {
 class KYCNoticeCardWidget extends StatelessWidget {
   final bool isKycCompleted;
   final VoidCallback onContinuePressed;
-  
+
   const KYCNoticeCardWidget({
     Key? key,
     required this.isKycCompleted,
@@ -1435,14 +1422,10 @@ class KYCNoticeCardWidget extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return 
-    
-    Card(
+    return Card(
       margin: const EdgeInsets.all(16.0),
       elevation: 2.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       child: Column(
         children: [
           Padding(
@@ -1462,9 +1445,8 @@ class KYCNoticeCardWidget extends StatelessWidget {
                     children: [
                       Text(
                         'Driver Agreement Required',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4.0),
                       Text(
@@ -1480,7 +1462,10 @@ class KYCNoticeCardWidget extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 12.0,
+            ),
             color: Colors.grey[50],
             child: Row(
               children: [
@@ -1496,11 +1481,6 @@ class KYCNoticeCardWidget extends StatelessWidget {
         ],
       ),
     );
- 
- 
- 
- 
- 
   }
 }
 
@@ -1511,13 +1491,10 @@ class ExampleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Driver Dashboard'),
-      ),
+      appBar: AppBar(title: const Text('Driver Dashboard')),
       body: Column(
         children: [
           // Other widgets here...
-          
           KYCNoticeWidget(
             isKycCompleted: false, // This would come from your state
             onContinuePressed: () {
@@ -1525,7 +1502,7 @@ class ExampleScreen extends StatelessWidget {
               Navigator.pushNamed(context, '/agreement');
             },
           ),
-          
+
           // More widgets...
         ],
       ),

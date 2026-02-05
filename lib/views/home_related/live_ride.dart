@@ -992,7 +992,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       case 'bottom_nav':
         // Go back to home screen on cancellation
         // Get.back();
-         Get.offAll(() => BottomnavmainScreen(isOnDuty: true,));
+        Get.offAll(() => BottomnavmainScreen(isOnDuty: true));
         break;
       case 'arriving_screen':
         // Navigate to ArrivingClient screen
@@ -1014,20 +1014,19 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     final w = MediaQuery.of(context).size.width;
 
     return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
 
-       canPop: false,
-  onPopInvokedWithResult: (didPop, result) {
-    if (didPop) return;
-
-    Fluttertoast.showToast(
-      msg: "Please complete the ride verification first",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.black87,
-      textColor: Colors.white,
-      fontSize: 14,
-    );
-  },
+        Fluttertoast.showToast(
+          msg: "Please complete the ride verification first",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.black87,
+          textColor: Colors.white,
+          fontSize: 14,
+        );
+      },
       // canPop: false,
       // onPopInvoked: (didPop) {
       //   if (didPop) return;
