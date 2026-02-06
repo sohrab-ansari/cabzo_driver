@@ -7,8 +7,10 @@ import 'package:nzcu_driver/apiervices/api_path.dart';
 import 'package:nzcu_driver/modals/add_money_wallet_response.dart';
 import 'package:nzcu_driver/modals/bank_account_add_Res.dart';
 import 'package:nzcu_driver/modals/chartid_response.dart';
+import 'package:nzcu_driver/modals/create_by_driver_respose.dart';
 import 'package:nzcu_driver/modals/driverId_response.dart';
 import 'package:nzcu_driver/modals/driver_Image_upload_res.dart';
+import 'package:nzcu_driver/modals/driver_toggle_duty_response.dart';
 import 'package:nzcu_driver/modals/get_all_sub_vehicle_categories_response.dart';
 import 'package:nzcu_driver/modals/get_all_vehicle_categories_response.dart';
 import 'package:nzcu_driver/modals/get_bank_accounts_response.dart';
@@ -99,6 +101,84 @@ class ProfileApiServices {
     }
   }
 
+
+  
+static Future<Drivertoggledutyresponse> toggle_duty_data() async {
+    // final Uri url = Uri.parse(ApiPath.createVehicle);
+    // final Uri url = Uri.parse("${ApiPath.driver_home}");
+    final prefs = await SharedPreferences.getInstance();
+    final String? userId = prefs.getString("driver_userid");
+    final String? token = prefs.getString("auth_token");
+
+    //  final Uri url = Uri.parse(
+    //   "${ApiPath.baseUri}/driver/toggleDuty?$userId",
+    // );
+
+
+ final Uri url = Uri.parse(
+    "${ApiPath.baseUri}/driver/toggleDuty/$userId",
+  );
+    print("========== CREATE VEHICLE API ==========");
+    print("URL : $url");
+    print("Token : $token");
+    // print("Request Body : ${jsonEncode(requestBody)}");
+    print("my_tokennnn ${token}");
+
+    try {
+      final http.Response response = await http.patch(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token", // ✅ BEARER TOKEN
+        },
+        // body: jsonEncode(requestBody),
+      );
+
+      print("Status Code : ${response.statusCode}");
+      print("Response Body : ${response.body}");
+
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      final Drivertoggledutyresponse drivertoggledutyresponse = Drivertoggledutyresponse.fromJson(
+        data,
+      );
+
+
+ print("my_driver_tokennnn_toggle_respose ${data}");
+      print("Response Body222222222 : ${drivertoggledutyresponse.driver!.id}");
+
+      if (drivertoggledutyresponse.success == true &&
+          drivertoggledutyresponse.driver != null &&
+          drivertoggledutyresponse.driver!.id != null) {
+        print("Response Body222222222kkkk : ${drivertoggledutyresponse.driver!.id}");
+        // Use ! to assert non-null or provide default value
+        await prefs.setString(
+          "driver_userid",
+          drivertoggledutyresponse.driver!.id.toString(),
+        );
+
+        await prefs.setString(
+          "driver_name",
+          drivertoggledutyresponse.driver!.name.toString(),
+        );
+
+        print("Response Body222222222jjjj : ${drivertoggledutyresponse.driver!.id}");
+        // print(
+        //   "✅ Driver user ID saved to SharedPreferences: ${registerProfileRes.data!.id}",
+        // );
+      } else {
+        print(
+          "⚠️  Could not save driver_userid - ID is null or response not successful",
+        );
+      }
+      return drivertoggledutyresponse;
+    } catch (e) {
+      print("❌ Exception in Create Vehicle1 : $e");
+      return Drivertoggledutyresponse(success: false, message: "Connection error: $e");
+    }
+  }
+  
+  
+  
   static Future<DriverImageUploadRes> edit_profile_data_api({
     File? image,
     required String userType,
@@ -1140,6 +1220,162 @@ class ProfileApiServices {
       );
     }
   }
+
+
+
+static Future<CreateByDriverResponse> createByDriverData(
+  
+  {
+  required double startLat,
+  required double startLng,
+  required String startAddress,
+  required double endLat,
+  required double endLng,
+  required String endAddress,
+  required String userName,
+  required String phone,
+}
+
+) async {
+  final prefs = await SharedPreferences.getInstance();
+  final String? token = prefs.getString("auth_token");
+
+  final Uri url =
+      Uri.parse("${ApiPath.baseUri}/order/createByDriver");
+
+  print("========== 🔵 CREATE BY DRIVER API ==========");
+  print("URL : $url");
+  print("Token : $token");
+
+  /// 🔥 Payload exactly as backend expects
+  final Map<String, dynamic> payload = {
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [startLat, startLng],
+      "address": startAddress,
+    },
+    "endLocation": {
+      "type": "Point",
+      "coordinates": [endLat, endLng],
+      "address": endAddress,
+    },
+    "userName": userName,
+    "phone": phone,
+  };
+
+  print("📤 REQUEST BODY 👇");
+  print(const JsonEncoder.withIndent('  ').convert(payload));
+
+  try {
+    final http.Response response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode(payload),
+    );
+
+    print("✅ Status Code : ${response.statusCode}");
+
+    if (response.body.trim().isEmpty) {
+      throw FormatException("Empty response from server");
+    }
+
+    final decodedJson = jsonDecode(response.body);
+
+    print("📦 RESPONSE 👇");
+    print(const JsonEncoder.withIndent('  ').convert(decodedJson));
+
+    return CreateByDriverResponse.fromJson(decodedJson);
+  } catch (e) {
+    print("❌ Exception in createByDriverData");
+    print(e.toString());
+
+    return CreateByDriverResponse(
+      success: false,
+      message: "Connection error: ${e.toString()}",
+    );
+  }
+}
+
+
+//   static Future<CreateByDriverResponse> create_by_driver_data({
+//     required dynamic orderid,
+//   }) async {
+//     final prefs = await SharedPreferences.getInstance();
+//     final String? token = prefs.getString("auth_token");
+
+//     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID : $orderid");
+
+//     // final Uri url = Uri.parse("${ApiPath.baseUri}/payments/cash");
+
+
+// final Uri url = Uri.parse("${ApiPath.baseUri}/order/createByDriver");
+//     print("========== 🔵 CASH PAYMENT API ==========");
+//     print("URL : $url");
+//     print("Token : $token");
+
+//     try {
+//       final http.Response response = await http.post(
+//         url,
+//         headers: {
+//           "Content-Type": "application/json",
+//           "Authorization": "Bearer $token",
+//         },
+//         body: jsonEncode({"orderId": orderid}),
+//       );
+
+//       print("✅ Status Code : ${response.statusCode}");
+
+//       // Check if response is valid JSON
+//       if (response.body.trim().isEmpty) {
+//         throw FormatException("Empty response from server");
+//       }
+
+//       // Check if response is HTML (error page)
+//       if (response.body.trim().startsWith('<!DOCTYPE html>') ||
+//           response.body.trim().startsWith('<html')) {
+//         throw FormatException(
+//           "Server returned HTML error page. Check endpoint URL.",
+//         );
+//       }
+
+//       // Try to parse JSON
+//       dynamic decodedJson;
+//       try {
+//         decodedJson = jsonDecode(response.body);
+//       } catch (jsonError) {
+//         print("JSON Parse Error: $jsonError");
+//         print("Raw Response: ${response.body}");
+//         throw FormatException("Invalid JSON response from server");
+//       }
+
+//       // Pretty print for debugging
+//       final prettyJson = const JsonEncoder.withIndent(
+//         '  ',
+//       ).convert(decodedJson);
+//       print("📦 FULL RESPONSE (Pretty Print) 👇");
+//       print(prettyJson);
+
+//       // Parse the response
+//       final CreateByDriverResponse createByDriverResponse =
+//           CreateByDriverResponse.fromJson(decodedJson);
+
+//       print("🎯 Parsed Model Object 👇");
+//       print(createByDriverResponse);  
+//       return createByDriverResponse;
+//     } catch (e) {
+//       print("❌ Exception in create_by_driver_data");
+//       print(e.toString());
+
+//       // Return a proper error response
+//       return CreateByDriverResponse(
+//         success: false,
+//         message: "Connection error: ${e.toString()}",
+//       );
+//     }
+//   }
 
   static Future<Getpromocodedata> get_promocode_data() async {
     final prefs = await SharedPreferences.getInstance();

@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'dart:convert';
 import 'package:nzcu_driver/controllers/controllers.dart';
+import 'package:nzcu_driver/controllers/home_controllers/driver_toggle_duty_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/driverid_controller.dart';
@@ -34,6 +35,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Controllers controllers = Get.put(Controllers());
   final HomeController homeController = Get.find<HomeController>();
+
+  final DriverToggleDutyController driverToggleDutyController = Get.find<DriverToggleDutyController>();
+
   final StepperController stepperController = Get.find<StepperController>();
 
   final DriveridController driveridController = Get.put(DriveridController());
@@ -73,6 +77,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     // handleonline();
     homeController.home_data_method();
     driveridController.driverid_mdethod();
+
+      // driverToggleDutyController.driver_toggle_method();
 
     WidgetsBinding.instance.addObserver(this);
     _initializeApp();
@@ -1040,6 +1046,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           child: ElevatedButton(
             onPressed: () {
               socketManager.goOffline();
+
+              // driverToggleDutyController.driver_toggle_method();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,

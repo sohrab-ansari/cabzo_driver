@@ -148,7 +148,7 @@ initState() {
           _menuCard(w, secondImagePathList, secondTitleList, secondScreens),
           SizedBox(height: w * .02),
           _logoutButton(w),
-          SizedBox(height: w * .3),
+          SizedBox(height: w * .03),
         ],
       ),
     );

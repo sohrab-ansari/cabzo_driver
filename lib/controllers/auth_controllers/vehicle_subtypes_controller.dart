@@ -153,6 +153,10 @@ class VehicleSubtypesController extends GetxController {
     }
   }
 
+  void clearError() {
+  errorMessage.value = '';
+}
+
   // Load more vehicle sub-types (next page)
   Future<void> loadMoreVehicleSubTypes() async {
     if (hasMorePages.value &&

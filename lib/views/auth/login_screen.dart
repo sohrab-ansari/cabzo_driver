@@ -813,55 +813,55 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
 
               // Space
-              SizedBox(height: w * 0.07),
+              SizedBox(height: w * 0.05),
 
               // Space
-              SizedBox(height: w * 0.00),
+              // SizedBox(height: w * 0.00),
 
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: w * 0.04),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AppFonts.textPoppins(
-                          context,
-                          "Already have an account? ",
-                          w * 0.036,
-                          FontWeight.w400,
-                          AppColors.black.withOpacity(0.7),
-                          TextAlign.left,
-                          TextOverflow.visible,
-                        ),
+              // Padding(
+              //   padding: EdgeInsets.symmetric(horizontal: w * 0.04),
+              //   child: Column(
+              //     children: [
+              //       Row(
+              //         mainAxisAlignment: MainAxisAlignment.center,
+              //         children: [
+              //           AppFonts.textPoppins(
+              //             context,
+              //             "Already have an account? ",
+              //             w * 0.036,
+              //             FontWeight.w400,
+              //             AppColors.black.withOpacity(0.7),
+              //             TextAlign.left,
+              //             TextOverflow.visible,
+              //           ),
 
-                        // Sign in link
-                        InkWell(
-                          onTap: () {
-                            CustomNavigator.push(
-                              context,
-                              SignupScreen(),
-                              transition: TransitionType.slideLeft,
-                            );
-                          },
-                          child: AppFonts.textPoppins(
-                            context,
-                            "Sign Up",
-                            w * 0.036,
-                            FontWeight.w400,
-                            const Color(0xFF439AFE),
-                            TextAlign.left,
-                            TextOverflow.visible,
-                          ),
-                        ),
-                      ],
-                    ).animate().fade(duration: 1300.ms, curve: Curves.easeInOut).scale(
-                          begin: const Offset(0.95, 0.95),
-                          end: const Offset(1, 1),
-                        ),
-                  ],
-                ),
-              ),
+              //           // Sign in link
+              //           InkWell(
+              //             onTap: () {
+              //               CustomNavigator.push(
+              //                 context,
+              //                 SignupScreen(),
+              //                 transition: TransitionType.slideLeft,
+              //               );
+              //             },
+              //             child: AppFonts.textPoppins(
+              //               context,
+              //               "Sign Up",
+              //               w * 0.036,
+              //               FontWeight.w400,
+              //               const Color(0xFF439AFE),
+              //               TextAlign.left,
+              //               TextOverflow.visible,
+              //             ),
+              //           ),
+              //         ],
+              //       ).animate().fade(duration: 1300.ms, curve: Curves.easeInOut).scale(
+              //             begin: const Offset(0.95, 0.95),
+              //             end: const Offset(1, 1),
+              //           ),
+              //     ],
+              //   ),
+              // ),
 
               // Space
               SizedBox(height: w * 0.04),
@@ -869,13 +869,15 @@ class _LoginScreenState extends State<LoginScreen> {
               // Space
               SizedBox(height: w * 0.09),
 
-              // Send OTP button - Always enabled
-              Padding(
+              
+// Login
+
+       Padding(
                 padding: EdgeInsets.symmetric(horizontal: w * 0.04),
                 child: Obx(
                   () => AppButtons.solid2(
                     context: context,
-                    text: "Send OTP",
+                    text: "Login",
                     onClicked: _handleSendOtp, // Click handler with validations
                     isButtonEnabled: true, // Button is always enabled
                     isFullWidth: true,
@@ -891,6 +893,29 @@ class _LoginScreenState extends State<LoginScreen> {
                       end: const Offset(1, 1),
                     ),
               ),
+
+              // Send OTP button - Always enabled
+              // Padding(
+              //   padding: EdgeInsets.symmetric(horizontal: w * 0.04),
+              //   child: Obx(
+              //     () => AppButtons.solid2(
+              //       context: context,
+              //       text: "Send OTP",
+              //       onClicked: _handleSendOtp, // Click handler with validations
+              //       isButtonEnabled: true, // Button is always enabled
+              //       isFullWidth: true,
+              //       fontSize: w * 0.045,
+              //       height: w * 0.140,
+              //       radius: 12.0,
+              //       isLoading: loginController.isLoading.value,
+              //       textColor: AppColors.black,
+              //       fontWeight: FontWeight.w500,
+              //     ),
+              //   ).animate().fade(duration: 1600.ms, curve: Curves.easeInOut).scale(
+              //         begin: const Offset(0.95, 0.95),
+              //         end: const Offset(1, 1),
+              //       ),
+              // ),
 
               SizedBox(height: w * .1),
             ],

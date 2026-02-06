@@ -1,7 +1,9 @@
 import 'package:nzcu_driver/controllers/auth_controllers/vehicle_subtypes_controller.dart';
 import 'package:nzcu_driver/controllers/auth_controllers/vehicle_types_controller.dart';
+import 'package:nzcu_driver/controllers/book_ride_controller/create_By_driver_controller.dart';
 import 'package:nzcu_driver/controllers/chart_id_controller/chartid_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/cash_controller.dart';
+import 'package:nzcu_driver/controllers/home_controllers/driver_toggle_duty_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/bank_account_add_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/review_and_rating_controller.dart';
@@ -41,21 +43,17 @@ class DependencyInjection {
 
     Get.put(SocketManager(), permanent: true);
 
-
-
     Get.put(VehicleTypesController(), permanent: true);
 
+    Get.put(GetPromoCodeController(), permanent: true);
 
-Get.put(GetPromoCodeController(), permanent: true);
+    Get.put(NotificationController(), permanent: true);
 
+    Get.put(VehicleSubtypesController(), permanent: true);
 
-Get.put(NotificationController(), permanent: true);
+    Get.put(DriverToggleDutyController(), permanent: true);
 
+    Get.put(CreateByDriverController(), permanent: true);
 
-Get.put(VehicleSubtypesController(), permanent: true);
-
-
-
-    
   }
 }

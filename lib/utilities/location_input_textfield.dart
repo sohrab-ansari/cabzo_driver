@@ -1,21 +1,29 @@
 import 'package:nzcu_driver/utilities/colors/colors_list.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-//import 'package:google_fonts/google_fonts.dart';
 
 class LocationInputTextfield extends StatefulWidget {
   final String preffixImage;
-  //  final Widget suffixImage;
   final Color? backgroundColor;
   final String? hintText;
   final double? hintFontSize;
   final double? preffixhorizontalPadding;
   final double? preffixverticalPadding;
-  // final double? suffixhorizontalPadding;
-  // final double? suffixverticalPadding;
   final TextEditingController? address;
   final VoidCallback onPressed;
   final String? additionalImage;
+
+  /// NEW: Enable text editing (default false for backward compatibility)
+  final bool isEditable;
+
+  /// NEW: Callback when text changes
+  final ValueChanged<String>? onChanged;
+
+  /// NEW: Show clear button when text is present
+  final bool showClearButton;
+
+  /// NEW: Callback when clear button is pressed
+  final VoidCallback? onClear;
 
   const LocationInputTextfield({
     super.key,
@@ -25,12 +33,13 @@ class LocationInputTextfield extends StatefulWidget {
     required this.onPressed,
     this.preffixhorizontalPadding,
     this.preffixverticalPadding,
-    // this.suffixhorizontalPadding,
-    // this.suffixverticalPadding,
     required this.preffixImage,
     this.hintFontSize,
-    // required this.suffixImage,
     this.address,
+    this.isEditable = false,
+    this.onChanged,
+    this.showClearButton = false,
+    this.onClear,
   });
 
   @override
@@ -41,30 +50,29 @@ class _LocationInputTextfieldState extends State<LocationInputTextfield> {
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
-    return GestureDetector(
-      onTap: widget.onPressed,
 
+    return GestureDetector(
+      onTap: widget.isEditable ? null : widget.onPressed,
       child: TextFormField(
         controller: widget.address,
-
-        // style: GoogleFonts.poppins(
-        //   color: ColorsList.textColor,
-        //   fontSize: w * 0.04,
-        //   fontWeight: FontWeight.w500,
-        // ),
-        // readOnly: true,
         cursorColor: ColorsList.textColor,
         cursorWidth: 2.0,
         cursorHeight: w * 0.05,
-        readOnly: true,
+        readOnly: !widget.isEditable,
+        onChanged: widget.onChanged,
+        onTap: widget.isEditable ? null : widget.onPressed,
+        style: GoogleFonts.blinker(
+          color: Colors.black,
+          fontSize: w * .04,
+          fontWeight: FontWeight.w400,
+        ),
         decoration: InputDecoration(
           hintText: widget.hintText ?? "",
           hintStyle: GoogleFonts.blinker(
-            color: Colors.black,
+            color: Colors.black54,
             fontSize: widget.hintFontSize ?? w * .04,
             fontWeight: FontWeight.w400,
           ),
-
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(w * .03),
             borderSide: BorderSide(
@@ -93,7 +101,6 @@ class _LocationInputTextfieldState extends State<LocationInputTextfield> {
             horizontal: w * .04,
           ),
           filled: true,
-
           fillColor: widget.backgroundColor ?? ColorsList.scaffoldColor,
           prefixIcon: Padding(
             padding: EdgeInsets.only(
@@ -107,14 +114,18 @@ class _LocationInputTextfieldState extends State<LocationInputTextfield> {
               height: w * .05,
             ),
           ),
-
-          // suffixIcon: Padding(
-          //   padding: EdgeInsets.symmetric(
-          //     horizontal: widget.suffixhorizontalPadding ?? w * .03,
-          //     vertical: widget.suffixverticalPadding ?? w * .001,
-          //   ),
-          //   child: widget.suffixImage,
-          // ),
+          suffixIcon:
+              widget.showClearButton &&
+                  widget.address != null &&
+                  widget.address!.text.isNotEmpty
+              ? IconButton(
+                  icon: Icon(Icons.close, size: w * .05, color: Colors.grey),
+                  onPressed: () {
+                    widget.address?.clear();
+                    widget.onClear?.call();
+                  },
+                )
+              : null,
         ),
       ),
     );
