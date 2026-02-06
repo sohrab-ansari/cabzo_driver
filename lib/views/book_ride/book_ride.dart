@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/views/scheduled_pickups/accepted_screen.dart';
 
 class BookRide extends StatefulWidget {
   const BookRide({super.key});
@@ -209,18 +210,57 @@ class _BookRideState extends State<BookRide> {
 
       // Check if booking was successful
       if (createByDriverController.cashResponse.value?.success == true) {
-        // Show success message
-        Get.snackbar(
-          'Success',
-          'Ride booked successfully!',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 2),
-        );
+        // Show success message using ScaffoldMessenger
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Ride booked successfully!'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
 
-        // Navigate back or to next screen
-        Get.back();
+        // Extract ride data from API response for navigation
+        final apiResponse = createByDriverController.cashResponse.value;
+        final rideData = apiResponse?.data?.toJson() ?? {};
+
+        // Add orderId using the _id from response
+        rideData['orderId'] =
+            apiResponse?.data?.id ?? apiResponse?.data?.dataId;
+
+        // Navigate to ArrivingClient screen with typeCheck:true for book ride flow
+        await Get.to(
+          () => ArrivingClient(rideData: rideData, typeCheck: true),
+          transition: Transition.rightToLeft,
+          duration: const Duration(milliseconds: 300),
+        );
+      } else {
+        // Show error message using ScaffoldMessenger
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                createByDriverController.errorMessage.value.isNotEmpty
+                    ? createByDriverController.errorMessage.value
+                    : 'Failed to book ride. Please try again.',
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Something went wrong. Please try again.'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
     } finally {
       if (mounted) {

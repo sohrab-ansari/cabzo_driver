@@ -101,9 +101,7 @@ class ProfileApiServices {
     }
   }
 
-
-  
-static Future<Drivertoggledutyresponse> toggle_duty_data() async {
+  static Future<Drivertoggledutyresponse> toggle_duty_data() async {
     // final Uri url = Uri.parse(ApiPath.createVehicle);
     // final Uri url = Uri.parse("${ApiPath.driver_home}");
     final prefs = await SharedPreferences.getInstance();
@@ -114,10 +112,7 @@ static Future<Drivertoggledutyresponse> toggle_duty_data() async {
     //   "${ApiPath.baseUri}/driver/toggleDuty?$userId",
     // );
 
-
- final Uri url = Uri.parse(
-    "${ApiPath.baseUri}/driver/toggleDuty/$userId",
-  );
+    final Uri url = Uri.parse("${ApiPath.baseUri}/driver/toggleDuty/$userId");
     print("========== CREATE VEHICLE API ==========");
     print("URL : $url");
     print("Token : $token");
@@ -138,18 +133,18 @@ static Future<Drivertoggledutyresponse> toggle_duty_data() async {
       print("Response Body : ${response.body}");
 
       final Map<String, dynamic> data = jsonDecode(response.body);
-      final Drivertoggledutyresponse drivertoggledutyresponse = Drivertoggledutyresponse.fromJson(
-        data,
-      );
+      final Drivertoggledutyresponse drivertoggledutyresponse =
+          Drivertoggledutyresponse.fromJson(data);
 
-
- print("my_driver_tokennnn_toggle_respose ${data}");
+      print("my_driver_tokennnn_toggle_respose ${data}");
       print("Response Body222222222 : ${drivertoggledutyresponse.driver!.id}");
 
       if (drivertoggledutyresponse.success == true &&
           drivertoggledutyresponse.driver != null &&
           drivertoggledutyresponse.driver!.id != null) {
-        print("Response Body222222222kkkk : ${drivertoggledutyresponse.driver!.id}");
+        print(
+          "Response Body222222222kkkk : ${drivertoggledutyresponse.driver!.id}",
+        );
         // Use ! to assert non-null or provide default value
         await prefs.setString(
           "driver_userid",
@@ -161,7 +156,9 @@ static Future<Drivertoggledutyresponse> toggle_duty_data() async {
           drivertoggledutyresponse.driver!.name.toString(),
         );
 
-        print("Response Body222222222jjjj : ${drivertoggledutyresponse.driver!.id}");
+        print(
+          "Response Body222222222jjjj : ${drivertoggledutyresponse.driver!.id}",
+        );
         // print(
         //   "✅ Driver user ID saved to SharedPreferences: ${registerProfileRes.data!.id}",
         // );
@@ -173,12 +170,13 @@ static Future<Drivertoggledutyresponse> toggle_duty_data() async {
       return drivertoggledutyresponse;
     } catch (e) {
       print("❌ Exception in Create Vehicle1 : $e");
-      return Drivertoggledutyresponse(success: false, message: "Connection error: $e");
+      return Drivertoggledutyresponse(
+        success: false,
+        message: "Connection error: $e",
+      );
     }
   }
-  
-  
-  
+
   static Future<DriverImageUploadRes> edit_profile_data_api({
     File? image,
     required String userType,
@@ -969,6 +967,25 @@ static Future<Drivertoggledutyresponse> toggle_duty_data() async {
       print("✅ Response Status: ${response.statusCode}");
 
       print("myyyy_fulllll_respsoneeeee ${response.body}");
+
+      // Fluttertoast.showToast(msg: response.body['message']);
+
+      final Map<String, dynamic> decodedJson = jsonDecode(response.body);
+
+      Fluttertoast.showToast(
+        msg: decodedJson['message'] ?? "Something went wrong",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP, // 👈 THIS
+        timeInSecForIosWeb: 2,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 14,
+      );
+
+      // ✅ Show API message in toast
+      // Fluttertoast.showToast(
+      //   msg: decodedJson['message'] ?? "Something went wrong",
+      // );
       if (response.statusCode == 200) {
         final decodedJson = jsonDecode(response.body);
 
@@ -1007,7 +1024,7 @@ static Future<Drivertoggledutyresponse> toggle_duty_data() async {
       } else {
         return Updateorderresposne(
           success: false,
-          message: "Request failed with status ${response.statusCode}",
+          // message: "Request failed with status ${response.statusCode}",
         );
       }
     } on TimeoutException {
@@ -1221,161 +1238,152 @@ static Future<Drivertoggledutyresponse> toggle_duty_data() async {
     }
   }
 
+  static Future<CreateByDriverResponse> createByDriverData({
+    required double startLat,
+    required double startLng,
+    required String startAddress,
+    required double endLat,
+    required double endLng,
+    required String endAddress,
+    required String userName,
+    required String phone,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
 
+    final Uri url = Uri.parse("${ApiPath.baseUri}/order/createByDriver");
 
-static Future<CreateByDriverResponse> createByDriverData(
-  
-  {
-  required double startLat,
-  required double startLng,
-  required String startAddress,
-  required double endLat,
-  required double endLng,
-  required String endAddress,
-  required String userName,
-  required String phone,
-}
+    print("========== 🔵 CREATE BY DRIVER API ==========");
+    print("URL : $url");
+    print("Token : $token");
 
-) async {
-  final prefs = await SharedPreferences.getInstance();
-  final String? token = prefs.getString("auth_token");
-
-  final Uri url =
-      Uri.parse("${ApiPath.baseUri}/order/createByDriver");
-
-  print("========== 🔵 CREATE BY DRIVER API ==========");
-  print("URL : $url");
-  print("Token : $token");
-
-  /// 🔥 Payload exactly as backend expects
-  final Map<String, dynamic> payload = {
-    "startLocation": {
-      "type": "Point",
-      "coordinates": [startLat, startLng],
-      "address": startAddress,
-    },
-    "endLocation": {
-      "type": "Point",
-      "coordinates": [endLat, endLng],
-      "address": endAddress,
-    },
-    "userName": userName,
-    "phone": phone,
-  };
-
-  print("📤 REQUEST BODY 👇");
-  print(const JsonEncoder.withIndent('  ').convert(payload));
-
-  try {
-    final http.Response response = await http.post(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
+    /// 🔥 Payload exactly as backend expects
+    final Map<String, dynamic> payload = {
+      "startLocation": {
+        "type": "Point",
+        "coordinates": [startLat, startLng],
+        "address": startAddress,
       },
-      body: jsonEncode(payload),
-    );
+      "endLocation": {
+        "type": "Point",
+        "coordinates": [endLat, endLng],
+        "address": endAddress,
+      },
+      "userName": userName,
+      "phone": phone,
+    };
 
-    print("✅ Status Code : ${response.statusCode}");
+    print("📤 REQUEST BODY 👇");
+    print(const JsonEncoder.withIndent('  ').convert(payload));
 
-    if (response.body.trim().isEmpty) {
-      throw FormatException("Empty response from server");
+    try {
+      final http.Response response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode(payload),
+      );
+
+      print("✅ Status Code : ${response.statusCode}");
+
+      if (response.body.trim().isEmpty) {
+        throw FormatException("Empty response from server");
+      }
+
+      final decodedJson = jsonDecode(response.body);
+
+      print("📦 RESPONSE 👇");
+      print(const JsonEncoder.withIndent('  ').convert(decodedJson));
+
+      return CreateByDriverResponse.fromJson(decodedJson);
+    } catch (e) {
+      print("❌ Exception in createByDriverData");
+      print(e.toString());
+
+      return CreateByDriverResponse(
+        success: false,
+        message: "Connection error: ${e.toString()}",
+      );
     }
-
-    final decodedJson = jsonDecode(response.body);
-
-    print("📦 RESPONSE 👇");
-    print(const JsonEncoder.withIndent('  ').convert(decodedJson));
-
-    return CreateByDriverResponse.fromJson(decodedJson);
-  } catch (e) {
-    print("❌ Exception in createByDriverData");
-    print(e.toString());
-
-    return CreateByDriverResponse(
-      success: false,
-      message: "Connection error: ${e.toString()}",
-    );
   }
-}
 
+  //   static Future<CreateByDriverResponse> create_by_driver_data({
+  //     required dynamic orderid,
+  //   }) async {
+  //     final prefs = await SharedPreferences.getInstance();
+  //     final String? token = prefs.getString("auth_token");
 
-//   static Future<CreateByDriverResponse> create_by_driver_data({
-//     required dynamic orderid,
-//   }) async {
-//     final prefs = await SharedPreferences.getInstance();
-//     final String? token = prefs.getString("auth_token");
+  //     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID : $orderid");
 
-//     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID : $orderid");
+  //     // final Uri url = Uri.parse("${ApiPath.baseUri}/payments/cash");
 
-//     // final Uri url = Uri.parse("${ApiPath.baseUri}/payments/cash");
+  // final Uri url = Uri.parse("${ApiPath.baseUri}/order/createByDriver");
+  //     print("========== 🔵 CASH PAYMENT API ==========");
+  //     print("URL : $url");
+  //     print("Token : $token");
 
+  //     try {
+  //       final http.Response response = await http.post(
+  //         url,
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           "Authorization": "Bearer $token",
+  //         },
+  //         body: jsonEncode({"orderId": orderid}),
+  //       );
 
-// final Uri url = Uri.parse("${ApiPath.baseUri}/order/createByDriver");
-//     print("========== 🔵 CASH PAYMENT API ==========");
-//     print("URL : $url");
-//     print("Token : $token");
+  //       print("✅ Status Code : ${response.statusCode}");
 
-//     try {
-//       final http.Response response = await http.post(
-//         url,
-//         headers: {
-//           "Content-Type": "application/json",
-//           "Authorization": "Bearer $token",
-//         },
-//         body: jsonEncode({"orderId": orderid}),
-//       );
+  //       // Check if response is valid JSON
+  //       if (response.body.trim().isEmpty) {
+  //         throw FormatException("Empty response from server");
+  //       }
 
-//       print("✅ Status Code : ${response.statusCode}");
+  //       // Check if response is HTML (error page)
+  //       if (response.body.trim().startsWith('<!DOCTYPE html>') ||
+  //           response.body.trim().startsWith('<html')) {
+  //         throw FormatException(
+  //           "Server returned HTML error page. Check endpoint URL.",
+  //         );
+  //       }
 
-//       // Check if response is valid JSON
-//       if (response.body.trim().isEmpty) {
-//         throw FormatException("Empty response from server");
-//       }
+  //       // Try to parse JSON
+  //       dynamic decodedJson;
+  //       try {
+  //         decodedJson = jsonDecode(response.body);
+  //       } catch (jsonError) {
+  //         print("JSON Parse Error: $jsonError");
+  //         print("Raw Response: ${response.body}");
+  //         throw FormatException("Invalid JSON response from server");
+  //       }
 
-//       // Check if response is HTML (error page)
-//       if (response.body.trim().startsWith('<!DOCTYPE html>') ||
-//           response.body.trim().startsWith('<html')) {
-//         throw FormatException(
-//           "Server returned HTML error page. Check endpoint URL.",
-//         );
-//       }
+  //       // Pretty print for debugging
+  //       final prettyJson = const JsonEncoder.withIndent(
+  //         '  ',
+  //       ).convert(decodedJson);
+  //       print("📦 FULL RESPONSE (Pretty Print) 👇");
+  //       print(prettyJson);
 
-//       // Try to parse JSON
-//       dynamic decodedJson;
-//       try {
-//         decodedJson = jsonDecode(response.body);
-//       } catch (jsonError) {
-//         print("JSON Parse Error: $jsonError");
-//         print("Raw Response: ${response.body}");
-//         throw FormatException("Invalid JSON response from server");
-//       }
+  //       // Parse the response
+  //       final CreateByDriverResponse createByDriverResponse =
+  //           CreateByDriverResponse.fromJson(decodedJson);
 
-//       // Pretty print for debugging
-//       final prettyJson = const JsonEncoder.withIndent(
-//         '  ',
-//       ).convert(decodedJson);
-//       print("📦 FULL RESPONSE (Pretty Print) 👇");
-//       print(prettyJson);
+  //       print("🎯 Parsed Model Object 👇");
+  //       print(createByDriverResponse);
+  //       return createByDriverResponse;
+  //     } catch (e) {
+  //       print("❌ Exception in create_by_driver_data");
+  //       print(e.toString());
 
-//       // Parse the response
-//       final CreateByDriverResponse createByDriverResponse =
-//           CreateByDriverResponse.fromJson(decodedJson);
-
-//       print("🎯 Parsed Model Object 👇");
-//       print(createByDriverResponse);  
-//       return createByDriverResponse;
-//     } catch (e) {
-//       print("❌ Exception in create_by_driver_data");
-//       print(e.toString());
-
-//       // Return a proper error response
-//       return CreateByDriverResponse(
-//         success: false,
-//         message: "Connection error: ${e.toString()}",
-//       );
-//     }
-//   }
+  //       // Return a proper error response
+  //       return CreateByDriverResponse(
+  //         success: false,
+  //         message: "Connection error: ${e.toString()}",
+  //       );
+  //     }
+  //   }
 
   static Future<Getpromocodedata> get_promocode_data() async {
     final prefs = await SharedPreferences.getInstance();

@@ -1171,7 +1171,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
             SizedBox(height: w * .04),
 
             if (widget.typeCheck == true) ...[
-              _buildClientCard2(w),
+              _buildClientCard(w),
             ] else ...[
               _buildClientCard(w),
             ],
@@ -1179,7 +1179,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
             SizedBox(height: w * .04),
 
             if (widget.typeCheck == true) ...[
-              // _buildActionButtons2(w), // Implement if needed
+              _buildActionButtons(w), // Implement if needed
             ] else ...[
               _buildActionButtons(w),
             ],

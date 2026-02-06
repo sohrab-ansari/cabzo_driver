@@ -223,7 +223,7 @@ class ApiResponseHandler {
           // ToastService.showSuccess(context, successMessage);
         }
       } else {
-        final errorMessage = response?.message ?? 'Operation failed';
+        final errorMessage = response?.message ;
 
                   Fluttertoast.showToast(msg: errorMessage,toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.red,textColor: Colors.white,fontSize: 16.0);
 

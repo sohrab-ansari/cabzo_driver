@@ -32,6 +32,8 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
   @override
   void initState() {
     super.initState();
+
+    
     _isDisposed = false;
     print('🔑 OTP Screen initialized');
     print('📦 Ride data: ${widget.rideData}');
@@ -42,6 +44,9 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
         FocusScope.of(context).unfocus();
       }
     });
+
+
+  
   }
 
   @override
@@ -49,6 +54,12 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
     print('🗑️ OTP Screen disposed');
     _isDisposed = true;
     super.dispose();
+  }
+
+
+  void thetypecheck() {
+    
+    print("hellooootype>>> ${widget.bookridetypecheck}");
   }
 
   // Helper method to show snackbar safely
