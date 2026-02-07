@@ -26,10 +26,10 @@ class SocketManager {
   // Configuration
   // static const String SOCKET_URL = 'https://api.corezap.framekarts.com';
 
-  // static const String SOCKET_URL = 'https://corezap.smarttechbros.com';
+  static const String SOCKET_URL = 'https://corezap.smarttechbros.com';
 
   //nzcu url
-  static const String SOCKET_URL = 'https://api.nzcu.framekarts.com';
+  // static const String SOCKET_URL = 'https://api.nzcu.framekarts.com';
 
   static const int MAX_RECONNECT_ATTEMPTS = 5;
   static const int CONNECTION_TIMEOUT = 10000;
@@ -133,10 +133,8 @@ class SocketManager {
       _driverPhone = prefs.getString("driver_mobile");
       // _driverImage = prefs.getString("driver_image");
 
-
       // _driverImage = prefs.getString("driver_image");
       _driverImage = prefs.getString("driver_image");
-
 
       // Also try to load from stored driverData JSON
       final storedDriverData = prefs.getString('driverData');
@@ -157,7 +155,6 @@ class SocketManager {
           _vehicleNumber =
               driverData['vehicleNumber'] ?? driverData['vehicleNo'];
         }
-
 
         _vehicleImage = driverData['vehicleImage'];
         _fleetId = driverData['fleetId'];
@@ -582,8 +579,7 @@ class SocketManager {
         _currentRide = null;
         onRideCancelled?.call(data);
 
-
-        Get.offAll(BottomnavmainScreen(isOnDuty: true,));
+        Get.offAll(BottomnavmainScreen(isOnDuty: true));
 
         // Get.back();
       } else {

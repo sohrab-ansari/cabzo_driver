@@ -117,7 +117,7 @@ class BankAccountAddController extends GetxController {
       Fluttertoast.showToast(
         msg: message,
         toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
+        gravity: ToastGravity.TOP,
         backgroundColor: Colors.red,
         textColor: Colors.white,
       );
@@ -140,7 +140,7 @@ class BankAccountAddController extends GetxController {
       Fluttertoast.showToast(
         msg: message,
         toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
+        gravity: ToastGravity.TOP,
         backgroundColor: Colors.green,
         textColor: Colors.white,
       );

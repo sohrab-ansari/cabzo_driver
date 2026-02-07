@@ -276,7 +276,7 @@ class _AgreementScreenState extends State<AgreementScreen> {
     Fluttertoast.showToast(
       msg: message,
       toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.BOTTOM,
+      gravity: ToastGravity.TOP,
       backgroundColor: Colors.black54,
       textColor: Colors.white,
       fontSize: 14.0,

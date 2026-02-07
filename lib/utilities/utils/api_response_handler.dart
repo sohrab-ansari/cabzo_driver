@@ -219,13 +219,13 @@ class ApiResponseHandler {
         onSuccess(response);
         if (successMessage != null && successMessage.isNotEmpty) {
 
-          Fluttertoast.showToast(msg: successMessage,toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.green,textColor: Colors.white,fontSize: 16.0);
+          // Fluttertoast.showToast(msg: successMessage,toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.green,textColor: Colors.white,fontSize: 16.0);
           // ToastService.showSuccess(context, successMessage);
         }
       } else {
         final errorMessage = response?.message ;
 
-                  Fluttertoast.showToast(msg: errorMessage,toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.red,textColor: Colors.white,fontSize: 16.0);
+                  // Fluttertoast.showToast(msg: errorMessage,toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.red,textColor: Colors.white,fontSize: 16.0);
 
         // ToastService.showError(context, errorTitle ?? 'Error', errorMessage);
         onError?.call(errorMessage);
@@ -233,7 +233,7 @@ class ApiResponseHandler {
     } catch (e) {
       final errorMessage = _parseError(e);
 
-                        Fluttertoast.showToast(msg:   errorTitle ?? 'Error',toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.red,textColor: Colors.white,fontSize: 16.0);
+                        // Fluttertoast.showToast(msg:   errorTitle ?? 'Error',toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.red,textColor: Colors.white,fontSize: 16.0);
 
       // ToastService.showError(context, errorTitle ?? 'Error', errorMessage);
       onError?.call(errorMessage);

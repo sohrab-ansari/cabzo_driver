@@ -176,7 +176,7 @@ class AddMoneyWalletController extends GetxController {
         Fluttertoast.showToast(
           msg: "Payment successful!",
           toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.BOTTOM,
+          gravity: ToastGravity.TOP,
           backgroundColor: Colors.green,
           textColor: Colors.white,
         );
@@ -200,7 +200,7 @@ class AddMoneyWalletController extends GetxController {
         Fluttertoast.showToast(
           msg: "Payment verification failed",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
+          gravity: ToastGravity.TOP,
         );
         // _showError(verificationResponse.message ?? 'Payment verification failed');
       }

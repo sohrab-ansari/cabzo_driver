@@ -81,7 +81,7 @@ class EditProfileController extends GetxController {
       Fluttertoast.showToast(
         msg: res.message ?? "Profile updated successfully",
         toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
+        gravity: ToastGravity.TOP,
       );
 
       Get.offAll(BottomnavmainScreen());

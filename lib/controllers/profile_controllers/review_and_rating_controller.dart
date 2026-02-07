@@ -48,7 +48,7 @@ class ReviewAndRatingController extends GetxController {
           Fluttertoast.showToast(
             msg: "${res.data!.length} reviews loaded",
             toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
+            gravity: ToastGravity.TOP,
           );
         }
       } else {

@@ -63,7 +63,7 @@ class AuthApiService {
         Fluttertoast.showToast(
           msg: data['error'] ?? "Something went wrong",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
+          gravity: ToastGravity.TOP,
         );
         print("❌ Server error");
         return false;
@@ -113,6 +113,11 @@ class AuthApiService {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString("auth_token", otpResponse.token!);
         await prefs.setString("driver_userid", driverId);
+
+        if (otpResponse.driver?.name != null &&
+            otpResponse.driver!.name!.isNotEmpty) {
+          await prefs.setString("driver_name", otpResponse.driver!.name!);
+        }
       }
 
       return otpResponse;
@@ -184,219 +189,213 @@ class AuthApiService {
   //   }
   // }
 
+  static Future<CreateVehicleRes> createVehicle_Api({
+    required String vehicleName,
+    String? vehicleNumber,
+    String? vehicleColor,
+    String? vehicleType,
+    String? vehicleStatus,
+    String? vehicleModel,
+    int? vehicleCapacity,
+    String? driverId,
+    String? vehicleSubType,
+    int? vehicleYear,
+    File? rcImage,
+    File? vehicleInsuraneImage,
+    File? vehicleNumberImage,
+  }) async {
+    // Print all received parameters
+    print("\n📋 VEHICLE CREATION PARAMETERS:");
+    print("├─ vehicleName: $vehicleName");
+    print("├─ vehicleNumber: $vehicleNumber");
+    print("├─ vehicleColor: $vehicleColor");
+    print("├─ vehicleType: $vehicleType");
+    print("├─ vehicleStatus: $vehicleStatus");
+    print("├─ vehicleModel: $vehicleModel");
+    print(
+      "├─ vehicleCapacity: $vehicleCapacity (type: ${vehicleCapacity.runtimeType})",
+    );
+    print("├─ driverId: $driverId");
+    print("├─ vehicleSubType: $vehicleSubType");
+    print("├─ vehicleYear: $vehicleYear");
+    print("├─ rcImage: ${rcImage?.path ?? 'NULL'}");
+    print("├─ vehicleInsuraneImage: ${vehicleInsuraneImage?.path ?? 'NULL'}");
+    print("└─ vehicleNumberImage: ${vehicleNumberImage?.path ?? 'NULL'}");
 
+    final Uri url = Uri.parse(ApiPath.createVehicle);
 
-static Future<CreateVehicleRes> createVehicle_Api({
-  required String vehicleName,
-  String? vehicleNumber,
-  String? vehicleColor,
-  String? vehicleType,
-  String? vehicleStatus,
-  String? vehicleModel,
-  int? vehicleCapacity,
-  String? driverId,
-  String? vehicleSubType,
-  int? vehicleYear,
-  File? rcImage,
-  File? vehicleInsuraneImage,
-  File? vehicleNumberImage,
-}) async {
-  // Print all received parameters
-  print("\n📋 VEHICLE CREATION PARAMETERS:");
-  print("├─ vehicleName: $vehicleName");
-  print("├─ vehicleNumber: $vehicleNumber");
-  print("├─ vehicleColor: $vehicleColor");
-  print("├─ vehicleType: $vehicleType");
-  print("├─ vehicleStatus: $vehicleStatus");
-  print("├─ vehicleModel: $vehicleModel");
-  print("├─ vehicleCapacity: $vehicleCapacity (type: ${vehicleCapacity.runtimeType})");
-  print("├─ driverId: $driverId");
-  print("├─ vehicleSubType: $vehicleSubType");
-  print("├─ vehicleYear: $vehicleYear");
-  print("├─ rcImage: ${rcImage?.path ?? 'NULL'}");
-  print("├─ vehicleInsuraneImage: ${vehicleInsuraneImage?.path ?? 'NULL'}");
-  print("└─ vehicleNumberImage: ${vehicleNumberImage?.path ?? 'NULL'}");
+    // Get token from SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+    final String? userId = prefs.getString("driver_userid");
 
-  final Uri url = Uri.parse(ApiPath.createVehicle);
-
-  // Get token from SharedPreferences
-  final prefs = await SharedPreferences.getInstance();
-  final String? token = prefs.getString("auth_token");
-  final String? userId = prefs.getString("driver_userid");
-
-  print("Token: $token");
-  print("User ID from SharedPreferences: $userId");
-
-  try {
-    // Create multipart request
-    var request = http.MultipartRequest('POST', url);
-
-    // Add headers
-    if (token != null) {
-      request.headers['Authorization'] = 'Bearer $token';
-    }
-
-    // Add text fields - Use userId from SharedPreferences if driverId is null
-    final actualDriverId = userId ?? "";
-    
-    request.fields['vehicleName'] = vehicleName;
-    request.fields['vehicleNumber'] = vehicleNumber ?? "";
-    request.fields['vehicleColor'] = vehicleColor ?? "";
-    request.fields['vehicleType'] = vehicleType ?? "";
-    request.fields['vehicleStatus'] = vehicleStatus ?? "Active";
-    request.fields['vehicleModel'] = vehicleModel ?? "";
-    request.fields['vehicleSubType'] = vehicleSubType ?? "";
-    
-    // Handle vehicleCapacity - convert int to string
-    if (vehicleCapacity != null) {
-      request.fields['vehicleCapacity'] = vehicleCapacity.toString();
-    } else {
-      request.fields['vehicleCapacity'] = "4"; // default value
-    }
-    
-    if (vehicleYear != null) {
-      request.fields['vehicleYear'] = vehicleYear.toString();
-    } else {
-      request.fields['vehicleYear'] = "";
-    }
-    
-    request.fields['driverId'] = actualDriverId;
-
-    print("Text fields added to request");
-    print("Using driverId: $actualDriverId");
-
-    // Helper function to extract filename from path
-    String getFileNameFromPath(String path) {
-      final parts = path.split('/');
-      return parts.isNotEmpty ? parts.last : 'image.jpg';
-    }
-
-    // Add RC image if exists
-    if (rcImage != null && await rcImage.exists()) {
-      final fileName = getFileNameFromPath(rcImage.path);
-      print("Adding RC image: $fileName");
-      
-      request.files.add(
-        await http.MultipartFile.fromPath(
-          'rcImage',
-          rcImage.path,
-          filename: fileName,
-        ),
-      );
-      print("✓ Added RC image as: $fileName");
-    } else {
-      print("RC Image is null or doesn't exist");
-    }
-
-    // Add Vehicle Insurance image if exists
-    if (vehicleInsuraneImage != null && await vehicleInsuraneImage.exists()) {
-      final fileName = getFileNameFromPath(vehicleInsuraneImage.path);
-      print("Adding Vehicle Insurance image: $fileName");
-      
-      request.files.add(
-        await http.MultipartFile.fromPath(
-          'vehicleInsuraneImage',
-          vehicleInsuraneImage.path,
-          filename: fileName,
-        ),
-      );
-      print("✓ Added Insurance image as: $fileName");
-    } else {
-      print("Vehicle Insurance Image is null or doesn't exist");
-    }
-
-    // Add Vehicle Number image if exists
-    if (vehicleNumberImage != null && await vehicleNumberImage.exists()) {
-      final fileName = getFileNameFromPath(vehicleNumberImage.path);
-      print("Adding Vehicle Number image: $fileName");
-      
-      request.files.add(
-        await http.MultipartFile.fromPath(
-          'vehicleNumberImage',
-          vehicleNumberImage.path,
-          filename: fileName,
-        ),
-      );
-      print("✓ Added Number Plate image as: $fileName");
-    } else {
-      print("Vehicle Number Image is null or doesn't exist");
-    }
-
-    print("\n========== CREATE VEHICLE API ==========");
-    print("URL: $url");
-    print("Request Fields: ${request.fields}");
-    print("Number of Files: ${request.files.length}");
-    
-    // List all files with their field names and filenames
-    for (var i = 0; i < request.files.length; i++) {
-      var file = request.files[i];
-      print("File $i: field='${file.field}', filename='${file.filename}'");
-    }
-
-    // Send request
-    print("\n🚀 Sending request...");
-    final response = await request.send();
-    final responseBody = await response.stream.bytesToString();
-
-    print("\n📥 Response Received:");
-    print("Status Code: ${response.statusCode}");
-    
-    // Check if response is HTML (error) or JSON
-    if (responseBody.trim().startsWith('<!DOCTYPE') || 
-        responseBody.trim().startsWith('<html>') ||
-        response.statusCode >= 400) {
-      print("❌ Server returned error");
-      print("Response Body: $responseBody");
-      
-      String errorMessage = "Server error (${response.statusCode})";
-      
-      if (response.statusCode == 413) {
-        errorMessage = "Images are too large. Please use smaller images.";
-      } else if (responseBody.contains('MulterError:')) {
-        final startIndex = responseBody.indexOf('MulterError:');
-        final endIndex = responseBody.indexOf('<br>', startIndex);
-        if (startIndex != -1 && endIndex != -1) {
-          errorMessage = responseBody.substring(startIndex, endIndex);
-        }
-      }
-      
-      return CreateVehicleRes(
-        success: false,
-        message: errorMessage,
-      );
-    }
+    print("Token: $token");
+    print("User ID from SharedPreferences: $userId");
 
     try {
-      print("Response Body: $responseBody");
-      final Map<String, dynamic> data = jsonDecode(responseBody);
-      final CreateVehicleRes createVehicleRes = CreateVehicleRes.fromJson(data);
-      
-      if (createVehicleRes.success == true) {
-        print("✅ Vehicle created successfully!");
-      } else {
-        print("❌ Vehicle creation failed: ${createVehicleRes.message}");
+      // Create multipart request
+      var request = http.MultipartRequest('POST', url);
+
+      // Add headers
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
       }
-      
-      return createVehicleRes;
+
+      // Add text fields - Use userId from SharedPreferences if driverId is null
+      final actualDriverId = userId ?? "";
+
+      request.fields['vehicleName'] = vehicleName;
+      request.fields['vehicleNumber'] = vehicleNumber ?? "";
+      request.fields['vehicleColor'] = vehicleColor ?? "";
+      request.fields['vehicleType'] = vehicleType ?? "";
+      request.fields['vehicleStatus'] = vehicleStatus ?? "Active";
+      request.fields['vehicleModel'] = vehicleModel ?? "";
+      request.fields['vehicleSubType'] = vehicleSubType ?? "";
+
+      // Handle vehicleCapacity - convert int to string
+      if (vehicleCapacity != null) {
+        request.fields['vehicleCapacity'] = vehicleCapacity.toString();
+      } else {
+        request.fields['vehicleCapacity'] = "4"; // default value
+      }
+
+      if (vehicleYear != null) {
+        request.fields['vehicleYear'] = vehicleYear.toString();
+      } else {
+        request.fields['vehicleYear'] = "";
+      }
+
+      request.fields['driverId'] = actualDriverId;
+
+      print("Text fields added to request");
+      print("Using driverId: $actualDriverId");
+
+      // Helper function to extract filename from path
+      String getFileNameFromPath(String path) {
+        final parts = path.split('/');
+        return parts.isNotEmpty ? parts.last : 'image.jpg';
+      }
+
+      // Add RC image if exists
+      if (rcImage != null && await rcImage.exists()) {
+        final fileName = getFileNameFromPath(rcImage.path);
+        print("Adding RC image: $fileName");
+
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'rcImage',
+            rcImage.path,
+            filename: fileName,
+          ),
+        );
+        print("✓ Added RC image as: $fileName");
+      } else {
+        print("RC Image is null or doesn't exist");
+      }
+
+      // Add Vehicle Insurance image if exists
+      if (vehicleInsuraneImage != null && await vehicleInsuraneImage.exists()) {
+        final fileName = getFileNameFromPath(vehicleInsuraneImage.path);
+        print("Adding Vehicle Insurance image: $fileName");
+
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'vehicleInsuraneImage',
+            vehicleInsuraneImage.path,
+            filename: fileName,
+          ),
+        );
+        print("✓ Added Insurance image as: $fileName");
+      } else {
+        print("Vehicle Insurance Image is null or doesn't exist");
+      }
+
+      // Add Vehicle Number image if exists
+      if (vehicleNumberImage != null && await vehicleNumberImage.exists()) {
+        final fileName = getFileNameFromPath(vehicleNumberImage.path);
+        print("Adding Vehicle Number image: $fileName");
+
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'vehicleNumberImage',
+            vehicleNumberImage.path,
+            filename: fileName,
+          ),
+        );
+        print("✓ Added Number Plate image as: $fileName");
+      } else {
+        print("Vehicle Number Image is null or doesn't exist");
+      }
+
+      print("\n========== CREATE VEHICLE API ==========");
+      print("URL: $url");
+      print("Request Fields: ${request.fields}");
+      print("Number of Files: ${request.files.length}");
+
+      // List all files with their field names and filenames
+      for (var i = 0; i < request.files.length; i++) {
+        var file = request.files[i];
+        print("File $i: field='${file.field}', filename='${file.filename}'");
+      }
+
+      // Send request
+      print("\n🚀 Sending request...");
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      print("\n📥 Response Received:");
+      print("Status Code: ${response.statusCode}");
+
+      // Check if response is HTML (error) or JSON
+      if (responseBody.trim().startsWith('<!DOCTYPE') ||
+          responseBody.trim().startsWith('<html>') ||
+          response.statusCode >= 400) {
+        print("❌ Server returned error");
+        print("Response Body: $responseBody");
+
+        String errorMessage = "Server error (${response.statusCode})";
+
+        if (response.statusCode == 413) {
+          errorMessage = "Images are too large. Please use smaller images.";
+        } else if (responseBody.contains('MulterError:')) {
+          final startIndex = responseBody.indexOf('MulterError:');
+          final endIndex = responseBody.indexOf('<br>', startIndex);
+          if (startIndex != -1 && endIndex != -1) {
+            errorMessage = responseBody.substring(startIndex, endIndex);
+          }
+        }
+
+        return CreateVehicleRes(success: false, message: errorMessage);
+      }
+
+      try {
+        print("Response Body: $responseBody");
+        final Map<String, dynamic> data = jsonDecode(responseBody);
+        final CreateVehicleRes createVehicleRes = CreateVehicleRes.fromJson(
+          data,
+        );
+
+        if (createVehicleRes.success == true) {
+          print("✅ Vehicle created successfully!");
+        } else {
+          print("❌ Vehicle creation failed: ${createVehicleRes.message}");
+        }
+
+        return createVehicleRes;
+      } catch (e) {
+        print("❌ Failed to parse JSON response: $e");
+        print("Raw response: ${responseBody}");
+        return CreateVehicleRes(
+          success: false,
+          message: "Invalid response format: $e",
+        );
+      }
     } catch (e) {
-      print("❌ Failed to parse JSON response: $e");
-      print("Raw response: ${responseBody}");
-      return CreateVehicleRes(
-        success: false,
-        message: "Invalid response format: $e",
-      );
+      print("❌ Exception in Create Vehicle API: $e");
+      print("Stack trace: ${e.toString()}");
+      return CreateVehicleRes(success: false, message: "Connection error: $e");
     }
-  } catch (e) {
-    print("❌ Exception in Create Vehicle API: $e");
-    print("Stack trace: ${e.toString()}");
-    return CreateVehicleRes(
-      success: false,
-      message: "Connection error: $e",
-    );
   }
-}
-
-
 
   static Future<RegisterProfileRes> createRegister_Api({
     required String name,
@@ -565,7 +564,7 @@ static Future<CreateVehicleRes> createVehicle_Api({
 
   static Future<DriverImageUploadRes> uploadNewDriverImage({
     required File image,
-  
+
     required String userType,
   }) async {
     final prefs = await SharedPreferences.getInstance();

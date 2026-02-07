@@ -56,7 +56,7 @@ class TransactionController extends GetxController {
         Fluttertoast.showToast(
           msg: res.message ?? "Something went wrong",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
+          gravity: ToastGravity.TOP,
         );
 
         // Get.offAll(BottomnavmainScreen());

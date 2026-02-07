@@ -1021,7 +1021,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         Fluttertoast.showToast(
           msg: "Please complete the ride verification first",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
+          gravity: ToastGravity.TOP,
           backgroundColor: Colors.black87,
           textColor: Colors.white,
           fontSize: 14,

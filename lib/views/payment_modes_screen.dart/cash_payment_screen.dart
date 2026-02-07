@@ -112,7 +112,7 @@ class _CashPaymentScreenState extends State<CashPaymentScreen> {
         Fluttertoast.showToast(
           msg: "Please complete the payment first",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
+          gravity: ToastGravity.TOP,
           backgroundColor: Colors.black87,
           textColor: Colors.white,
           fontSize: 14,

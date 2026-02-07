@@ -19,11 +19,14 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  //  final DriveridController driveridController = Get.put(DriveridController());
   @override
   void initState() {
     super.initState();
 
-    _initializeApp();
+//  driveridController.driverid_mdethod();
+
+    // _initializeApp();
 
     Future.delayed(const Duration(seconds: 3), () {
       if (!mounted) return;
@@ -37,30 +40,30 @@ class _SplashScreenState extends State<SplashScreen> {
 
     tokenbasednav();
   }
-    // Socket Manager instance
-  final SocketManager socketManager = SocketManager();
+  //   // Socket Manager instance
+  // final SocketManager socketManager = SocketManager();
 
-    Future<void> _initializeApp() async {
-    // Request permissions
-    // await _requestPermissions();
+  //   Future<void> _initializeApp() async {
+  //   // Request permissions
+  //   // await _requestPermissions();
 
-    // // Load custom icons
-    // await _loadCustomBikeMarker();
-    // await _loadVehicleIcons();
+  //   // // Load custom icons
+  //   // await _loadCustomBikeMarker();
+  //   // await _loadVehicleIcons();
     
 
-    // // Initialize socket manager with callbacks
-    // _setupSocketCallbacks();
+  //   // // Initialize socket manager with callbacks
+  //   // _setupSocketCallbacks();
 
-    // Start socket connection
-    final DriveridController driveridController = Get.put(DriveridController());
+  //   // Start socket connection
+  //   // final DriveridController driveridController = Get.put(DriveridController());
 
-       driveridController.driverid_mdethod();
-    await socketManager.initialize();
+      
+  //   await socketManager.initialize();
 
-    // Start location listener
-    // _startLocationListener();
-  }
+  //   // Start location listener
+  //   // _startLocationListener();
+  // }
 
   Future<void> tokenbasednav() async {
     final prefs = await SharedPreferences.getInstance();
@@ -71,7 +74,7 @@ class _SplashScreenState extends State<SplashScreen> {
     print("splash online status: ${wasOnline}");
 
     if (token != null) {
-       final SocketManager socketManager = SocketManager();
+      //  final SocketManager socketManager = SocketManager();
       CustomNavigator.removeUntil(
         context,
         BottomnavmainScreen(isOnDuty: wasOnline, isFirstLaunch: true),

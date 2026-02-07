@@ -785,7 +785,7 @@ class ProfileApiServices {
       Fluttertoast.showToast(
         msg: data['message'] ?? "Something went wrong",
         toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
+        gravity: ToastGravity.TOP,
       );
 
       return true;
@@ -972,12 +972,13 @@ class ProfileApiServices {
 
       final Map<String, dynamic> decodedJson = jsonDecode(response.body);
 
+          
       Fluttertoast.showToast(
         msg: decodedJson['message'] ?? "Something went wrong",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.TOP, // 👈 THIS
         timeInSecForIosWeb: 2,
-        backgroundColor: Colors.red,
+        backgroundColor: Colors.green,
         textColor: Colors.white,
         fontSize: 14,
       );

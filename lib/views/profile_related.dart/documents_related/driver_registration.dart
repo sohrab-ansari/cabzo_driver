@@ -4342,7 +4342,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
             ),
             SizedBox(width: w * .02),
             CustomText(
-              text: "Driver Registration",
+              text: "Driver Registration ",
               textColor: ColorsList.titleTextColor,
               textFontSize: w * .05,
               textFontWeight: FontWeight.w500,
