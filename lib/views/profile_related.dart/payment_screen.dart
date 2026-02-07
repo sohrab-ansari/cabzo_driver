@@ -358,7 +358,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 class PaymentScreen extends StatefulWidget {
-  const PaymentScreen({super.key});
+  final Map<String, dynamic>? rideData;
+  const PaymentScreen({super.key, this.rideData});
 
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
@@ -382,6 +383,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Future<void> _refreshData() async {
     await walletController.wallet_method();
   }
+
+  
 
   @override
   Widget build(BuildContext context) {

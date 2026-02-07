@@ -390,6 +390,8 @@
 //   }
 // }
 
+import 'dart:convert';
+
 import 'package:nzcu_driver/controllers/controllers.dart';
 import 'package:nzcu_driver/controllers/home_controllers/cash_controller.dart';
 import 'package:nzcu_driver/utilities/app_buttons.dart';
@@ -417,11 +419,26 @@ class _ReceivePaymentModesState extends State<ReceivePaymentModes> {
   final Controllers controllers = Get.find<Controllers>();
   final CashController cashController = Get.find<CashController>();
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   print("🎯 ReceivePaymentModes initialized");
+  //   print("📦 Ride Data: ${widget.rideData}");
+  // }
+
   @override
   void initState() {
     super.initState();
+
     print("🎯 ReceivePaymentModes initialized");
-    print("📦 Ride Data: ${widget.rideData}");
+    print("📦 Ride Data (Pretty):");
+    prettyPrint(widget.rideData);
+  }
+
+  void prettyPrint(dynamic data) {
+    const encoder = JsonEncoder.withIndent('  ');
+    final prettyString = encoder.convert(data);
+    debugPrint(prettyString);
   }
 
   @override
@@ -464,7 +481,10 @@ class _ReceivePaymentModesState extends State<ReceivePaymentModes> {
     }
 
     print("💰 Processing cash payment for order: $orderId");
-    cashController.processCashPayment(orderId: orderId, rideData: widget.rideData);
+    cashController.processCashPayment(
+      orderId: orderId,
+      rideData: widget.rideData,
+    );
   }
 
   void _handleDone() {
@@ -525,7 +545,7 @@ class _ReceivePaymentModesState extends State<ReceivePaymentModes> {
                         ),
                       ],
                     ),
-                    child: Details().invoice(context),
+                    child: Details().invoice(context, widget.rideData),
                   ),
 
                   SizedBox(height: w * .07),

@@ -206,10 +206,18 @@ class Details {
     );
   }
 
-  Widget invoice(BuildContext context) {
+  Widget invoice(BuildContext context, dynamic rideData) {
     double w = MediaQuery.of(context).size.width;
-    List changesName = ["Ride Charge", "Booking Fees ", "Discount"];
-    List chargesAmount = ["15.36", "42.00", "-29.00"];
+
+    // Extract totalFare from rideData
+    String totalFare = "0.00";
+    if (rideData != null && rideData['totalFare'] != null) {
+      totalFare = rideData['totalFare'].toString();
+    }
+
+    List changesName = ["Ride Charge"];
+    List chargesAmount = [totalFare];
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -247,7 +255,7 @@ class Details {
               vertical: w * .01,
             ),
             child: Column(
-              children: List.generate(3, (index) {
+              children: List.generate(changesName.length, (index) {
                 String amount = chargesAmount[index];
                 bool isNegative = amount.startsWith("-");
 
@@ -321,7 +329,7 @@ class Details {
                       color: ColorsList.titleTextColor,
                     ),
                     CustomText(
-                      text: "74.00",
+                      text: totalFare,
                       textColor: ColorsList.titleTextColor,
                       textFontSize: w * .04,
                       textFontWeight: FontWeight.w500,
