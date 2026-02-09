@@ -1085,14 +1085,14 @@ class _ArrivingClientState extends State<ArrivingClient> {
       titleSpacing: w * .03,
       title: Row(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: CustomImages.images(
-              "assets/icons/arrowLeftIcon.png",
-              w * .07,
-              w * .07,
-            ),
-          ),
+          // GestureDetector(
+          //   onTap: () => Navigator.pop(context),
+          //   child: CustomImages.images(
+          //     "assets/icons/arrowLeftIcon.png",
+          //     w * .07,
+          //     w * .07,
+          //   ),
+          // ),
           SizedBox(width: w * .03),
           CustomText(
             text: "Arriving Client",
