@@ -26,10 +26,10 @@ class SocketManager {
   // Configuration
   // static const String SOCKET_URL = 'https://api.corezap.framekarts.com';
 
-  static const String SOCKET_URL = 'https://corezap.smarttechbros.com';
+  // static const String SOCKET_URL = 'https://corezap.smarttechbros.com';
 
   //nzcu url
-  // static const String SOCKET_URL = 'https://api.nzcu.framekarts.com';
+  static const String SOCKET_URL = 'https://api.nzcu.framekarts.com';
 
   static const int MAX_RECONNECT_ATTEMPTS = 5;
   static const int CONNECTION_TIMEOUT = 10000;

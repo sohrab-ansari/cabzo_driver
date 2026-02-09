@@ -1465,7 +1465,7 @@ class ProfileApiServices {
     required int page,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString("auth_token");
+    final String? token = prefs.getString("auth_token2");
 
     final Uri url = Uri.parse(
       "${ApiPath.baseUri}/getAllVehicleCategories?limit=$limit&page=$page",
@@ -1542,7 +1542,7 @@ class ProfileApiServices {
     required int page,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString("auth_token");
+    final String? token = prefs.getString("auth_token2");
 
     // final Uri url = Uri.parse("${ApiPath.baseUri}/getAllVehicleCategories");
 

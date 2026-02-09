@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:nzcu_driver/apiervices/api_path.dart';
 import 'package:nzcu_driver/modals/Otp_verify_res.dart';
 import 'package:nzcu_driver/modals/create_vehicle_res.dart';
@@ -79,31 +80,29 @@ class AuthApiService {
     required String otp,
     String? phoneNumber,
   }) async {
+    final prefs = await SharedPreferences.getInstance();
 
-        final prefs = await SharedPreferences.getInstance();
+    // Save FCM token
 
-      // Save FCM token
-   
-        await prefs.getString('fcmToken');
+    await prefs.getString('fcmToken');
 
-          final deviceInfo = DeviceInfoPlugin();
-        final androidInfo = await deviceInfo.androidInfo;
-        print('fcmm___token_from_shared_preferences: ${prefs.getString('fcmToken')}');
-      
+    final deviceInfo = DeviceInfoPlugin();
+    final androidInfo = await deviceInfo.androidInfo;
+    print(
+      'fcmm___token_from_shared_preferences: ${prefs.getString('fcmToken')}',
+    );
+
     final Uri url = Uri.parse(ApiPath.verifyOtp);
 
     final Map<String, dynamic> requestBody = {
       "otp": otp,
       "phone": phoneNumber ?? "9908479999",
       // "fcmToken": "test-fcm-token-123",
-            "fcmToken": prefs.getString('fcmToken') ?? "test-fcm-token-123",
+      "fcmToken": prefs.getString('fcmToken') ?? "test-fcm-token-123",
 
-
-//  androidInfo.id;
+      //  androidInfo.id;
       // "deviceId": "device-001",
-
-            "deviceId": androidInfo.id,
-
+      "deviceId": androidInfo.id,
     };
 
     print("otppppp_veriffyyyy___ ${requestBody}");
@@ -126,21 +125,48 @@ class AuthApiService {
 
       final OtpverifyRes otpResponse = OtpverifyRes.fromJson(data);
 
-      /// ✅ SAVE TOKEN & DRIVER ID
-      if (otpResponse.token != null &&
-          otpResponse.token!.isNotEmpty &&
-          driverId != null &&
-          driverId.isNotEmpty) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString("auth_token", otpResponse.token!);
-        await prefs.setString("driver_userid", driverId);
+      print(
+        "isprofileee_verifyyyyy_check ${otpResponse.driver!.isProfileCompleted}",
+      );
 
-        if (otpResponse.driver?.name != null &&
-            otpResponse.driver!.name!.isNotEmpty) {
-          await prefs.setString("driver_name", otpResponse.driver!.name!);
+      if (otpResponse.driver!.isProfileCompleted == true) {
+        print(
+          "✅ OTP verified and profile is complete. Saving token and driver ID.",
+        );
+
+        /// ✅ SAVE TOKEN & DRIVER ID
+        if (otpResponse.token != null &&
+            otpResponse.token!.isNotEmpty &&
+            driverId != null &&
+            driverId.isNotEmpty) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString("auth_token", otpResponse.token!);
+          await prefs.setString("driver_userid", driverId);
+
+          if (otpResponse.driver?.name != null &&
+              otpResponse.driver!.name!.isNotEmpty) {
+            await prefs.setString("driver_name", otpResponse.driver!.name!);
+          }
+        }
+      }else  {
+        print("else__data_storedd");
+          if (otpResponse.token != null &&
+            otpResponse.token!.isNotEmpty &&
+            driverId != null &&
+            driverId.isNotEmpty) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString("auth_token2", otpResponse.token!);
+          await prefs.setString("driver_userid2", driverId);
+
+      print("getting storeddd token2 ${prefs.getString("auth_token2")}");
+       print("getting storeddd token2 ${prefs.getString("driver_userid2")}");
+
+          if (otpResponse.driver?.name != null &&
+              otpResponse.driver!.name!.isNotEmpty) {
+            await prefs.setString("driver_name2", otpResponse.driver!.name!);
+          }
         }
       }
-
       return otpResponse;
     } catch (e) {
       Fluttertoast.showToast(msg: "Connection error");
@@ -247,8 +273,8 @@ class AuthApiService {
 
     // Get token from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString("auth_token");
-    final String? userId = prefs.getString("driver_userid");
+    final String? token = prefs.getString("auth_token2");
+    final String? userId = prefs.getString("driver_userid2");
 
     print("Token: $token");
     print("User ID from SharedPreferences: $userId");
@@ -407,7 +433,6 @@ class AuthApiService {
         print("❌ Failed to parse JSON response: $e");
         print("Raw response: ${responseBody}");
 
-
         return CreateVehicleRes(
           success: false,
           message: "Invalid response format: $e",
@@ -419,7 +444,6 @@ class AuthApiService {
       return CreateVehicleRes(success: false, message: "Connection error: $e");
     }
   }
-
 
   static Future<RegisterProfileRes> createRegister_Api({
     required String name,
@@ -458,7 +482,7 @@ class AuthApiService {
 
     // Get token from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString("auth_token");
+    final String? token = prefs.getString("auth_token2");
 
     print("Token: $token");
 
@@ -555,6 +579,14 @@ class AuthApiService {
       print("Status Code: ${response.statusCode}");
       print("Response Body: $responseBody");
 
+      //   Fluttertoast.showToast(
+      //   msg: message,
+      //   toastLength: Toast.LENGTH_SHORT,
+      //   gravity: ToastGravity.TOP,
+      //   backgroundColor: Colors.green,
+      //   textColor: Colors.white,
+      // );
+
       final Map<String, dynamic> data = jsonDecode(responseBody);
       final RegisterProfileRes registerProfileRes = RegisterProfileRes.fromJson(
         data,
@@ -571,8 +603,17 @@ class AuthApiService {
           "✅ Driver user ID saved to SharedPreferences: ${registerProfileRes.data!.id}",
         );
       } else {
+        print("theee_errorrr_hererrrr ${data['message']}");
         print(
           "⚠️  Could not save driver_userid - ID is null or response not successful",
+        );
+
+        Fluttertoast.showToast(
+          msg: data['message'],
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
         );
       }
 
@@ -587,66 +628,198 @@ class AuthApiService {
   }
 
   static Future<DriverImageUploadRes> uploadNewDriverImage({
-    required File image,
+  required File image,
+  required String userType,
+}) async {
+  final prefs = await SharedPreferences.getInstance();
+  final String? userId = prefs.getString("driver_userid2");
+  final String? token = prefs.getString("auth_token2");
 
-    required String userType,
-  }) async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? userId = prefs.getString("driver_userid");
+  final Uri url = Uri.parse(
+    "${ApiPath.baseUri}/driver/update?userId=$userId&userType=$userType",
+  );
 
-    print("the_paramssss1 ${image}");
-    print("the_paramssss2 ${userId}");
-    print("the_paramssss3 ${userType}");
+  try {
+    final request = http.MultipartRequest('PUT', url)
+      ..headers.addAll({
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+      })
+      ..files.add(
+        await http.MultipartFile.fromPath('image', image.path),
+      );
 
-    print("the_paramssss3_useriddd ${userId}");
+    final response = await request.send();
+    final body = await response.stream.bytesToString();
 
-    final Uri url = Uri.parse(
-      "${ApiPath.baseUri}/driver/update?userId=$userId&userType=$userType",
+    if (response.headers['content-type']
+            ?.contains('application/json') ==
+        true) {
+      final res = DriverImageUploadRes.fromJson(jsonDecode(body));
+
+      // 🔴 SHOW ERROR TOAST DIRECTLY HERE
+      if (res.success == false) {
+        Fluttertoast.showToast(
+          msg: res.message ?? "Something went wrong",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.TOP,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 14,
+        );
+      }
+
+      return res;
+    } else {
+      Fluttertoast.showToast(
+        msg: "Unexpected server response",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.TOP,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+
+      return DriverImageUploadRes(
+        success: false,
+        message: "Unexpected server response",
+      );
+    }
+  } catch (e) {
+    Fluttertoast.showToast(
+      msg: "Network error",
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.TOP,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
     );
 
-    print("URL => $url");
-
-    final token = prefs.getString("auth_token");
-
-    try {
-      final request = http.MultipartRequest('PUT', url)
-        ..headers.addAll({
-          "Authorization": "Bearer $token",
-          "Accept": "application/json",
-        })
-        ..files.add(await http.MultipartFile.fromPath('image', image.path));
-
-      final response = await request.send();
-      final statusCode = response.statusCode;
-      final body = await response.stream.bytesToString();
-
-      print("Response Status Code: $statusCode");
-      print("Response Body: ${body.substring(0, min(body.length, 200))}...");
-
-      // Check if response is JSON before decoding
-      if (response.headers['content-type']?.contains('application/json') ==
-          true) {
-        return DriverImageUploadRes.fromJson(jsonDecode(body));
-      } else {
-        // Handle non-JSON responses (HTML error pages, etc.)
-        if (statusCode >= 400) {
-          return DriverImageUploadRes(
-            success: false,
-            message:
-                "Server error ($statusCode): ${_extractErrorMessage(body)}",
-          );
-        } else {
-          return DriverImageUploadRes(
-            success: false,
-            message: "Unexpected response format from server",
-          );
-        }
-      }
-    } catch (e) {
-      print("Upload error: $e");
-      return DriverImageUploadRes(success: false, message: e.toString());
-    }
+    return DriverImageUploadRes(
+      success: false,
+      message: "Network error",
+    );
   }
+}
+
+
+//   static Future<DriverImageUploadRes> uploadNewDriverImage({
+//   required File image,
+//   required String userType,
+// }) async {
+//   final prefs = await SharedPreferences.getInstance();
+//   final String? userId = prefs.getString("driver_userid2");
+//   final String? token = prefs.getString("auth_token2");
+
+//   final Uri url = Uri.parse(
+//     "${ApiPath.baseUri}/driver/update?userId=$userId&userType=$userType",
+//   );
+
+//   print("URL => $url");
+
+//   try {
+//     final request = http.MultipartRequest('PUT', url)
+//       ..headers.addAll({
+//         "Authorization": "Bearer $token",
+//         "Accept": "application/json",
+//       })
+//       ..files.add(
+//         await http.MultipartFile.fromPath('image', image.path),
+//       );
+
+//     final response = await request.send();
+//     final body = await response.stream.bytesToString();
+
+//     print("Status Code: ${response.statusCode}");
+//     print("Response Body: $body");
+
+//     if (response.headers['content-type']
+//             ?.contains('application/json') ==
+//         true) {
+
+//           print("hellooo1");
+//       return DriverImageUploadRes.fromJson(jsonDecode(body));
+//     } else {
+
+//       print("hellooo2");
+//       return DriverImageUploadRes(
+//         success: false,
+//         message: "Unexpected server response",
+//       );
+//     }
+//   } catch (e) {
+
+//     print("hellooo3");
+//     print("Upload error: $e");
+//     return DriverImageUploadRes(
+//       success: false,
+//       message: e.toString(),
+//     );
+//   }
+// }
+
+
+  // static Future<DriverImageUploadRes> uploadNewDriverImage({
+  //   required File image,
+
+  //   required String userType,
+  // }) async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final String? userId = prefs.getString("driver_userid2");
+
+  //   print("the_paramssss1 ${image}");
+  //   print("the_paramssss2 ${userId}");
+  //   print("the_paramssss3 ${userType}");
+
+  //   print("the_paramssss3_useriddd ${userId}");
+
+  //   final Uri url = Uri.parse(
+  //     "${ApiPath.baseUri}/driver/update?userId=$userId&userType=$userType",
+  //   );
+
+  //   print("URL => $url");
+
+  //   final token = prefs.getString("auth_token2");
+
+  //   print("tookennnn_print ${token}");
+  //   try {
+  //     final request = http.MultipartRequest('PUT', url)
+  //       ..headers.addAll({
+  //         "Authorization": "Bearer $token",
+  //         "Accept": "application/json",
+  //       })
+  //       ..files.add(await http.MultipartFile.fromPath('image', image.path));
+
+  //     final response = await request.send();
+  //     final statusCode = response.statusCode;
+  //     final body = await response.stream.bytesToString();
+
+  //     print("Response Status Code: $statusCode");
+  //     print("Response Body: ${body.substring(0, min(body.length, 200))}...");
+
+  //     // Check if response is JSON before decoding
+  //     if (response.headers['content-type']?.contains('application/json') ==
+  //         true) {
+  //       return DriverImageUploadRes.fromJson(jsonDecode(body));
+  //     } else {
+  //       // Handle non-JSON responses (HTML error pages, etc.)
+  //       if (statusCode >= 400) {
+  //         return DriverImageUploadRes(
+  //           success: false,
+  //           message:
+  //               "Server error ($statusCode): ${_extractErrorMessage(body)}",
+  //         );
+  //       } else {
+  //         print("helloooo_errorrrr22 ${body['']}");
+  //         return DriverImageUploadRes(
+  //           success: false,
+  //           message: "Unexpected response format from server",
+  //         );
+  //       }
+  //     }
+  //   } catch (e) {
+  //     print("Upload error: $e");
+  //     return DriverImageUploadRes(success: false, message: e.toString());
+  //   }
+  // }
 
   // Helper method to extract error message from HTML
   static String _extractErrorMessage(String html) {

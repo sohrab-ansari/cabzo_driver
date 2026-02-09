@@ -3143,7 +3143,6 @@
 //   }
 // }
 
-
 import 'dart:convert';
 import 'dart:io';
 import 'package:nzcu_driver/controllers/auth_controllers/driver_register_controller.dart';
@@ -3250,11 +3249,11 @@ class _DriverRegistrationState extends State<DriverRegistration> {
   @override
   void initState() {
     driverRegisterController = Get.put(DriverRegisterController());
-    
+
     // Clear any existing errors before loading
     vehicleTypesController.clearError();
     vehicleSubtypesController.clearError();
-    
+
     // Ensure submission flag is reset when screen loads
     _isSubmitting = false;
     print(
@@ -3265,9 +3264,15 @@ class _DriverRegistrationState extends State<DriverRegistration> {
     // Debug current state
     WidgetsBinding.instance.addPostFrameCallback((_) {
       print("🚀 Initializing Driver Registration Screen");
-      print("📊 Vehicle Types Error Message: ${vehicleTypesController.errorMessage.value}");
-      print("📊 Vehicle Types Loading: ${vehicleTypesController.isLoading.value}");
-      print("📊 Vehicle Types Has Data: ${vehicleTypesController.allVehicleTypes.isNotEmpty}");
+      print(
+        "📊 Vehicle Types Error Message: ${vehicleTypesController.errorMessage.value}",
+      );
+      print(
+        "📊 Vehicle Types Loading: ${vehicleTypesController.isLoading.value}",
+      );
+      print(
+        "📊 Vehicle Types Has Data: ${vehicleTypesController.allVehicleTypes.isNotEmpty}",
+      );
     });
 
     // Load vehicle types
@@ -4392,10 +4397,8 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                   driverFormController.activeStep.value,
                 ),
               ],
-              onStepReached: (index) {
-                driverFormController.reachStep(index);
-                _scrollToTop();
-              },
+              enableStepTapping: false, // Disable tapping to prevent going back
+              disableScroll: true, // Disable scroll to change step
             ),
           ),
           Expanded(
@@ -4465,220 +4468,214 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                                 ],
                               )
                             : driverFormController.activeStep.value == 1
-                                ? Form(
-                                    key: _vehicleFormKey,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Padding(
+                            ? Form(
+                                key: _vehicleFormKey,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: w * .01,
+                                      ),
+                                      child: AppFonts.textPoppins(
+                                        context,
+                                        "Add your vehicle",
+                                        w * 0.06,
+                                        FontWeight.w500,
+                                        AppColors.black,
+                                        TextAlign.left,
+                                        TextOverflow.visible,
+                                      ),
+                                    ),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Add your car, bike, or auto – drive your way.",
+                                      w * 0.036,
+                                      FontWeight.w500,
+                                      AppColors.mediumGray,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "vehicle name",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .01),
+                                    AppFormFields.custTextFormOther(
+                                      context: context,
+                                      hintText: "e.g. Car",
+                                      controller: vehicleNameController,
+                                      validator: (value) {
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
+                                          return 'Vehicle Name is required';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "vehicle number",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .01),
+                                    AppFormFields.custTextFormOther(
+                                      context: context,
+                                      hintText: "e.g. Car",
+                                      controller: vehicleNumberController,
+                                      validator: (value) {
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
+                                          return 'Vehicle Number is required';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Vehicle type",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .01),
+                                    // Dropdown for Vehicle Type with Pagination
+                                    Obx(() {
+                                      // Check if data is loading (initial load)
+                                      if (vehicleTypesController
+                                              .isLoading
+                                              .value &&
+                                          vehicleTypesController
+                                              .allVehicleTypes
+                                              .isEmpty) {
+                                        return Container(
                                           padding: EdgeInsets.symmetric(
-                                            vertical: w * .01,
+                                            horizontal: w * .04,
                                           ),
-                                          child: AppFonts.textPoppins(
-                                            context,
-                                            "Add your vehicle",
-                                            w * 0.06,
-                                            FontWeight.w500,
-                                            AppColors.black,
-                                            TextAlign.left,
-                                            TextOverflow.visible,
+                                          height: w * .14,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: AppColors.mediumGray,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
                                           ),
-                                        ),
-                                        AppFonts.textPoppins(
-                                          context,
-                                          "Add your car, bike, or auto – drive your way.",
-                                          w * 0.036,
-                                          FontWeight.w500,
-                                          AppColors.mediumGray,
-                                          TextAlign.left,
-                                          TextOverflow.ellipsis,
-                                        ),
-                                        SizedBox(height: w * .04),
-                                        AppFonts.textPoppins(
-                                          context,
-                                          "vehicle name",
-                                          w * 0.04,
-                                          FontWeight.w500,
-                                          AppColors.black,
-                                          TextAlign.left,
-                                          TextOverflow.ellipsis,
-                                        ),
-                                        SizedBox(height: w * .01),
-                                        AppFormFields.custTextFormOther(
-                                          context: context,
-                                          hintText: "e.g. Car",
-                                          controller: vehicleNameController,
-                                          validator: (value) {
-                                            if (value == null ||
-                                                value.trim().isEmpty) {
-                                              return 'Vehicle Name is required';
-                                            }
-                                            return null;
-                                          },
-                                        ),
-                                        SizedBox(height: w * .04),
-                                        AppFonts.textPoppins(
-                                          context,
-                                          "vehicle number",
-                                          w * 0.04,
-                                          FontWeight.w500,
-                                          AppColors.black,
-                                          TextAlign.left,
-                                          TextOverflow.ellipsis,
-                                        ),
-                                        SizedBox(height: w * .01),
-                                        AppFormFields.custTextFormOther(
-                                          context: context,
-                                          hintText: "e.g. Car",
-                                          controller: vehicleNumberController,
-                                          validator: (value) {
-                                            if (value == null ||
-                                                value.trim().isEmpty) {
-                                              return 'Vehicle Number is required';
-                                            }
-                                            return null;
-                                          },
-                                        ),
-                                        SizedBox(height: w * .04),
-                                        AppFonts.textPoppins(
-                                          context,
-                                          "Vehicle type",
-                                          w * 0.04,
-                                          FontWeight.w500,
-                                          AppColors.black,
-                                          TextAlign.left,
-                                          TextOverflow.ellipsis,
-                                        ),
-                                        SizedBox(height: w * .01),
-                                        // Dropdown for Vehicle Type with Pagination
-                                        Obx(() {
-                                          // Check if data is loading (initial load)
-                                          if (vehicleTypesController
-                                                  .isLoading
-                                                  .value &&
-                                              vehicleTypesController
-                                                  .allVehicleTypes
-                                                  .isEmpty) {
-                                            return Container(
-                                              padding: EdgeInsets.symmetric(
-                                                horizontal: w * .04,
-                                              ),
-                                              height: w * .14,
-                                              decoration: BoxDecoration(
-                                                border: Border.all(
-                                                  color: AppColors.mediumGray,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                  8,
-                                                ),
-                                              ),
-                                              child: Center(
-                                                child: Row(
-                                                  children: [
-                                                    SizedBox(
-                                                      width: 20,
-                                                      height: 20,
-                                                      child:
-                                                          CircularProgressIndicator(
-                                                        strokeWidth: 2,
-                                                        valueColor:
-                                                            AlwaysStoppedAnimation<
-                                                                Color>(
-                                                          AppColors.primaryRed,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(width: w * .03),
-                                                    AppFonts.textPoppins(
-                                                      context,
-                                                      "Loading vehicle types...",
-                                                      w * 0.035,
-                                                      FontWeight.w400,
-                                                      AppColors.mediumGray,
-                                                      TextAlign.left,
-                                                      TextOverflow.ellipsis,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            );
-                                          }
-
-                                          // Check if there's an error or empty data
-                                          if (vehicleTypesController
-                                                  .allVehicleTypes
-                                                  .isEmpty &&
-                                              !vehicleTypesController
-                                                  .isLoading
-                                                  .value) {
-                                            // Check if there's an error message
-                                            if (!vehicleTypesController
-                                                    .isLoading
-                                                    .value &&
-                                                vehicleTypesController
-                                                    .errorMessage
-                                                    .value
-                                                    .isNotEmpty) {
-                                              return Container(
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal: w * .04,
-                                                ),
-                                                height: w * .14,
-                                                decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                    color: Colors.red
-                                                        .withOpacity(0.3),
+                                          child: Center(
+                                            child: Row(
+                                              children: [
+                                                SizedBox(
+                                                  width: 20,
+                                                  height: 20,
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 2,
+                                                    valueColor:
+                                                        AlwaysStoppedAnimation<
+                                                          Color
+                                                        >(AppColors.primaryRed),
                                                   ),
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  color:
-                                                      Colors.red.withOpacity(
-                                                          0.1),
                                                 ),
-                                                child: Center(
-                                                  child: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      AppFonts.textPoppins(
-                                                        context,
-                                                        "Error loading vehicle types",
-                                                        w * 0.032,
-                                                        FontWeight.w400,
-                                                        Colors.red,
-                                                        TextAlign.center,
-                                                        TextOverflow.ellipsis,
-                                                      ),
-                                                      SizedBox(height: w * .01),
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          // Clear error and retry
-                                                          vehicleTypesController
-                                                              .clearError();
-                                                          vehicleTypesController
-                                                              .vehicalmethod();
-                                                        },
-                                                        child: Container(
-                                                          padding:
-                                                              EdgeInsets.symmetric(
-                                                            horizontal:
-                                                                w * .04,
+                                                SizedBox(width: w * .03),
+                                                AppFonts.textPoppins(
+                                                  context,
+                                                  "Loading vehicle types...",
+                                                  w * 0.035,
+                                                  FontWeight.w400,
+                                                  AppColors.mediumGray,
+                                                  TextAlign.left,
+                                                  TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      }
+
+                                      // Check if there's an error or empty data
+                                      if (vehicleTypesController
+                                              .allVehicleTypes
+                                              .isEmpty &&
+                                          !vehicleTypesController
+                                              .isLoading
+                                              .value) {
+                                        // Check if there's an error message
+                                        if (!vehicleTypesController
+                                                .isLoading
+                                                .value &&
+                                            vehicleTypesController
+                                                .errorMessage
+                                                .value
+                                                .isNotEmpty) {
+                                          return Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: w * .04,
+                                            ),
+                                            height: w * .14,
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: Colors.red.withOpacity(
+                                                  0.3,
+                                                ),
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              color: Colors.red.withOpacity(
+                                                0.1,
+                                              ),
+                                            ),
+                                            child: Center(
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  AppFonts.textPoppins(
+                                                    context,
+                                                    "Error loading vehicle types",
+                                                    w * 0.032,
+                                                    FontWeight.w400,
+                                                    Colors.red,
+                                                    TextAlign.center,
+                                                    TextOverflow.ellipsis,
+                                                  ),
+                                                  SizedBox(height: w * .01),
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      // Clear error and retry
+                                                      vehicleTypesController
+                                                          .clearError();
+                                                      vehicleTypesController
+                                                          .vehicalmethod();
+                                                    },
+                                                    child: Container(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                            horizontal: w * .04,
                                                             vertical: w * .01,
                                                           ),
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: AppColors
-                                                                .primaryRed,
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                4),
-                                                          ),
-                                                          child: AppFonts
-                                                              .textPoppins(
+                                                      decoration: BoxDecoration(
+                                                        color: AppColors
+                                                            .primaryRed,
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              4,
+                                                            ),
+                                                      ),
+                                                      child:
+                                                          AppFonts.textPoppins(
                                                             context,
                                                             "Retry",
                                                             w * 0.03,
@@ -4688,15 +4685,140 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                                                             TextOverflow
                                                                 .ellipsis,
                                                           ),
-                                                        ),
-                                                      ),
-                                                    ],
+                                                    ),
                                                   ),
-                                                ),
-                                              );
-                                            }
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        }
 
-                                            return Container(
+                                        return Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: w * .04,
+                                          ),
+                                          height: w * .14,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: AppColors.mediumGray,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: AppFonts.textPoppins(
+                                              context,
+                                              "No vehicle types available",
+                                              w * 0.035,
+                                              FontWeight.w400,
+                                              AppColors.mediumGray,
+                                              TextAlign.center,
+                                              TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        );
+                                      }
+
+                                      final vehicleList = vehicleTypesController
+                                          .allVehicleTypes;
+
+                                      // Get selected vehicle name if available
+                                      String selectedName =
+                                          "Select vehicle type";
+                                      if (vehicleTypeController
+                                          .text
+                                          .isNotEmpty) {
+                                        final selected = vehicleList.firstWhere(
+                                          (v) =>
+                                              v.id ==
+                                              vehicleTypeController.text,
+                                          orElse: () =>
+                                              VehicleTypesModal.Datum(),
+                                        );
+                                        if (selected.name != null) {
+                                          selectedName = selected.name!;
+                                        }
+                                      }
+
+                                      return GestureDetector(
+                                        onTap: () {
+                                          _showVehicleTypeBottomSheet(
+                                            context,
+                                            w,
+                                            vehicleList,
+                                          );
+                                        },
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: w * .04,
+                                            vertical: w * .035,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: _showVehicleTypeError
+                                                  ? AppColors.primaryRed
+                                                  : AppColors.mediumGray,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Expanded(
+                                                child: AppFonts.textPoppins(
+                                                  context,
+                                                  selectedName,
+                                                  w * 0.035,
+                                                  FontWeight.w400,
+                                                  vehicleTypeController
+                                                          .text
+                                                          .isEmpty
+                                                      ? AppColors.mediumGray
+                                                      : AppColors.black,
+                                                  TextAlign.left,
+                                                  TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              Icon(
+                                                Icons.arrow_drop_down,
+                                                color: AppColors.primaryRed,
+                                                size: w * 0.07,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }),
+
+                                    /////////////////////////////////////
+                                    // VEHICLE SUB-TYPE DROPDOWN
+                                    SizedBox(height: w * .04),
+
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Vehicle sub type",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .01),
+                                    // Combine Obx with regular widget logic
+                                    Container(
+                                      height: w * .14,
+                                      child: Column(
+                                        children: [
+                                          // First check if vehicle type is selected (non-reactive check)
+                                          if (vehicleTypeController
+                                              .text
+                                              .isEmpty)
+                                            Container(
                                               padding: EdgeInsets.symmetric(
                                                 horizontal: w * .04,
                                               ),
@@ -4706,14 +4828,12 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                                                   color: AppColors.mediumGray,
                                                 ),
                                                 borderRadius:
-                                                    BorderRadius.circular(
-                                                  8,
-                                                ),
+                                                    BorderRadius.circular(8),
                                               ),
                                               child: Center(
                                                 child: AppFonts.textPoppins(
                                                   context,
-                                                  "No vehicle types available",
+                                                  "Please select a vehicle type first",
                                                   w * 0.035,
                                                   FontWeight.w400,
                                                   AppColors.mediumGray,
@@ -4721,112 +4841,15 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                                                   TextOverflow.ellipsis,
                                                 ),
                                               ),
-                                            );
-                                          }
-
-                                          final vehicleList =
-                                              vehicleTypesController
-                                                  .allVehicleTypes;
-
-                                          // Get selected vehicle name if available
-                                          String selectedName =
-                                              "Select vehicle type";
-                                          if (vehicleTypeController
-                                              .text
-                                              .isNotEmpty) {
-                                            final selected = vehicleList
-                                                .firstWhere(
-                                              (v) =>
-                                                  v.id ==
-                                                  vehicleTypeController.text,
-                                              orElse: () =>
-                                                  VehicleTypesModal.Datum(),
-                                            );
-                                            if (selected.name != null) {
-                                              selectedName = selected.name!;
-                                            }
-                                          }
-
-                                          return GestureDetector(
-                                            onTap: () {
-                                              _showVehicleTypeBottomSheet(
-                                                context,
-                                                w,
-                                                vehicleList,
-                                              );
-                                            },
-                                            child: Container(
-                                              padding: EdgeInsets.symmetric(
-                                                horizontal: w * .04,
-                                                vertical: w * .035,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                border: Border.all(
-                                                  color: _showVehicleTypeError
-                                                      ? AppColors.primaryRed
-                                                      : AppColors.mediumGray,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                  8,
-                                                ),
-                                              ),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Expanded(
-                                                    child: AppFonts.textPoppins(
-                                                      context,
-                                                      selectedName,
-                                                      w * 0.035,
-                                                      FontWeight.w400,
-                                                      vehicleTypeController
-                                                              .text
-                                                              .isEmpty
-                                                          ? AppColors.mediumGray
-                                                          : AppColors.black,
-                                                      TextAlign.left,
-                                                      TextOverflow.ellipsis,
-                                                    ),
-                                                  ),
-                                                  Icon(
-                                                    Icons.arrow_drop_down,
-                                                    color: AppColors.primaryRed,
-                                                    size: w * 0.07,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          );
-                                        }),
-
-                                        /////////////////////////////////////
-                                        // VEHICLE SUB-TYPE DROPDOWN
-                                        SizedBox(height: w * .04),
-
-                                        SizedBox(height: w * .04),
-                                        AppFonts.textPoppins(
-                                          context,
-                                          "Vehicle sub type",
-                                          w * 0.04,
-                                          FontWeight.w500,
-                                          AppColors.black,
-                                          TextAlign.left,
-                                          TextOverflow.ellipsis,
-                                        ),
-                                        SizedBox(height: w * .01),
-                                        // Combine Obx with regular widget logic
-                                        Container(
-                                          height: w * .14,
-                                          child: Column(
-                                            children: [
-                                              // First check if vehicle type is selected (non-reactive check)
-                                              if (vehicleTypeController
-                                                  .text
-                                                  .isEmpty)
-                                                Container(
+                                            )
+                                          else
+                                            // Use Obx only for the reactive part
+                                            Obx(() {
+                                              // Check if data is loading
+                                              if (vehicleSubtypesController
+                                                  .isLoading
+                                                  .value) {
+                                                return Container(
                                                   padding: EdgeInsets.symmetric(
                                                     horizontal: w * .04,
                                                   ),
@@ -4838,171 +4861,128 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                                                     ),
                                                     borderRadius:
                                                         BorderRadius.circular(
-                                                            8),
-                                                  ),
-                                                  child: Center(
-                                                    child: AppFonts.textPoppins(
-                                                      context,
-                                                      "Please select a vehicle type first",
-                                                      w * 0.035,
-                                                      FontWeight.w400,
-                                                      AppColors.mediumGray,
-                                                      TextAlign.center,
-                                                      TextOverflow.ellipsis,
-                                                    ),
-                                                  ),
-                                                )
-                                              else
-                                                // Use Obx only for the reactive part
-                                                Obx(() {
-                                                  // Check if data is loading
-                                                  if (vehicleSubtypesController
-                                                      .isLoading
-                                                      .value) {
-                                                    return Container(
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                        horizontal: w * .04,
-                                                      ),
-                                                      height: w * .14,
-                                                      decoration: BoxDecoration(
-                                                        border: Border.all(
-                                                          color: AppColors
-                                                              .mediumGray,
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(
                                                           8,
                                                         ),
-                                                      ),
-                                                      child: Center(
-                                                        child: Row(
-                                                          children: [
-                                                            CircularProgressIndicator(
-                                                              strokeWidth: 2,
-                                                              valueColor:
-                                                                  AlwaysStoppedAnimation<
-                                                                      Color>(
+                                                  ),
+                                                  child: Center(
+                                                    child: Row(
+                                                      children: [
+                                                        CircularProgressIndicator(
+                                                          strokeWidth: 2,
+                                                          valueColor:
+                                                              AlwaysStoppedAnimation<
+                                                                Color
+                                                              >(
                                                                 AppColors
                                                                     .primaryRed,
                                                               ),
-                                                            ),
-                                                            SizedBox(
-                                                              width: w * .03,
-                                                            ),
-                                                            AppFonts.textPoppins(
-                                                              context,
-                                                              "Loading vehicle sub-types...",
-                                                              w * 0.035,
-                                                              FontWeight.w400,
-                                                              AppColors
-                                                                  .mediumGray,
-                                                              TextAlign.left,
-                                                              TextOverflow
-                                                                  .ellipsis,
-                                                            ),
-                                                          ],
                                                         ),
-                                                      ),
-                                                    );
-                                                  }
+                                                        SizedBox(
+                                                          width: w * .03,
+                                                        ),
+                                                        AppFonts.textPoppins(
+                                                          context,
+                                                          "Loading vehicle sub-types...",
+                                                          w * 0.035,
+                                                          FontWeight.w400,
+                                                          AppColors.mediumGray,
+                                                          TextAlign.left,
+                                                          TextOverflow.ellipsis,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                );
+                                              }
 
-                                                  // Check if there's an error or empty data
-                                                  if (vehicleSubtypesController
-                                                              .cashResponse
-                                                              .value ==
-                                                          null ||
-                                                      vehicleSubtypesController
-                                                              .cashResponse
-                                                              .value!
-                                                              .data ==
-                                                          null ||
-                                                      vehicleSubtypesController
+                                              // Check if there's an error or empty data
+                                              if (vehicleSubtypesController
+                                                          .cashResponse
+                                                          .value ==
+                                                      null ||
+                                                  vehicleSubtypesController
                                                           .cashResponse
                                                           .value!
-                                                          .data!
-                                                          .isEmpty) {
-                                                    // Check if there's an error message
-                                                    if (!vehicleSubtypesController
-                                                            .isLoading
-                                                            .value &&
-                                                        vehicleSubtypesController
-                                                            .errorMessage
-                                                            .value
-                                                            .isNotEmpty) {
-                                                      return Container(
-                                                        padding:
-                                                            EdgeInsets.symmetric(
+                                                          .data ==
+                                                      null ||
+                                                  vehicleSubtypesController
+                                                      .cashResponse
+                                                      .value!
+                                                      .data!
+                                                      .isEmpty) {
+                                                // Check if there's an error message
+                                                if (!vehicleSubtypesController
+                                                        .isLoading
+                                                        .value &&
+                                                    vehicleSubtypesController
+                                                        .errorMessage
+                                                        .value
+                                                        .isNotEmpty) {
+                                                  return Container(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
                                                           horizontal: w * .04,
                                                         ),
-                                                        height: w * .14,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border.all(
-                                                            color: Colors.red
-                                                                .withOpacity(
-                                                                    0.3),
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
+                                                    height: w * .14,
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                        color: Colors.red
+                                                            .withOpacity(0.3),
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
                                                             8,
                                                           ),
-                                                          color: Colors.red
-                                                              .withOpacity(0.1),
-                                                        ),
-                                                        child: Center(
-                                                          child: Column(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .center,
-                                                            children: [
-                                                              AppFonts
-                                                                  .textPoppins(
-                                                                context,
-                                                                "Error loading vehicle sub-types",
-                                                                w * 0.032,
-                                                                FontWeight.w400,
-                                                                Colors.red,
-                                                                TextAlign
-                                                                    .center,
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                              ),
-                                                              SizedBox(
-                                                                  height:
-                                                                      w * .01),
-                                                              GestureDetector(
-                                                                onTap: () {
-                                                                  // Clear error and retry
-                                                                  vehicleSubtypesController
-                                                                      .clearError();
-                                                                  _loadVehicleSubTypes(
-                                                                      vehicleTypeController
-                                                                          .text);
-                                                                },
-                                                                child:
-                                                                    Container(
-                                                                  padding: EdgeInsets
-                                                                      .symmetric(
+                                                      color: Colors.red
+                                                          .withOpacity(0.1),
+                                                    ),
+                                                    child: Center(
+                                                      child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          AppFonts.textPoppins(
+                                                            context,
+                                                            "Error loading vehicle sub-types",
+                                                            w * 0.032,
+                                                            FontWeight.w400,
+                                                            Colors.red,
+                                                            TextAlign.center,
+                                                            TextOverflow
+                                                                .ellipsis,
+                                                          ),
+                                                          SizedBox(
+                                                            height: w * .01,
+                                                          ),
+                                                          GestureDetector(
+                                                            onTap: () {
+                                                              // Clear error and retry
+                                                              vehicleSubtypesController
+                                                                  .clearError();
+                                                              _loadVehicleSubTypes(
+                                                                vehicleTypeController
+                                                                    .text,
+                                                              );
+                                                            },
+                                                            child: Container(
+                                                              padding:
+                                                                  EdgeInsets.symmetric(
                                                                     horizontal:
-                                                                        w *
-                                                                            .04,
+                                                                        w * .04,
                                                                     vertical:
-                                                                        w *
-                                                                            .01,
+                                                                        w * .01,
                                                                   ),
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    color: AppColors
-                                                                        .primaryRed,
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            4),
-                                                                  ),
-                                                                  child: AppFonts
-                                                                      .textPoppins(
+                                                              decoration: BoxDecoration(
+                                                                color: AppColors
+                                                                    .primaryRed,
+                                                                borderRadius:
+                                                                    BorderRadius.circular(
+                                                                      4,
+                                                                    ),
+                                                              ),
+                                                              child:
+                                                                  AppFonts.textPoppins(
                                                                     context,
                                                                     "Retry",
                                                                     w * 0.03,
@@ -5015,539 +4995,248 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                                                                     TextOverflow
                                                                         .ellipsis,
                                                                   ),
-                                                                ),
-                                                              ),
-                                                            ],
+                                                            ),
                                                           ),
-                                                        ),
-                                                      );
-                                                    }
-
-                                                    return Container(
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                        horizontal: w * .04,
+                                                        ],
                                                       ),
-                                                      height: w * .14,
-                                                      decoration: BoxDecoration(
-                                                        border: Border.all(
-                                                          color: AppColors
-                                                              .mediumGray,
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(
+                                                    ),
+                                                  );
+                                                }
+
+                                                return Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: w * .04,
+                                                  ),
+                                                  height: w * .14,
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                      color:
+                                                          AppColors.mediumGray,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
                                                           8,
                                                         ),
-                                                      ),
-                                                      child: Center(
-                                                        child: AppFonts
-                                                            .textPoppins(
-                                                          context,
-                                                          "No vehicle sub-types available for this vehicle type",
-                                                          w * 0.035,
-                                                          FontWeight.w400,
-                                                          AppColors.mediumGray,
-                                                          TextAlign.center,
-                                                          TextOverflow.ellipsis,
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }
-
-                                                  final subTypeData =
-                                                      vehicleSubtypesController
-                                                          .cashResponse
-                                                          .value;
-                                                  final subTypeList =
-                                                      subTypeData!.data!;
-
-                                                  return Container(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                      horizontal: w * .04,
+                                                  ),
+                                                  child: Center(
+                                                    child: AppFonts.textPoppins(
+                                                      context,
+                                                      "No vehicle sub-types available for this vehicle type",
+                                                      w * 0.035,
+                                                      FontWeight.w400,
+                                                      AppColors.mediumGray,
+                                                      TextAlign.center,
+                                                      TextOverflow.ellipsis,
                                                     ),
-                                                    decoration: BoxDecoration(
-                                                      border: Border.all(
-                                                        color: _showVehicleSubTypeError
-                                                            ? AppColors
-                                                                .primaryRed
-                                                            : AppColors
-                                                                .mediumGray,
-                                                      ),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              8),
-                                                    ),
-                                                    child:
-                                                        DropdownButton<String>(
-                                                      value:
-                                                          vehicleSubTypeController
-                                                              .text
-                                                              .isEmpty
-                                                              ? null
-                                                              : vehicleSubTypeController
-                                                                  .text,
-                                                      hint:
-                                                          AppFonts.textPoppins(
-                                                        context,
-                                                        "Select vehicle sub-type",
-                                                        w * 0.035,
-                                                        FontWeight.w400,
-                                                        AppColors.mediumGray,
-                                                        TextAlign.left,
-                                                        TextOverflow.ellipsis,
-                                                      ),
-                                                      icon: Icon(
-                                                        Icons.arrow_drop_down,
-                                                        color: AppColors
-                                                            .primaryRed,
-                                                        size: w * 0.07,
-                                                      ),
-                                                      underline: SizedBox(),
-                                                      isExpanded: true,
-                                                      style: TextStyle(
-                                                        fontSize: w * 0.035,
-                                                        color: AppColors.black,
-                                                        fontWeight:
-                                                            FontWeight.w400,
-                                                      ),
-                                                      items: subTypeList
-                                                          .where(
-                                                            (datum) =>
-                                                                datum.id !=
-                                                                    null &&
-                                                                datum.name !=
-                                                                    null,
-                                                          ) // Filter out null IDs and names
-                                                          .map<
-                                                              DropdownMenuItem<
-                                                                  String>>((
-                                                            VehicleSubTypesModal
-                                                                    .Datum
-                                                                datum,
-                                                          ) {
-                                                            return DropdownMenuItem<
-                                                                String>(
-                                                              value: datum.id!,
-                                                              child: Container(
-                                                                padding: EdgeInsets
-                                                                    .symmetric(
+                                                  ),
+                                                );
+                                              }
+
+                                              final subTypeData =
+                                                  vehicleSubtypesController
+                                                      .cashResponse
+                                                      .value;
+                                              final subTypeList =
+                                                  subTypeData!.data!;
+
+                                              return Container(
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: w * .04,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                    color:
+                                                        _showVehicleSubTypeError
+                                                        ? AppColors.primaryRed
+                                                        : AppColors.mediumGray,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                child: DropdownButton<String>(
+                                                  value:
+                                                      vehicleSubTypeController
+                                                          .text
+                                                          .isEmpty
+                                                      ? null
+                                                      : vehicleSubTypeController
+                                                            .text,
+                                                  hint: AppFonts.textPoppins(
+                                                    context,
+                                                    "Select vehicle sub-type",
+                                                    w * 0.035,
+                                                    FontWeight.w400,
+                                                    AppColors.mediumGray,
+                                                    TextAlign.left,
+                                                    TextOverflow.ellipsis,
+                                                  ),
+                                                  icon: Icon(
+                                                    Icons.arrow_drop_down,
+                                                    color: AppColors.primaryRed,
+                                                    size: w * 0.07,
+                                                  ),
+                                                  underline: SizedBox(),
+                                                  isExpanded: true,
+                                                  style: TextStyle(
+                                                    fontSize: w * 0.035,
+                                                    color: AppColors.black,
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+                                                  items: subTypeList
+                                                      .where(
+                                                        (datum) =>
+                                                            datum.id != null &&
+                                                            datum.name != null,
+                                                      ) // Filter out null IDs and names
+                                                      .map<
+                                                        DropdownMenuItem<String>
+                                                      >((
+                                                        VehicleSubTypesModal.Datum
+                                                        datum,
+                                                      ) {
+                                                        return DropdownMenuItem<
+                                                          String
+                                                        >(
+                                                          value: datum.id!,
+                                                          child: Container(
+                                                            padding:
+                                                                EdgeInsets.symmetric(
                                                                   vertical:
                                                                       w * .03,
                                                                 ),
-                                                                child: Column(
-                                                                  crossAxisAlignment:
-                                                                      CrossAxisAlignment
-                                                                          .start,
-                                                                  children: [
-                                                                    AppFonts.textPoppins(
-                                                                      context,
-                                                                      datum.name ??
-                                                                          "Unknown",
-                                                                      w * 0.045,
-                                                                      FontWeight
-                                                                          .w400,
-                                                                      AppColors
-                                                                          .black,
-                                                                      TextAlign
-                                                                          .left,
-                                                                      TextOverflow
-                                                                          .ellipsis,
-                                                                    ),
-                                                                    if (datum.minimumPrice !=
-                                                                            null ||
-                                                                        datum.baseFare !=
-                                                                            null)
-                                                                      SizedBox(
-                                                                        height:
-                                                                            w *
-                                                                                .005,
-                                                                      ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            );
-                                                          })
-                                                          .toList(),
-                                                      onChanged:
-                                                          (String? newValue) {
-                                                        if (newValue != null) {
-                                                          setState(() {
-                                                            vehicleSubTypeController
-                                                                    .text =
-                                                                newValue;
-
-                                                            // Find the selected vehicle sub-type
-                                                            final selectedSubType =
-                                                                subTypeList
-                                                                    .firstWhere(
-                                                              (subType) =>
-                                                                  subType.id ==
-                                                                  newValue,
-                                                            );
-
-                                                            // Show selection
-                                                            print(
-                                                              "Selected vehicle sub-type: ${selectedSubType.name} (ID: $newValue)",
-                                                            );
-                                                            if (selectedSubType
-                                                                    .minimumPrice !=
-                                                                null) {
-                                                              print(
-                                                                "Minimum Price: ${selectedSubType.minimumPrice}",
-                                                              );
-                                                            }
-                                                            if (selectedSubType
-                                                                    .baseFare !=
-                                                                null) {
-                                                              print(
-                                                                "Base Fare: ${selectedSubType.baseFare}",
-                                                              );
-                                                            }
-
-                                                            Get.snackbar(
-                                                              "Selected",
-                                                              "${selectedSubType.name}",
-                                                              snackPosition:
-                                                                  SnackPosition
-                                                                      .BOTTOM,
-                                                              duration:
-                                                                  Duration(
-                                                                seconds: 1,
-                                                              ),
-                                                              backgroundColor:
+                                                            child: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                AppFonts.textPoppins(
+                                                                  context,
+                                                                  datum.name ??
+                                                                      "Unknown",
+                                                                  w * 0.045,
+                                                                  FontWeight
+                                                                      .w400,
                                                                   AppColors
-                                                                      .primaryRed
-                                                                      .withOpacity(
-                                                                        0.9,
-                                                                      ),
-                                                              colorText:
-                                                                  Colors.white,
-                                                            );
-                                                          });
-                                                        }
-                                                      },
-                                                    ),
-                                                  );
-                                                }),
-                                            ],
-                                          ),
-                                        ),
+                                                                      .black,
+                                                                  TextAlign
+                                                                      .left,
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                                ),
+                                                                if (datum.minimumPrice !=
+                                                                        null ||
+                                                                    datum.baseFare !=
+                                                                        null)
+                                                                  SizedBox(
+                                                                    height:
+                                                                        w *
+                                                                        .005,
+                                                                  ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        );
+                                                      })
+                                                      .toList(),
+                                                  onChanged: (String? newValue) {
+                                                    if (newValue != null) {
+                                                      setState(() {
+                                                        vehicleSubTypeController
+                                                                .text =
+                                                            newValue;
 
-                                        SizedBox(height: w * .04),
-                                        AppFonts.textPoppins(
-                                          context,
-                                          "Model",
-                                          w * 0.04,
-                                          FontWeight.w500,
-                                          AppColors.black,
-                                          TextAlign.left,
-                                          TextOverflow.ellipsis,
-                                        ),
-                                        SizedBox(height: w * .01),
-                                        AppFormFields.custTextFormOther(
-                                          context: context,
-                                          hintText: "e.g. Swift Dzire",
-                                          controller: modelController,
-                                          validator: (value) {
-                                            if (value == null ||
-                                                value.trim().isEmpty) {
-                                              return 'Model is required';
-                                            }
-                                            return null;
-                                          },
-                                        ),
-                                        SizedBox(height: w * .04),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                AppFonts.textPoppins(
-                                                  context,
-                                                  "Year",
-                                                  w * 0.04,
-                                                  FontWeight.w500,
-                                                  AppColors.black,
-                                                  TextAlign.left,
-                                                  TextOverflow.ellipsis,
-                                                ),
-                                                SizedBox(height: w * .01),
-                                                AppFormFields.custTextFormOther(
-                                                  context: context,
-                                                  hintText: "e.g. 2014",
-                                                  controller: yearController,
-                                                  width: w * .45,
-                                                  keyboardType:
-                                                      TextInputType.number,
-                                                  validator: (value) {
-                                                    if (value == null ||
-                                                        value.trim().isEmpty) {
-                                                      return 'Year is required';
-                                                    }
-                                                    if (value.length != 4 ||
-                                                        int.tryParse(value) ==
+                                                        // Find the selected vehicle sub-type
+                                                        final selectedSubType =
+                                                            subTypeList
+                                                                .firstWhere(
+                                                                  (subType) =>
+                                                                      subType
+                                                                          .id ==
+                                                                      newValue,
+                                                                );
+
+                                                        // Show selection
+                                                        print(
+                                                          "Selected vehicle sub-type: ${selectedSubType.name} (ID: $newValue)",
+                                                        );
+                                                        if (selectedSubType
+                                                                .minimumPrice !=
                                                             null) {
-                                                      return 'Invalid Year';
+                                                          print(
+                                                            "Minimum Price: ${selectedSubType.minimumPrice}",
+                                                          );
+                                                        }
+                                                        if (selectedSubType
+                                                                .baseFare !=
+                                                            null) {
+                                                          print(
+                                                            "Base Fare: ${selectedSubType.baseFare}",
+                                                          );
+                                                        }
+
+                                                        Get.snackbar(
+                                                          "Selected",
+                                                          "${selectedSubType.name}",
+                                                          snackPosition:
+                                                              SnackPosition
+                                                                  .BOTTOM,
+                                                          duration: Duration(
+                                                            seconds: 1,
+                                                          ),
+                                                          backgroundColor:
+                                                              AppColors
+                                                                  .primaryRed
+                                                                  .withOpacity(
+                                                                    0.9,
+                                                                  ),
+                                                          colorText:
+                                                              Colors.white,
+                                                        );
+                                                      });
                                                     }
-                                                    return null;
                                                   },
                                                 ),
-                                              ],
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                AppFonts.textPoppins(
-                                                  context,
-                                                  "Color",
-                                                  w * 0.04,
-                                                  FontWeight.w500,
-                                                  AppColors.black,
-                                                  TextAlign.left,
-                                                  TextOverflow.ellipsis,
-                                                ),
-                                                SizedBox(height: w * .01),
-                                                AppFormFields.custTextFormOther(
-                                                  context: context,
-                                                  hintText: "e.g. Black",
-                                                  controller: colorController,
-                                                  width: w * .45,
-                                                  validator: (value) {
-                                                    if (value == null ||
-                                                        value.trim().isEmpty) {
-                                                      return 'Color is required';
-                                                    }
-                                                    return null;
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(height: w * .04),
-                                        AppFonts.textPoppins(
-                                          context,
-                                          "Licence Plate Number",
-                                          w * 0.04,
-                                          FontWeight.w500,
-                                          AppColors.black,
-                                          TextAlign.left,
-                                          TextOverflow.ellipsis,
-                                        ),
-                                        SizedBox(height: w * .01),
-                                        AppFormFields.custTextFormOther(
-                                          context: context,
-                                          hintText: "e.g. 6WED298",
-                                          controller: plateNumberController,
-                                          validator: (value) {
-                                            if (value == null ||
-                                                value.trim().isEmpty) {
-                                              return 'Plate Number is required';
-                                            }
-                                            return null;
-                                          },
-                                        ),
-                                        SizedBox(height: w * .04),
+                                              );
+                                            }),
+                                        ],
+                                      ),
+                                    ),
 
-                                        AppFonts.textPoppins(
-                                          context,
-                                          "Photo of Registration Certificate",
-                                          w * 0.04,
-                                          FontWeight.w500,
-                                          AppColors.black,
-                                          TextAlign.left,
-                                          TextOverflow.ellipsis,
-                                        ),
-                                        CustomDocumentUploader(
-                                          width: w,
-                                          height: w * .4,
-                                          borderRadius: 5,
-                                          uploadText: 'Upload',
-                                          borderColor: _showRcImageError
-                                              ? AppColors.primaryRed
-                                              : AppColors.black,
-                                          errorText: _showRcImageError
-                                              ? "Registration Certificate image is required"
-                                              : null,
-                                          onImageSelected: (File? image) {
-                                            setState(() {
-                                              _registrationCertificateImage =
-                                                  image;
-                                              if (image != null)
-                                                _showRcImageError = false;
-                                            });
-                                          },
-                                          isImageUploaded:
-                                              _registrationCertificateImage !=
-                                                  null,
-                                          onClearImage: () {
-                                            setState(() {
-                                              _registrationCertificateImage =
-                                                  null;
-                                            });
-                                          },
-                                        ),
-                                        AppFonts.textPoppins(
-                                          context,
-                                          "Make sure your Registration Certificate photo are clear and visible.",
-                                          w * 0.025,
-                                          FontWeight.w500,
-                                          AppColors.mediumGray,
-                                          TextAlign.left,
-                                          TextOverflow.visible,
-                                          maxLines: 2,
-                                        ),
-                                        SizedBox(height: w * .04),
-                                        AppFonts.textPoppins(
-                                          context,
-                                          "Photo of Licence Plate Number",
-                                          w * 0.04,
-                                          FontWeight.w500,
-                                          AppColors.black,
-                                          TextAlign.left,
-                                          TextOverflow.ellipsis,
-                                        ),
-                                        CustomDocumentUploader(
-                                          width: w,
-                                          height: w * .4,
-                                          borderRadius: 5,
-                                          uploadText: 'Upload',
-                                          borderColor: _showPlateImageError
-                                              ? AppColors.primaryRed
-                                              : AppColors.black,
-                                          errorText: _showPlateImageError
-                                              ? "Licence Plate image is required"
-                                              : null,
-                                          onImageSelected: (File? image) {
-                                            setState(() {
-                                              _licencePlateImage = image;
-                                              if (image != null)
-                                                _showPlateImageError = false;
-                                            });
-                                          },
-                                          isImageUploaded:
-                                              _licencePlateImage != null,
-                                          onClearImage: () {
-                                            setState(() {
-                                              _licencePlateImage = null;
-                                            });
-                                          },
-                                        ),
-
-                                        AppFonts.textPoppins(
-                                          context,
-                                          "Make sure your vehicle's licence plate number photo are clear and visible.",
-                                          w * 0.025,
-                                          FontWeight.w500,
-                                          AppColors.mediumGray,
-                                          TextAlign.left,
-                                          TextOverflow.visible,
-                                          maxLines: 2,
-                                        ),
-                                        SizedBox(height: w * .04),
-                                        AppFonts.textPoppins(
-                                          context,
-                                          "Photo of Vehicle Insurance",
-                                          w * 0.04,
-                                          FontWeight.w500,
-                                          AppColors.black,
-                                          TextAlign.left,
-                                          TextOverflow.ellipsis,
-                                        ),
-                                        CustomDocumentUploader(
-                                          width: w,
-                                          height: w * .4,
-                                          borderRadius: 5,
-                                          uploadText: 'Upload',
-                                          borderColor: _showInsuranceImageError
-                                              ? AppColors.primaryRed
-                                              : AppColors.black,
-                                          errorText: _showInsuranceImageError
-                                              ? "Vehicle Insurance image is required"
-                                              : null,
-                                          onImageSelected: (File? image) {
-                                            setState(() {
-                                              _vehicleInsuranceImage = image;
-                                              if (image != null)
-                                                _showInsuranceImageError =
-                                                    false;
-                                            });
-                                          },
-                                          isImageUploaded:
-                                              _vehicleInsuranceImage != null,
-                                          onClearImage: () {
-                                            setState(() {
-                                              _vehicleInsuranceImage = null;
-                                            });
-                                          },
-                                        ),
-                                        AppFonts.textPoppins(
-                                          context,
-                                          "Make sure your vehicle's insurance photo are clear and visible.",
-                                          w * 0.025,
-                                          FontWeight.w500,
-                                          AppColors.mediumGray,
-                                          TextAlign.left,
-                                          TextOverflow.visible,
-                                          maxLines: 2,
-                                        ),
-                                        SizedBox(height: w * .04),
-                                        AppButtons.solid(
-                                          context: context,
-                                          text: "Continue",
-                                          onClicked: _submitVehicleDetails,
-                                          isLoading: _isLoading,
-                                          isFullWidth: true,
-                                          backgroundColor: AppColors.primaryRed,
-                                          textColor: AppColors.white,
-                                          fontSize: w * .045,
-                                          height: w * .140,
-                                          radius: 12.0,
-                                        ),
-                                        SizedBox(height: w * .1),
-                                      ],
-                                    ), // Closing Column for Step 1
-                                  ) // Closing Form for Step 1
-                                : driverFormController.activeStep.value == 2
-                                    ? Form(
-                                        key: _personalFormKey,
-                                        child: Column(
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Model",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .01),
+                                    AppFormFields.custTextFormOther(
+                                      context: context,
+                                      hintText: "e.g. Swift Dzire",
+                                      controller: modelController,
+                                      validator: (value) {
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
+                                          return 'Model is required';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                vertical: w * .01,
-                                              ),
-                                              child: AppFonts.textPoppins(
-                                                context,
-                                                "Add your Personal Details",
-                                                w * 0.06,
-                                                FontWeight.w500,
-                                                AppColors.black,
-                                                TextAlign.left,
-                                                TextOverflow.visible,
-                                              ),
-                                            ),
                                             AppFonts.textPoppins(
                                               context,
-                                              "Fill in your details to become a verified driver.",
-                                              w * 0.036,
-                                              FontWeight.w500,
-                                              AppColors.mediumGray,
-                                              TextAlign.left,
-                                              TextOverflow.ellipsis,
-                                            ),
-                                            SizedBox(height: w * .04),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Name",
+                                              "Year",
                                               w * 0.04,
                                               FontWeight.w500,
                                               AppColors.black,
@@ -5557,566 +5246,814 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                                             SizedBox(height: w * .01),
                                             AppFormFields.custTextFormOther(
                                               context: context,
-                                              hintText: "e.g. Mahavir",
-                                              controller: nameController,
-                                              validator: (value) {
-                                                if (value == null ||
-                                                    value.trim().isEmpty) {
-                                                  return 'Name is required';
-                                                }
-                                                return null;
-                                              },
-                                            ),
-                                            SizedBox(height: w * .04),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Phone Number",
-                                              w * 0.04,
-                                              FontWeight.w500,
-                                              AppColors.black,
-                                              TextAlign.left,
-                                              TextOverflow.ellipsis,
-                                            ),
-                                            SizedBox(height: w * .01),
-                                            AppFormFields.custTextFormOther(
-                                              context: context,
-                                              hintText: "e.g. 9865431062",
-                                              controller: phoneNumberController,
+                                              hintText: "e.g. 2014",
+                                              controller: yearController,
+                                              width: w * .45,
                                               keyboardType:
                                                   TextInputType.number,
-                                              maxLength: 10,
                                               validator: (value) {
                                                 if (value == null ||
                                                     value.trim().isEmpty) {
-                                                  return 'Phone Number is required';
+                                                  return 'Year is required';
                                                 }
-                                                if (value.length != 10) {
-                                                  return 'Phone Number must be 10 digits';
+                                                if (value.length != 4 ||
+                                                    int.tryParse(value) ==
+                                                        null) {
+                                                  return 'Invalid Year';
                                                 }
                                                 return null;
                                               },
                                             ),
-                                            SizedBox(height: w * .04),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Date of Birth",
-                                              w * 0.04,
-                                              FontWeight.w500,
-                                              AppColors.black,
-                                              TextAlign.left,
-                                              TextOverflow.ellipsis,
-                                            ),
-                                            SizedBox(height: w * .01),
-                                            AppFormFields.custTextFormOther(
-                                              context: context,
-                                              hintText: "DD/MM/YYYY",
-                                              controller: dobController,
-                                              readOnly: true,
-                                              validator: (value) {
-                                                if (value == null ||
-                                                    value.trim().isEmpty) {
-                                                  return 'Date of Birth is required';
-                                                }
-                                                return null;
-                                              },
-                                              onClicked: () async {
-                                                DateTime initialDate =
-                                                    DateTime.now().subtract(
-                                                  const Duration(days: 365 * 20),
-                                                );
-                                                DateTime firstDate =
-                                                    DateTime(1900);
-                                                DateTime lastDate =
-                                                    DateTime.now();
-
-                                                final DateTime? picked =
-                                                    await showDatePicker(
-                                                  context: context,
-                                                  initialDate: initialDate,
-                                                  firstDate: firstDate,
-                                                  lastDate: lastDate,
-                                                );
-
-                                                if (picked != null) {
-                                                  setState(() {
-                                                    dobController.text =
-                                                        DateFormat(
-                                                      "dd/MM/yyyy",
-                                                    ).format(picked);
-                                                  });
-                                                }
-                                              },
-                                              suffixIcon: Icon(
-                                                Icons.calendar_month,
-                                                color: AppColors.primaryRed,
-                                                size: w * 0.055,
-                                              ),
-                                            ),
-                                            SizedBox(height: w * .04),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Email",
-                                              w * 0.04,
-                                              FontWeight.w500,
-                                              AppColors.black,
-                                              TextAlign.left,
-                                              TextOverflow.ellipsis,
-                                            ),
-                                            SizedBox(height: w * .01),
-                                            AppFormFields.custTextFormOther(
-                                              context: context,
-                                              hintText: "e.g. Mahavir@gmail.com",
-                                              controller: emailController,
-                                              keyboardType:
-                                                  TextInputType.emailAddress,
-                                              validator: (value) {
-                                                if (value == null ||
-                                                    value.trim().isEmpty) {
-                                                  return 'Email is required';
-                                                }
-                                                if (!value.contains('@')) {
-                                                  return 'Invalid Email';
-                                                }
-                                                return null;
-                                              },
-                                            ),
-                                            SizedBox(height: w * .04),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Alternate Contact (1)",
-                                              w * 0.04,
-                                              FontWeight.w500,
-                                              AppColors.black,
-                                              TextAlign.left,
-                                              TextOverflow.ellipsis,
-                                            ),
-                                            SizedBox(height: w * .01),
-                                            AppFormFields.custTextFormOther(
-                                              context: context,
-                                              hintText: "e.g. 9865431062",
-                                              controller:
-                                                  alternateContact1Controller,
-                                              keyboardType:
-                                                  TextInputType.number,
-                                              maxLength: 10,
-                                              validator: (value) {
-                                                if (value == null ||
-                                                    value.trim().isEmpty) {
-                                                  return 'Alternate Contact is required';
-                                                }
-                                                if (value.length != 10) {
-                                                  return 'Phone Number must be 10 digits';
-                                                }
-                                                return null;
-                                              },
-                                            ),
-                                            SizedBox(height: w * .04),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Relation",
-                                              w * 0.04,
-                                              FontWeight.w500,
-                                              AppColors.black,
-                                              TextAlign.left,
-                                              TextOverflow.ellipsis,
-                                            ),
-                                            SizedBox(height: w * .01),
-                                            AppFormFields.custTextFormOther(
-                                              context: context,
-                                              hintText: "e.g. Mother",
-                                              controller: relation1Controller,
-                                              validator: (value) {
-                                                if (value == null ||
-                                                    value.trim().isEmpty) {
-                                                  return 'Relation is required';
-                                                }
-                                                return null;
-                                              },
-                                            ),
-                                            SizedBox(height: w * .04),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Address",
-                                              w * 0.04,
-                                              FontWeight.w500,
-                                              AppColors.black,
-                                              TextAlign.left,
-                                              TextOverflow.ellipsis,
-                                            ),
-                                            SizedBox(height: w * .01),
-                                            AppFormFields.custTextFormOther(
-                                              context: context,
-                                              hintText: "e.g. Bhopal",
-                                              controller: address1Controller,
-                                              validator: (value) {
-                                                if (value == null ||
-                                                    value.trim().isEmpty) {
-                                                  return 'Address is required';
-                                                }
-                                                return null;
-                                              },
-                                            ),
-                                            SizedBox(height: w * .04),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Alternate Contact (2)",
-                                              w * 0.04,
-                                              FontWeight.w500,
-                                              AppColors.black,
-                                              TextAlign.left,
-                                              TextOverflow.ellipsis,
-                                            ),
-                                            SizedBox(height: w * .01),
-                                            AppFormFields.custTextFormOther(
-                                              context: context,
-                                              hintText: "e.g. 9865431062",
-                                              controller:
-                                                  alternateContact2Controller,
-                                              keyboardType:
-                                                  TextInputType.number,
-                                              maxLength: 10,
-                                            ),
-                                            SizedBox(height: w * .04),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Relation",
-                                              w * 0.04,
-                                              FontWeight.w500,
-                                              AppColors.black,
-                                              TextAlign.left,
-                                              TextOverflow.ellipsis,
-                                            ),
-                                            SizedBox(height: w * .01),
-                                            AppFormFields.custTextFormOther(
-                                              context: context,
-                                              hintText: "e.g. Mother",
-                                              controller: relation2Controller,
-                                            ),
-                                            SizedBox(height: w * .04),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Address",
-                                              w * 0.04,
-                                              FontWeight.w500,
-                                              AppColors.black,
-                                              TextAlign.left,
-                                              TextOverflow.ellipsis,
-                                            ),
-                                            SizedBox(height: w * .01),
-                                            AppFormFields.custTextFormOther(
-                                              context: context,
-                                              hintText: "e.g. Bhopal",
-                                              controller: address2Controller,
-                                            ),
-                                            SizedBox(height: w * .04),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Upload Photo of Aadhar Card (Front)",
-                                              w * 0.04,
-                                              FontWeight.w500,
-                                              AppColors.black,
-                                              TextAlign.left,
-                                              TextOverflow.ellipsis,
-                                            ),
-                                            CustomDocumentUploader(
-                                              width: w,
-                                              height: w * .4,
-                                              borderRadius: 5,
-                                              uploadText: 'Upload',
-                                              borderColor: _showAadharFrontError
-                                                  ? AppColors.primaryRed
-                                                  : AppColors.black,
-                                              errorText: _showAadharFrontError
-                                                  ? "Aadhar Front image is required"
-                                                  : null,
-                                              onImageSelected: (File? image) {
-                                                setState(() {
-                                                  _aadharFrontImage = image;
-                                                  if (image != null)
-                                                    _showAadharFrontError =
-                                                        false;
-                                                });
-                                              },
-                                              isImageUploaded:
-                                                  _aadharFrontImage != null,
-                                              onClearImage: () {
-                                                setState(() {
-                                                  _aadharFrontImage = null;
-                                                });
-                                              },
-                                            ),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Make sure your Front Aadhar card photo are clear and visible.",
-                                              w * 0.025,
-                                              FontWeight.w500,
-                                              AppColors.mediumGray,
-                                              TextAlign.left,
-                                              TextOverflow.visible,
-                                              maxLines: 2,
-                                            ),
-                                            SizedBox(height: w * .04),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Upload Photo of Aadhar Card (Back)",
-                                              w * 0.04,
-                                              FontWeight.w500,
-                                              AppColors.black,
-                                              TextAlign.left,
-                                              TextOverflow.ellipsis,
-                                            ),
-                                            CustomDocumentUploader(
-                                              width: w,
-                                              height: w * .4,
-                                              borderRadius: 5,
-                                              uploadText: 'Upload',
-                                              borderColor: _showAadharBackError
-                                                  ? AppColors.primaryRed
-                                                  : AppColors.black,
-                                              errorText: _showAadharBackError
-                                                  ? "Aadhar Back image is required"
-                                                  : null,
-                                              onImageSelected: (File? image) {
-                                                setState(() {
-                                                  _aadharBackImage = image;
-                                                  if (image != null)
-                                                    _showAadharBackError =
-                                                        false;
-                                                });
-                                              },
-                                              isImageUploaded:
-                                                  _aadharBackImage != null,
-                                              onClearImage: () {
-                                                setState(() {
-                                                  _aadharBackImage = null;
-                                                });
-                                              },
-                                            ),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Make sure your Aadhar card back photo are clear and visible.",
-                                              w * 0.025,
-                                              FontWeight.w500,
-                                              AppColors.mediumGray,
-                                              TextAlign.left,
-                                              TextOverflow.visible,
-                                              maxLines: 2,
-                                            ),
-                                            SizedBox(height: w * .04),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Upload Photo of PAN Card",
-                                              w * 0.04,
-                                              FontWeight.w500,
-                                              AppColors.black,
-                                              TextAlign.left,
-                                              TextOverflow.ellipsis,
-                                            ),
-                                            CustomDocumentUploader(
-                                              width: w,
-                                              height: w * .4,
-                                              borderRadius: 5,
-                                              uploadText: 'Upload',
-                                              borderColor: _showPanError
-                                                  ? AppColors.primaryRed
-                                                  : AppColors.black,
-                                              errorText: _showPanError
-                                                  ? "PAN Card image is required"
-                                                  : null,
-                                              onImageSelected: (File? image) {
-                                                setState(() {
-                                                  _panCardImage = image;
-                                                  if (image != null)
-                                                    _showPanError = false;
-                                                });
-                                              },
-                                              isImageUploaded:
-                                                  _panCardImage != null,
-                                              onClearImage: () {
-                                                setState(() {
-                                                  _panCardImage = null;
-                                                });
-                                              },
-                                            ),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Make sure your PAN card photo are clear and visible.",
-                                              w * 0.025,
-                                              FontWeight.w500,
-                                              AppColors.mediumGray,
-                                              TextAlign.left,
-                                              TextOverflow.visible,
-                                              maxLines: 2,
-                                            ),
-                                            SizedBox(height: w * .04),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Upload Photo of Driver License",
-                                              w * 0.04,
-                                              FontWeight.w500,
-                                              AppColors.black,
-                                              TextAlign.left,
-                                              TextOverflow.ellipsis,
-                                            ),
-                                            CustomDocumentUploader(
-                                              width: w,
-                                              height: w * .4,
-                                              borderRadius: 5,
-                                              uploadText: 'Upload',
-                                              borderColor: _showDlError
-                                                  ? AppColors.primaryRed
-                                                  : AppColors.black,
-                                              errorText: _showDlError
-                                                  ? "Driver License image is required"
-                                                  : null,
-                                              onImageSelected: (File? image) {
-                                                setState(() {
-                                                  _driverLicenseImage = image;
-                                                  if (image != null)
-                                                    _showDlError = false;
-                                                });
-                                              },
-                                              isImageUploaded:
-                                                  _driverLicenseImage != null,
-                                              onClearImage: () {
-                                                setState(() {
-                                                  _driverLicenseImage = null;
-                                                });
-                                              },
-                                            ),
-                                            AppFonts.textPoppins(
-                                              context,
-                                              "Make sure your driver license photo are clear and visible.",
-                                              w * 0.025,
-                                              FontWeight.w500,
-                                              AppColors.mediumGray,
-                                              TextAlign.left,
-                                              TextOverflow.visible,
-                                              maxLines: 2,
-                                            ),
-                                            SizedBox(height: w * .1),
-                                            AppButtons.solid(
-                                              context: context,
-                                              text: "Continue",
-                                              onClicked: _submitPersonalDetails,
-                                              isLoading: _isSubmitting,
-                                              isFullWidth: true,
-                                              backgroundColor:
-                                                  AppColors.primaryRed,
-                                              textColor: AppColors.white,
-                                              fontSize: w * .045,
-                                              height: w * .140,
-                                              radius: 12.0,
-                                            ),
-                                            SizedBox(height: w * .1),
                                           ],
-                                        ), // Closing Column for Step 2
-                                      ) // Closing Form for Step 2
-                                    : driverFormController.activeStep.value == 3
-                                        ? Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Padding(
-                                                padding: EdgeInsets.symmetric(
-                                                  vertical: w * .01,
-                                                ),
-                                                child: AppFonts.textPoppins(
-                                                  context,
-                                                  "Add Profile Photo",
-                                                  w * 0.06,
-                                                  FontWeight.w500,
-                                                  AppColors.black,
-                                                  TextAlign.left,
-                                                  TextOverflow.visible,
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: w * .8,
-                                                child: AppFonts.textPoppins(
-                                                  context,
-                                                  "Upload a recent photo of yourself (no sunglasses, no mask).",
-                                                  w * 0.036,
-                                                  FontWeight.w500,
-                                                  AppColors.mediumGray,
-                                                  TextAlign.left,
-                                                  TextOverflow.visible,
-                                                  maxLines: 2,
-                                                ),
-                                              ),
-                                              SizedBox(height: w * .02),
-                                              Center(
-                                                child: Column(
-                                                  children: [
-                                                    CustomDocumentUploader(
-                                                      width: w * .4,
-                                                      height: w * .4,
-                                                      isCircular: true,
-                                                      uploadText: 'Upload',
-                                                      borderColor:
-                                                          _showProfilePhotoError
-                                                              ? AppColors
-                                                                  .primaryRed
-                                                              : AppColors
-                                                                  .black,
-                                                      errorText:
-                                                          _showProfilePhotoError
-                                                              ? "Profile Photo is required"
-                                                              : null,
-                                                      onImageSelected:
-                                                          (File? image) {
-                                                        setState(() {
-                                                          _profilePhotoImage =
-                                                              image;
-                                                          if (image != null)
-                                                            _showProfilePhotoError =
-                                                                false;
-                                                        });
-                                                      },
-                                                      isImageUploaded:
-                                                          _profilePhotoImage !=
-                                                              null,
-                                                      onClearImage: () {
-                                                        setState(() {
-                                                          _profilePhotoImage =
-                                                              null;
-                                                        });
-                                                      },
-                                                    ),
-                                                    SizedBox(
-                                                      width: w * .7,
-                                                      child: AppFonts.textPoppins(
-                                                        context,
-                                                        "Your profile photo must clearly show your face.",
-                                                        w * 0.036,
-                                                        FontWeight.w500,
-                                                        AppColors.mediumGray,
-                                                        TextAlign.center,
-                                                        TextOverflow.visible,
-                                                        maxLines: 2,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              SizedBox(height: w * .4),
-                                              AppButtons.solid(
-                                                context: context,
-                                                text: "Submit",
-                                                onClicked: _submitProfilePhoto,
-                                                isLoading: _isSubmitting,
-                                                isFullWidth: true,
-                                                backgroundColor:
-                                                    AppColors.primaryRed,
-                                                textColor: AppColors.white,
-                                                fontSize: w * .045,
-                                                height: w * .140,
-                                                radius: 12.0,
-                                              ),
-                                              SizedBox(height: w * .1),
-                                            ],
-                                          )
-                                        : SizedBox(),
+                                        ),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            AppFonts.textPoppins(
+                                              context,
+                                              "Color",
+                                              w * 0.04,
+                                              FontWeight.w500,
+                                              AppColors.black,
+                                              TextAlign.left,
+                                              TextOverflow.ellipsis,
+                                            ),
+                                            SizedBox(height: w * .01),
+                                            AppFormFields.custTextFormOther(
+                                              context: context,
+                                              hintText: "e.g. Black",
+                                              controller: colorController,
+                                              width: w * .45,
+                                              validator: (value) {
+                                                if (value == null ||
+                                                    value.trim().isEmpty) {
+                                                  return 'Color is required';
+                                                }
+                                                return null;
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Licence Plate Number",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .01),
+                                    AppFormFields.custTextFormOther(
+                                      context: context,
+                                      hintText: "e.g. 6WED298",
+                                      controller: plateNumberController,
+                                      validator: (value) {
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
+                                          return 'Plate Number is required';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    SizedBox(height: w * .04),
+
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Photo of Registration Certificate",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    CustomDocumentUploader(
+                                      width: w,
+                                      height: w * .4,
+                                      borderRadius: 5,
+                                      uploadText: 'Upload',
+                                      borderColor: _showRcImageError
+                                          ? AppColors.primaryRed
+                                          : AppColors.black,
+                                      errorText: _showRcImageError
+                                          ? "Registration Certificate image is required"
+                                          : null,
+                                      onImageSelected: (File? image) {
+                                        setState(() {
+                                          _registrationCertificateImage = image;
+                                          if (image != null)
+                                            _showRcImageError = false;
+                                        });
+                                      },
+                                      isImageUploaded:
+                                          _registrationCertificateImage != null,
+                                      onClearImage: () {
+                                        setState(() {
+                                          _registrationCertificateImage = null;
+                                        });
+                                      },
+                                    ),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Make sure your Registration Certificate photo are clear and visible.",
+                                      w * 0.025,
+                                      FontWeight.w500,
+                                      AppColors.mediumGray,
+                                      TextAlign.left,
+                                      TextOverflow.visible,
+                                      maxLines: 2,
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Photo of Licence Plate Number",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    CustomDocumentUploader(
+                                      width: w,
+                                      height: w * .4,
+                                      borderRadius: 5,
+                                      uploadText: 'Upload',
+                                      borderColor: _showPlateImageError
+                                          ? AppColors.primaryRed
+                                          : AppColors.black,
+                                      errorText: _showPlateImageError
+                                          ? "Licence Plate image is required"
+                                          : null,
+                                      onImageSelected: (File? image) {
+                                        setState(() {
+                                          _licencePlateImage = image;
+                                          if (image != null)
+                                            _showPlateImageError = false;
+                                        });
+                                      },
+                                      isImageUploaded:
+                                          _licencePlateImage != null,
+                                      onClearImage: () {
+                                        setState(() {
+                                          _licencePlateImage = null;
+                                        });
+                                      },
+                                    ),
+
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Make sure your vehicle's licence plate number photo are clear and visible.",
+                                      w * 0.025,
+                                      FontWeight.w500,
+                                      AppColors.mediumGray,
+                                      TextAlign.left,
+                                      TextOverflow.visible,
+                                      maxLines: 2,
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Photo of Vehicle Insurance",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    CustomDocumentUploader(
+                                      width: w,
+                                      height: w * .4,
+                                      borderRadius: 5,
+                                      uploadText: 'Upload',
+                                      borderColor: _showInsuranceImageError
+                                          ? AppColors.primaryRed
+                                          : AppColors.black,
+                                      errorText: _showInsuranceImageError
+                                          ? "Vehicle Insurance image is required"
+                                          : null,
+                                      onImageSelected: (File? image) {
+                                        setState(() {
+                                          _vehicleInsuranceImage = image;
+                                          if (image != null)
+                                            _showInsuranceImageError = false;
+                                        });
+                                      },
+                                      isImageUploaded:
+                                          _vehicleInsuranceImage != null,
+                                      onClearImage: () {
+                                        setState(() {
+                                          _vehicleInsuranceImage = null;
+                                        });
+                                      },
+                                    ),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Make sure your vehicle's insurance photo are clear and visible.",
+                                      w * 0.025,
+                                      FontWeight.w500,
+                                      AppColors.mediumGray,
+                                      TextAlign.left,
+                                      TextOverflow.visible,
+                                      maxLines: 2,
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppButtons.solid(
+                                      context: context,
+                                      text: "Continue",
+                                      onClicked: _submitVehicleDetails,
+                                      isLoading: _isLoading,
+                                      isFullWidth: true,
+                                      backgroundColor: AppColors.primaryRed,
+                                      textColor: AppColors.white,
+                                      fontSize: w * .045,
+                                      height: w * .140,
+                                      radius: 12.0,
+                                    ),
+                                    SizedBox(height: w * .1),
+                                  ],
+                                ), // Closing Column for Step 1
+                              ) // Closing Form for Step 1
+                            : driverFormController.activeStep.value == 2
+                            ? Form(
+                                key: _personalFormKey,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: w * .01,
+                                      ),
+                                      child: AppFonts.textPoppins(
+                                        context,
+                                        "Add your Personal Details",
+                                        w * 0.06,
+                                        FontWeight.w500,
+                                        AppColors.black,
+                                        TextAlign.left,
+                                        TextOverflow.visible,
+                                      ),
+                                    ),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Fill in your details to become a verified driver.",
+                                      w * 0.036,
+                                      FontWeight.w500,
+                                      AppColors.mediumGray,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Name",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .01),
+                                    AppFormFields.custTextFormOther(
+                                      context: context,
+                                      hintText: "e.g. Mahavir",
+                                      controller: nameController,
+                                      validator: (value) {
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
+                                          return 'Name is required';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Phone Number",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .01),
+                                    AppFormFields.custTextFormOther(
+                                      context: context,
+                                      hintText: "e.g. 9865431062",
+                                      controller: phoneNumberController,
+                                      keyboardType: TextInputType.number,
+                                      maxLength: 10,
+                                      validator: (value) {
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
+                                          return 'Phone Number is required';
+                                        }
+                                        if (value.length != 10) {
+                                          return 'Phone Number must be 10 digits';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Date of Birth",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .01),
+                                    AppFormFields.custTextFormOther(
+                                      context: context,
+                                      hintText: "DD/MM/YYYY",
+                                      controller: dobController,
+                                      readOnly: true,
+                                      validator: (value) {
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
+                                          return 'Date of Birth is required';
+                                        }
+                                        return null;
+                                      },
+                                      onClicked: () async {
+                                        DateTime initialDate = DateTime.now()
+                                            .subtract(
+                                              const Duration(days: 365 * 20),
+                                            );
+                                        DateTime firstDate = DateTime(1900);
+                                        DateTime lastDate = DateTime.now();
+
+                                        final DateTime? picked =
+                                            await showDatePicker(
+                                              context: context,
+                                              initialDate: initialDate,
+                                              firstDate: firstDate,
+                                              lastDate: lastDate,
+                                            );
+
+                                        if (picked != null) {
+                                          setState(() {
+                                            dobController.text = DateFormat(
+                                              "dd/MM/yyyy",
+                                            ).format(picked);
+                                          });
+                                        }
+                                      },
+                                      suffixIcon: Icon(
+                                        Icons.calendar_month,
+                                        color: AppColors.primaryRed,
+                                        size: w * 0.055,
+                                      ),
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Email",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .01),
+                                    AppFormFields.custTextFormOther(
+                                      context: context,
+                                      hintText: "e.g. Mahavir@gmail.com",
+                                      controller: emailController,
+                                      keyboardType: TextInputType.emailAddress,
+                                      validator: (value) {
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
+                                          return 'Email is required';
+                                        }
+                                        if (!value.contains('@')) {
+                                          return 'Invalid Email';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Alternate Contact (1)",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .01),
+                                    AppFormFields.custTextFormOther(
+                                      context: context,
+                                      hintText: "e.g. 9865431062",
+                                      controller: alternateContact1Controller,
+                                      keyboardType: TextInputType.number,
+                                      maxLength: 10,
+                                      validator: (value) {
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
+                                          return 'Alternate Contact is required';
+                                        }
+                                        if (value.length != 10) {
+                                          return 'Phone Number must be 10 digits';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Relation",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .01),
+                                    AppFormFields.custTextFormOther(
+                                      context: context,
+                                      hintText: "e.g. Mother",
+                                      controller: relation1Controller,
+                                      validator: (value) {
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
+                                          return 'Relation is required';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Address",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .01),
+                                    AppFormFields.custTextFormOther(
+                                      context: context,
+                                      hintText: "e.g. Bhopal",
+                                      controller: address1Controller,
+                                      validator: (value) {
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
+                                          return 'Address is required';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Alternate Contact (2)",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .01),
+                                    AppFormFields.custTextFormOther(
+                                      context: context,
+                                      hintText: "e.g. 9865431062",
+                                      controller: alternateContact2Controller,
+                                      keyboardType: TextInputType.number,
+                                      maxLength: 10,
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Relation",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .01),
+                                    AppFormFields.custTextFormOther(
+                                      context: context,
+                                      hintText: "e.g. Mother",
+                                      controller: relation2Controller,
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Address",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .01),
+                                    AppFormFields.custTextFormOther(
+                                      context: context,
+                                      hintText: "e.g. Bhopal",
+                                      controller: address2Controller,
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Upload Photo of Aadhar Card (Front)",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    CustomDocumentUploader(
+                                      width: w,
+                                      height: w * .4,
+                                      borderRadius: 5,
+                                      uploadText: 'Upload',
+                                      borderColor: _showAadharFrontError
+                                          ? AppColors.primaryRed
+                                          : AppColors.black,
+                                      errorText: _showAadharFrontError
+                                          ? "Aadhar Front image is required"
+                                          : null,
+                                      onImageSelected: (File? image) {
+                                        setState(() {
+                                          _aadharFrontImage = image;
+                                          if (image != null)
+                                            _showAadharFrontError = false;
+                                        });
+                                      },
+                                      isImageUploaded:
+                                          _aadharFrontImage != null,
+                                      onClearImage: () {
+                                        setState(() {
+                                          _aadharFrontImage = null;
+                                        });
+                                      },
+                                    ),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Make sure your Front Aadhar card photo are clear and visible.",
+                                      w * 0.025,
+                                      FontWeight.w500,
+                                      AppColors.mediumGray,
+                                      TextAlign.left,
+                                      TextOverflow.visible,
+                                      maxLines: 2,
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Upload Photo of Aadhar Card (Back)",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    CustomDocumentUploader(
+                                      width: w,
+                                      height: w * .4,
+                                      borderRadius: 5,
+                                      uploadText: 'Upload',
+                                      borderColor: _showAadharBackError
+                                          ? AppColors.primaryRed
+                                          : AppColors.black,
+                                      errorText: _showAadharBackError
+                                          ? "Aadhar Back image is required"
+                                          : null,
+                                      onImageSelected: (File? image) {
+                                        setState(() {
+                                          _aadharBackImage = image;
+                                          if (image != null)
+                                            _showAadharBackError = false;
+                                        });
+                                      },
+                                      isImageUploaded: _aadharBackImage != null,
+                                      onClearImage: () {
+                                        setState(() {
+                                          _aadharBackImage = null;
+                                        });
+                                      },
+                                    ),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Make sure your Aadhar card back photo are clear and visible.",
+                                      w * 0.025,
+                                      FontWeight.w500,
+                                      AppColors.mediumGray,
+                                      TextAlign.left,
+                                      TextOverflow.visible,
+                                      maxLines: 2,
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Upload Photo of PAN Card",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    CustomDocumentUploader(
+                                      width: w,
+                                      height: w * .4,
+                                      borderRadius: 5,
+                                      uploadText: 'Upload',
+                                      borderColor: _showPanError
+                                          ? AppColors.primaryRed
+                                          : AppColors.black,
+                                      errorText: _showPanError
+                                          ? "PAN Card image is required"
+                                          : null,
+                                      onImageSelected: (File? image) {
+                                        setState(() {
+                                          _panCardImage = image;
+                                          if (image != null)
+                                            _showPanError = false;
+                                        });
+                                      },
+                                      isImageUploaded: _panCardImage != null,
+                                      onClearImage: () {
+                                        setState(() {
+                                          _panCardImage = null;
+                                        });
+                                      },
+                                    ),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Make sure your PAN card photo are clear and visible.",
+                                      w * 0.025,
+                                      FontWeight.w500,
+                                      AppColors.mediumGray,
+                                      TextAlign.left,
+                                      TextOverflow.visible,
+                                      maxLines: 2,
+                                    ),
+                                    SizedBox(height: w * .04),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Upload Photo of Driver License",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    CustomDocumentUploader(
+                                      width: w,
+                                      height: w * .4,
+                                      borderRadius: 5,
+                                      uploadText: 'Upload',
+                                      borderColor: _showDlError
+                                          ? AppColors.primaryRed
+                                          : AppColors.black,
+                                      errorText: _showDlError
+                                          ? "Driver License image is required"
+                                          : null,
+                                      onImageSelected: (File? image) {
+                                        setState(() {
+                                          _driverLicenseImage = image;
+                                          if (image != null)
+                                            _showDlError = false;
+                                        });
+                                      },
+                                      isImageUploaded:
+                                          _driverLicenseImage != null,
+                                      onClearImage: () {
+                                        setState(() {
+                                          _driverLicenseImage = null;
+                                        });
+                                      },
+                                    ),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Make sure your driver license photo are clear and visible.",
+                                      w * 0.025,
+                                      FontWeight.w500,
+                                      AppColors.mediumGray,
+                                      TextAlign.left,
+                                      TextOverflow.visible,
+                                      maxLines: 2,
+                                    ),
+                                    SizedBox(height: w * .1),
+                                    AppButtons.solid(
+                                      context: context,
+                                      text: "Continue",
+                                      onClicked: _submitPersonalDetails,
+                                      isLoading: _isSubmitting,
+                                      isFullWidth: true,
+                                      backgroundColor: AppColors.primaryRed,
+                                      textColor: AppColors.white,
+                                      fontSize: w * .045,
+                                      height: w * .140,
+                                      radius: 12.0,
+                                    ),
+                                    SizedBox(height: w * .1),
+                                  ],
+                                ), // Closing Column for Step 2
+                              ) // Closing Form for Step 2
+                            : driverFormController.activeStep.value == 3
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: w * .01,
+                                    ),
+                                    child: AppFonts.textPoppins(
+                                      context,
+                                      "Add Profile Photo",
+                                      w * 0.06,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.visible,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: w * .8,
+                                    child: AppFonts.textPoppins(
+                                      context,
+                                      "Upload a recent photo of yourself (no sunglasses, no mask).",
+                                      w * 0.036,
+                                      FontWeight.w500,
+                                      AppColors.mediumGray,
+                                      TextAlign.left,
+                                      TextOverflow.visible,
+                                      maxLines: 2,
+                                    ),
+                                  ),
+                                  SizedBox(height: w * .02),
+                                  Center(
+                                    child: Column(
+                                      children: [
+                                        CustomDocumentUploader(
+                                          width: w * .4,
+                                          height: w * .4,
+                                          isCircular: true,
+                                          uploadText: 'Upload',
+                                          borderColor: _showProfilePhotoError
+                                              ? AppColors.primaryRed
+                                              : AppColors.black,
+                                          errorText: _showProfilePhotoError
+                                              ? "Profile Photo is required"
+                                              : null,
+                                          onImageSelected: (File? image) {
+                                            setState(() {
+                                              _profilePhotoImage = image;
+                                              if (image != null)
+                                                _showProfilePhotoError = false;
+                                            });
+                                          },
+                                          isImageUploaded:
+                                              _profilePhotoImage != null,
+                                          onClearImage: () {
+                                            setState(() {
+                                              _profilePhotoImage = null;
+                                            });
+                                          },
+                                        ),
+                                        SizedBox(
+                                          width: w * .7,
+                                          child: AppFonts.textPoppins(
+                                            context,
+                                            "Your profile photo must clearly show your face.",
+                                            w * 0.036,
+                                            FontWeight.w500,
+                                            AppColors.mediumGray,
+                                            TextAlign.center,
+                                            TextOverflow.visible,
+                                            maxLines: 2,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: w * .4),
+                                  AppButtons.solid(
+                                    context: context,
+                                    text: "Submit",
+                                    onClicked: _submitProfilePhoto,
+                                    isLoading: _isSubmitting,
+                                    isFullWidth: true,
+                                    backgroundColor: AppColors.primaryRed,
+                                    textColor: AppColors.white,
+                                    fontSize: w * .045,
+                                    height: w * .140,
+                                    radius: 12.0,
+                                  ),
+                                  SizedBox(height: w * .1),
+                                ],
+                              )
+                            : SizedBox(),
                       ),
                     ],
                   ),
@@ -6130,6 +6067,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
   }
 
   EasyStep buildStep(int stepIndex, String title, double w, int activeStep) {
+    // bool isActive = activeStep >= stepIndex;
     bool isActive = activeStep >= stepIndex;
 
     return EasyStep(
@@ -6137,8 +6075,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
           ? CircleAvatar(
               radius: w * 0.04,
               backgroundColor: AppColors.primaryRed,
-              child:
-                  Icon(Icons.check, size: w * 0.045, color: AppColors.white),
+              child: Icon(Icons.check, size: w * 0.045, color: AppColors.white),
             )
           : CircleAvatar(
               radius: w * 0.04,
