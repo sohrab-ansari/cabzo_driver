@@ -64,7 +64,6 @@ class SocketManager {
   DateTime? _lastLocationUpdate;
   StreamSubscription<Position>? _positionStreamSubscription;
   Timer? _locationUpdateTimer;
-  DateTime? _lastLocationEmitTime;
 
   // Ride tracking
   String? _activeRideId;
@@ -897,13 +896,6 @@ class SocketManager {
   void _sendLocationUpdate() {
     if (_socket == null || !_isSocketConnected) return;
 
-    // Add 3-second throttle guard
-    final now = DateTime.now();
-    if (_lastLocationEmitTime != null &&
-        now.difference(_lastLocationEmitTime!).inMilliseconds < 3000) {
-      return;
-    }
-
     final rideId =
         _activeRideId ?? _currentRide?['orderId'] ?? _currentRide?['rideId'];
     final bool isRideActive =
@@ -952,9 +944,6 @@ class SocketManager {
         );
       }
     }
-
-    // Update last emission time
-    _lastLocationEmitTime = now;
   }
 
   void _startLocationUpdates() {

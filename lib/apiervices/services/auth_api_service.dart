@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:nzcu_driver/apiervices/api_path.dart';
 import 'package:nzcu_driver/modals/Otp_verify_res.dart';
 import 'package:nzcu_driver/modals/create_vehicle_res.dart';
@@ -84,6 +85,9 @@ class AuthApiService {
       // Save FCM token
    
         await prefs.getString('fcmToken');
+
+          final deviceInfo = DeviceInfoPlugin();
+        final androidInfo = await deviceInfo.androidInfo;
         print('fcmm___token_from_shared_preferences: ${prefs.getString('fcmToken')}');
       
     final Uri url = Uri.parse(ApiPath.verifyOtp);
@@ -94,8 +98,15 @@ class AuthApiService {
       // "fcmToken": "test-fcm-token-123",
             "fcmToken": prefs.getString('fcmToken') ?? "test-fcm-token-123",
 
-      "deviceId": "device-001",
+
+//  androidInfo.id;
+      // "deviceId": "device-001",
+
+            "deviceId": androidInfo.id,
+
     };
+
+    print("otppppp_veriffyyyy___ ${requestBody}");
 
     try {
       final http.Response response = await http.post(
@@ -395,6 +406,8 @@ class AuthApiService {
       } catch (e) {
         print("❌ Failed to parse JSON response: $e");
         print("Raw response: ${responseBody}");
+
+
         return CreateVehicleRes(
           success: false,
           message: "Invalid response format: $e",
@@ -406,6 +419,7 @@ class AuthApiService {
       return CreateVehicleRes(success: false, message: "Connection error: $e");
     }
   }
+
 
   static Future<RegisterProfileRes> createRegister_Api({
     required String name,

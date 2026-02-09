@@ -24,13 +24,13 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-//  driveridController.driverid_mdethod();
+    //  driveridController.driverid_mdethod();
 
     // _initializeApp();
 
     Future.delayed(const Duration(seconds: 3), () {
       if (!mounted) return;
- 
+
       CustomNavigator.removeUntil(
         context,
         const LoginScreen(),
@@ -50,7 +50,6 @@ class _SplashScreenState extends State<SplashScreen> {
   //   // // Load custom icons
   //   // await _loadCustomBikeMarker();
   //   // await _loadVehicleIcons();
-    
 
   //   // // Initialize socket manager with callbacks
   //   // _setupSocketCallbacks();
@@ -58,7 +57,6 @@ class _SplashScreenState extends State<SplashScreen> {
   //   // Start socket connection
   //   // final DriveridController driveridController = Get.put(DriveridController());
 
-      
   //   await socketManager.initialize();
 
   //   // Start location listener

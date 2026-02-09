@@ -11,6 +11,10 @@ import 'package:nzcu_driver/views/splash/splash_screen.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseBackgroundMessageHandler(RemoteMessage message) async {
+  // IMPORTANT: Firebase must be initialized in background isolate
+  // Background handlers run in a separate Dart isolate where Firebase is NOT initialized
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   print('📩 [Background] Message received: ${message.messageId}');
 
   // Use the singleton instance
