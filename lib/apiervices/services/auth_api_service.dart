@@ -78,12 +78,22 @@ class AuthApiService {
     required String otp,
     String? phoneNumber,
   }) async {
+
+        final prefs = await SharedPreferences.getInstance();
+
+      // Save FCM token
+   
+        await prefs.getString('fcmToken');
+        print('fcmm___token_from_shared_preferences: ${prefs.getString('fcmToken')}');
+      
     final Uri url = Uri.parse(ApiPath.verifyOtp);
 
     final Map<String, dynamic> requestBody = {
       "otp": otp,
       "phone": phoneNumber ?? "9908479999",
-      "fcmToken": "test-fcm-token-123",
+      // "fcmToken": "test-fcm-token-123",
+            "fcmToken": prefs.getString('fcmToken') ?? "test-fcm-token-123",
+
       "deviceId": "device-001",
     };
 

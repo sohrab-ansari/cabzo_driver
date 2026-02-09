@@ -487,8 +487,15 @@ class _LoginScreenState extends State<LoginScreen> {
   // Form key for validation
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   
-  // Initialize login controller
-  final LoginController loginController = Get.put(LoginController());
+  
+
+
+
+      LoginController loginController = Get.put(LoginController());
+
+
+
+
   
   // Validation flags
   bool isPhoneValid = false;

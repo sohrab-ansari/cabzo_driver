@@ -356,6 +356,8 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         'vehicleType': widget.rideData['vehicleType'] ?? 'sedan',
         'rideOtp': widget.rideData['otp'],
         'status': 'pending',
+        'isScheduled': widget.rideData['isScheduled'] ?? false,
+        'scheduledStartTime': widget.rideData['scheduledStartTime'],
       };
 
       // Also store in local variables for easy access
@@ -1002,7 +1004,10 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         _countdownTimer?.cancel();
 
         Get.off(
-          () => ArrivingClient(rideData: widget.rideData),
+          () => ArrivingClient(
+            rideData: widget.rideData,
+            typeCheck: _rideData!['isScheduled'] == true,
+          ),
           transition: Transition.rightToLeft,
         );
         break;
@@ -1225,6 +1230,42 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
               ),
             ),
           ),
+          if (_rideData!['isScheduled'] == true) ...[
+            SizedBox(height: 8),
+            Center(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange.withOpacity(0.5)),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Scheduled Pickup',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.orange[800],
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (_rideData!['scheduledStartTime'] != null)
+                      Text(
+                        DateFormat('hh:mm a, dd MMM yyyy').format(
+                          DateTime.parse(_rideData!['scheduledStartTime']),
+                        ),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.orange[700],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
           SizedBox(height: 16),
 
           // Trip Information

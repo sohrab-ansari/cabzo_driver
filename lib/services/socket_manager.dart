@@ -33,7 +33,7 @@ class SocketManager {
 
   static const int MAX_RECONNECT_ATTEMPTS = 5;
   static const int CONNECTION_TIMEOUT = 10000;
-  static const int LOCATION_UPDATE_INTERVAL = 2000;
+  static const int LOCATION_UPDATE_INTERVAL = 3000;
   static const double LOCATION_CHANGE_THRESHOLD = 0.0001;
 
   // Driver data
@@ -61,8 +61,6 @@ class SocketManager {
   // Location
   double _currentLatitude = 0.0;
   double _currentLongitude = 0.0;
-  double? _lastSentLatitude;
-  double? _lastSentLongitude;
   DateTime? _lastLocationUpdate;
   StreamSubscription<Position>? _positionStreamSubscription;
   Timer? _locationUpdateTimer;
@@ -341,12 +339,12 @@ class SocketManager {
             _currentLongitude = position.longitude;
             _lastLocationUpdate = DateTime.now();
 
-            // Send location update if on duty
-            if (isOnDuty && _socket != null && _isSocketConnected) {
-              _sendLocationUpdate();
-            }
+            // Send location update if on duty (REMOVED: Now handled exclusively by periodic timer)
+            // if (isOnDuty && _socket != null && _isSocketConnected) {
+            //   _sendLocationUpdate();
+            // }
 
-            print('📍 Location updated: $_currentLatitude, $_currentLongitude');
+            // print('📍 Location updated: $_currentLatitude, $_currentLongitude');
           },
           onError: (error) {
             print('⚠️ Location watch error: $error');
@@ -552,12 +550,13 @@ class SocketManager {
           _currentRide!['status'] = data['status'];
         }
 
-        // Mark ride as complete
-        final status = data['status'];
+        // Mark ride as complete if status indicates it ended
+        final status = data['status']?.toString().toLowerCase();
         if (status == 'completed' ||
             status == 'finished' ||
-            status == 'ended') {
-          print('✅ Ride completion status received: $status');
+            status == 'ended' ||
+            status == 'cancelled') {
+          print('✅ Ride end status received: $status');
           _completeRide(orderId);
         }
       }
@@ -588,7 +587,7 @@ class SocketManager {
     });
 
     _socket!.on('ride:location', (data) {
-      print('📍 Rider location during ride: $data');
+      // print('📍 Rider location during ride: $data');
       onRideLocationUpdate?.call(data);
     });
 
@@ -809,13 +808,15 @@ class SocketManager {
       final payload = {
         'latitude': _currentLatitude,
         'longitude': _currentLongitude,
-        'vehicleType': _vehicleType2,
+        'vehicleType': _vehicleType,
+        'vehicleSubType': _vehicleType2,
         'vehicleId': _vehicleNumber,
         'vehicleImage': _vehicleImage,
         'fleetId': _fleetId,
         'timestamp': DateTime.now().toIso8601String(),
       };
 
+      print("vehical_type_coming>>>  ${_vehicleType}");
       print("vehical_subtyp[e_coming>>>  ${_vehicleType2}");
       print('>>>>>>   Emitting user:online: $payload');
       _socket!.emit('user:online', payload);
@@ -853,6 +854,9 @@ class SocketManager {
 
       isOnDuty = false;
       _isProcessingOnline = false;
+      _isRideInProgress = false;
+      _activeRideId = null;
+      _currentRide = null;
 
       // Save offline status to SharedPreferences
       await _saveOnlineStatusToPrefs(false);
@@ -892,39 +896,15 @@ class SocketManager {
   void _sendLocationUpdate() {
     if (_socket == null || !_isSocketConnected) return;
 
-    // Only send if location has changed significantly
-    final latDiff = (_currentLatitude - (_lastSentLatitude ?? _currentLatitude))
-        .abs();
-    final lngDiff =
-        (_currentLongitude - (_lastSentLongitude ?? _currentLongitude)).abs();
-
-    if (latDiff < LOCATION_CHANGE_THRESHOLD &&
-        lngDiff < LOCATION_CHANGE_THRESHOLD) {
-      return; // Skip sending if location change is too small
-    }
-
-    // Update last sent coordinates
-    _lastSentLatitude = _currentLatitude;
-    _lastSentLongitude = _currentLongitude;
-
-    // 1. General driver location update
-    final driverPayload = {
-      'latitude': _currentLatitude,
-      'longitude': _currentLongitude,
-      'role': 'Driver',
-      'vehicleType': _vehicleType,
-      'vehicleImage': _vehicleImage,
-      'fleetId': _fleetId,
-      'timestamp': DateTime.now().toIso8601String(),
-    };
-
-    print('📍 Sending location update: $_currentLatitude, $_currentLongitude');
-    _socket!.emit('driver:location:update', driverPayload);
-
-    // 2. Specific ride location update (if in a ride)
     final rideId =
         _activeRideId ?? _currentRide?['orderId'] ?? _currentRide?['rideId'];
-    if (rideId != null && rideId is String) {
+    final bool isRideActive =
+        _isRideInProgress &&
+        rideId != null &&
+        rideId.toString().trim().isNotEmpty;
+
+    if (isRideActive) {
+      // 1. Specific ride location update
       final ridePayload = {
         'rideId': rideId,
         'location': {
@@ -938,14 +918,38 @@ class SocketManager {
         },
       };
 
+      print("📍 [RIDE-MODE] my_ride_location_payload>>> $ridePayload");
       _socket!.emit('ride:location:update', ridePayload);
+    } else {
+      // 2. ONLY send general status if NO ride is in progress
+      if (!_isRideInProgress) {
+        final driverPayload = {
+          'latitude': _currentLatitude,
+          'longitude': _currentLongitude,
+          'role': 'Driver',
+          'vehicleType': _vehicleType,
+          'vehicleImage': _vehicleImage,
+          'fleetId': _fleetId,
+          'timestamp': DateTime.now().toIso8601String(),
+        };
+
+        print(
+          '📍 [DRIVER-MODE] Sending general driver location update: $_currentLatitude, $_currentLongitude',
+        );
+        _socket!.emit('driver:location:update', driverPayload);
+      } else {
+        // Extra safety: we are in a ride, but rideId was missing/empty
+        print(
+          '⚠️ [SAFETY-BLOCK] Suppressing driver:location:update - Ride is in progress but ID is invalid: "$rideId"',
+        );
+      }
     }
   }
 
   void _startLocationUpdates() {
     _stopLocationUpdates();
 
-    print('🔄 Starting location update broadcasts every 2 seconds');
+    print('🔄 Starting location update broadcasts every 3 seconds');
 
     _locationUpdateTimer = Timer.periodic(
       const Duration(milliseconds: LOCATION_UPDATE_INTERVAL),
@@ -1036,6 +1040,12 @@ class SocketManager {
 
     print('❌ Declining ride: $payload');
     _socket!.emit('ride:decline', payload);
+
+    // Ensure we return to general location updates
+    _isRideInProgress = false;
+    _activeRideId = null;
+    _currentRide = null;
+
     return true;
   }
 

@@ -35,7 +35,9 @@ class EnterOtpScreen extends StatefulWidget {
 class _EnterOtpScreenState extends State<EnterOtpScreen> {
   final Controllers contentController = Get.put(Controllers());
   final OtpController otpController = Get.put(OtpController());
-  final LoginController loginController = Get.put(LoginController());
+  // final LoginController loginController = Get.put(LoginController());
+
+  final LoginController loginController = Get.find<LoginController>();
 
   bool isLoading = false;
   String errorMessage = '';
@@ -461,7 +463,12 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
                         );
                       } else {
                         return GestureDetector(
-                          onTap: otpController.resendCode,
+                          onTap: () {
+                            otpController.resendCode(
+                              phoneNumber: widget.phoneNumber,
+                            );
+                          },
+
                           child: CustomText(
                             text: "Resend OTP",
                             textFontSize: w * .035,

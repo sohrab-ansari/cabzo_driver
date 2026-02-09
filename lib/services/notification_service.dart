@@ -237,7 +237,7 @@ class NotificationService {
         return;
       }
 
-      print('🔑 [NotificationService] FCM Token: $_fcmToken');
+      print('>>>>>>>>>>>>>> [NotificationService] FCM Token: $_fcmToken');
 
       // Persist token and device info
       await _persistTokenAndDeviceInfo();

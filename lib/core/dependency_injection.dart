@@ -1,3 +1,4 @@
+import 'package:nzcu_driver/controllers/auth_controllers/login.controller.dart';
 import 'package:nzcu_driver/controllers/auth_controllers/vehicle_subtypes_controller.dart';
 import 'package:nzcu_driver/controllers/auth_controllers/vehicle_types_controller.dart';
 import 'package:nzcu_driver/controllers/book_ride_controller/create_By_driver_controller.dart';
@@ -54,6 +55,10 @@ class DependencyInjection {
     Get.put(DriverToggleDutyController(), permanent: true);
 
     Get.put(CreateByDriverController(), permanent: true);
+
+    Get.put(LoginController(), permanent: true);
+
+    // final LoginController loginController = Get.put(LoginController());
 
   }
 }

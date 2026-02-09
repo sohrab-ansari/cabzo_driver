@@ -1,6 +1,13 @@
 class ApiPath {
+
+
+  //asad server
   static const String baseUri2 = "https://corezap.smarttechbros.com/api/v1"; 
-   // asad server
+  
+
+
+
+  //nzcu server
 
   // static const String baseUri2 = "https://api.nzcu.framekarts.com/api/v1"; 
 
@@ -9,8 +16,15 @@ class ApiPath {
   // static const String baseUri = "https://api.corezap.framekarts.com/api/v1"; //
 
 
+
+
+
+
+//asad server
+
    static const String baseUri = "https://corezap.smarttechbros.com/api/v1";
 
+  //nzcu server
 
   // static const String baseUri = "https://api.nzcu.framekarts.com/api/v1";
 // 
