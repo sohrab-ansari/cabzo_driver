@@ -5,8 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/core/dependency_injection.dart';
 import 'package:nzcu_driver/firebase_options.dart';
-import 'package:nzcu_driver/services/notification_service.dart';
-import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/services/notification_services/notification_service.dart';
+import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/views/splash/splash_screen.dart';
 
 @pragma('vm:entry-point')
@@ -17,7 +17,7 @@ Future<void> _firebaseBackgroundMessageHandler(RemoteMessage message) async {
 
   print('📩 [Background] Message received: ${message.messageId}');
 
-  // Use the singleton instance
+  // Use the singleton instance------
   await NotificationService.instance.showNotificationInBackground(message);
 }
 

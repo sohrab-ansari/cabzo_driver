@@ -1,5 +1,6 @@
-import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
-import 'package:nzcu_driver/modals/chartid_response.dart';
+import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
+import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
+import 'package:nzcu_driver/modals/home_modals/chat_id_response.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
@@ -20,7 +21,7 @@ class ChatHistoryController extends GetxController {
 
     try {
       final ChatResponse res =
-          await ProfileApiServices.get_chat_messages_data(chatId: chatId);
+          await HomeApiServices.get_chat_messages_data(chatId: chatId);
 
       chatResponse.value = res;
     } catch (e) {

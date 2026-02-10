@@ -1,9 +1,9 @@
-import 'package:nzcu_driver/controllers/controllers.dart';
-import 'package:nzcu_driver/utilities/app_buttons.dart';
+import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
+import 'package:nzcu_driver/utilities/widgets/app_buttons.dart';
 import 'package:nzcu_driver/utilities/colors/colors_list.dart';
-import 'package:nzcu_driver/utilities/custom_images.dart';
-import 'package:nzcu_driver/utilities/custom_text.dart';
-import 'package:nzcu_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_images.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_text.dart';
+import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:nzcu_driver/views/popups/pop_ups.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';

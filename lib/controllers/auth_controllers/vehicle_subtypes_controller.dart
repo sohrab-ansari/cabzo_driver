@@ -1,6 +1,7 @@
-import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
-import 'package:nzcu_driver/modals/get_all_sub_vehicle_categories_response.dart';
-import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/services/apiservices/auth_api_service.dart';
+import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
+import 'package:nzcu_driver/modals/auth_modals/get_all_sub_vehicle_categories_response.dart';
+import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -71,7 +72,7 @@ class VehicleSubtypesController extends GetxController {
     try {
       // Call API
       final GetAllsubVehicleCategoriesResponse response =
-          await ProfileApiServices.get_sub_vehical_data(
+          await AuthApiService.get_sub_vehical_data(
             vehicalCategoryId: vehicalCategoryId,
             limit: fetchLimit,
             page: fetchPage,

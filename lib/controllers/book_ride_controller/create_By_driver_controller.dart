@@ -1,8 +1,8 @@
 // import 'package:nzcu_driver/api_services/profile_api_services.dart';
-import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
-import 'package:nzcu_driver/modals/create_by_driver_respose.dart';
+import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
+import 'package:nzcu_driver/modals/auth_modals/create_by_driver_respose.dart';
 // import 'package:nzcu_driver/views/payment_modes_screen/cash_payment_screen.dart';
-import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:get/get.dart';
 
 class CreateByDriverController extends GetxController {

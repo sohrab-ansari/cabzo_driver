@@ -1,8 +1,8 @@
 
 
 
-import 'package:nzcu_driver/modals/review_rating_response.dart';
-import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
+import 'package:nzcu_driver/modals/profile_modals/review_rating_response.dart';
+import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 
 // import 'package:nzcu_driver/apiServices/services/profile_api_services.dart';
 import 'package:flutter/material.dart';

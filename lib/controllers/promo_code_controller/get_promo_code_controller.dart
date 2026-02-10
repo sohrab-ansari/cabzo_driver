@@ -1,48 +1,31 @@
-import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
-import 'package:nzcu_driver/modals/get_promo_code_data.dart';
-import 'package:nzcu_driver/modals/order_complete_cash_response.dart';
-// import 'package:nzcu_driver/views/payment_modes_screen/cash_payment_screen.dart';
-import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
+import 'package:nzcu_driver/modals/profile_modals/get_promo_code_data.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class GetPromoCodeController extends GetxController {
-  // Rx variables for state management
   Rx<Getpromocodedata?> cashResponse = Rx<Getpromocodedata?>(null);
   RxBool isLoading = false.obs;
   RxString errorMessage = ''.obs;
 
-  // Process cash payment
-  Future<void> getPromoCode(
-  
-  )
-   async {
-
-    
+  Future<void> getPromoCode() async {
     // Reset states
     isLoading.value = true;
     errorMessage.value = '';
     cashResponse.value = null;
-    
+
     try {
-      // Call API
-      final Getpromocodedata response = 
+      final Getpromocodedata response =
           await ProfileApiServices.get_promocode_data();
-      
-      // Update response
+
       cashResponse.value = response;
-      
+
       if (response.success == true) {
         print("promo code data successful");
-        
-    
-        
       } else {
-        // Payment failed
         errorMessage.value = response.message ?? 'promo code Please try again.';
         print("❌ getPromoCode failed: ${errorMessage.value}");
-        
-        // Show error snackbar
+
         Get.snackbar(
           'promo code d Failed',
           errorMessage.value,
@@ -53,13 +36,10 @@ class GetPromoCodeController extends GetxController {
           margin: const EdgeInsets.all(10),
         );
       }
-      
     } catch (e) {
-      // Handle exceptions
       errorMessage.value = 'An error occurred: $e';
       print("❌ Exception in promo code d: $e");
-      
-      // Show error snackbar
+
       Get.snackbar(
         'Error',
         'Something went wrong. Please try again.',
@@ -69,7 +49,6 @@ class GetPromoCodeController extends GetxController {
         duration: const Duration(seconds: 3),
         margin: const EdgeInsets.all(10),
       );
-      
     } finally {
       // Always reset loading state
       isLoading.value = false;
@@ -77,5 +56,4 @@ class GetPromoCodeController extends GetxController {
   }
 
   // Navigate to home screen
- 
 }

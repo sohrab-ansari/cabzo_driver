@@ -1,13 +1,12 @@
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/driverid_controller.dart';
-import 'package:nzcu_driver/services/socket_manager.dart';
-import 'package:nzcu_driver/utilities/colors.dart';
-import 'package:nzcu_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/services/apiservices/socket_manager.dart';
+import 'package:nzcu_driver/utilities/colors/colors.dart';
+import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:nzcu_driver/views/auth/login_screen.dart';
-import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
-import 'package:nzcu_driver/views/bottomNavigation/home_screen.dart';
-import 'package:nzcu_driver/views/onboarding/onboarding_screen.dart';
+import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/views/Homeviewscreens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

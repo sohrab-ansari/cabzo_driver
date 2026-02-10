@@ -1,10 +1,10 @@
 import 'dart:io';
-import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
+import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/wallet_controller.dart';
-import 'package:nzcu_driver/modals/bank_account_add_Res.dart';
-import 'package:nzcu_driver/utilities/navigator.dart';
-import 'package:nzcu_driver/views/profile_related.dart/payment_screen.dart';
+import 'package:nzcu_driver/modals/profile_modals/bank_account_add_Res.dart';
+import 'package:nzcu_driver/utilities/widgets/navigator.dart';
+import 'package:nzcu_driver/views/profile_screens/payment_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';

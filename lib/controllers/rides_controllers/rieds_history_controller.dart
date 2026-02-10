@@ -1,38 +1,22 @@
-import 'dart:io';
-
-import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
-import 'package:nzcu_driver/modals/driver_Image_upload_res.dart';
-import 'package:nzcu_driver/modals/home_modal_response.dart';
-
-import 'package:nzcu_driver/modals/ride_history_response2.dart';
-import 'package:nzcu_driver/modals/transactions_response.dart';
-import 'package:nzcu_driver/modals/wallet_response.dart';
-import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
-
-// import 'package:nzcu_driver/apiServices/services/auth_api_service.dart';
-// import 'package:nzcu_driver/apiServices/services/profile_api_services.dart';
-import 'package:nzcu_driver/utilities/navigator.dart';
-import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
+import 'package:nzcu_driver/modals/home_modals/ride_history_response.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
 class RiedsHistoryController extends GetxController {
-  Rx<RideHistoryResponse2?> transactionsres = Rx<RideHistoryResponse2?>(null);
+  Rx<RideHistoryResponse?> transactionsres = Rx<RideHistoryResponse?>(null);
   RxBool isLoading = false.obs;
   RxString errorMessage = ''.obs;
 
-
-
-  Future<void> get_history_method({required String  status}) async {
+  Future<void> get_history_method({required String status}) async {
     print("rides history called");
 
     isLoading.value = true;
     errorMessage.value = '';
 
     try {
-      final RideHistoryResponse2 res =
-          await ProfileApiServices.get_rides_history_data(status: status);
+      final RideHistoryResponse res =
+          await HomeApiServices.get_rides_history_data(status: status);
 
       print("API Response: ${res.success}");
       print("API Data: ${res.data?.length}");
@@ -65,5 +49,4 @@ class RiedsHistoryController extends GetxController {
       isLoading.value = false;
     }
   }
-
 }

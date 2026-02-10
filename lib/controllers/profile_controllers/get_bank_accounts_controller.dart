@@ -1,16 +1,16 @@
 import 'dart:io';
 
-import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
+import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
-import 'package:nzcu_driver/modals/driverId_response.dart';
-import 'package:nzcu_driver/modals/driver_Image_upload_res.dart';
-import 'package:nzcu_driver/modals/get_bank_accounts_response.dart';
-import 'package:nzcu_driver/modals/home_modal_response.dart';
-import 'package:nzcu_driver/modals/transactions_response.dart';
-import 'package:nzcu_driver/modals/wallet_response.dart';
+import 'package:nzcu_driver/modals/home_modals/driverId_response.dart';
+import 'package:nzcu_driver/modals/auth_modals/driver_Image_upload_res.dart';
+import 'package:nzcu_driver/modals/profile_modals/get_bank_accounts_response.dart';
+import 'package:nzcu_driver/modals/home_modals/home_modal_response.dart';
+import 'package:nzcu_driver/modals/profile_modals/transactions_response.dart';
+import 'package:nzcu_driver/modals/profile_modals/wallet_response.dart';
 
-import 'package:nzcu_driver/utilities/navigator.dart';
-import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/utilities/widgets/navigator.dart';
+import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
