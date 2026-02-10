@@ -10,7 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class Wallet extends StatefulWidget {
-  const Wallet({super.key});
+  dynamic balance;
+  Wallet({super.key, required this.balance});
 
   @override
   State<Wallet> createState() => _WalletState();
@@ -84,7 +85,9 @@ class _WalletState extends State<Wallet> {
                           ),
                           AppFonts.textPoppins(
                             context,
-                            "100.0",
+
+                            // "100.0",
+                            widget.balance.toStringAsFixed(2) ?? '0.00',
                             w * 0.08,
                             FontWeight.bold,
                             AppColors.green,

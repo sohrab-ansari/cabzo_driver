@@ -6,6 +6,7 @@ import 'package:nzcu_driver/controllers/chart_id_controller/chartid_controller.d
 import 'package:nzcu_driver/controllers/home_controllers/cash_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/driver_toggle_duty_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
+import 'package:nzcu_driver/controllers/notification_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/bank_account_add_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/review_and_rating_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/terms_and_policy_controller.dart';
@@ -13,7 +14,7 @@ import 'package:nzcu_driver/controllers/profile_controllers/transaction_controll
 import 'package:nzcu_driver/controllers/profile_controllers/wallet_controller.dart';
 import 'package:nzcu_driver/controllers/promo_code_controller/get_promo_code_controller.dart';
 import 'package:nzcu_driver/controllers/rides_controllers/rieds_history_controller.dart';
-import 'package:nzcu_driver/services/notification_controller.dart';
+import 'package:nzcu_driver/services/notification_service_controller.dart';
 import 'package:nzcu_driver/services/socket_manager.dart';
 import 'package:nzcu_driver/views/scheduled_pickups/otp_and_Declined_files/decline_Order_controller.dart';
 import 'package:nzcu_driver/views/scheduled_pickups/otp_and_Declined_files/verify_Otp_Order_controller.dart';
@@ -48,7 +49,7 @@ class DependencyInjection {
 
     Get.put(GetPromoCodeController(), permanent: true);
 
-    Get.put(NotificationController(), permanent: true);
+    Get.put(NotificationServiceController(), permanent: true);
 
     Get.put(VehicleSubtypesController(), permanent: true);
 
@@ -57,6 +58,8 @@ class DependencyInjection {
     Get.put(CreateByDriverController(), permanent: true);
 
     Get.put(LoginController(), permanent: true);
+
+    Get.put(NotificationController(), permanent: true);
 
     // final LoginController loginController = Get.put(LoginController());
 

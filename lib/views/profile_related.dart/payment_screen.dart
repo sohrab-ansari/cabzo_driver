@@ -484,7 +484,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         InkWell(
-                          onTap: () => Get.to(() => Wallet()),
+                          onTap: (){
+                            
+                          },
+                          // onTap: () => Get.to(() => Wallet(balance:  controller.walletresponse.value?.data?.availableBalance,)),
                           child: Container(
                             width: double.infinity,
                             color: ColorsList.scaffoldColor,

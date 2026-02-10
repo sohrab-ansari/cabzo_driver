@@ -39,21 +39,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final List<String> firstImagePathList = [
     "assets/icons/material-symbols_payments-outline-sharp.png",
     "assets/icons/ic_round-star.png",
-    "assets/icons/mingcute_document-2-fill.png",
+    // "assets/icons/mingcute_document-2-fill.png",
     "assets/icons/Gift.png",
   ];
 
   final List<Widget> firstScreens = [
     PaymentScreen(),
     Review(),
-    Documents(),
+    // Documents(),
     NotificationScreen(),
   ];
 
   final List<String> firstTitleList = [
     "Payment",
     "Rating",
-    "Documents",
+    // "Documents",
     "Notifications",
   ];
 
@@ -248,7 +248,9 @@ CustomText(
                 screens[index],
                 transition: TransitionType.slideLeft,
               ),
-              child: customMenuItemsButton(images[index], titles[index]),
+              child: 
+              
+              customMenuItemsButton(images[index], titles[index]),
             ),
           ),
         );

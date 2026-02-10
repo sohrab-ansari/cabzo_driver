@@ -16,6 +16,7 @@ import 'package:nzcu_driver/modals/get_all_vehicle_categories_response.dart';
 import 'package:nzcu_driver/modals/get_bank_accounts_response.dart';
 import 'package:nzcu_driver/modals/get_promo_code_data.dart';
 import 'package:nzcu_driver/modals/home_modal_response.dart';
+import 'package:nzcu_driver/modals/notification_response.dart';
 import 'package:nzcu_driver/modals/order_complete_cash_response.dart';
 import 'package:nzcu_driver/modals/payments_withdraw_response.dart';
 import 'package:nzcu_driver/modals/review_rating_response.dart';
@@ -1385,6 +1386,81 @@ class ProfileApiServices {
   //       );
   //     }
   //   }
+
+  static Future<NotificationResponse> get_notification_data() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+
+    final Uri url = Uri.parse("${ApiPath.baseUri}/notification/userNotifications");
+
+    print("========== 🔵 CASH PAYMENT API ==========");
+    print("URL : $url");
+    print("Token : $token");
+
+    try {
+      final http.Response response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        // body: jsonEncode({"orderId": orderid}),
+      );
+
+      print("✅ Status Code : ${response.statusCode}");
+
+      print("thee_response_notification_bodyyyyyy ${response.body}");
+      // Check if response is valid JSON
+      if (response.body.trim().isEmpty) {
+        throw FormatException("Empty response from server");
+      }
+
+      // Check if response is HTML (error page)
+      if (response.body.trim().startsWith('<!DOCTYPE html>') ||
+          response.body.trim().startsWith('<html')) {
+        throw FormatException(
+          "Server returned HTML error page. Check endpoint URL.",
+        );
+      }
+
+      // Try to parse JSON
+      dynamic decodedJson;
+      try {
+        decodedJson = jsonDecode(response.body);
+      } catch (jsonError) {
+        print("JSON Parse Error: $jsonError");
+        print("Raw Response: ${response.body}");
+        throw FormatException("Invalid JSON response from server");
+      }
+
+      // Pretty print for debugging
+      final prettyJson = const JsonEncoder.withIndent(
+        '  ',
+      ).convert(decodedJson);
+      print("📦 FULL RESPONSE (Pretty Print) 👇");
+      print(prettyJson);
+
+      // Parse the response
+      final NotificationResponse notificationResponse = NotificationResponse.fromJson(
+        decodedJson,
+      );
+
+      print("🎯 Parsed Model Object 👇");
+      print(notificationResponse);
+
+      return notificationResponse;
+    } catch (e) {
+      print("❌ Exception in get_notification_data");
+      print(e.toString());
+
+      // Return a proper error response
+      return NotificationResponse(
+        success: false,
+        message: "Connection error: ${e.toString()}",
+      );
+    }
+  }
+
 
   static Future<Getpromocodedata> get_promocode_data() async {
     final prefs = await SharedPreferences.getInstance();

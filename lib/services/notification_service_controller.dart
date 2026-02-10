@@ -4,7 +4,7 @@
 import 'package:get/get.dart';
 import 'package:nzcu_driver/services/notification_service.dart';
 
-class NotificationController extends GetxController {
+class NotificationServiceController extends GetxController {
   // ============================================================================
   // OBSERVABLES
   // ============================================================================
@@ -22,7 +22,7 @@ class NotificationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    print('📱 [NotificationController] Initializing...');
+    print('📱 [NotificationServiceController] Initializing...');
     _initializeNotifications();
   }
 
@@ -46,11 +46,11 @@ class NotificationController extends GetxController {
       isInitialized.value = true;
       isPermissionGranted.value = fcmToken.value != null;
 
-      print('✅ [NotificationController] Initialization complete');
+      print('✅ [NotificationServiceController] Initialization complete');
       print('   FCM Token: ${fcmToken.value}');
       print('   Device ID: ${deviceId.value}');
     } catch (e) {
-      print('❌ [NotificationController] Initialization failed: $e');
+      print('❌ [NotificationServiceController] Initialization failed: $e');
     } finally {
       isLoading.value = false;
     }
@@ -70,7 +70,7 @@ class NotificationController extends GetxController {
   Future<void> _checkInitialMessage() async {
     final message = await NotificationService.instance.getInitialMessage();
     if (message != null) {
-      print('🚀 [NotificationController] App opened from notification');
+      print('🚀 [NotificationServiceController] App opened from notification');
       _handleNotificationData(message.data);
     }
   }
@@ -92,9 +92,9 @@ class NotificationController extends GetxController {
       // Load new token
       await _loadStoredData();
 
-      print('🔄 [NotificationController] Token refreshed: ${fcmToken.value}');
+      print('🔄 [NotificationServiceController] Token refreshed: ${fcmToken.value}');
     } catch (e) {
-      print('❌ [NotificationController] Token refresh failed: $e');
+      print('❌ [NotificationServiceController] Token refresh failed: $e');
     } finally {
       isLoading.value = false;
     }
@@ -122,7 +122,7 @@ class NotificationController extends GetxController {
     await NotificationService.instance.deleteToken();
     fcmToken.value = null;
     isInitialized.value = false;
-    print('🗑️ [NotificationController] Notification data cleared');
+    print('🗑️ [NotificationServiceController] Notification data cleared');
   }
 
   // ============================================================================
@@ -134,7 +134,7 @@ class NotificationController extends GetxController {
     final String? orderId =
         data['orderId']?.toString() ?? data['order_id']?.toString();
 
-    print('🧭 [NotificationController] Handling notification navigation');
+    print('🧭 [NotificationServiceController] Handling notification navigation');
     print('   Screen: $screen');
     print('   OrderId: $orderId');
 
