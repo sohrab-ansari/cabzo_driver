@@ -1,10 +1,13 @@
-
-
+import 'dart:convert';
 import 'dart:math';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:nzcu_driver/services/apiservices/socket_manager.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
+import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
+import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
 
 class NotificationService {
   // Private constructor - Singleton pattern
@@ -93,7 +96,9 @@ class NotificationService {
   Future<void> showNotificationInBackground(RemoteMessage message) async {
     try {
       // Initialize local notifications plugin in background
-      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const androidSettings = AndroidInitializationSettings(
+        '@mipmap/ic_launcher',
+      );
       const iosSettings = DarwinInitializationSettings(
         requestAlertPermission: false,
         requestBadgePermission: false,
@@ -103,15 +108,15 @@ class NotificationService {
         android: androidSettings,
         iOS: iosSettings,
       );
-      
+
       await _localNotifications.initialize(initSettings);
-      
+
       // Create channel if needed
       final androidPlugin = _localNotifications
           .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin
           >();
-      
+
       if (androidPlugin != null) {
         const channel = AndroidNotificationChannel(
           channelId,
@@ -124,10 +129,10 @@ class NotificationService {
         );
         await androidPlugin.createNotificationChannel(channel);
       }
-      
+
       // Show notification
       await showNotification(message);
-      
+
       print('✅ [Background] Notification displayed');
     } catch (e) {
       print('❌ [Background] Failed to show notification: $e');
@@ -159,9 +164,22 @@ class NotificationService {
     await _localNotifications.initialize(
       initSettings,
       onDidReceiveNotificationResponse: _onNotificationTap,
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
 
     print('✅ [NotificationService] Local notifications initialized');
+  }
+
+  @pragma('vm:entry-point')
+  static void notificationTapBackground(
+    NotificationResponse notificationResponse,
+  ) {
+    // Handle background notification tap/action
+    print(
+      '👆 [NotificationService] Background notification action: ${notificationResponse.actionId}',
+    );
+    // We can't use GetX or non-static members here.
+    // Usually we'd use a BackgroundService or similar to signal the accept/decline.
   }
 
   Future<void> _createNotificationChannel() async {
@@ -349,6 +367,60 @@ class NotificationService {
   // NOTIFICATION DISPLAY
   // ============================================================================
 
+  /// Show a notification for a ride request with Accept/Decline buttons
+  Future<void> showRideRequestNotification(
+    Map<String, dynamic> rideData,
+  ) async {
+    try {
+      final String orderId = rideData['orderId']?.toString() ?? 'unknown';
+      final String riderName = rideData['riderName']?.toString() ?? 'New Rider';
+      final String pickup =
+          rideData['pickupAddress']?.toString() ?? 'Pickup Location';
+
+      final androidDetails = AndroidNotificationDetails(
+        channelId,
+        channelName,
+        channelDescription: channelDescription,
+        importance: Importance.max,
+        priority: Priority.max,
+        fullScreenIntent: true,
+        category: AndroidNotificationCategory.call,
+        actions: <AndroidNotificationAction>[
+          const AndroidNotificationAction(
+            'accept_ride',
+            'Accept',
+            cancelNotification: true,
+            contextual: false,
+            icon: DrawableResourceAndroidBitmap('ic_launcher'),
+          ),
+          const AndroidNotificationAction(
+            'decline_ride',
+            'Decline',
+            cancelNotification: true,
+            contextual: false,
+            icon: DrawableResourceAndroidBitmap('ic_launcher'),
+          ),
+        ],
+      );
+
+      final notificationDetails = NotificationDetails(android: androidDetails);
+
+      await _localNotifications.show(
+        888, // Constant ID for ride requests
+        'New Ride Request!',
+        'Rider: $riderName\nPickup: $pickup',
+        notificationDetails,
+        payload: jsonEncode(rideData),
+      );
+
+      print(
+        '✅ [NotificationService] Ride request notification shown for $orderId',
+      );
+    } catch (e) {
+      print('❌ [NotificationService] Failed to show ride notification: $e');
+    }
+  }
+
   /// Show a local notification from a RemoteMessage
   Future<void> showNotification(RemoteMessage message) async {
     try {
@@ -418,10 +490,70 @@ class NotificationService {
   /// Handle notification tap when app is in foreground
   void _onNotificationTap(NotificationResponse response) {
     print('👆 [NotificationService] Notification tapped (foreground)');
+    print('   ActionId: ${response.actionId}');
     print('   Payload: ${response.payload}');
 
     if (response.payload != null) {
-      _handleNotificationNavigationFromPayload(response.payload!);
+      try {
+        final Map<String, dynamic> data = jsonDecode(response.payload!);
+
+        if (response.actionId == 'accept_ride') {
+          print('✅ User clicked ACCEPT from notification');
+          final String? orderId =
+              data['orderId']?.toString() ??
+              data['rideId']?.toString() ??
+              data['_id']?.toString();
+
+          if (orderId != null) {
+            // Trigger API Call via Controller
+            final orderUpdateController = Get.find<OrderUpdateController>();
+
+            // Use overlay context or Get.context
+            final context = Get.overlayContext ?? Get.context;
+
+            if (context != null) {
+              orderUpdateController.updateOrder(
+                context: context,
+                buttonId: 'accept_button',
+                orderStatus: "Accepted",
+                orderId: orderId,
+                rideData: data, // Pass full ride data from payload
+                stepControl: "Accepted",
+                successMessage: 'Ride accepted successfully!',
+                shouldTriggerNavigation: true, // As requested by user
+              );
+
+              // Navigate to Arriving Client Screen
+              print('🚕 Navigating to ArrivingClient...');
+              Get.to(
+                () => ArrivingClient(typeCheck: false, rideData: data),
+                transition: Transition.fadeIn,
+              );
+            } else {
+              print(
+                '❌ [NotificationService] No context available for API call',
+              );
+            }
+          }
+        } else if (response.actionId == 'decline_ride') {
+          print('❌ User clicked DECLINE from notification');
+          final String? orderId =
+              data['orderId']?.toString() ??
+              data['rideId']?.toString() ??
+              data['_id']?.toString();
+
+          if (orderId != null) {
+            SocketManager().declineRide(
+              orderId,
+              reason: 'Declined via notification',
+            );
+          }
+        } else {
+          _handleNotificationNavigationFromPayload(response.payload!);
+        }
+      } catch (e) {
+        print('❌ [NotificationService] Error in _onNotificationTap: $e');
+      }
     }
   }
 

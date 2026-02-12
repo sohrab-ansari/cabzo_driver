@@ -6,8 +6,24 @@ import 'package:get/get.dart';
 import 'package:nzcu_driver/core/dependency_injection.dart';
 import 'package:nzcu_driver/firebase_options.dart';
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
+import 'package:nzcu_driver/services/background_service.dart';
+import 'package:flutter_background_geolocation/flutter_background_geolocation.dart'
+    as bg;
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/views/splash/splash_screen.dart';
+
+@pragma('vm:entry-point')
+void headlessTask(bg.HeadlessEvent event) async {
+  print('[HeadlessTask] Event: ${event.name}');
+  if (event.name == bg.Event.LOCATION) {
+    bg.Location location = event.event;
+    print(
+      '[HeadlessTask] Location: ${location.coords.latitude}, ${location.coords.longitude}',
+    );
+    // Note: We could emit socket here, but BackgroundService should already be doing it if running.
+    // Headless tasks are for when the app is completely terminated and BackgroundService isolate might be resting.
+  }
+}
 
 @pragma('vm:entry-point')
 Future<void> _firebaseBackgroundMessageHandler(RemoteMessage message) async {
@@ -24,6 +40,9 @@ Future<void> _firebaseBackgroundMessageHandler(RemoteMessage message) async {
 void main() async {
   // Ensure Flutter widgets are initialized
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Register HeadlessTask for flutter_background_geolocation
+  bg.BackgroundGeolocation.registerHeadlessTask(headlessTask);
 
   print('');
   print('=' * 60);
@@ -69,10 +88,16 @@ void main() async {
     // ========================================================================
     // 6. PRINT SUCCESS MESSAGE
     // ========================================================================
-    print('');
     print('🎉 All services initialized successfully!');
     print('=' * 60);
     print('');
+
+    // ========================================================================
+    // 7. BACKGROUND SERVICE INITIALIZATION
+    // ========================================================================
+    print('7️⃣ Initializing Background Service...');
+    await BackgroundService.initializeService();
+    print('   ✅ Background service initialized');
   } catch (e, stackTrace) {
     print('');
     print('❌ ERROR DURING INITIALIZATION ❌');

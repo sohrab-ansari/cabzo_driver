@@ -14,6 +14,7 @@ import 'package:nzcu_driver/views/ride_screens/ride_request_screen.dart';
 import 'package:nzcu_driver/utilities/widgets/home_screen_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -52,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _hasPendingRideRequest = false;
 
   // App lifecycle
-  bool _appInBackground = false;
+  // bool _appInBackground = false; // Removed as requested to use background plugins instead
 
   // UI State
   String _selectedTab = "Driver";
@@ -84,7 +85,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     driveridController.driverid_mdethod();
     // driverToggleDutyController.driver_toggle_method();
 
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addObserver(
+      this,
+    ); // Lifecycle observer for background sync
     _initializeApp();
     sharedpreferences();
 
@@ -293,6 +296,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _processRideRequest(Map<String, dynamic> rideData) {
+    if (!mounted) return;
     print('🚕 Processing ride request...');
 
     Navigator.push(
@@ -334,63 +338,87 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
+  // ==================== APP LIFECYCLE (Background Sync) ====================
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('📱 App lifecycle changed: $state');
+    super.didChangeAppLifecycleState(state);
 
-    setState(() {
-      _appInBackground =
-          state == AppLifecycleState.paused ||
-          state == AppLifecycleState.inactive;
-    });
+    if (state == AppLifecycleState.paused) {
+      // App is going to background (minimized)
+      print('⏸️ [HomeScreen] App moved to BACKGROUND');
 
-    switch (state) {
-      case AppLifecycleState.resumed:
-        _onAppResumed();
-        break;
-      case AppLifecycleState.paused:
-        _onAppPaused();
-        break;
-      default:
-        break;
+      // If driver is online, ensure background service is running
+      if (socketManager.isOnDuty) {
+        _ensureBackgroundServiceRunning();
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      // App is coming back to foreground
+      print('▶️ [HomeScreen] App moved to FOREGROUND');
+
+      // Re-sync state from SharedPreferences (background may have changed things)
+      _syncStateFromBackground();
     }
   }
 
-  void _onAppResumed() {
-    print('📱 App resumed from background');
-
-    if (_appInBackground) {
-      _appInBackground = false;
-
-      // ✅ FIX: Restore online status after app restart
-      _restoreOnlineStatusAfterResume();
-    }
-  }
-
-  /// Restore online status if driver was online before app was paused/restarted
-  Future<void> _restoreOnlineStatusAfterResume() async {
-    print('🔄 Checking if driver was online before pause...');
-
+  /// Ensure background service is running when app goes to background
+  Future<void> _ensureBackgroundServiceRunning() async {
     try {
-      // Wait a moment for socket to stabilize
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      // Try to restore online status
-      // await socketManager.restoreOnlineStatus();
-    } catch (error) {
-      print('❌ Error restoring online status after resume: $error');
+      final service = FlutterBackgroundService();
+      bool isRunning = await service.isRunning();
+      if (!isRunning) {
+        print(
+          '🚀 [HomeScreen] Starting background service (app going to bg)...',
+        );
+        await service.startService();
+      } else {
+        print('✅ [HomeScreen] Background service already running');
+      }
+    } catch (e) {
+      print('⚠️ [HomeScreen] Error ensuring background service: $e');
     }
   }
 
-  void _onAppPaused() {
-    print('📱 App going to background');
-    _appInBackground = true;
-    _clearPendingRideRequest();
+  /// Re-sync SocketManager state when app comes back to foreground
+  Future<void> _syncStateFromBackground() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // Check if ride state changed while in background
+      final bgRideInProgress = prefs.getBool("is_ride_in_progress") ?? false;
+      final bgActiveRideId = prefs.getString("active_ride_id") ?? "";
+
+      print('🔄 [HomeScreen] Syncing from background:');
+      print('   - Ride in progress: $bgRideInProgress');
+      print('   - Active ride ID: $bgActiveRideId');
+
+      // Refresh vehicle data (may have been updated)
+      await socketManager.refreshVehicleData();
+
+      // Ensure socket is still connected (reconnect if needed)
+      if (socketManager.isOnDuty && !socketManager.isSocketConnected) {
+        print(
+          '🔌 [HomeScreen] Socket disconnected while in bg, reconnecting...',
+        );
+        await socketManager.connectSocket();
+
+        // Re-emit online status after reconnect
+        if (socketManager.isSocketConnected) {
+          await socketManager.goOnline();
+        }
+      }
+
+      // Refresh UI
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      print('⚠️ [HomeScreen] Error syncing from background: $e');
+    }
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this); // Remove lifecycle observer
     // ❌ DON'T dispose SocketManager here - it's a singleton used across the app
     // Only remove the observer and cleanup local resources
     // socketManager.dispose() should only be called on app logout
