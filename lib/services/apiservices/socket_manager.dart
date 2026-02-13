@@ -101,6 +101,8 @@ class SocketManager with WidgetsBindingObserver {
   // Configuration
   // static const String SOCKET_URL = 'https://api.corezap.framekarts.com';
 
+  //  static const String SOCKET_URL = 'https://api.nzcu.framekarts.com';
+
   static const String SOCKET_URL = 'https://corezap.smarttechbros.com';
 
   //nzcu url
@@ -673,7 +675,9 @@ class SocketManager with WidgetsBindingObserver {
     });
 
     _socket!.on('ride:orderCancelled', (data) {
+      print("hellooo>>> cancelled");
       print('userrrr_side____Canceeledddd>>>>>>>>>>>>>>>>: ${data}');
+
       // Handle order cancelled notification
     });
 
@@ -735,6 +739,9 @@ class SocketManager with WidgetsBindingObserver {
       final rideId = data['rideId'] ?? data['orderId'];
 
       if (rideId != null && rideId is String) {
+        // ✅ Notify native side to clear ride state
+        _nativeChannel.invokeMethod('clearRideState');
+
         _completeRide(rideId);
         _currentRide = null;
         onRideCancelled?.call(data);
@@ -1359,6 +1366,9 @@ class SocketManager with WidgetsBindingObserver {
     _currentRide = null;
     _saveRideStateToPrefs(); // Reset state for background isolate
 
+    // ✅ Notify native side to clear ride state
+    _nativeChannel.invokeMethod('clearRideState');
+
     return true;
   }
 
@@ -1371,6 +1381,9 @@ class SocketManager with WidgetsBindingObserver {
         _isRideInProgress = false;
         _currentRide = null;
         _saveRideStateToPrefs(); // Reset state for background isolate
+
+        // ✅ Notify native side to clear ride state
+        _nativeChannel.invokeMethod('clearRideState');
 
         // Clear persisted ride data
         _clearPersistedRide();

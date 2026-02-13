@@ -140,7 +140,7 @@ class RideRequestActivity : AppCompatActivity() {
     }
 
     private fun handleAccept() {
-        Log.d(TAG, "Accepting ride")
+        Log.d(TAG, "✅ User clicked ACCEPT button")
         val serviceIntent = Intent(this, LocationService::class.java).apply {
             action = "ACCEPT_RIDE"
             putExtra("rideData", rideData.toString())
@@ -159,7 +159,7 @@ class RideRequestActivity : AppCompatActivity() {
     }
 
     private fun handleDecline() {
-        Log.d(TAG, "Declining ride")
+        Log.d(TAG, "❌ User clicked DECLINE button")
         val serviceIntent = Intent(this, LocationService::class.java).apply {
             action = "DECLINE_RIDE"
             putExtra("rideData", rideData.toString())
@@ -171,10 +171,10 @@ class RideRequestActivity : AppCompatActivity() {
     override fun finish() {
         super.finish()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, R.anim.slide_down)
+            overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, R.anim.fade_out)
         } else {
             @Suppress("DEPRECATION")
-            overridePendingTransition(0, R.anim.slide_down)
+            overridePendingTransition(0, R.anim.fade_out)
         }
     }
 

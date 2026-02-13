@@ -16,6 +16,8 @@ import io.socket.client.Socket
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 import java.util.Random
+import android.view.WindowManager
+import android.graphics.Color
 
 class LocationService : Service() {
 
@@ -31,6 +33,7 @@ class LocationService : Service() {
     private val RIDE_CHANNEL_ID = "high_importance_channel"
     private val NOTIFICATION_ID = 1001
     private val RIDE_NOTIFICATION_ID = 888
+    private var activeAlertDialog: AlertDialog? = null
 
     companion object {
         var isAppInForeground = false
@@ -56,15 +59,24 @@ class LocationService : Service() {
             stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
         } else if (action == "ACCEPT_RIDE") {
+            Log.d("NativeLocation", "✅ onStartCommand RECEIVED ACCEPT_RIDE action")
             val rideDataStr = intent?.getStringExtra("rideData")
             if (rideDataStr != null) {
                 acceptRide(JSONObject(rideDataStr))
             }
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.cancel(RIDE_NOTIFICATION_ID)
         } else if (action == "DECLINE_RIDE") {
+            Log.d("NativeLocation", "❌ onStartCommand RECEIVED DECLINE_RIDE action")
             val rideDataStr = intent?.getStringExtra("rideData")
             if (rideDataStr != null) {
                 declineRide(JSONObject(rideDataStr))
             }
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.cancel(RIDE_NOTIFICATION_ID)
+        } else if (action == "CLEAR_RIDE_STATE") {
+            Log.d("NativeLocation", "🧹 onStartCommand RECEIVED CLEAR_RIDE_STATE action")
+            clearRideState()
         }
 
         startEmissionTimer()
@@ -87,6 +99,8 @@ class LocationService : Service() {
 
     private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val manager = getSystemService(NotificationManager::class.java)
+            
             val serviceChannel = NotificationChannel(
                 CHANNEL_ID,
                 "NZCU Native Location Service",
@@ -95,13 +109,16 @@ class LocationService : Service() {
             
             val rideChannel = NotificationChannel(
                 RIDE_CHANNEL_ID,
-                "High Importance Notifications",
+                "New Ride Requests",
                 NotificationManager.IMPORTANCE_HIGH
-            )
-            rideChannel.description = "This channel is used for important notifications"
-            rideChannel.enableVibration(true)
+            ).apply {
+                description = "This channel is used for important ride alerts"
+                enableVibration(true)
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                setBypassDnd(true) // Wake up the driver even in DND
+                setShowBadge(true)
+            }
 
-            val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(serviceChannel)
             manager.createNotificationChannel(rideChannel)
         }
@@ -154,6 +171,7 @@ class LocationService : Service() {
                 if (args.isNotEmpty()) {
                     val data = args[0] as JSONObject
                     Log.d("NativeLocation", "🚕 NEW RIDE RECEIVED: $data")
+                    // Use the optimized notification which handles both Lock Screen and Banner cases
                     showRideNotification(data)
                 }
             }
@@ -187,11 +205,25 @@ class LocationService : Service() {
         }
     }
 
-    private fun showRideNotification(rideData: JSONObject) {
-        if (isAppInForeground) {
-            Log.d("NativeLocation", "App is in foreground, skipping native bottom sheet")
-            return
+
+    // Generic System Alert removed because it requires manual permission on modern Android. 
+    // We now use RideRequestActivity via FullScreenIntent for better "No Permission" support.
+
+    private fun dismissActiveAlertDialog() {
+        try {
+            if (activeAlertDialog?.isShowing == true) {
+                activeAlertDialog?.dismiss()
+                activeAlertDialog = null
+                Log.d("NativeLocation", "AlertDialog dismissed")
+            }
+        } catch (e: Exception) {
+            Log.e("NativeLocation", "Error dismissing dialog: ${e.message}")
         }
+    }
+
+    private fun showRideNotification(rideData: JSONObject) {
+        // We always try to show the notification and launch the activity for maximum visibility.
+        // Android will decide if it shows a banner or a full-screen dialog based on the screen state.
         
         val orderId = rideData.optString("orderId", rideData.optString("rideId", rideData.optString("_id", "unknown")))
         val riderName = rideData.optJSONObject("userId")?.optString("name", "Customer") 
@@ -229,20 +261,42 @@ class LocationService : Service() {
         val prefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
         prefs.edit().putString("flutter.last_ride_request", rideData.toString()).apply()
 
+        val acceptIntent = Intent(this, LocationService::class.java).apply {
+            action = "ACCEPT_RIDE"
+            putExtra("rideData", rideData.toString())
+        }
+        val acceptPendingIntent = PendingIntent.getService(
+            this, Random().nextInt(), acceptIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val declineIntent = Intent(this, LocationService::class.java).apply {
+            action = "DECLINE_RIDE"
+            putExtra("rideData", rideData.toString())
+        }
+        val declinePendingIntent = PendingIntent.getService(
+            this, Random().nextInt(), declineIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
         val notification = NotificationCompat.Builder(this, RIDE_CHANNEL_ID)
-            .setContentTitle("New Ride Request")
-            .setContentText("Rider: $riderName")
-            .setSubText("Pickup: $pickup")
+            .setContentTitle("🚗 NEW RIDE REQUEST")
+            .setContentText("Tap to open centered dialog")
+            .setSubText("Rider: $riderName")
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setPriority(NotificationCompat.PRIORITY_MAX)
-            .setCategory(NotificationCompat.CATEGORY_CALL)
+            .setCategory(NotificationCompat.CATEGORY_ALARM) // More aggressive than CATEGORY_CALL
             .setFullScreenIntent(fullScreenPendingIntent, true)
             .setContentIntent(pendingIntent)
+            .addAction(android.R.drawable.ic_input_add, "ACCEPT", acceptPendingIntent)
+            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "DECLINE", declinePendingIntent)
             .setAutoCancel(true)
-            .setOngoing(true)
-            .setVibrate(longArrayOf(0, 1000, 500, 1000))
+            .setOngoing(true) // Keeps it visible
+            .setVibrate(longArrayOf(0, 1000, 500, 1000, 500, 1000))
             .setSound(android.provider.Settings.System.DEFAULT_RINGTONE_URI)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setLocalOnly(true)
+            .setDefaults(Notification.DEFAULT_ALL)
             .build()
 
         val manager = getSystemService(NotificationManager::class.java)
@@ -295,6 +349,7 @@ class LocationService : Service() {
         payload.put("vehicleNumber", vehicleNumber)
         payload.put("vehicleImage", vehicleImage)
 
+        Log.d("NativeLocation", "📤 EMITTING ride:accept for orderId: $orderId")
         socket?.emit("ride:accept", payload)
         
         // Mark as active in prefs so background emitter switches to ride:location:update
@@ -316,6 +371,7 @@ class LocationService : Service() {
         payload.put("reason", "Declined from native UI")
         payload.put("declinedAt", if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) java.time.Instant.now().toString() else System.currentTimeMillis().toString())
 
+        Log.d("NativeLocation", "📤 EMITTING ride:decline for orderId: $orderId")
         socket?.emit("ride:decline", payload)
         Log.d("NativeLocation", "Declined Ride: $orderId")
         clearRideState()

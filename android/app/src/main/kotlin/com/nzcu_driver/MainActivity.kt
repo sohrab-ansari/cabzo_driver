@@ -63,6 +63,16 @@ class MainActivity: FlutterActivity() {
                     Log.d("NativeLocation", "Explicit foreground state update: $isOpen")
                     result.success(true)
                 }
+                "clearRideState" -> {
+                    val intent = Intent(this, LocationService::class.java)
+                    intent.action = "CLEAR_RIDE_STATE"
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        startForegroundService(intent)
+                    } else {
+                        startService(intent)
+                    }
+                    result.success(true)
+                }
                 else -> {
                     result.notImplemented()
                 }
