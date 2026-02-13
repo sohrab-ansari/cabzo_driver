@@ -7,7 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 /// Complete helper class for showing riders/drivers on Google Maps
 class MapHelper {
   /// Create markers for multiple riders/drivers nearby
-  /// 
+  ///
   /// Each rider should have:
   /// - riderId: String
   /// - location: { lat: double, lng: double }
@@ -21,28 +21,29 @@ class MapHelper {
     double distanceKm = 5.0, // Show riders within 5km
   }) {
     final Set<Marker> markers = {};
-    
+
     for (var rider in riders) {
       try {
         final riderId = rider['riderId'] as String?;
         final location = rider['location'] as Map<String, dynamic>?;
-        
+
         if (riderId == null || location == null) continue;
-        
+
         final lat = location['lat'] as double?;
         final lng = location['lng'] as double?;
-        
+
         if (lat == null || lng == null) continue;
-        
+
         // Select icon based on vehicle type or use custom icon
-        BitmapDescriptor icon = customIcon ?? 
-          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
-        
+        BitmapDescriptor icon =
+            customIcon ??
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
+
         final vehicleType = rider['vehicleType'] as String?;
         if (vehicleType != null && vehicleIcons != null) {
           icon = vehicleIcons[vehicleType] ?? icon;
         }
-        
+
         markers.add(
           Marker(
             markerId: MarkerId('rider_$riderId'),
@@ -51,7 +52,8 @@ class MapHelper {
             anchor: const Offset(0.5, 0.5),
             infoWindow: InfoWindow(
               title: rider['name'] ?? 'Rider',
-              snippet: '${rider['status'] ?? 'Available'} • ${vehicleType ?? 'Unknown'}',
+              snippet:
+                  '${rider['status'] ?? 'Available'} • ${vehicleType ?? 'Unknown'}',
             ),
             zIndex: 1, // Below driver marker
           ),
@@ -81,11 +83,11 @@ class MapHelper {
       final ByteData? byteData = await frameInfo.image.toByteData(
         format: ui.ImageByteFormat.png,
       );
-      
+
       if (byteData == null) {
         throw Exception('Failed to convert image to ByteData');
       }
-      
+
       return BitmapDescriptor.fromBytes(byteData.buffer.asUint8List());
     } catch (e) {
       print('⚠️ MapHelper: Failed to load icon: $e');
@@ -99,16 +101,18 @@ class MapHelper {
     int iconSize = 70,
   }) async {
     final Map<String, BitmapDescriptor> icons = {};
-    
+
     // Default vehicle asset paths
     final defaultPaths = {
       'bike': 'assets/images/bike.png',
-      'car': 'assets/images/car.png',
-      'auto': 'assets/images/auto.png',
+      'car':
+          'assets/images/vehicle1.png', // Changed from car.png to vehicle1.png which exists
+      'auto':
+          'assets/images/bike.png', // Changed from auto.png to bike.png which exists
     };
-    
+
     final assetPaths = vehicleAssetPaths ?? defaultPaths;
-    
+
     for (var entry in assetPaths.entries) {
       try {
         final icon = await loadCustomIcon(
@@ -124,7 +128,7 @@ class MapHelper {
         );
       }
     }
-    
+
     return icons;
   }
 
@@ -158,9 +162,13 @@ class MapHelper {
     double lng2,
   ) {
     const p = 0.017453292519943295; // Math.PI / 180
-    final a = 0.5 -
+    final a =
+        0.5 -
         math.cos((lat2 - lat1) * p) / 2 +
-        math.cos(lat1 * p) * math.cos(lat2 * p) * (1 - math.cos((lng2 - lng1) * p)) / 2;
+        math.cos(lat1 * p) *
+            math.cos(lat2 * p) *
+            (1 - math.cos((lng2 - lng1) * p)) /
+            2;
     return 12742 * math.asin(math.sqrt(a)); // 2 * R; R = 6371 km
   }
 
@@ -175,12 +183,12 @@ class MapHelper {
       try {
         final location = rider['location'] as Map<String, dynamic>?;
         if (location == null) return false;
-        
+
         final lat = location['lat'] as double?;
         final lng = location['lng'] as double?;
-        
+
         if (lat == null || lng == null) return false;
-        
+
         final distance = calculateDistance(driverLat, driverLng, lat, lng);
         return distance <= maxDistanceKm;
       } catch (e) {

@@ -38,6 +38,8 @@ import 'package:http/http.dart' as http;
 // import 'package:nzcu_driver/apiServices/api_path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+
 class ProfileApiServices {
   // static Future<HomeModalResponse> get_home_data() async {
   //   // final Uri url = Uri.parse(ApiPath.createVehicle);
@@ -180,6 +182,8 @@ class ProfileApiServices {
   //   }
   // }
 
+
+
   static Future<FaqsCategoriesResponse> get_all_categories_data() async {
     final Uri url = Uri.parse("${ApiPath.get_All_Categories}");
 
@@ -223,83 +227,8 @@ class ProfileApiServices {
       );
     }
   }
-
-  //  static Future<FaqsCategoriesResponse> get_all_categories_data() async {
-  //   // final Uri url = Uri.parse(ApiPath.createVehicle);
-  //   final Uri url = Uri.parse("${ApiPath.get_All_Categories}");
-
-  //   /// 🔐 GET TOKEN
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final String? token = prefs.getString("auth_token");
-
-  //   print("========== CREATE VEHICLE API ==========");
-  //   print("URL : $url");
-  //   print("Token : $token");
-  //   // print("Request Body : ${jsonEncode(requestBody)}");
-  //   print("my_tokennnn ${token}");
-
-  //   try {
-  //     final http.Response response = await http.get(
-  //       url,
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         "Authorization": "Bearer $token", // ✅ BEARER TOKEN
-  //       },
-  //       // body: jsonEncode(requestBody),
-  //     );
-
-  //     print("Status Code : ${response.statusCode}");
-  //     print("Response Body : ${response.body}");
-
-  //     final Map<String, dynamic> data = jsonDecode(response.body);
-  //     final FaqsCategoriesResponse walletResponse = FaqsCategoriesResponse.fromJson(data);
-
-  //     return walletResponse;
-  //   } catch (e) {
-  //     print("❌ Exception in Create Vehicle4 : $e");
-  //     return FaqsCategoriesResponse(success: false, message: "Connection error: $e");
-  //   }
-  // }
-
-  //    static Future<GetByCategoryResponse> get_faq_categories_data({dynamic category}) async {
-
-  // final Uri url = Uri.parse(
-  //   "${ApiPath.baseUri}api/v1/getByCategory?category=$category",
-  // );
-
-  //     final prefs = await SharedPreferences.getInstance();
-  //     final String? token = prefs.getString("auth_token");
-
-  //     print("========== CREATE VEHICLE API ==========");
-  //     print("URL : $url");
-  //     print("Token : $token");
-  //     // print("Request Body : ${jsonEncode(requestBody)}");
-  //     print("my_tokennnn ${token}");
-
-  //     try {
-  //       final http.Response response = await http.get(
-  //         url,
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           "Authorization": "Bearer $token", // ✅ BEARER TOKEN
-  //         },
-  //         // body: jsonEncode(requestBody),
-  //       );
-
-  //       print("Status Code : ${response.statusCode}");
-  //       print("Response Body : ${response.body}");
-
-  //       final Map<String, dynamic> data = jsonDecode(response.body);
-  //       final GetByCategoryResponse walletResponse = GetByCategoryResponse.fromJson(data);
-
-  //       return walletResponse;
-  //     } catch (e) {
-  //       print("❌ Exception in Create Vehicle4 : $e");
-  //       return GetByCategoryResponse(success: false, message: "Connection error: $e");
-  //     }
-  //   }
-
-  static Future<GetByCategoryResponse> get_faq_categories_data({
+  
+static Future<GetByCategoryResponse> get_faq_categories_data({
     required String category,
   }) async {
     // final Uri url = Uri.parse("${ApiPath.baseUri}/getByCategory?category=$category");
@@ -1144,6 +1073,7 @@ class ProfileApiServices {
 
   //     final Map<String, dynamic> decodedJson = jsonDecode(response.body);
 
+          
   //     Fluttertoast.showToast(
   //       msg: decodedJson['message'] ?? "Something went wrong",
   //       toastLength: Toast.LENGTH_SHORT,
@@ -1561,9 +1491,7 @@ class ProfileApiServices {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
 
-    final Uri url = Uri.parse(
-      "${ApiPath.baseUri}/notification/userNotifications",
-    );
+    final Uri url = Uri.parse("${ApiPath.baseUri}/notification/userNotifications");
 
     print("========== 🔵 CASH PAYMENT API ==========");
     print("URL : $url");
@@ -1613,8 +1541,9 @@ class ProfileApiServices {
       print(prettyJson);
 
       // Parse the response
-      final NotificationResponse notificationResponse =
-          NotificationResponse.fromJson(decodedJson);
+      final NotificationResponse notificationResponse = NotificationResponse.fromJson(
+        decodedJson,
+      );
 
       print("🎯 Parsed Model Object 👇");
       print(notificationResponse);
@@ -1631,6 +1560,7 @@ class ProfileApiServices {
       );
     }
   }
+
 
   static Future<Getpromocodedata> get_promocode_data() async {
     final prefs = await SharedPreferences.getInstance();

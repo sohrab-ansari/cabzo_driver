@@ -7,6 +7,7 @@ import 'package:nzcu_driver/core/dependency_injection.dart';
 import 'package:nzcu_driver/firebase_options.dart';
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
 import 'package:nzcu_driver/services/background_service.dart';
+import 'package:flutter_background/flutter_background.dart';
 import 'package:flutter_background_geolocation/flutter_background_geolocation.dart'
     as bg;
 import 'package:nzcu_driver/utilities/colors/colors.dart';
@@ -98,6 +99,16 @@ void main() async {
     print('7️⃣ Initializing Background Service...');
     await BackgroundService.initializeService();
     print('   ✅ Background service initialized');
+
+    print('8️⃣ Initializing Flutter Background (App Keep-Alive)...');
+    const androidConfig = FlutterBackgroundAndroidConfig(
+      notificationTitle: "NZCU Driver",
+      notificationText: "App is running in the background",
+      notificationImportance: AndroidNotificationImportance.high,
+      notificationIcon: AndroidResource(name: 'ic_launcher', defType: 'mipmap'),
+    );
+    await FlutterBackground.initialize(androidConfig: androidConfig);
+    print('   ✅ Flutter Background initialized');
   } catch (e, stackTrace) {
     print('');
     print('❌ ERROR DURING INITIALIZATION ❌');

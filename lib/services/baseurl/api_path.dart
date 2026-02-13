@@ -62,8 +62,7 @@ class ApiPath {
   static String order_verify_otp = "$baseUri/order/verifyOtp";
 
 
-
-  static String get_All_Categories = "$baseUri/getAllCategories";
+   static String get_All_Categories = "$baseUri/getAllCategories";
 
   // static String order_declined = "$baseUri/order/verify-otp";
 }

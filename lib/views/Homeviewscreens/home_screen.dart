@@ -129,11 +129,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     await _loadCustomBikeMarker();
     await _loadVehicleIcons();
 
-    // Initialize socket manager with callbacks
+    // Start socket callbacks
     _setupSocketCallbacks();
 
-    // Start socket connection
-    await socketManager.initialize();
+    // End loading state early to show the UI as soon as icons/basic data are ready
+    if (mounted) {
+      setState(() {
+        _isEffectiveFirstLaunch = false;
+      });
+    }
+
+    // Initialize socket manager in background (don't await to unblock UI)
+    socketManager.initialize().then((_) {
+      if (mounted) setState(() {});
+    });
 
     // Start location listener
     _startLocationListener();
@@ -456,17 +465,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     print("hellllllll discoonect22 ${socketManager.isSocketConnected}");
     print("hellllllll discoonect33333 ${widget.isFirstLaunch}");
-    // Show loading screen while socket is connecting (from splash screen)
-    if (!socketManager.isSocketConnected && _isEffectiveFirstLaunch) {
+    // Show loading screen only while basic initialization (icons/permissions) is happening
+    if (_isEffectiveFirstLaunch) {
       return _buildLoadingScreen();
     }
 
-    // Show loading screen only while restoration is in progress (app startup)
-    if (socketManager.isRestorationInProgress) {
-      print("helllllllllllll11111111111112222222222222222222");
-
-      return _buildLoadingScreen();
-    }
+    // We removed the socketManager.isRestorationInProgress condition here
+    // to prevent the loading screen from hanging if the network is slow/socket fails.
+    // The UI will update automatically once restoration finishes and status changes.
 
     return socketManager.isOnDuty == false
         ? _buildOfflineScreen(w)

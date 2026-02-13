@@ -6,90 +6,22 @@ import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
-import 'package:flutter/services.dart';
-
+import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:flutter_background/flutter_background.dart' as bg_lib;
 import 'package:flutter_background_geolocation/flutter_background_geolocation.dart'
     as bg;
 
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
 
-class SocketManager with WidgetsBindingObserver {
+class SocketManager {
   // Singleton instance
   static final SocketManager _instance = SocketManager._internal();
   factory SocketManager() => _instance;
-  SocketManager._internal() {
-    WidgetsBinding.instance.addObserver(this);
-    // Set initial state to true as the app is being initialized in foreground
-    _updateNativeForegroundState(true);
-  }
-
-  Future<void> _updateNativeForegroundState(bool isOpen) async {
-    try {
-      await _nativeChannel.invokeMethod('updateForegroundState', {
-        'isOpen': isOpen,
-      });
-      print('📦 [SocketManager] Native foreground state updated: $isOpen');
-    } catch (e) {
-      print('❌ [SocketManager] Error updating native foreground state: $e');
-    }
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _updateNativeForegroundState(true);
-    } else {
-      _updateNativeForegroundState(false);
-    }
-  }
-
-  // Native Channel
-  static const _nativeChannel = MethodChannel(
-    'com.nzcu_driver/native_location',
-  );
-
-  Future<void> _startNativeService() async {
-    try {
-      await _nativeChannel.invokeMethod('startService');
-      print('📦 [SocketManager] Native background service STARTED');
-    } catch (e) {
-      print('❌ [SocketManager] Error starting native service: $e');
-    }
-  }
-
-  Future<void> _stopNativeService() async {
-    try {
-      await _nativeChannel.invokeMethod('stopService');
-      print('📦 [SocketManager] Native background service STOPPED');
-    } catch (e) {
-      print('❌ [SocketManager] Error stopping native service: $e');
-    }
-  }
-
-  Future<bool> _checkOverlayPermission() async {
-    try {
-      final bool result = await _nativeChannel.invokeMethod(
-        'checkOverlayPermission',
-      );
-      return result;
-    } catch (e) {
-      print('❌ [SocketManager] Error checking overlay permission: $e');
-      return true; // Default to true on error/other platforms
-    }
-  }
-
-  Future<bool> _requestOverlayPermission() async {
-    try {
-      await _nativeChannel.invokeMethod('requestOverlayPermission');
-      return true;
-    } catch (e) {
-      print('❌ [SocketManager] Error requesting overlay permission: $e');
-      return false;
-    }
-  }
+  SocketManager._internal();
 
   // Socket instance
   IO.Socket? _socket;
@@ -101,8 +33,6 @@ class SocketManager with WidgetsBindingObserver {
   // Configuration
   // static const String SOCKET_URL = 'https://api.corezap.framekarts.com';
 
-  //  static const String SOCKET_URL = 'https://api.nzcu.framekarts.com';
-
   static const String SOCKET_URL = 'https://corezap.smarttechbros.com';
 
   //nzcu url
@@ -112,36 +42,6 @@ class SocketManager with WidgetsBindingObserver {
   static const int CONNECTION_TIMEOUT = 10000;
   static const int LOCATION_UPDATE_INTERVAL = 3000;
   static const double LOCATION_CHANGE_THRESHOLD = 0.0001;
-
-  void _initializeNativeChannelListeners() {
-    _nativeChannel.setMethodCallHandler((call) async {
-      print('📦 [SocketManager] Received native method call: ${call.method}');
-      if (call.method == 'onRideRequestFromNotification') {
-        try {
-          final String rideDataJson = call.arguments;
-          final Map<String, dynamic> data = jsonDecode(rideDataJson);
-          final rideData = _mapRideData(data);
-
-          print(
-            '🚕 [SocketManager] Ride request from native notification: ${rideData['orderId']}',
-          );
-
-          // Trigger the standard new ride logic
-          if (onNewRide != null) {
-            onNewRide!(rideData);
-          } else {
-            // If main listener is not yet attached, store it and try later
-            _lastRideData = rideData;
-            print(
-              '⚠️ [SocketManager] onNewRide listener not attached, stored rideData',
-            );
-          }
-        } catch (e) {
-          print('❌ [SocketManager] Error parsing native ride data: $e');
-        }
-      }
-    });
-  }
 
   // Driver data
   String? _driverId;
@@ -171,6 +71,7 @@ class SocketManager with WidgetsBindingObserver {
   double _currentLatitude = 0.0;
   double _currentLongitude = 0.0;
   DateTime? _lastLocationUpdate;
+  StreamSubscription<Position>? _positionStreamSubscription;
   Timer? _locationUpdateTimer;
 
   // Ride tracking
@@ -203,23 +104,8 @@ class SocketManager with WidgetsBindingObserver {
   // ==================== INITIALIZATION ====================
   Future<void> initialize() async {
     print('🔄 Initializing SocketManager...');
-    _initializeNativeChannelListeners();
     await _loadDriverData();
     await _getInitialLocation();
-
-    // Check for initial ride from native side
-    try {
-      final String? initialRideJson = await _nativeChannel.invokeMethod(
-        'getInitialRide',
-      );
-      if (initialRideJson != null) {
-        print('🚕 [SocketManager] Found initial ride from cold start');
-        final Map<String, dynamic> data = jsonDecode(initialRideJson);
-        _lastRideData = _mapRideData(data);
-      }
-    } catch (e) {
-      print('⚠️ [SocketManager] Error getting initial ride: $e');
-    }
 
     // Initialize Advanced Geolocation
     await _initAdvancedGeolocation();
@@ -344,33 +230,20 @@ class SocketManager with WidgetsBindingObserver {
     print('   - Vehicle ID: $vehicleId');
 
     // Save to SharedPreferences for persistence
-    _saveVehicleDataToPrefs(
-      vehicleId,
-      vehicleTypeId,
-      vehicleSubType,
-      _vehicleImage,
-      _fleetId,
-    );
+    _saveVehicleDataToPrefs(vehicleId, vehicleTypeId, vehicleSubType);
   }
 
   Future<void> _saveVehicleDataToPrefs(
     String vehicleId,
     String vehicleTypeId,
     String vehicleSubType,
-    String? vehicleImage,
-    String? fleetId,
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString("vehicle_id", vehicleId);
       await prefs.setString("vehicle_type_id", vehicleTypeId);
       await prefs.setString("vehicle_SubType", vehicleSubType);
-      if (vehicleImage != null)
-        await prefs.setString("vehicle_image", vehicleImage);
-      if (fleetId != null) await prefs.setString("fleet_id", fleetId);
-      print(
-        '💾 Vehicle, SubType, Image, and Fleet data saved to SharedPreferences',
-      );
+      print('💾 Vehicle and SubType data saved to SharedPreferences');
     } catch (error) {
       print('❌ Error saving vehicle data to prefs: $error');
     }
@@ -478,6 +351,7 @@ class SocketManager with WidgetsBindingObserver {
   // ==================== LOCATION ====================
   Future<void> _getInitialLocation() async {
     try {
+      // Check if app is ready for location requests
       if (!_isAppReady) {
         print('⏳ App not ready yet, using cached location if available');
         if (_currentLatitude != 0.0 && _currentLongitude != 0.0) {
@@ -485,16 +359,34 @@ class SocketManager with WidgetsBindingObserver {
         }
       }
 
-      final location = await bg.BackgroundGeolocation.getCurrentPosition();
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 3),
+      );
 
-      _currentLatitude = location.coords.latitude;
-      _currentLongitude = location.coords.longitude;
+      _currentLatitude = position.latitude;
+      _currentLongitude = position.longitude;
       _lastLocationUpdate = DateTime.now();
 
       print('✅ Initial location: $_currentLatitude, $_currentLongitude');
     } catch (e) {
-      print('⚠️ Initial location fetch failed (non-fatal): $e');
-      if (_currentLatitude == 0.0) {
+      print('⚠️ Quick location failed: $e');
+      try {
+        final lastPosition = await Geolocator.getLastKnownPosition();
+        if (lastPosition != null) {
+          _currentLatitude = lastPosition.latitude;
+          _currentLongitude = lastPosition.longitude;
+          print(
+            '📍 Using last known location: $_currentLatitude, $_currentLongitude',
+          );
+        } else {
+          _currentLatitude = 23.2508131;
+          _currentLongitude = 77.4647936;
+          print(
+            '📍 Using default location: $_currentLatitude, $_currentLongitude',
+          );
+        }
+      } catch (e) {
         _currentLatitude = 23.2508131;
         _currentLongitude = 77.4647936;
       }
@@ -502,14 +394,44 @@ class SocketManager with WidgetsBindingObserver {
   }
 
   void startLocationWatch() {
-    print('📍 Location watch is handled by BackgroundGeolocation');
-    // We already initialized bg.onLocation in _initAdvancedGeolocation
+    if (_positionStreamSubscription != null) {
+      print('ℹ️ Location watch already active');
+      return;
+    }
+
+    print('📍 Starting continuous location watch');
+
+    _positionStreamSubscription =
+        Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.best,
+            distanceFilter: 5,
+          ),
+        ).listen(
+          (position) {
+            _currentLatitude = position.latitude;
+            _currentLongitude = position.longitude;
+            _lastLocationUpdate = DateTime.now();
+
+            // Send location update if on duty (REMOVED: Now handled exclusively by periodic timer)
+            // if (isOnDuty && _socket != null && _isSocketConnected) {
+            //   _sendLocationUpdate();
+            // }
+
+            // print('📍 Location updated: $_currentLatitude, $_currentLongitude');
+          },
+          onError: (error) {
+            print('⚠️ Location watch error: $error');
+          },
+        );
   }
 
   void stopLocationWatch() {
-    print(
-      '⏹️ Location watch stop request received (BackgroundGeolocation continues)',
-    );
+    if (_positionStreamSubscription != null) {
+      _positionStreamSubscription!.cancel();
+      _positionStreamSubscription = null;
+      print('⏹️ Stopped location watch');
+    }
   }
 
   // ==================== SOCKET CONNECTION ====================
@@ -675,9 +597,7 @@ class SocketManager with WidgetsBindingObserver {
     });
 
     _socket!.on('ride:orderCancelled', (data) {
-      print("hellooo>>> cancelled");
       print('userrrr_side____Canceeledddd>>>>>>>>>>>>>>>>: ${data}');
-
       // Handle order cancelled notification
     });
 
@@ -739,9 +659,6 @@ class SocketManager with WidgetsBindingObserver {
       final rideId = data['rideId'] ?? data['orderId'];
 
       if (rideId != null && rideId is String) {
-        // ✅ Notify native side to clear ride state
-        _nativeChannel.invokeMethod('clearRideState');
-
         _completeRide(rideId);
         _currentRide = null;
         onRideCancelled?.call(data);
@@ -920,21 +837,6 @@ class SocketManager with WidgetsBindingObserver {
     // Notify UI to show loading state
     onDriverStatusChange?.call(isOnDuty);
 
-    // CHECK OVERLAY PERMISSION (mandatory for native ride bottom sheet)
-    final bool hasOverlayPermission = await _checkOverlayPermission();
-    if (!hasOverlayPermission) {
-      print('⚠️ Missing Display over other apps permission!');
-      final bool requested = await _requestOverlayPermission();
-      if (!requested) {
-        _handleOnlineFailure(
-          'Please enable "Display over other apps" permission to receive ride requests while the app is in background.',
-        );
-        return;
-      }
-      // Wait a bit for user to return from settings
-      await Future.delayed(const Duration(seconds: 2));
-    }
-
     try {
       // If socket is not connected, try to reconnect first
       if (_socket == null || !_isSocketConnected) {
@@ -1015,32 +917,63 @@ class SocketManager with WidgetsBindingObserver {
       _startLocationUpdates();
       startLocationWatch();
 
-      // PERSIST ONLINE STATUS IMMEDIATELY (for background isolate resume support)
-      await _saveOnlineStatusToPrefs(true);
-      await _saveVehicleDataToPrefs(
-        _vehicleNumber ?? "",
-        _vehicleType ?? "",
-        _vehicleType2 ?? "",
-        _vehicleImage,
-        _fleetId,
-      );
-
       // NOTIFY BACKGROUND SERVICE TO CONNECT
-      print('🚀 [SocketManager] Ensuring Background Service is running...');
-      final backgroundService = FlutterBackgroundService();
-      bool isRunning = await backgroundService.isRunning();
-      if (!isRunning) {
-        print('🚀 [SocketManager] Starting background service manually...');
-        await backgroundService.startService();
-      }
-
       print(
         '🚀 [SocketManager] Sending "goOnline" command to Background Service...',
       );
-      backgroundService.invoke('goOnline');
+      FlutterBackgroundService().invoke('goOnline');
 
-      // START NATIVE ANDROID SERVICE (KOTLIN)
-      await _startNativeService();
+      // START APP KEEP-ALIVE (isolated try-catch)
+      try {
+        print('🚀 [SocketManager] Enabling FlutterBackground keep-alive...');
+        bool hasPermissions = await bg_lib.FlutterBackground.hasPermissions;
+
+        if (!hasPermissions) {
+          print(
+            '⚠️ [SocketManager] FlutterBackground missing permissions - attempting to initialize...',
+          );
+          const androidConfig = bg_lib.FlutterBackgroundAndroidConfig(
+            notificationTitle: "NZCU Driver",
+            notificationText: "App is running in the background",
+            notificationImportance: bg_lib.AndroidNotificationImportance.high,
+            notificationIcon: bg_lib.AndroidResource(
+              name: 'ic_launcher',
+              defType: 'mipmap',
+            ),
+          );
+          await bg_lib.FlutterBackground.initialize(
+            androidConfig: androidConfig,
+          );
+          hasPermissions = await bg_lib.FlutterBackground.hasPermissions;
+        }
+
+        if (hasPermissions) {
+          bool enabled =
+              await bg_lib.FlutterBackground.enableBackgroundExecution();
+          print(
+            '✅ [SocketManager] FlutterBackground execution enabled: $enabled',
+          );
+        } else {
+          print(
+            '❌ [SocketManager] FlutterBackground permissions still missing after init attempt',
+          );
+        }
+      } catch (bgKeepAliveError) {
+        print(
+          '⚠️ [SocketManager] FlutterBackground keep-alive failed (non-fatal): $bgKeepAliveError',
+        );
+      }
+
+      // START ADVANCED GEOLOCATION TRACKING
+      try {
+        print('🚀 [SocketManager] Starting Native Geolocation Tracking...');
+        await bg.BackgroundGeolocation.start();
+        print('✅ [SocketManager] Native Geolocation Tracking started');
+      } catch (geoError) {
+        print(
+          '⚠️ [SocketManager] Geolocation start failed (non-fatal): $geoError',
+        );
+      }
 
       print('🟢 [SocketManager] Driver online request sent successfully');
     } catch (error) {
@@ -1050,34 +983,18 @@ class SocketManager with WidgetsBindingObserver {
   }
 
   Future<void> goOffline() async {
+    print('🔴 GOING OFFLINE...');
+
+    print("hellooooo222 ${_isProcessingOnline}");
+    if (_isProcessingOnline) return;
+    print("hellooooo3333 ${_isProcessingOnline}");
+    // _isProcessingOnline = true;
+    print("hellooooo4444 ${_isProcessingOnline}");
+
+    // Notify UI to show loading state
+    onDriverStatusChange?.call(isOnDuty);
+
     try {
-      if (_isProcessingOnline) return;
-
-      _isProcessingOnline = true;
-      print('🔴 [SocketManager] Going offline...');
-
-      // Notify UI
-      onDriverStatusChange?.call(false);
-
-      // ENSURE BACKGROUND SERVICE RECEIVES COMMAND
-      final backgroundService = FlutterBackgroundService();
-      bool isRunning = await backgroundService.isRunning();
-      if (!isRunning) {
-        print(
-          '🚀 [SocketManager] Starting background service to handle offline event...',
-        );
-        await backgroundService.startService();
-      }
-      backgroundService.invoke('goOffline');
-
-      // DISCONNECT NATIVE GEOLOCATION
-      try {
-        print('⏹️ [SocketManager] Stopping Native Geolocation Tracking...');
-        await bg.BackgroundGeolocation.stop();
-      } catch (e) {
-        print('⚠️ [SocketManager] Error stopping Geolocation: $e');
-      }
-
       // Emit offline event before disconnecting
       if (_socket != null && _isSocketConnected) {
         print('🔴 Emitting offline status...');
@@ -1117,8 +1034,17 @@ class SocketManager with WidgetsBindingObserver {
       print('🛑 Sending "goOffline" command to Background Service...');
       FlutterBackgroundService().invoke('goOffline');
 
-      // STOP NATIVE ANDROID SERVICE (KOTLIN)
-      await _stopNativeService();
+      // STOP APP KEEP-ALIVE
+      print('🛑 [SocketManager] Disabling FlutterBackground keep-alive...');
+      try {
+        await bg_lib.FlutterBackground.disableBackgroundExecution();
+      } catch (e) {
+        print('⚠️ Error disabling background execution: $e');
+      }
+
+      // STOP ADVANCED GEOLOCATION TRACKING
+      print('🛑 [SocketManager] Stopping Native Geolocation Tracking...');
+      await bg.BackgroundGeolocation.stop();
 
       print('✅ Driver is now offline and socket disconnected');
     } catch (error) {
@@ -1366,9 +1292,6 @@ class SocketManager with WidgetsBindingObserver {
     _currentRide = null;
     _saveRideStateToPrefs(); // Reset state for background isolate
 
-    // ✅ Notify native side to clear ride state
-    _nativeChannel.invokeMethod('clearRideState');
-
     return true;
   }
 
@@ -1381,9 +1304,6 @@ class SocketManager with WidgetsBindingObserver {
         _isRideInProgress = false;
         _currentRide = null;
         _saveRideStateToPrefs(); // Reset state for background isolate
-
-        // ✅ Notify native side to clear ride state
-        _nativeChannel.invokeMethod('clearRideState');
 
         // Clear persisted ride data
         _clearPersistedRide();
@@ -1785,6 +1705,9 @@ class SocketManager with WidgetsBindingObserver {
     _disconnectSocket();
     _stopLocationUpdates();
     stopLocationWatch();
+    if (_positionStreamSubscription != null) {
+      _positionStreamSubscription!.cancel();
+    }
   }
 
   // ==================== LOGOUT ====================
