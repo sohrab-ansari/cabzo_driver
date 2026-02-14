@@ -33,7 +33,11 @@ class SocketManager {
   // Configuration
   // static const String SOCKET_URL = 'https://api.corezap.framekarts.com';
 
-  static const String SOCKET_URL = 'https://corezap.smarttechbros.com';
+  // static const String SOCKET_URL = 'https://corezap.smarttechbros.com';
+
+
+  static const String SOCKET_URL = 'https://nzcu.smarttechbros.com';
+ 
 
   //nzcu url
   // static const String SOCKET_URL = 'https://api.nzcu.framekarts.com';

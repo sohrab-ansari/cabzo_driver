@@ -603,21 +603,21 @@ class _ReceivePaymentModesState extends State<ReceivePaymentModes> {
                             ),
 
                             // Loading overlay for cash button
-                            if (cashController.isLoading.value)
-                              Positioned.fill(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.3),
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                  child: Center(
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
+                            // if (cashController.isLoading.value)
+                            //   Positioned.fill(
+                            //     child: Container(
+                            //       decoration: BoxDecoration(
+                            //         color: Colors.black.withOpacity(0.3),
+                            //         borderRadius: BorderRadius.circular(14),
+                            //       ),
+                            //       child: Center(
+                            //         child: CircularProgressIndicator(
+                            //           strokeWidth: 2,
+                            //           color: Colors.white,
+                            //         ),
+                            //       ),
+                            //     ),
+                            //   ),
                           ],
                         ).animate().fade(duration: 500.ms).scale(),
                       ],
@@ -644,44 +644,44 @@ class _ReceivePaymentModesState extends State<ReceivePaymentModes> {
               ),
             ),
 
-            // Global Loading Overlay
-            Obx(() {
-              if (cashController.isLoading.value) {
-                return Container(
-                  color: Colors.black.withOpacity(0.4),
-                  child: Center(
-                    child: Container(
-                      padding: EdgeInsets.all(w * .05),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              ColorsList.mainButtonColor,
-                            ),
-                          ),
-                          SizedBox(height: w * .04),
-                          AppFonts.textPoppins(
-                            context,
-                            "Processing Payment...",
-                            w * .04,
-                            FontWeight.w500,
-                            AppColors.black,
-                            TextAlign.center,
-                            TextOverflow.visible,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }
-              return const SizedBox();
-            }),
+            // // Global Loading Overlay
+            // Obx(() {
+            //   if (cashController.isLoading.value) {
+            //     return Container(
+            //       color: Colors.black.withOpacity(0.4),
+            //       child: Center(
+            //         child: Container(
+            //           padding: EdgeInsets.all(w * .05),
+            //           decoration: BoxDecoration(
+            //             color: Colors.white,
+            //             borderRadius: BorderRadius.circular(16),
+            //           ),
+            //           child: Column(
+            //             mainAxisSize: MainAxisSize.min,
+            //             children: [
+            //               CircularProgressIndicator(
+            //                 valueColor: AlwaysStoppedAnimation<Color>(
+            //                   ColorsList.mainButtonColor,
+            //                 ),
+            //               ),
+            //               SizedBox(height: w * .04),
+            //               AppFonts.textPoppins(
+            //                 context,
+            //                 "Processing Payment...",
+            //                 w * .04,
+            //                 FontWeight.w500,
+            //                 AppColors.black,
+            //                 TextAlign.center,
+            //                 TextOverflow.visible,
+            //               ),
+            //             ],
+            //           ),
+            //         ),
+            //       ),
+            //     );
+            //   }
+            //   return const SizedBox();
+            // }),
           ],
         ),
       ),

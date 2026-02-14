@@ -68,7 +68,13 @@ class _ArrivingClientState extends State<ArrivingClient> {
   // Ride Data
   Map<String, dynamic>? _rideData;
   List<LatLng> _routeCoordinates = [];
-  List<LatLng> _pickupToDropCoordinates = [];
+  List<LatLng> _driverToDropCoordinates = [];
+
+  // Dynamic polyline management
+  Timer? _polylineRefreshTimer;
+  DateTime _lastPolylineRefresh = DateTime.now();
+  bool _isFetchingDirections = false;
+  bool _initialFitDone = false;
 
   // Custom Marker Icons
   BitmapDescriptor? _bikeMarkerIcon;
@@ -77,6 +83,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
   // Navigation listener subscription
   Worker? _navigationWorker;
+  Worker? _stepperWorker;
 
   @override
   void initState() {
@@ -86,6 +93,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
     // Set up navigation listener
     _setupNavigationListener();
+    _setupStepperListener();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _initializeAll();
@@ -108,6 +116,32 @@ class _ArrivingClientState extends State<ArrivingClient> {
         orderUpdateController.clearNavigation();
       }
     });
+  }
+
+  void _setupStepperListener() {
+    _stepperWorker = ever(stepperController.activeStep, (int step) {
+      if (mounted && _isScreenActive) {
+        _onStepChanged(step);
+      }
+    });
+  }
+
+  void _onStepChanged(int step) {
+    print('🔄 Stepper step changed to: $step');
+    if (step == 2) {
+      // Trip started - switch to driver → drop polyline
+      _routeCoordinates.clear();
+      _initialFitDone = false;
+      if (_driverLocation != null && _rideData?['dropoffCoordinates'] != null) {
+        _fetchRouteFromDriverTo(
+          _rideData!['dropoffCoordinates'] as LatLng,
+        ).then((_) {
+          _setMarkers();
+          _updatePolylines();
+          _fitMapToAllMarkers();
+        });
+      }
+    }
   }
 
   Future<void> _getchartidmethod() async {
@@ -147,9 +181,11 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
     // Cancel all timers and subscriptions first
     _positionStreamSubscription?.cancel();
+    _polylineRefreshTimer?.cancel();
 
     // Clean up workers
     _navigationWorker?.dispose();
+    _stepperWorker?.dispose();
 
     // Call super.dispose first
     super.dispose();
@@ -174,6 +210,8 @@ class _ArrivingClientState extends State<ArrivingClient> {
     _positionStreamSubscription?.pause();
     _positionStreamSubscription?.cancel();
     _positionStreamSubscription = null;
+    _polylineRefreshTimer?.cancel();
+    _polylineRefreshTimer = null;
 
     _mapController?.dispose();
     _mapController = null;
@@ -181,8 +219,10 @@ class _ArrivingClientState extends State<ArrivingClient> {
     markers.clear();
     circles.clear();
     _polylines.clear();
+    _driverToDropCoordinates.clear();
 
     _isInitialized = false;
+    _initialFitDone = false;
   }
 
   Future<void> _pauseLocationTracking() async {
@@ -565,7 +605,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
               );
             }
 
+            // Update markers and dynamically trim/re-fetch polyline
             _setMarkers();
+            _updateDynamicPolyline();
           },
           onError: (error) {
             print('❌ Location stream error: $error');
@@ -600,12 +642,187 @@ class _ArrivingClientState extends State<ArrivingClient> {
     return degree * pi / 180;
   }
 
+  // ==================== Dynamic Polyline Methods ====================
+
+  /// Called on every location update to trim the polyline and conditionally re-fetch
+  void _updateDynamicPolyline() {
+    if (!_isScreenActive || !mounted || _driverLocation == null) return;
+
+    final step = stepperController.activeStep.value;
+
+    if (step < 2) {
+      // State 1: Going to pickup
+      if (_routeCoordinates.isNotEmpty) {
+        _routeCoordinates = _trimPolylineToDriverPosition(
+          _routeCoordinates,
+          _driverLocation!,
+        );
+      }
+
+      // Check if driver deviated from route - re-fetch if needed
+      if (_routeCoordinates.isEmpty ||
+          _isDriverOffRoute(_routeCoordinates, _driverLocation!)) {
+        _throttledRefetchRoute(
+          _rideData?['pickupCoordinates'] as LatLng?,
+          isPickup: true,
+        );
+      }
+    } else if (step == 2) {
+      // State 2: Going to drop
+      if (_driverToDropCoordinates.isNotEmpty) {
+        _driverToDropCoordinates = _trimPolylineToDriverPosition(
+          _driverToDropCoordinates,
+          _driverLocation!,
+        );
+      }
+
+      // Check if driver deviated from route - re-fetch if needed
+      if (_driverToDropCoordinates.isEmpty ||
+          _isDriverOffRoute(_driverToDropCoordinates, _driverLocation!)) {
+        _throttledRefetchRoute(
+          _rideData?['dropoffCoordinates'] as LatLng?,
+          isPickup: false,
+        );
+      }
+    }
+
+    _updatePolylines();
+
+    // Follow driver on map after initial fit
+    if (_initialFitDone && _mapController != null) {
+      _mapController!.animateCamera(CameraUpdate.newLatLng(_driverLocation!));
+    }
+  }
+
+  /// Trim polyline to the driver's current position by removing passed points
+  List<LatLng> _trimPolylineToDriverPosition(
+    List<LatLng> polyline,
+    LatLng driverPos,
+  ) {
+    if (polyline.isEmpty) return polyline;
+
+    int closestIndex = _findClosestPointIndex(polyline, driverPos);
+
+    // Remove all points before the closest point
+    if (closestIndex > 0) {
+      final trimmed = polyline.sublist(closestIndex);
+      // Insert driver's current position at the start for smooth visual
+      return [driverPos, ...trimmed];
+    }
+
+    // Replace the first point with driver position for smooth visual
+    return [driverPos, ...polyline.sublist(1)];
+  }
+
+  /// Find the index of the closest point on the polyline to the driver
+  int _findClosestPointIndex(List<LatLng> polyline, LatLng driverPos) {
+    double minDist = double.infinity;
+    int minIndex = 0;
+
+    for (int i = 0; i < polyline.length; i++) {
+      final dist = _calculateDistance(
+        driverPos.latitude,
+        driverPos.longitude,
+        polyline[i].latitude,
+        polyline[i].longitude,
+      );
+      if (dist < minDist) {
+        minDist = dist;
+        minIndex = i;
+      }
+    }
+
+    return minIndex;
+  }
+
+  /// Check if driver has deviated more than 100m from the route
+  bool _isDriverOffRoute(List<LatLng> polyline, LatLng driverPos) {
+    if (polyline.isEmpty) return true;
+
+    int closestIndex = _findClosestPointIndex(polyline, driverPos);
+    double distToRoute = _calculateDistance(
+      driverPos.latitude,
+      driverPos.longitude,
+      polyline[closestIndex].latitude,
+      polyline[closestIndex].longitude,
+    );
+
+    // 0.1 km = 100 meters
+    return distToRoute > 0.1;
+  }
+
+  /// Throttled re-fetch of route from driver's current position to destination
+  void _throttledRefetchRoute(LatLng? destination, {required bool isPickup}) {
+    if (destination == null || _isFetchingDirections) return;
+
+    final now = DateTime.now();
+    if (now.difference(_lastPolylineRefresh).inSeconds < 15) {
+      return; // Too soon since last fetch
+    }
+
+    _lastPolylineRefresh = now;
+    _fetchRouteFromDriverTo(destination, isPickup: isPickup);
+  }
+
+  /// Fetch directions from driver's current location to a destination
+  Future<void> _fetchRouteFromDriverTo(
+    LatLng destination, {
+    bool isPickup = false,
+  }) async {
+    if (_driverLocation == null || _isFetchingDirections) return;
+
+    _isFetchingDirections = true;
+
+    try {
+      final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/directions/json'
+        '?origin=${_driverLocation!.latitude},${_driverLocation!.longitude}'
+        '&destination=${destination.latitude},${destination.longitude}'
+        '&key=$GOOGLE_API_KEY',
+      );
+
+      print(
+        '🛣️ Re-fetching route from driver to ${isPickup ? "pickup" : "drop"}...',
+      );
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        if (data['routes'] != null && data['routes'].isNotEmpty) {
+          final route = data['routes'][0];
+          final newCoordinates = _getDetailedPolylineFromSteps(route);
+
+          if (mounted && _isScreenActive) {
+            setState(() {
+              if (isPickup) {
+                _routeCoordinates = newCoordinates;
+              } else {
+                _driverToDropCoordinates = newCoordinates;
+              }
+            });
+            _updatePolylines();
+            print('✅ Route re-fetched (${newCoordinates.length} points)');
+          }
+        }
+      }
+    } catch (e) {
+      print('❌ Error re-fetching route: $e');
+    } finally {
+      _isFetchingDirections = false;
+    }
+  }
+
+  // ==================== Markers (State-Aware) ====================
+
   void _setMarkers() {
     if (!_isScreenActive || !mounted) return;
 
+    final step = stepperController.activeStep.value;
     final newMarkers = <Marker>{};
     final newCircles = <Circle>{};
 
+    // Always show driver marker
     if (_driverLocation != null && _bikeMarkerIcon != null) {
       newMarkers.add(
         Marker(
@@ -642,45 +859,50 @@ class _ArrivingClientState extends State<ArrivingClient> {
       );
     }
 
-    if (_rideData?['pickupCoordinates'] != null && _pickupMarkerIcon != null) {
-      newMarkers.add(
-        Marker(
-          markerId: const MarkerId("pickup"),
-          position: _rideData!['pickupCoordinates'],
-          infoWindow: InfoWindow(
-            title: "Pickup",
-            snippet: _rideData!['pickupLocation'],
+    if (step < 2) {
+      // State 1: Show pickup marker
+      if (_rideData?['pickupCoordinates'] != null &&
+          _pickupMarkerIcon != null) {
+        newMarkers.add(
+          Marker(
+            markerId: const MarkerId("pickup"),
+            position: _rideData!['pickupCoordinates'],
+            infoWindow: InfoWindow(
+              title: "Pickup",
+              snippet: _rideData!['pickupLocation'],
+            ),
+            icon: _pickupMarkerIcon!,
+            zIndex: 1,
           ),
-          icon: _pickupMarkerIcon!,
-          zIndex: 1,
-        ),
-      );
+        );
 
-      newCircles.add(
-        Circle(
-          circleId: const CircleId('pickup_zone'),
-          center: _rideData!['pickupCoordinates'],
-          radius: 500,
-          fillColor: Colors.blue.withOpacity(0.15),
-          strokeColor: Colors.blue.withOpacity(0.5),
-          strokeWidth: 2,
-        ),
-      );
-    }
-
-    if (_rideData?['dropoffCoordinates'] != null && _dropMarkerIcon != null) {
-      newMarkers.add(
-        Marker(
-          markerId: const MarkerId("drop"),
-          position: _rideData!['dropoffCoordinates'],
-          infoWindow: InfoWindow(
-            title: "Drop",
-            snippet: _rideData!['dropLocation'],
+        newCircles.add(
+          Circle(
+            circleId: const CircleId('pickup_zone'),
+            center: _rideData!['pickupCoordinates'],
+            radius: 500,
+            fillColor: Colors.blue.withOpacity(0.15),
+            strokeColor: Colors.blue.withOpacity(0.5),
+            strokeWidth: 2,
           ),
-          icon: _dropMarkerIcon!,
-          zIndex: 1,
-        ),
-      );
+        );
+      }
+    } else {
+      // State 2: Show drop marker
+      if (_rideData?['dropoffCoordinates'] != null && _dropMarkerIcon != null) {
+        newMarkers.add(
+          Marker(
+            markerId: const MarkerId("drop"),
+            position: _rideData!['dropoffCoordinates'],
+            infoWindow: InfoWindow(
+              title: "Drop",
+              snippet: _rideData!['dropLocation'],
+            ),
+            icon: _dropMarkerIcon!,
+            zIndex: 1,
+          ),
+        );
+      }
     }
 
     if (mounted) {
@@ -690,19 +912,26 @@ class _ArrivingClientState extends State<ArrivingClient> {
       });
     }
 
-    _fitMapToAllMarkers();
+    if (!_initialFitDone) {
+      _fitMapToAllMarkers();
+    }
   }
 
   void _fitMapToAllMarkers() {
     if (_mapController == null || !_isScreenActive) return;
 
+    final step = stepperController.activeStep.value;
     final List<LatLng> allPoints = [];
 
     if (_driverLocation != null) allPoints.add(_driverLocation!);
-    if (_rideData?['pickupCoordinates'] != null)
-      allPoints.add(_rideData!['pickupCoordinates']);
-    if (_rideData?['dropoffCoordinates'] != null)
-      allPoints.add(_rideData!['dropoffCoordinates']);
+
+    if (step < 2) {
+      if (_rideData?['pickupCoordinates'] != null)
+        allPoints.add(_rideData!['pickupCoordinates']);
+    } else {
+      if (_rideData?['dropoffCoordinates'] != null)
+        allPoints.add(_rideData!['dropoffCoordinates']);
+    }
 
     if (allPoints.isEmpty) return;
 
@@ -713,6 +942,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
         _mapController!.animateCamera(
           CameraUpdate.newLatLngBounds(bounds, 150),
         );
+        _initialFitDone = true;
       }
     });
   }
@@ -811,14 +1041,13 @@ class _ArrivingClientState extends State<ArrivingClient> {
   }
 
   Future<void> _getDirections() async {
-    if (_rideData?['pickupCoordinates'] == null ||
-        _rideData?['dropoffCoordinates'] == null) {
-      print('⚠️ Cannot get directions: coordinates missing');
+    if (_rideData?['pickupCoordinates'] == null) {
+      print('⚠️ Cannot get directions: pickup coordinates missing');
       return;
     }
 
     try {
-      // Route 1: Driver Location to Pickup
+      // Fetch route from driver location to pickup
       if (_driverLocation != null && _rideData!['pickupCoordinates'] != null) {
         final pickupCoords = _rideData!['pickupCoordinates'] as LatLng;
         final url = Uri.parse(
@@ -836,57 +1065,12 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
           if (data['routes'] != null && data['routes'].isNotEmpty) {
             final route = data['routes'][0];
-            // Use detailed polyline from steps instead of overview
             _routeCoordinates = _getDetailedPolylineFromSteps(route);
             print(
               '🛣️ Route Driver → Pickup calculated (${_routeCoordinates.length} points)',
             );
           } else {
             print('⚠️ No routes found from driver to pickup');
-          }
-        } else {
-          print('⚠️ Directions API error: ${response.statusCode}');
-        }
-      }
-
-      // Route 2: Pickup to Drop-off
-      if (_rideData!['pickupCoordinates'] != null &&
-          _rideData!['dropoffCoordinates'] != null) {
-        final pickupCoords = _rideData!['pickupCoordinates'] as LatLng;
-        final dropoffCoords = _rideData!['dropoffCoordinates'] as LatLng;
-
-        print('📍 Pickup: ${pickupCoords.latitude}, ${pickupCoords.longitude}');
-        print(
-          '📍 Dropoff: ${dropoffCoords.latitude}, ${dropoffCoords.longitude}',
-        );
-
-        final url = Uri.parse(
-          'https://maps.googleapis.com/maps/api/directions/json'
-          '?origin=${pickupCoords.latitude},${pickupCoords.longitude}'
-          '&destination=${dropoffCoords.latitude},${dropoffCoords.longitude}'
-          '&key=$GOOGLE_API_KEY',
-        );
-
-        print('🛣️ Fetching route from pickup to drop...');
-        final response = await http.get(url);
-
-        if (response.statusCode == 200) {
-          final data = json.decode(response.body);
-          print('📦 Directions response: ${data['status']}');
-
-          if (data['routes'] != null && data['routes'].isNotEmpty) {
-            final route = data['routes'][0];
-            if (route['legs'] != null || route['overview_polyline'] != null) {
-              // Use detailed polyline from steps instead of overview
-              _pickupToDropCoordinates = _getDetailedPolylineFromSteps(route);
-              print(
-                '✅ Route Pickup → Drop calculated (${_pickupToDropCoordinates.length} points)',
-              );
-            } else {
-              print('⚠️ No polyline data in route');
-            }
-          } else {
-            print('⚠️ No routes found from pickup to drop');
           }
         } else {
           print('⚠️ Directions API error: ${response.statusCode}');
@@ -904,29 +1088,33 @@ class _ArrivingClientState extends State<ArrivingClient> {
   void _updatePolylines() {
     if (!_isScreenActive || !mounted) return;
 
+    final step = stepperController.activeStep.value;
     final polylines = <Polyline>{};
 
-    if (_routeCoordinates.isNotEmpty) {
-      polylines.add(
-        Polyline(
-          polylineId: const PolylineId('driver_to_pickup'),
-          points: _routeCoordinates,
-          color: Colors.blue,
-          width: 4,
-        ),
-      );
-    }
-
-    if (_pickupToDropCoordinates.isNotEmpty) {
-      polylines.add(
-        Polyline(
-          polylineId: const PolylineId('pickup_to_drop'),
-          points: _pickupToDropCoordinates,
-          color: Colors.green,
-          width: 4,
-          patterns: [PatternItem.dash(10), PatternItem.gap(10)],
-        ),
-      );
+    if (step < 2) {
+      // State 1: Show driver → pickup polyline
+      if (_routeCoordinates.isNotEmpty) {
+        polylines.add(
+          Polyline(
+            polylineId: const PolylineId('driver_to_pickup'),
+            points: _routeCoordinates,
+            color: Colors.blue,
+            width: 5,
+          ),
+        );
+      }
+    } else {
+      // State 2: Show driver → drop polyline
+      if (_driverToDropCoordinates.isNotEmpty) {
+        polylines.add(
+          Polyline(
+            polylineId: const PolylineId('driver_to_drop'),
+            points: _driverToDropCoordinates,
+            color: Colors.green,
+            width: 5,
+          ),
+        );
+      }
     }
 
     if (mounted) {

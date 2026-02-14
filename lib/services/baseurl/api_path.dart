@@ -1,5 +1,8 @@
 class ApiPath {
-  static const String baseUri2 = "https://corezap.smarttechbros.com/api/v1";
+  // static const String baseUri2 = "https://corezap.smarttechbros.com/api/v1";
+
+    static const String baseUri2 = "https://nzcu.smarttechbros.com/api/v1";
+
 
   // static const String baseUri2 = "https://api.nzcu.framekarts.com/api/v1";
 
@@ -9,9 +12,16 @@ class ApiPath {
   
   // static const String baseUri = "https://api.corezap.framekarts.com/api/v1"; //
 
-  static const String baseUri = "https://corezap.smarttechbros.com/api/v1";
+  // static const String baseUri = "https://corezap.smarttechbros.com/api/v1";
 
   //  static const String baseUri = "https://api.nzcu.framekarts.com/api/v1";
+
+
+
+  // new _baseurl
+
+
+  static const String baseUri = "https://nzcu.smarttechbros.com/api/v1";
 
 
 //  =======================================================================4
@@ -62,7 +72,9 @@ class ApiPath {
   static String order_verify_otp = "$baseUri/order/verifyOtp";
 
 
-   static String get_All_Categories = "$baseUri/getAllCategories";
+static String get_All_Categories = "$baseUri/getAllCategories";
+
+ static String order_verifed_otp = "$baseUri/order/verifyOtp";
 
   // static String order_declined = "$baseUri/order/verify-otp";
 }

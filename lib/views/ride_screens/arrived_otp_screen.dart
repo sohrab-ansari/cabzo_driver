@@ -4,6 +4,7 @@ import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -94,10 +95,15 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
     print("📌 OTP: $otp");
 
     // Change this URL to your actual endpoint
-    final Uri url = Uri.parse(
-      "https://api.corezap.framekarts.com/api/v1/order/verifyOtp",
-    );
+    // final Uri url = Uri.parse(
+    //   "https://api.corezap.framekarts.com/api/v1/order/verifyOtp",
+    // );
 
+
+
+ final Uri url = Uri.parse(
+     ApiPath.order_verifed_otp
+    );
     try {
       final response = await http.post(
         url,
