@@ -119,19 +119,13 @@
 //   }
 // }
 
-
 class GetBankAccountsResponse {
   bool? success;
   String? message;
   int? count;
   List<BankAccount>? data;
 
-  GetBankAccountsResponse({
-    this.success,
-    this.message,
-    this.count,
-    this.data,
-  });
+  GetBankAccountsResponse({this.success, this.message, this.count, this.data});
 
   static GetBankAccountsResponse fromJson(Map<String, dynamic> json) {
     return GetBankAccountsResponse(
@@ -140,7 +134,8 @@ class GetBankAccountsResponse {
       count: json['count'],
       data: json['data'] != null
           ? List<BankAccount>.from(
-              json['data'].map((x) => BankAccount.fromJson(x)))
+              json['data'].map((x) => BankAccount.fromJson(x)),
+            )
           : null,
     );
   }
@@ -162,6 +157,8 @@ class BankAccount {
   String? accountNumber;
   String? ifscCode;
   String? accountHolderName;
+  String? type;
+  String? upiId;
   DateTime? createdAt;
   DateTime? updatedAt;
   int? v;
@@ -173,6 +170,8 @@ class BankAccount {
     this.accountNumber,
     this.ifscCode,
     this.accountHolderName,
+    this.type,
+    this.upiId,
     this.createdAt,
     this.updatedAt,
     this.v,
@@ -188,6 +187,8 @@ class BankAccount {
       accountNumber: json['accountNumber'],
       ifscCode: json['ifscCode'],
       accountHolderName: json['accountHolderName'],
+      type: json['type'],
+      upiId: json['upiId'],
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : null,
@@ -206,6 +207,8 @@ class BankAccount {
       'accountNumber': accountNumber,
       'ifscCode': ifscCode,
       'accountHolderName': accountHolderName,
+      'type': type,
+      'upiId': upiId,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
       '__v': v,
@@ -218,25 +221,13 @@ class Driver {
   String? phone;
   String? name;
 
-  Driver({
-    this.id,
-    this.phone,
-    this.name,
-  });
+  Driver({this.id, this.phone, this.name});
 
   static Driver fromJson(Map<String, dynamic> json) {
-    return Driver(
-      id: json['_id'],
-      phone: json['phone'],
-      name: json['name'],
-    );
+    return Driver(id: json['_id'], phone: json['phone'], name: json['name']);
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      '_id': id,
-      'phone': phone,
-      'name': name,
-    };
+    return {'_id': id, 'phone': phone, 'name': name};
   }
 }

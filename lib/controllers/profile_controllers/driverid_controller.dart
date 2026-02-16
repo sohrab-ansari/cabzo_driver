@@ -53,11 +53,11 @@ class DriveridController extends GetxController {
       if (res.success == true) {
         print("driverid data fetched successfully");
 
-        Fluttertoast.showToast(
-          msg: res.message ?? "Something went wrong",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP,
-        );
+        // Fluttertoast.showToast(
+        //   msg: res.message ?? "Something went wrong",
+        //   toastLength: Toast.LENGTH_SHORT,
+        //   gravity: ToastGravity.TOP,
+        // );
 
         driveridresponse.value = res;
       } else {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/views/ride_screens/ride_request_screen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,9 +12,7 @@ import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart
 import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:flutter_background/flutter_background.dart' as bg_lib;
-import 'package:flutter_background_geolocation/flutter_background_geolocation.dart'
-    as bg;
+
 
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
 
@@ -37,6 +36,12 @@ class SocketManager {
 
 
   static const String SOCKET_URL = 'https://nzcu.smarttechbros.com';
+
+
+
+  // static const String SOCKET_URL = 'https://api.syrus.framekarts.com';
+
+  // https://api.syrus.framekarts.com/
  
 
   //nzcu url
@@ -112,44 +117,44 @@ class SocketManager {
     await _getInitialLocation();
 
     // Initialize Advanced Geolocation
-    await _initAdvancedGeolocation();
+    // await _initAdvancedGeolocation();
 
     await connectSocket();
     // Restore online status from SharedPreferences
     await _restoreOnlineStatus();
   }
 
-  Future<void> _initAdvancedGeolocation() async {
-    print('🛰️ [SocketManager] Initializing Advanced Geolocation...');
+  // Future<void> _initAdvancedGeolocation() async {
+  //   print('🛰️ [SocketManager] Initializing Advanced Geolocation...');
 
-    bg.BackgroundGeolocation.onLocation((bg.Location location) {
-      print(
-        '[Advanced Geolocation] Location changed: ${location.coords.latitude}, ${location.coords.longitude}',
-      );
-      _currentLatitude = location.coords.latitude;
-      _currentLongitude = location.coords.longitude;
+  //   bg.BackgroundGeolocation.onLocation((bg.Location location) {
+  //     print(
+  //       '[Advanced Geolocation] Location changed: ${location.coords.latitude}, ${location.coords.longitude}',
+  //     );
+  //     _currentLatitude = location.coords.latitude;
+  //     _currentLongitude = location.coords.longitude;
 
-      // If we are online, emit update immediately via socket
-      if (isOnDuty && _socket != null && _isSocketConnected) {
-        _sendLocationUpdate();
-      }
-    });
+  //     // If we are online, emit update immediately via socket
+  //     if (isOnDuty && _socket != null && _isSocketConnected) {
+  //       _sendLocationUpdate();
+  //     }
+  //   });
 
-    await bg.BackgroundGeolocation.ready(
-      bg.Config(
-        desiredAccuracy: bg.Config.DESIRED_ACCURACY_HIGH,
-        distanceFilter: 10.0,
-        stopOnTerminate: false,
-        startOnBoot: true,
-        debug: false,
-        logLevel: bg.Config.LOG_LEVEL_OFF,
-        notification: bg.Notification(
-          title: "NZCU Driver Tracking",
-          text: "Online and ready for rides",
-        ),
-      ),
-    );
-  }
+  //   await bg.BackgroundGeolocation.ready(
+  //     bg.Config(
+  //       desiredAccuracy: bg.Config.DESIRED_ACCURACY_HIGH,
+  //       distanceFilter: 10.0,
+  //       stopOnTerminate: false,
+  //       startOnBoot: true,
+  //       debug: false,
+  //       logLevel: bg.Config.LOG_LEVEL_OFF,
+  //       notification: bg.Notification(
+  //         title: "NZCU Driver Tracking",
+  //         text: "Online and ready for rides",
+  //       ),
+  //     ),
+  //   );
+  // }
 
   // ✅ NEW: Mark app as ready for location requests
   void setAppReady(bool ready) {
@@ -594,8 +599,19 @@ class SocketManager {
         prefs.setString('last_ride_request', jsonEncode(data));
       });
 
+
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => RideRequestScreen(rideData: rideData),
+    //   ),
+    // );
+
+
+
+    Get.to(RideRequestScreen(rideData: rideData));
       // Trigger interactive notification
-      NotificationService.instance.showRideRequestNotification(rideData);
+      // NotificationService.instance.showRideRequestNotification(rideData);
 
       onNewRide?.call(rideData);
     });
@@ -928,50 +944,50 @@ class SocketManager {
       FlutterBackgroundService().invoke('goOnline');
 
       // START APP KEEP-ALIVE (isolated try-catch)
-      try {
-        print('🚀 [SocketManager] Enabling FlutterBackground keep-alive...');
-        bool hasPermissions = await bg_lib.FlutterBackground.hasPermissions;
+      // try {
+      //   print('🚀 [SocketManager] Enabling FlutterBackground keep-alive...');
+      //   bool hasPermissions = await bg_lib.FlutterBackground.hasPermissions;
 
-        if (!hasPermissions) {
-          print(
-            '⚠️ [SocketManager] FlutterBackground missing permissions - attempting to initialize...',
-          );
-          const androidConfig = bg_lib.FlutterBackgroundAndroidConfig(
-            notificationTitle: "NZCU Driver",
-            notificationText: "App is running in the background",
-            notificationImportance: bg_lib.AndroidNotificationImportance.high,
-            notificationIcon: bg_lib.AndroidResource(
-              name: 'ic_launcher',
-              defType: 'mipmap',
-            ),
-          );
-          await bg_lib.FlutterBackground.initialize(
-            androidConfig: androidConfig,
-          );
-          hasPermissions = await bg_lib.FlutterBackground.hasPermissions;
-        }
+      //   if (!hasPermissions) {
+      //     print(
+      //       '⚠️ [SocketManager] FlutterBackground missing permissions - attempting to initialize...',
+      //     );
+      //     const androidConfig = bg_lib.FlutterBackgroundAndroidConfig(
+      //       notificationTitle: "NZCU Driver",
+      //       notificationText: "App is running in the background",
+      //       notificationImportance: bg_lib.AndroidNotificationImportance.high,
+      //       notificationIcon: bg_lib.AndroidResource(
+      //         name: 'ic_launcher',
+      //         defType: 'mipmap',
+      //       ),
+      //     );
+      //     await bg_lib.FlutterBackground.initialize(
+      //       androidConfig: androidConfig,
+      //     );
+      //     hasPermissions = await bg_lib.FlutterBackground.hasPermissions;
+      //   }
 
-        if (hasPermissions) {
-          bool enabled =
-              await bg_lib.FlutterBackground.enableBackgroundExecution();
-          print(
-            '✅ [SocketManager] FlutterBackground execution enabled: $enabled',
-          );
-        } else {
-          print(
-            '❌ [SocketManager] FlutterBackground permissions still missing after init attempt',
-          );
-        }
-      } catch (bgKeepAliveError) {
-        print(
-          '⚠️ [SocketManager] FlutterBackground keep-alive failed (non-fatal): $bgKeepAliveError',
-        );
-      }
+      //   if (hasPermissions) {
+      //     bool enabled =
+      //         await bg_lib.FlutterBackground.enableBackgroundExecution();
+      //     print(
+      //       '✅ [SocketManager] FlutterBackground execution enabled: $enabled',
+      //     );
+      //   } else {
+      //     print(
+      //       '❌ [SocketManager] FlutterBackground permissions still missing after init attempt',
+      //     );
+      //   }
+      // } catch (bgKeepAliveError) {
+      //   print(
+      //     '⚠️ [SocketManager] FlutterBackground keep-alive failed (non-fatal): $bgKeepAliveError',
+      //   );
+      // }
 
       // START ADVANCED GEOLOCATION TRACKING
       try {
         print('🚀 [SocketManager] Starting Native Geolocation Tracking...');
-        await bg.BackgroundGeolocation.start();
+        // await bg.BackgroundGeolocation.start();
         print('✅ [SocketManager] Native Geolocation Tracking started');
       } catch (geoError) {
         print(
@@ -1041,14 +1057,14 @@ class SocketManager {
       // STOP APP KEEP-ALIVE
       print('🛑 [SocketManager] Disabling FlutterBackground keep-alive...');
       try {
-        await bg_lib.FlutterBackground.disableBackgroundExecution();
+        // await bg_lib.FlutterBackground.disableBackgroundExecution();
       } catch (e) {
         print('⚠️ Error disabling background execution: $e');
       }
 
       // STOP ADVANCED GEOLOCATION TRACKING
       print('🛑 [SocketManager] Stopping Native Geolocation Tracking...');
-      await bg.BackgroundGeolocation.stop();
+      // await bg.BackgroundGeolocation.stop();
 
       print('✅ Driver is now offline and socket disconnected');
     } catch (error) {

@@ -19,13 +19,10 @@ class AddUpi extends StatefulWidget {
 }
 
 class _AddUpiState extends State<AddUpi> {
+  final BankAccountAddController bankAccountAddController =
+      Get.find<BankAccountAddController>();
 
-
-      final BankAccountAddController bankAccountAddController = Get.find<BankAccountAddController>();
-
-
-  TextEditingController textEditingController = TextEditingController();
-
+  TextEditingController upiIdController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +87,7 @@ class _AddUpiState extends State<AddUpi> {
                   context: context,
                   hintText: "Example: abcdef@phonepe",
 
-                  controller: textEditingController,
+                  controller: upiIdController,
                   keyboardType: TextInputType.text,
                 ),
               ),
@@ -140,11 +137,15 @@ class _AddUpiState extends State<AddUpi> {
                 context: context,
                 text: "Update",
                 onClicked: () {
-                  // CustomNavigator.push(
-                  //   context,
-                  //   MoneyTransferScreen(),
-                  //   transition: TransitionType.fade,
-                  // );
+                  bankAccountAddController.addbankaccount_method(
+                    bankName: "",
+                    accountNumber: "",
+                    accountHolderName: "",
+                    ifscCode: "",
+                    type: "UPI",
+                    upiId: upiIdController.text,
+                    context: context,
+                  );
                 },
                 isFullWidth: true,
                 backgroundColor: AppColors.lightGray,

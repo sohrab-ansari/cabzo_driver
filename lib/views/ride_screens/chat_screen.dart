@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:nzcu_driver/controllers/chart_id_controller/chatid_controller.dart';
 import 'package:nzcu_driver/services/apiservices/socket_manager.dart';
+import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
 import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:flutter/material.dart';
@@ -212,11 +213,17 @@ class _ChatScreenState extends State<ChatScreen> {
       final prefs = await SharedPreferences.getInstance();
       final String? token = prefs.getString("auth_token");
 
+
+      print("token____chart screen  >> $token");
+
       if (token == null) {
         throw Exception('No authentication token found');
       }
 
-      final url = '$_baseUrl/api/v1/chat/messages/$_chatId';
+      // final url = '$_baseUrl/api/v1/chat/messages/$_chatId';
+
+
+           final url = '${ApiPath.baseUri}/chat/messages/$_chatId';
       print('🌐 API URL: $url');
 
       final response = await http.get(
@@ -261,14 +268,14 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     } catch (e) {
       print('❌ Error fetching chat history: $e');
-      if (_mounted) {
-        ScaffoldMessenger.of(Get.context!).showSnackBar(
-          SnackBar(
-            content: Text('Failed to load chat history: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      // if (_mounted) {
+      //   ScaffoldMessenger.of(Get.context!).showSnackBar(
+      //     SnackBar(
+      //       content: Text('Failed to load chat history: ${e.toString()}'),
+      //       backgroundColor: Colors.red,
+      //     ),
+      //   );
+      // }
     } finally {
       if (_mounted) {
         setState(() {

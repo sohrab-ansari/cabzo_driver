@@ -1,4 +1,3 @@
-
 import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +33,6 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
   void initState() {
     super.initState();
 
-    
     _isDisposed = false;
     print('🔑 OTP Screen initialized');
     print('📦 Ride data: ${widget.rideData}');
@@ -45,9 +43,6 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
         FocusScope.of(context).unfocus();
       }
     });
-
-
-  
   }
 
   @override
@@ -57,9 +52,7 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
     super.dispose();
   }
 
-
   void thetypecheck() {
-    
     print("hellooootype>>> ${widget.bookridetypecheck}");
   }
 
@@ -99,11 +92,7 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
     //   "https://api.corezap.framekarts.com/api/v1/order/verifyOtp",
     // );
 
-
-
- final Uri url = Uri.parse(
-     ApiPath.order_verifed_otp
-    );
+    final Uri url = Uri.parse(ApiPath.order_verifed_otp);
     try {
       final response = await http.post(
         url,
@@ -202,7 +191,6 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
         // Navigate after successful verification
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted && !_isDisposed) {
-
             print("naviagtionnnnn>>>   ");
             stepperController.nextStep();
 
@@ -233,19 +221,19 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
     final w = MediaQuery.of(context).size.width;
 
     return PopScope(
-        canPop: false,
-  onPopInvokedWithResult: (didPop, result) {
-    if (didPop) return;
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
 
-    Fluttertoast.showToast(
-      msg: "Please complete the ride verification first",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.TOP,
-      backgroundColor: Colors.black87,
-      textColor: Colors.white,
-      fontSize: 14,
-    );
-  },
+        Fluttertoast.showToast(
+          msg: "Please complete the ride verification first",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          backgroundColor: Colors.black87,
+          textColor: Colors.white,
+          fontSize: 14,
+        );
+      },
       // canPop: false,
       // onPopInvoked: (didPop) {
       //   if (didPop) return;
@@ -263,301 +251,302 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
         backgroundColor: Colors.white,
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           leadingWidth: w * 0.08,
           title: Text("OTP ${widget.bookridetypecheck ?? ''}"),
           elevation: 0,
           backgroundColor: Colors.white,
           foregroundColor: Colors.black,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              if (mounted && !_isDisposed) {
-                Navigator.of(context).pop(false);
-              }
-            },
+          // leading: IconButton(
+          //   icon: const Icon(Icons.arrow_back),
+          //   onPressed: () {
+          //     if (mounted && !_isDisposed) {
+          //       Navigator.of(context).pop(false);
+          //     }
+          //   },
+          // ),
         ),
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(w * 0.06, w * 0.06, w * 0.06, 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 30),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(w * 0.06, w * 0.06, w * 0.06, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 30),
 
-            /// Profile Image
-            Container(
-              height: w * 0.35,
-              width: w * 0.35,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-              ),
-              padding: const EdgeInsets.all(20),
-              child: Image.asset(
-                "assets/images/profile3.png",
-                fit: BoxFit.contain,
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            /// Customer Name
-            Text(
-              widget.rideData?['riderName']?.toString() ?? 'Customer',
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-            ),
-
-            const SizedBox(height: 8),
-
-            /// Instruction
-            const Text(
-              "Enter the 4-digit code to begin the trip",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-
-            const SizedBox(height: 30),
-
-            /// OTP FIELD
-            PinCodeTextField(
-              appContext: context,
-              length: 4,
-              keyboardType: TextInputType.number,
-              autoFocus: false,
-              animationType: AnimationType.fade,
-              textStyle: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-              pinTheme: PinTheme(
-                shape: PinCodeFieldShape.box,
-                borderRadius: BorderRadius.circular(12),
-                fieldHeight: 55,
-                fieldWidth: 55,
-                activeColor: const Color(0xFF26E3DD),
-                selectedColor: const Color(0xFF26E3DD),
-                inactiveColor: Colors.grey.shade300,
-                activeFillColor: Colors.white,
-                selectedFillColor: Colors.white,
-                inactiveFillColor: Colors.white,
-              ),
-              animationDuration: const Duration(milliseconds: 200),
-              enableActiveFill: true,
-              onChanged: (value) {
-                if (mounted) {
-                  setState(() {
-                    enteredOtp = value;
-                  });
-                }
-              },
-              onCompleted: (value) {
-                if (mounted) {
-                  setState(() {
-                    enteredOtp = value;
-                  });
-                  // Auto verify on complete
-                  _verifyOtp();
-                }
-              },
-            ),
-
-            const SizedBox(height: 20),
-
-            /// PICKUP & DROP LOCATION CARDS
-            _buildLocationCard(
-              label: "Pickup",
-              address: widget.rideData?['pickupLocation']?.toString() ??
-                  "Pickup location",
-              icon: "assets/icons/greenDot.png",
-              w: w,
-            ),
-
-            const SizedBox(height: 12),
-
-            _buildLocationCard(
-              label: "Drop",
-              address: widget.rideData?['dropLocation']?.toString() ??
-                  "Drop location",
-              icon: "assets/icons/redDot.png",
-              w: w,
-            ),
-
-            // const SizedBox(height: 20),
-
-            // /// RIDE DETAILS CARD
-            // _buildRideDetailsCard(w),
-
-            const SizedBox(height: 20),
-
-            if (widget.bookridetypecheck == true) ...[
+              /// Profile Image
               Container(
-                decoration: BoxDecoration(
+                height: w * 0.35,
+                width: w * 0.35,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.grey, width: 1),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 6,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
                 ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: w * 0.04,
-                    vertical: w * 0.035,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      /// Red Dot Icon
-                      Image.asset(
-                        "assets/icons/redDot.png",
-                        height: w * 0.05,
-                        width: w * 0.05,
-                      ),
+                padding: const EdgeInsets.all(20),
+                child: Image.asset(
+                  "assets/images/profile3.png",
+                  fit: BoxFit.contain,
+                ),
+              ),
 
-                      SizedBox(width: w * 0.03),
+              const SizedBox(height: 24),
 
-                      /// Text Content
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            /// Label
-                            Text(
-                              "Drop",
-                              style: TextStyle(
-                                fontSize: w * 0.035,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black,
-                              ),
-                            ),
+              /// Customer Name
+              Text(
+                widget.rideData?['riderName']?.toString() ?? 'Customer',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
 
-                            SizedBox(height: 6),
+              const SizedBox(height: 8),
 
-                            /// Address
-                            Text(
-                              widget.rideData?['dropLocation']?.toString() ??
-                                  "Bus Sta Upas, Majestic, Bengaluru, Karnataka 560009",
-                              style: TextStyle(
-                                fontSize: w * 0.032,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.grey.shade700,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
+              /// Instruction
+              const Text(
+                "Enter the 4-digit code to begin the trip",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+
+              const SizedBox(height: 30),
+
+              /// OTP FIELD
+              PinCodeTextField(
+                appContext: context,
+                length: 4,
+                keyboardType: TextInputType.number,
+                autoFocus: false,
+                animationType: AnimationType.fade,
+                textStyle: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+                pinTheme: PinTheme(
+                  shape: PinCodeFieldShape.box,
+                  borderRadius: BorderRadius.circular(12),
+                  fieldHeight: 55,
+                  fieldWidth: 55,
+                  activeColor: const Color(0xFF26E3DD),
+                  selectedColor: const Color(0xFF26E3DD),
+                  inactiveColor: Colors.grey.shade300,
+                  activeFillColor: Colors.white,
+                  selectedFillColor: Colors.white,
+                  inactiveFillColor: Colors.white,
+                ),
+                animationDuration: const Duration(milliseconds: 200),
+                enableActiveFill: true,
+                onChanged: (value) {
+                  if (mounted) {
+                    setState(() {
+                      enteredOtp = value;
+                    });
+                  }
+                },
+                onCompleted: (value) {
+                  if (mounted) {
+                    setState(() {
+                      enteredOtp = value;
+                    });
+                    // Auto verify on complete
+                    _verifyOtp();
+                  }
+                },
+              ),
+
+              const SizedBox(height: 20),
+
+              /// PICKUP & DROP LOCATION CARDS
+              // _buildLocationCard(
+              //   label: "Pickup",
+              //   address: widget.rideData?['pickupLocation']?.toString() ??
+              //       "Pickup location",
+              //   icon: "assets/icons/greenDot.png",
+              //   w: w,
+              // ),
+
+              // const SizedBox(height: 12),
+
+              // _buildLocationCard(
+              //   label: "Drop",
+              //   address: widget.rideData?['dropLocation']?.toString() ??
+              //       "Drop location",
+              //   icon: "assets/icons/redDot.png",
+              //   w: w,
+              // ),
+
+              // const SizedBox(height: 20),
+
+              // /// RIDE DETAILS CARD
+              // _buildRideDetailsCard(w),
+              const SizedBox(height: 20),
+
+              if (widget.bookridetypecheck == true) ...[
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.grey, width: 1),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: w * 0.04,
+                      vertical: w * 0.035,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        /// Red Dot Icon
+                        Image.asset(
+                          "assets/icons/redDot.png",
+                          height: w * 0.05,
+                          width: w * 0.05,
+                        ),
 
-            /// VERIFY BUTTON
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _isVerifying ? null : _verifyOtp,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF26E3DD),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  disabledBackgroundColor: Colors.grey,
-                ),
-                child: _isVerifying
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
+                        SizedBox(width: w * 0.03),
+
+                        /// Text Content
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              /// Label
+                              Text(
+                                "Drop",
+                                style: TextStyle(
+                                  fontSize: w * 0.035,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                              ),
+
+                              SizedBox(height: 6),
+
+                              /// Address
+                              Text(
+                                widget.rideData?['dropLocation']?.toString() ??
+                                    "Bus Sta Upas, Majestic, Bengaluru, Karnataka 560009",
+                                style: TextStyle(
+                                  fontSize: w * 0.032,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.grey.shade700,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
                         ),
-                      )
-                    : const Text(
-                        "Verify",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+
+              /// VERIFY BUTTON
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isVerifying ? null : _verifyOtp,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF26E3DD),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    disabledBackgroundColor: Colors.grey,
+                  ),
+                  child: _isVerifying
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                      : const Text(
+                          "Verify",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            /// CANCEL BUTTON
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: TextButton(
-                onPressed: _isVerifying
-                    ? null
-                    : () {
-
-                      // Navigator.pop(context);
-
-                       _handleCancelOrder();
-                      },
-                style: TextButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  "Cancel",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
-                  ),
                 ),
               ),
-            ),
 
-            /// DEBUG INFO (Optional - remove in production)
-            // if (widget.rideData != null) ...[
-            //   const SizedBox(height: 20),
-            //   Container(
-            //     padding: const EdgeInsets.all(10),
-            //     decoration: BoxDecoration(
-            //       color: Colors.grey[100],
-            //       borderRadius: BorderRadius.circular(10),
-            //     ),
-            //     child: Column(
-            //       crossAxisAlignment: CrossAxisAlignment.start,
-            //       children: [
-            //         const Text(
-            //           "Debug Info:",
-            //           style: TextStyle(fontWeight: FontWeight.bold),
-            //         ),
-            //         const SizedBox(height: 5),
-            //         Text("Order ID: ${widget.rideData?['orderId']}"),
-            //         Text("Rider: ${widget.rideData?['riderName']}"),
-            //         Text("OTP Entered: $enteredOtp"),
-            //       ],
-            //     ),
-            //   ),
-            // ],
-          ],
+              const SizedBox(height: 12),
+
+              /// CANCEL BUTTON
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: TextButton(
+                  onPressed: _isVerifying
+                      ? null
+                      : () {
+                          // Navigator.pop(context);
+
+                          _handleCancelOrder();
+                        },
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    "Cancel",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+
+              /// DEBUG INFO (Optional - remove in production)
+              // if (widget.rideData != null) ...[
+              //   const SizedBox(height: 20),
+              //   Container(
+              //     padding: const EdgeInsets.all(10),
+              //     decoration: BoxDecoration(
+              //       color: Colors.grey[100],
+              //       borderRadius: BorderRadius.circular(10),
+              //     ),
+              //     child: Column(
+              //       crossAxisAlignment: CrossAxisAlignment.start,
+              //       children: [
+              //         const Text(
+              //           "Debug Info:",
+              //           style: TextStyle(fontWeight: FontWeight.bold),
+              //         ),
+              //         const SizedBox(height: 5),
+              //         Text("Order ID: ${widget.rideData?['orderId']}"),
+              //         Text("Rider: ${widget.rideData?['riderName']}"),
+              //         Text("OTP Entered: $enteredOtp"),
+              //       ],
+              //     ),
+              //   ),
+              // ],
+            ],
+          ),
         ),
       ),
-     ) );
+    );
   }
 
-
-
-    void _handleCancelOrder() {
+  void _handleCancelOrder() {
     final orderId = widget.rideData?['orderId'];
 
     if (orderId != null && orderId.isNotEmpty) {
@@ -595,19 +584,12 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
           ),
         ],
       ),
-      padding: EdgeInsets.symmetric(
-        horizontal: w * 0.04,
-        vertical: w * 0.035,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: w * 0.04, vertical: w * 0.035),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           /// Location Icon
-          Image.asset(
-            icon,
-            height: w * 0.05,
-            width: w * 0.05,
-          ),
+          Image.asset(icon, height: w * 0.05, width: w * 0.05),
           SizedBox(width: w * 0.03),
 
           /// Text Content
@@ -686,12 +668,7 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               /// Fare
-              _buildDetailItem(
-                icon: '₹',
-                label: 'Fare',
-                value: fare,
-                w: w,
-              ),
+              _buildDetailItem(icon: '₹', label: 'Fare', value: fare, w: w),
 
               /// Distance
               _buildDetailItem(
@@ -710,16 +687,12 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
           SizedBox(height: w * 0.02),
 
           /// Phone Number
-          if (riderPhone != 'N/A')
-            _buildDetailRow('Phone', riderPhone),
-          if (riderPhone != 'N/A')
-            SizedBox(height: w * 0.02),
+          if (riderPhone != 'N/A') _buildDetailRow('Phone', riderPhone),
+          if (riderPhone != 'N/A') SizedBox(height: w * 0.02),
 
           /// Email
-          if (riderEmail != 'N/A')
-            _buildDetailRow('Email', riderEmail),
-          if (riderEmail != 'N/A')
-            SizedBox(height: w * 0.02),
+          if (riderEmail != 'N/A') _buildDetailRow('Email', riderEmail),
+          if (riderEmail != 'N/A') SizedBox(height: w * 0.02),
 
           /// OTP Verified Status
           _buildStatusRow(
@@ -743,10 +716,7 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
     return Expanded(
       child: Column(
         children: [
-          Text(
-            icon,
-            style: TextStyle(fontSize: w * 0.06),
-          ),
+          Text(icon, style: TextStyle(fontSize: w * 0.06)),
           SizedBox(height: w * 0.01),
           Text(
             label,
@@ -802,7 +772,12 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
   }
 
   /// Helper widget for status rows
-  Widget _buildStatusRow(String label, String value, bool isPositive, double w) {
+  Widget _buildStatusRow(
+    String label,
+    String value,
+    bool isPositive,
+    double w,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

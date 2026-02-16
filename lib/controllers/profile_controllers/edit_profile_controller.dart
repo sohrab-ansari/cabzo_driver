@@ -73,13 +73,13 @@ class EditProfileController extends GetxController {
           gender: gender,
         );
 
-    print("API Response: ${res.success}");
+    print("API>>>>>>Ressssponse: ${res.success}");
 
     if (res.success == true) {
       print("Profile updated successfully");
 
       Fluttertoast.showToast(
-        msg: res.message ?? "Profile updated successfully",
+        msg: res.message ?? "Profile upssdated successfully",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.TOP,
       );

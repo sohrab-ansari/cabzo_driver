@@ -27,7 +27,6 @@
 // //   TextEditingController ifscController = TextEditingController();
 // //   TextEditingController bankNameController = TextEditingController();
 
-
 // //   final BankAccountAddController bankAccountAddController = Get.put(
 // //     BankAccountAddController(),
 // //   );
@@ -37,7 +36,6 @@
 // //     super.dispose();
 // //     controllers.addBankAccoundButtonController.value = false;
 
-    
 // //   }
 
 // //   @override
@@ -188,8 +186,6 @@
 // //                       ifscCode: ,
 // //                     );
 
-
-
 // //                     // CustomNavigator.push(
 // //                     //   context,
 // //                     //   MoneyTransferScreen(),
@@ -216,7 +212,6 @@
 // //     );
 // //   }
 // // }
-
 
 // import 'package:nzcu_driver/controller/controllers.dart';
 // import 'package:nzcu_driver/controller/profilecontoller/bank_account_add_controller.dart';
@@ -435,7 +430,6 @@
 //   }
 // }
 
-
 import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/bank_account_add_controller.dart';
 import 'package:nzcu_driver/utilities/widgets/app_buttons.dart';
@@ -465,8 +459,8 @@ class _AddBankState extends State<AddBank> {
   TextEditingController ifscController = TextEditingController();
   TextEditingController bankNameController = TextEditingController();
 
- 
-      final BankAccountAddController bankAccountAddController = Get.find<BankAccountAddController>();
+  final BankAccountAddController bankAccountAddController =
+      Get.find<BankAccountAddController>();
 
   @override
   void dispose() {
@@ -633,12 +627,11 @@ class _AddBankState extends State<AddBank> {
                 isFullWidth: true,
                 backgroundColor:
                     controllers.addBankAccoundButtonController.value
-                        ? AppColors.primaryRed
-                        : AppColors.lightGray,
-                textColor:
-                    controllers.addBankAccoundButtonController.value
-                        ? AppColors.white
-                        : AppColors.mediumGray,
+                    ? AppColors.primaryRed
+                    : AppColors.lightGray,
+                textColor: controllers.addBankAccoundButtonController.value
+                    ? AppColors.white
+                    : AppColors.mediumGray,
                 fontSize: w * .045,
                 height: w * .140,
                 radius: 12.0,
@@ -648,7 +641,8 @@ class _AddBankState extends State<AddBank> {
                     accountNumber: accountNumberController.text.trim(),
                     bankName: bankNameController.text.trim(),
                     ifscCode: ifscController.text.trim(),
-                    context: context
+                    type: "BankAccount",
+                    context: context,
                   );
                 },
               ),

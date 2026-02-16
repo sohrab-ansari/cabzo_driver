@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
+import 'package:nzcu_driver/services/baseurl/api_path.dart';
 // import 'package:nzcu_driver/models/navigation_command.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
@@ -28,6 +29,7 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RideRequestScreen extends StatefulWidget {
   final Map<String, dynamic> rideData;
@@ -155,7 +157,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   }
 
   Future<void> _initializeAll() async {
-    setState(() => _isLoading = true);
+    if (mounted) setState(() => _isLoading = true);
 
     try {
       // Extract ride data FIRST
@@ -179,7 +181,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     } catch (e) {
       print('❌ Error initializing: $e');
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -235,10 +237,12 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         timer.cancel();
         _handleAutoDecline();
       } else {
-        setState(() {
-          _timer--;
-          _progress = _timer / TOTAL_TIME;
-        });
+        if (mounted) {
+          setState(() {
+            _timer--;
+            _progress = _timer / TOTAL_TIME;
+          });
+        }
       }
     });
   }
@@ -281,6 +285,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     _currentLatitude = location.latitude;
     _currentLongitude = location.longitude;
 
+    if (!mounted) return;
     setState(() {
       // Update driver marker position
       markers.removeWhere((marker) => marker.markerId.value == 'driver');
@@ -559,11 +564,11 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       if (status.isGranted) {
         return true;
       } else {
-        setState(() => _locationError = true);
+        if (mounted) setState(() => _locationError = true);
         return false;
       }
     } catch (e) {
-      setState(() => _locationError = true);
+      if (mounted) setState(() => _locationError = true);
       return false;
     }
   }
@@ -584,18 +589,20 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         ),
       );
 
-      setState(() {
-        _driverLocation = LatLng(position.latitude, position.longitude);
-        if (position.heading.isFinite && position.heading >= 0) {
-          _driverHeading = position.heading;
-        }
-        _locationError = false;
-      });
+      if (mounted) {
+        setState(() {
+          _driverLocation = LatLng(position.latitude, position.longitude);
+          if (position.heading.isFinite && position.heading >= 0) {
+            _driverHeading = position.heading;
+          }
+          _locationError = false;
+        });
+      }
 
       print('📍 Initial location: ${position.latitude}, ${position.longitude}');
     } catch (e) {
       print('❌ Error getting initial position: $e');
-      setState(() => _locationError = true);
+      if (mounted) setState(() => _locationError = true);
     }
 
     // Start position stream for continuous updates
@@ -636,7 +643,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
           },
           onError: (error) {
             print('❌ Location stream error: $error');
-            setState(() => _locationError = true);
+            if (mounted) {
+              setState(() => _locationError = true);
+            }
           },
         );
   }
@@ -743,10 +752,12 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       );
     }
 
-    setState(() {
-      markers = newMarkers;
-      circles = newCircles;
-    });
+    if (mounted) {
+      setState(() {
+        markers = newMarkers;
+        circles = newCircles;
+      });
+    }
 
     print('✅ Simple markers set: ${newMarkers.length} markers');
 
@@ -884,12 +895,14 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
             // Extract distance and duration
             if (route['legs'] != null && route['legs'].isNotEmpty) {
               final leg = route['legs'][0];
-              setState(() {
-                _routeInfo = {
-                  'distance': leg['distance']['text'] ?? '',
-                  'duration': leg['duration']['text'] ?? '',
-                };
-              });
+              if (mounted) {
+                setState(() {
+                  _routeInfo = {
+                    'distance': leg['distance']['text'] ?? '',
+                    'duration': leg['duration']['text'] ?? '',
+                  };
+                });
+              }
             }
 
             print('🛣️ Route Driver → Pickup calculated');
@@ -960,9 +973,11 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       );
     }
 
-    setState(() {
-      _polylines = polylines;
-    });
+    if (mounted) {
+      setState(() {
+        _polylines = polylines;
+      });
+    }
   }
 
   Future<void> _handleAutoDecline() async {
@@ -1429,8 +1444,10 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
                         ),
                         IconButton(
                           icon: Icon(Icons.close),
-                          onPressed: () =>
-                              setState(() => _showCancelSheet = false),
+                          onPressed: () {
+                            if (mounted)
+                              setState(() => _showCancelSheet = false);
+                          },
                         ),
                       ],
                     ),
@@ -1477,8 +1494,10 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
                                     : FontWeight.normal,
                               ),
                             ),
-                            onTap: () =>
-                                setState(() => _selectedReasonIndex = index),
+                            onTap: () {
+                              if (mounted)
+                                setState(() => _selectedReasonIndex = index);
+                            },
                           ),
                         );
                       },
@@ -1534,7 +1553,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   Future<void> _handleCustomDecline(String reason) async {
     if (_hasAccepted || _hasDeclined) return;
 
-    setState(() => _isDeclining = true);
+    if (mounted) setState(() => _isDeclining = true);
 
     try {
       // Use the new updateOrder method for custom decline
@@ -1550,10 +1569,12 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       );
 
       // Close the sheet
-      setState(() {
-        _showCancelSheet = false;
-        _selectedReasonIndex = null;
-      });
+      if (mounted) {
+        setState(() {
+          _showCancelSheet = false;
+          _selectedReasonIndex = null;
+        });
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -1562,7 +1583,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         ),
       );
     } finally {
-      setState(() => _isDeclining = false);
+      if (mounted) setState(() => _isDeclining = false);
     }
   }
 
@@ -1875,17 +1896,83 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       return;
     }
 
-    // Use the new updateOrder method
-    orderUpdateController.updateOrder(
-      context: context,
-      buttonId: 'cancel_button',
-      orderStatus: "Cancelled",
-      orderId: _orderId!,
-      rideData: widget.rideData,
-      stepControl: "Cancelled",
-      successMessage: 'Ride cancelled successfully',
-      shouldTriggerNavigation: true,
+    print("declinennnndd_api");
+    print("helloooo_tappeddd>>>   ${_orderId}  ");
+
+    final Uri url = Uri.parse("${ApiPath.baseUri}/order/decline/$_orderId");
+
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+
+    final res = await http.patch(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
     );
+
+    print("Response Body: ${res.body}");
+
+    final data = jsonDecode(res.body);
+
+    Fluttertoast.showToast(
+      msg: data["message"],
+      gravity: ToastGravity.TOP,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+    );
+
+    if (res.statusCode == 200) {
+      Navigator.pop(context);
+    }
+
+    // final res = await http.patch(
+    //   url,
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     "Authorization": "Bearer $token",
+    //   },
+    // );
+
+    // print("Status Code: ${res.statusCode}");
+    // print("Response Body: ${res.body}");
+
+    // if (res.statusCode == 200) {
+    //   print("navigating_to_back >>>");
+    //   Navigator.pop(context);
+    // }
+
+    // final Uri url = Uri.parse("${ApiPath.baseUri}/order/decline/$_orderId");
+
+    // final res = await http.patch(url);
+
+    // print("Status Code: ${res.statusCode}");
+    // print("Response Body: ${res.body}");
+
+    // if (res.statusCode == 200) {
+    //   print("navigating_to_back>>>");
+    //   Navigator.pop(context);
+    // }
+
+    //       final Uri url = Uri.parse(
+    //     "${ApiPath.baseUri}/order/decline/$_orderId",
+    //   );
+
+    //     final res = await http.post(url);
+    // if (res.statusCode == 200) Navigator.pop(context);
+
+    // Use the new updateOrder method
+    // orderUpdateController.updateOrder(
+    //   context: context,
+    //   buttonId: 'cancel_button',
+    //   orderStatus: "Cancelled",
+    //   orderId: _orderId!,
+    //   rideData: widget.rideData,
+    //   stepControl: "Cancelled",
+    //   successMessage: 'Ride cancelled successfully',
+    //   shouldTriggerNavigation: true,
+    // );
   }
 }
 

@@ -1,6 +1,3 @@
-
-
-
 // import 'package:nzcu_driver/controllers/profile_controllers/wallet_controller.dart';
 // import 'package:nzcu_driver/utilities/app_buttons.dart';
 // import 'package:nzcu_driver/utilities/colors.dart';
@@ -31,18 +28,17 @@
 
 //   final WalletController walletController = Get.find<WalletController>();
 
-  
 //   // Track if this is the first build
 //   bool _isFirstBuild = true;
 
 //   @override
 //   void initState() {
 //     super.initState();
-    
+
 //     // Don't call API directly in initState, use post-frame callback
 //     WidgetsBinding.instance.addPostFrameCallback((_) {
 //       // Only fetch data if it's not already loaded or if there was an error
-//       if (walletController.walletresponse.value == null || 
+//       if (walletController.walletresponse.value == null ||
 //           walletController.errorMessage.value.isNotEmpty) {
 //         walletController.wallet_method();
 //       }
@@ -371,7 +367,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Fetch data if not already loaded
       if (walletController.walletresponse.value == null) {
@@ -383,8 +379,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Future<void> _refreshData() async {
     await walletController.wallet_method();
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -420,7 +414,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
         child: SingleChildScrollView(
           physics: AlwaysScrollableScrollPhysics(),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: w * .04, vertical: w * .04),
+            padding: EdgeInsets.symmetric(
+              horizontal: w * .04,
+              vertical: w * .04,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -444,9 +441,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 // Use Obx for reactive updates
                 Obx(() {
                   final controller = walletController;
-                  
+
                   // Show loading indicator for the entire section
-                  if (controller.isLoading.value && controller.walletresponse.value == null) {
+                  if (controller.isLoading.value &&
+                      controller.walletresponse.value == null) {
                     return Center(
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: w * .1),
@@ -456,7 +454,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   }
 
                   // Show error message if any
-                  if (controller.errorMessage.value.isNotEmpty && controller.walletresponse.value == null) {
+                  if (controller.errorMessage.value.isNotEmpty &&
+                      controller.walletresponse.value == null) {
                     return Center(
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: w * .1),
@@ -483,10 +482,19 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        InkWell(
-                          onTap: (){
+                        AppFonts.textPoppins(
+                          context,
+                          "₹200 minimum balance required to accept or book a ride.",
+                          w * 0.030,
+                          FontWeight.w500,
+                          // const Color(0xFF72767C),
+                          Colors.black,
+                          TextAlign.center,
+                          TextOverflow.visible,
+                        ).animate().fade(duration: 900.ms).scale(),
 
-                          },
+                        InkWell(
+                          onTap: () {},
                           // onTap: () => Get.to(() => Wallet(balance:  controller.walletresponse.value?.data?.availableBalance,)),
                           child: Container(
                             width: double.infinity,
@@ -503,7 +511,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                   width: w * .75,
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       AppFonts.textPoppins(
                                         context,
@@ -517,17 +526,25 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                       SizedBox(height: w * .01),
 
                                       // Show loader only when initially loading
-                                      if (controller.walletresponse.value == null && controller.isLoading.value)
+                                      if (controller.walletresponse.value ==
+                                              null &&
+                                          controller.isLoading.value)
                                         SizedBox(
                                           height: w * 0.1,
                                           child: Center(
                                             child: CircularProgressIndicator(
                                               strokeWidth: 2,
-                                              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF27C840)),
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                    Color(0xFF27C840),
+                                                  ),
                                             ),
                                           ),
                                         )
-                                      else if (controller.walletresponse.value != null)
+                                      else if (controller
+                                              .walletresponse
+                                              .value !=
+                                          null)
                                         AppFonts.textPoppins(
                                           context,
                                           "₹${controller.walletresponse.value!.data?.availableBalance?.toStringAsFixed(2) ?? '0.00'}",
@@ -547,7 +564,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                           TextAlign.center,
                                           TextOverflow.visible,
                                         ),
-                                      
+
                                       SizedBox(height: w * .02),
                                     ],
                                   ),

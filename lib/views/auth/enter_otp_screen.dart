@@ -199,7 +199,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
           vehicleStatus == "draft") {
         print("📝 All Draft - Navigating to Registration");
         driverFormController.activeStep.value = 0; // Ensure start
-        CustomNavigator.push(
+        CustomNavigator.removeUntil(
           context,
           DriverRegistration(),
           transition: TransitionType.slideLeft,

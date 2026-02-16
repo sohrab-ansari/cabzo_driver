@@ -627,19 +627,19 @@ class _ReceivePaymentModesState extends State<ReceivePaymentModes> {
                   SizedBox(height: w * .08),
 
                   // Done Button
-                  AppButtons.solid(
-                    context: context,
-                    text: "Done",
-                    onClicked: _handleDone,
-                    isFullWidth: true,
-                    height: w * .14,
-                    radius: 16,
-                    backgroundColor: ColorsList.mainButtonColor,
-                    textColor: ColorsList.titleTextColor,
-                    fontSize: w * .045,
-                  ),
+                  // AppButtons.solid(
+                  //   context: context,
+                  //   text: "Done",
+                  //   onClicked: _handleDone,
+                  //   isFullWidth: true,
+                  //   height: w * .14,
+                  //   radius: 16,
+                  //   backgroundColor: ColorsList.mainButtonColor,
+                  //   textColor: ColorsList.titleTextColor,
+                  //   fontSize: w * .045,
+                  // ),
 
-                  SizedBox(height: w * .06),
+                  // SizedBox(height: w * .06),
                 ],
               ),
             ),

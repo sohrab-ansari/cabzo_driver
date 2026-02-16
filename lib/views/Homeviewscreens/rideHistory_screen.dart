@@ -1,4 +1,3 @@
-
 import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 import 'package:nzcu_driver/controllers/rides_controllers/rieds_history_controller.dart';
 import 'package:nzcu_driver/modals/home_modals/ride_history_response.dart';
@@ -18,11 +17,8 @@ class RidehistoryScreen extends StatefulWidget {
 
 class _RidehistoryScreenState extends State<RidehistoryScreen>
     with TickerProviderStateMixin {
-
-
-
-      final RiedsHistoryController riedsHistoryController = Get.find<RiedsHistoryController>();
-
+  final RiedsHistoryController riedsHistoryController =
+      Get.find<RiedsHistoryController>();
 
   final Controllers currentTabBar = Get.find<Controllers>();
 
@@ -45,7 +41,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
     _tabController.addListener(() {
       currentTabBar.currentTabIndex.value = _tabController.index;
       _currentStatus = _tabStatuses[_tabController.index];
-      
+
       // Call API when tab changes
       _fetchDataForCurrentTab();
     });
@@ -58,7 +54,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
 
   void _fetchDataForCurrentTab() {
     // Only fetch if not already loaded or if we need to refresh
-    if (!_tabLoaded[_currentStatus]! || 
+    if (!_tabLoaded[_currentStatus]! ||
         riedsHistoryController.transactionsres.value?.data == null) {
       riedsHistoryController.get_history_method(status: _currentStatus);
       _tabLoaded[_currentStatus] = true;
@@ -81,22 +77,23 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
         elevation: 0,
         leadingWidth: w * 0.010,
         leading: const SizedBox(),
-        title: AppFonts.textPoppins(
-          context,
-          "Ride History",
-          w * 0.05,
-          FontWeight.w600,
-          AppColors.black,
-          TextAlign.center,
-          TextOverflow.ellipsis,
-          maxLines: 1,
-        )
-            .animate()
-            .fade(duration: 800.ms, curve: Curves.easeInOut)
-            .scale(
-              begin: const Offset(0.95, 0.95),
-              end: const Offset(1, 1),
-            ),
+        title:
+            AppFonts.textPoppins(
+                  context,
+                  "Ride History",
+                  w * 0.05,
+                  FontWeight.w600,
+                  AppColors.black,
+                  TextAlign.center,
+                  TextOverflow.ellipsis,
+                  maxLines: 1,
+                )
+                .animate()
+                .fade(duration: 800.ms, curve: Curves.easeInOut)
+                .scale(
+                  begin: const Offset(0.95, 0.95),
+                  end: const Offset(1, 1),
+                ),
       ),
       body: Column(
         children: [
@@ -106,51 +103,54 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
               horizontal: w * .04,
               vertical: w * .03,
             ),
-            child: Container(
-              height: w * .11,
-              width: w,
-              decoration: BoxDecoration(
-                color: AppColors.lightGray.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(w * .035),
-                border: Border.all(
-                  color: AppColors.black.withOpacity(0.4),
-                  width: w * .002,
-                ),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: w * .005,
-                  vertical: w * .005,
-                ),
-                child: TabBar(
-                  controller: _tabController,
-                  indicator: BoxDecoration(
-                    color: AppColors.primaryRed,
-                    borderRadius: BorderRadius.circular(w * .03),
-                  ),
-                  indicatorColor: AppColors.darkGray,
-                  labelColor: AppColors.white,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  dividerHeight: 0.0,
-                  unselectedLabelColor: AppColors.darkGray.withOpacity(0.4),
-                  labelStyle: TextStyle(
-                    fontSize: w * .034,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  tabs: const [
-                    Tab(text: "New trip"),
-                    Tab(text: "Completed"),
-                    Tab(text: "Cancelled"),
-                  ],
-                ),
-              ),
-            )
-                .animate()
-                .fade(duration: 820.ms, curve: Curves.easeInOut)
-                .scale(
-                  begin: const Offset(0.95, 0.95),
-                  end: const Offset(1, 1),
-                ),
+            child:
+                Container(
+                      height: w * .11,
+                      width: w,
+                      decoration: BoxDecoration(
+                        color: AppColors.lightGray.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(w * .035),
+                        border: Border.all(
+                          color: AppColors.black.withOpacity(0.4),
+                          width: w * .002,
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: w * .005,
+                          vertical: w * .005,
+                        ),
+                        child: TabBar(
+                          controller: _tabController,
+                          indicator: BoxDecoration(
+                            color: AppColors.primaryRed,
+                            borderRadius: BorderRadius.circular(w * .03),
+                          ),
+                          indicatorColor: AppColors.darkGray,
+                          labelColor: AppColors.white,
+                          indicatorSize: TabBarIndicatorSize.tab,
+                          dividerHeight: 0.0,
+                          unselectedLabelColor: AppColors.darkGray.withOpacity(
+                            0.4,
+                          ),
+                          labelStyle: TextStyle(
+                            fontSize: w * .034,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          tabs: const [
+                            Tab(text: "New trip"),
+                            Tab(text: "Completed"),
+                            Tab(text: "Cancelled"),
+                          ],
+                        ),
+                      ),
+                    )
+                    .animate()
+                    .fade(duration: 820.ms, curve: Curves.easeInOut)
+                    .scale(
+                      begin: const Offset(0.95, 0.95),
+                      end: const Offset(1, 1),
+                    ),
           ),
 
           Divider(
@@ -179,22 +179,21 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
 
   Widget _buildRideListView(String status) {
     double w = MediaQuery.of(context).size.width;
-    
+
     return Obx(() {
       // Show loading only if current tab is active and loading
-      bool shouldShowLoading = riedsHistoryController.isLoading.value && 
-          _currentStatus == status;
-      
+      bool shouldShowLoading =
+          riedsHistoryController.isLoading.value && _currentStatus == status;
+
       // Show error only if current tab is active and has error
-      bool shouldShowError = riedsHistoryController.errorMessage.isNotEmpty && 
-          _currentStatus == status && 
+      bool shouldShowError =
+          riedsHistoryController.errorMessage.isNotEmpty &&
+          _currentStatus == status &&
           _tabLoaded[status]!;
 
       if (shouldShowLoading) {
         return Center(
-          child: CircularProgressIndicator(
-            color: AppColors.primaryRed,
-          ),
+          child: CircularProgressIndicator(color: AppColors.primaryRed),
         );
       }
 
@@ -262,7 +261,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
 
       // Get rides for current status
       final rides = riedsHistoryController.transactionsres.value?.data ?? [];
-      
+
       // Show empty state if no rides and tab has been loaded
       if (rides.isEmpty && _tabLoaded[status]!) {
         return RefreshIndicator(
@@ -297,11 +296,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.history,
-                size: w * 0.15,
-                color: AppColors.lightGray,
-              ),
+              Icon(Icons.history, size: w * 0.15, color: AppColors.lightGray),
               SizedBox(height: w * 0.03),
               AppFonts.textPoppins(
                 context,
@@ -354,17 +349,17 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
     final isCompleted = status == "Completed";
     final isCancelled = status == "Cancelled";
     final isPending = status == "Pending";
-    
+
     // Format time
     final timeFormat = DateFormat('h:mm a');
     final dateFormat = DateFormat('MMM dd, yyyy');
-    final rideTime = ride.createdAt != null 
+    final rideTime = ride.createdAt != null
         ? timeFormat.format(ride.createdAt!)
         : "N/A";
-    final rideDate = ride.createdAt != null 
+    final rideDate = ride.createdAt != null
         ? dateFormat.format(ride.createdAt!)
         : "N/A";
-    
+
     return Container(
       width: w,
       decoration: BoxDecoration(
@@ -390,14 +385,16 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                       children: [
                         AppFonts.textPoppins(
                           context,
-                          isPending 
-                            ? "New trip" 
-                            : isCompleted 
-                              ? "Completed" 
+                          isPending
+                              ? "New trip"
+                              : isCompleted
+                              ? "Completed"
                               : "Cancelled",
                           w * 0.035,
                           FontWeight.w600,
-                          isCancelled ? const Color(0xFFE02D3C) : AppColors.TextBuleColor,
+                          isCancelled
+                              ? const Color(0xFFE02D3C)
+                              : AppColors.TextBuleColor,
                           TextAlign.center,
                           TextOverflow.ellipsis,
                           maxLines: 1,
@@ -407,7 +404,9 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                           " : ",
                           w * 0.030,
                           FontWeight.w600,
-                          isCancelled ? const Color(0xFFE02D3C) : AppColors.TextBuleColor,
+                          isCancelled
+                              ? const Color(0xFFE02D3C)
+                              : AppColors.TextBuleColor,
                           TextAlign.center,
                           TextOverflow.ellipsis,
                           maxLines: 1,
@@ -417,7 +416,9 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                           rideTime,
                           w * 0.035,
                           FontWeight.w600,
-                          isCancelled ? const Color(0xFFE02D3C) : AppColors.TextBuleColor,
+                          isCancelled
+                              ? const Color(0xFFE02D3C)
+                              : AppColors.TextBuleColor,
                           TextAlign.center,
                           TextOverflow.ellipsis,
                           maxLines: 1,
@@ -437,7 +438,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                     ),
                   ],
                 ),
-                
+
                 AppFonts.textPoppins(
                   context,
                   "₹${ride.totalFare?.toStringAsFixed(2) ?? "0.00"}",
@@ -479,14 +480,14 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                       ),
                     AppFonts.textPoppins(
                       context,
-                      ride.paymentMethod?.toLowerCase() == "cash" 
-                        ? " Cash" 
-                        : " ${ride.paymentMethod?.toUpperCase() ?? "N/A"}",
+                      ride.paymentMethod?.toLowerCase() == "cash"
+                          ? " Cash"
+                          : " ${ride.paymentMethod?.toUpperCase() ?? "N/A"}",
                       w * 0.035,
                       FontWeight.w600,
-                      ride.paymentMethod?.toLowerCase() == "cash" 
-                        ? const Color(0xFf4CAF50) 
-                        : AppColors.primaryRed,
+                      ride.paymentMethod?.toLowerCase() == "cash"
+                          ? const Color(0xFf4CAF50)
+                          : AppColors.primaryRed,
                       TextAlign.center,
                       TextOverflow.ellipsis,
                       maxLines: 1,
@@ -514,7 +515,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                 SizedBox(width: w * 0.02),
                 AppFonts.textPoppins(
                   context,
-                  _getVehicleTypeText(ride.vehicleType ?? "bike"),
+                  _getVehicleTypeText(ride.vehicleId?.vehicleName ?? "bike"),
                   w * 0.035,
                   FontWeight.w600,
                   AppColors.black,
@@ -522,6 +523,17 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                   TextOverflow.ellipsis,
                   maxLines: 1,
                 ),
+
+                //  AppFonts.textPoppins(
+                //   context,
+                //   _getVehicleTypeText(ride ?? "bike"),
+                //   w * 0.035,
+                //   FontWeight.w600,
+                //   AppColors.black,
+                //   TextAlign.center,
+                //   TextOverflow.ellipsis,
+                //   maxLines: 1,
+                // ),
               ],
             ),
 
@@ -537,10 +549,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                       height: w * 0.06,
                       width: w * 0.06,
                     ),
-                    Container(
-                      width: w * 0.002,
-                      height: w * 0.10,
-                    ),
+                    Container(width: w * 0.002, height: w * 0.10),
                     Image.asset(
                       "assets/icons/redDot.png",
                       height: w * 0.06,
@@ -605,9 +614,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
             ),
 
             // Ride details
-          SizedBox(height: w * 0.04),
-
-
+            SizedBox(height: w * 0.04),
 
             // Row(
             //   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -633,11 +640,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
             //       ),
             //   ],
             // ),
-          
-          
-          ]
-          
-          ,
+          ],
         ),
       ),
     );

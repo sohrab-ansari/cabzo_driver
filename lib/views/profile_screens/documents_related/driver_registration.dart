@@ -3162,7 +3162,7 @@ import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_text.dart';
 import 'package:nzcu_driver/utilities/widgets/form_field.dart';
 import 'package:nzcu_driver/utilities/widgets/navigator.dart';
-import 'package:nzcu_driver/utilities/widgets/vehicleCard.dart';
+//
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/material.dart';
@@ -4114,7 +4114,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       );
 
       // Move to next step
-      // driverFormController.activeStep.value = 2;
+      driverFormController.activeStep.value = 1;
       // Clear vehicle images
       _clearVehicleImages();
       // Scroll to top
@@ -4219,7 +4219,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       print("✅ Personal details submitted successfully");
 
       // Move to next step
-      // driverFormController.activeStep.value = 3;
+      driverFormController.activeStep.value = 2;
       // Clear personal details images
       _clearPersonalDetailsImages();
       // Scroll to top
@@ -4317,7 +4317,6 @@ class _DriverRegistrationState extends State<DriverRegistration> {
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
-    double h = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -4329,22 +4328,22 @@ class _DriverRegistrationState extends State<DriverRegistration> {
         titleSpacing: w * .03,
         title: Row(
           children: [
-            GestureDetector(
-              onTap: () {
-                if (driverFormController.activeStep.value > 0 &&
-                    driverFormController.activeStep.value <= 3) {
-                  driverFormController.activeStep.value--;
-                  _scrollToTop();
-                } else {
-                  CustomNavigator.pop(context);
-                }
-              },
-              child: Icon(
-                Icons.arrow_back,
-                size: w * .07,
-                color: ColorsList.iconColor,
-              ),
-            ),
+            // GestureDetector(
+            //   onTap: () {
+            //     if (driverFormController.activeStep.value > 0 &&
+            //         driverFormController.activeStep.value <= 2) {
+            //       driverFormController.activeStep.value--;
+            //       _scrollToTop();
+            //     } else {
+            //       CustomNavigator.pop(context);
+            //     }
+            //   },
+            //   child: Icon(
+            //     Icons.arrow_back,
+            //     size: w * .07,
+            //     color: ColorsList.iconColor,
+            //   ),
+            // ),
             SizedBox(width: w * .02),
             CustomText(
               text: "Driver Registration ",
@@ -4374,24 +4373,18 @@ class _DriverRegistrationState extends State<DriverRegistration> {
               steps: [
                 buildStep(
                   0,
-                  'Preference',
-                  w,
-                  driverFormController.activeStep.value,
-                ),
-                buildStep(
-                  1,
                   'Vehicle Details',
                   w,
                   driverFormController.activeStep.value,
                 ),
                 buildStep(
-                  2,
+                  1,
                   'Personal Details',
                   w,
                   driverFormController.activeStep.value,
                 ),
                 buildStep(
-                  3,
+                  2,
                   'Profile Photo',
                   w,
                   driverFormController.activeStep.value,
@@ -4416,58 +4409,6 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                     children: [
                       Obx(
                         () => driverFormController.activeStep.value == 0
-                            ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: w * .03,
-                                    ),
-                                    child: AppFonts.textPoppins(
-                                      context,
-                                      "Tell us your vehicle preference",
-                                      w * 0.05,
-                                      FontWeight.w600,
-                                      AppColors.black,
-                                      TextAlign.left,
-                                      TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  SizedBox(height: w * .02),
-                                  InkWell(
-                                    onTap: () {
-                                      driverFormController.activeStep.value = 1;
-                                      _scrollToTop();
-                                    },
-                                    child: Container(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              SizedBox(
-                                                width: w * 0.94,
-                                                height: h * 0.55,
-                                                child: vehicleCard(
-                                                  image:
-                                                      "assets/images/image1.png",
-                                                  title: "I have a vehicle",
-                                                  desc:
-                                                      "Register your vehicle to begin driving. A quick verification will get you on the road.",
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(height: w * .1),
-                                ],
-                              )
-                            : driverFormController.activeStep.value == 1
                             ? Form(
                                 key: _vehicleFormKey,
                                 child: Column(
@@ -5475,9 +5416,9 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                                     ),
                                     SizedBox(height: w * .1),
                                   ],
-                                ), // Closing Column for Step 1
-                              ) // Closing Form for Step 1
-                            : driverFormController.activeStep.value == 2
+                                ), // Closing Column for Step 0
+                              ) // Closing Form for Step 0
+                            : driverFormController.activeStep.value == 1
                             ? Form(
                                 key: _personalFormKey,
                                 child: Column(
@@ -5958,9 +5899,9 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                                     ),
                                     SizedBox(height: w * .1),
                                   ],
-                                ), // Closing Column for Step 2
-                              ) // Closing Form for Step 2
-                            : driverFormController.activeStep.value == 3
+                                ), // Closing Column for Step 1
+                              ) // Closing Form for Step 1
+                            : driverFormController.activeStep.value == 2
                             ? Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [

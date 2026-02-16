@@ -64,10 +64,10 @@ class _EditProfileState extends State<EditProfile> {
 
   Future<void> _updateProfile() async {
     // Show loading indicator
-    Get.dialog(
-      const Center(child: CircularProgressIndicator()),
-      barrierDismissible: false,
-    );
+    // Get.dialog(
+    //   const Center(child: CircularProgressIndicator()),
+    //   barrierDismissible: false,
+    // );
 
     try {
       await editProfileController.edit_profile_method(

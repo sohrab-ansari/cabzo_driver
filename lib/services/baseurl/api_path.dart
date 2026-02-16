@@ -76,5 +76,12 @@ static String get_All_Categories = "$baseUri/getAllCategories";
 
  static String order_verifed_otp = "$baseUri/order/verifyOtp";
 
+
+
+ static String order_declined_api = "$baseUri/order/verifyOtp";
+
+
+
+
   // static String order_declined = "$baseUri/order/verify-otp";
 }

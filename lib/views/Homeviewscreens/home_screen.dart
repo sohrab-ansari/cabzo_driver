@@ -306,14 +306,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _processRideRequest(Map<String, dynamic> rideData) {
     if (!mounted) return;
-    print('🚕 Processing ride request...');
+    print('🚕 Processing ride request... in home screen..');
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => RideRequestScreen(rideData: rideData),
-      ),
-    );
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => RideRequestScreen(rideData: rideData),
+    //   ),
+    // );
   }
 
   void _navigateToRideScreen(Map<String, dynamic> rideData) {
@@ -555,14 +555,33 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               //   TextAlign.left,
                               //   TextOverflow.visible,
                               // ),
-                              AppFonts.textPoppins(
-                                context,
-                                driverName ?? "",
-                                w * 0.05,
-                                FontWeight.w600,
-                                AppColors.black,
-                                TextAlign.left,
-                                TextOverflow.visible,
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start  ,
+                                children: [
+                                  AppFonts.textPoppins(
+                                    context,
+                                    driverName ?? "",
+                                    w * 0.05,
+                                    FontWeight.w600,
+                                    AppColors.black,
+                                    TextAlign.left,
+                                    TextOverflow.visible,
+                                  ),
+
+                        
+
+
+                                    AppFonts.textPoppins(
+                                    context,
+                                  "Driver",
+                                    w * 0.03,
+                                    FontWeight.w600,
+                                    AppColors.darkGray,
+                                    TextAlign.left,
+                                    TextOverflow.visible,
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -1037,8 +1056,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               SizedBox(width: w * 0.25),
               HomeScreenWidgets.topAction(
                 icon: _selectedTab == "Earnings"
-                    ? "assets/icons/dolleron.svg"
-                    : "assets/icons/doller.png",
+                    ? "assets/icons/mynaui_rupee_grey.png"
+                    : "assets/icons/mynaui_rupee_bold.png",
                 label: "Earnings",
                 onTap: () {
                   setState(() {

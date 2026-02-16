@@ -88,6 +88,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
   @override
   void initState() {
     super.initState();
+    myridedataprint();
     _isScreenActive = true;
     print('🚗 ArrivingClient initState called');
 
@@ -126,6 +127,10 @@ class _ArrivingClientState extends State<ArrivingClient> {
     });
   }
 
+void myridedataprint() {
+
+  print("my_datat_print ${widget.rideData}");
+}
   void _onStepChanged(int step) {
     print('🔄 Stepper step changed to: $step');
     if (step == 2) {

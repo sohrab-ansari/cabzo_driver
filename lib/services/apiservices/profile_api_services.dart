@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:nzcu_driver/modals/profile_modals/faq_category_responses.dart';
 import 'package:nzcu_driver/modals/profile_modals/get_by_category_response.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
@@ -28,6 +30,7 @@ import 'package:nzcu_driver/modals/profile_modals/terms_and_policy_response.dart
 import 'package:nzcu_driver/modals/profile_modals/transactions_response.dart';
 import 'package:nzcu_driver/modals/home_modals/update_order_response.dart';
 import 'package:nzcu_driver/modals/profile_modals/wallet_response.dart';
+import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:nzcu_driver/views/profile_screens/edit_profile.dart';
 import 'package:nzcu_driver/modals/home_modals/verify_Otp_Order_response.dart';
 import 'package:flutter/material.dart';
@@ -37,8 +40,6 @@ import 'package:http/http.dart' as http;
 
 // import 'package:nzcu_driver/apiServices/api_path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-
 
 class ProfileApiServices {
   // static Future<HomeModalResponse> get_home_data() async {
@@ -182,8 +183,6 @@ class ProfileApiServices {
   //   }
   // }
 
-
-
   static Future<FaqsCategoriesResponse> get_all_categories_data() async {
     final Uri url = Uri.parse("${ApiPath.get_All_Categories}");
 
@@ -227,18 +226,18 @@ class ProfileApiServices {
       );
     }
   }
-  
-static Future<GetByCategoryResponse> get_faq_categories_data({
+
+  static Future<GetByCategoryResponse> get_faq_categories_data({
     required String category,
   }) async {
     // final Uri url = Uri.parse("${ApiPath.baseUri}/getByCategory?category=$category");
 
-     final Uri url = Uri.parse(
-    "${ApiPath.baseUri}/getByCategory/${Uri.encodeComponent(category)}",
-  );
+    final Uri url = Uri.parse(
+      "${ApiPath.baseUri}/getByCategory/${Uri.encodeComponent(category)}",
+    );
 
     final prefs = await SharedPreferences.getInstance();
-    
+
     final String? token = prefs.getString("auth_token");
 
     print("========== GET FAQS BY CATEGORY API ==========");
@@ -345,20 +344,139 @@ static Future<GetByCategoryResponse> get_faq_categories_data({
       print("Status Code: $statusCode");
       print("Response Body: $body");
 
-      if (response.headers['content-type']?.contains('application/json') ==
-          true) {
-        return DriverImageUploadRes.fromJson(jsonDecode(body));
+      if (statusCode == 200) {
+        print("hekllooooo");
+
+        // Parse the response
+        Map<String, dynamic> responseData = json.decode(body);
+
+        // Check if response contains driver data and update name in SharedPreferences
+        if (responseData.containsKey('driver') &&
+            responseData['driver'] != null) {
+          String driverName = responseData['driver']['name'] ?? '';
+          if (driverName.isNotEmpty) {
+            await prefs.setString('driver_name', driverName);
+            print("Driver name updated in SharedPreferences: $driverName");
+          }
+        } else if (name != null && name.isNotEmpty) {
+          // Fallback: use the name that was sent in the request
+          await prefs.setString('driver_name', name);
+          print("Driver name updated with request name: $name");
+        }
+
+        Get.offAll(BottomnavmainScreen());
+        return DriverImageUploadRes.fromJson(responseData);
       } else {
+        print("hekllooooo222");
         return DriverImageUploadRes(
           success: false,
           message: "Unexpected response format",
         );
       }
     } catch (e) {
+      print("hekllooooo3333");
       print("API Error: $e");
       return DriverImageUploadRes(success: false, message: e.toString());
     }
   }
+  //   static Future<DriverImageUploadRes> edit_profile_data_api({
+  //     File? image,
+  //     required String userType,
+  //     String? name,
+  //     String? email,
+  //     String? dateOfBirth,
+  //     String? gender,
+  //   }) async {
+  //     final prefs = await SharedPreferences.getInstance();
+  //     final String? userId = prefs.getString("driver_userid");
+  //     final String? token = prefs.getString("auth_token");
+
+  //     print("my_tokennnnn ${token}");
+  //     final Uri url = Uri.parse(
+  //       "${ApiPath.baseUri}/driver/update?userId=$userId&userType=$userType",
+  //     );
+
+  //     print("URL => $url");
+  //     print("Name => $name");
+  //     print("Email => $email");
+  //     print("dateOfBirth ===== => $dateOfBirth");
+  //     print("gender =====> $gender");
+  //     print("Image provided: ${image != null ? 'Yes' : 'No'}");
+
+  //     try {
+  //       final request = http.MultipartRequest('PUT', url);
+
+  //       /// ✅ Headers
+  //       request.headers.addAll({
+  //         "Authorization": "Bearer $token",
+  //         "Accept": "application/json",
+  //       });
+
+  //       /// ✅ TEXT FIELDS (Add only if not empty/null)
+  //       if (name != null && name.isNotEmpty) {
+  //         request.fields['name'] = name;
+  //       }
+
+  //       if (email != null && email.isNotEmpty) {
+  //         request.fields['email'] = email;
+  //       }
+
+  //       if (dateOfBirth != null && dateOfBirth.isNotEmpty) {
+  //         request.fields['dateOfBirth'] = dateOfBirth;
+  //       }
+
+  //       if (gender != null && gender.isNotEmpty) {
+  //         request.fields['gender'] = gender;
+  //       }
+
+  //       /// ✅ IMAGE FILE (only if provided and exists)
+  //       if (image != null && await image.exists()) {
+  //         request.files.add(
+  //           await http.MultipartFile.fromPath('image', image.path),
+  //         );
+  //         print("Image attached: ${image.path}");
+  //       } else {
+  //         print("No image provided - skipping image upload");
+  //       }
+
+  //       final response = await request.send();
+  //       final statusCode = response.statusCode;
+  //       final body = await response.stream.bytesToString();
+
+  //       print("Status Code: $statusCode");
+  //       print("Response Body: $body");
+
+  //       Map<String, dynamic> responseData = json.decode(response);
+
+  // // Extract driver name from the nested structure
+  // String driverName = responseData['driver']['name'] ?? '';
+
+  // // Store in SharedPreferences
+  // SharedPreferences prefs = await SharedPreferences.getInstance();
+  // await prefs.setString('driver_name', driverName);
+
+  //       if (response.statusCode == 200) {
+
+  //         print("hekllooooo");
+
+  // prefs.setString("driver_name", response.fields['name'] ?? name ?? ""); // Update name in SharedPreferences if changed
+  //               Get.offAll(BottomnavmainScreen());
+
+  //         return DriverImageUploadRes.fromJson(jsonDecode(body));
+  //       } else {
+  //          print("hekllooooo222");
+  //         return DriverImageUploadRes(
+  //           success: false,
+  //           message: "Unexpected response format",
+  //         );
+  //       }
+  //     } catch (e) {
+
+  //        print("hekllooooo3333");
+  //       print("API Error: $e");
+  //       return DriverImageUploadRes(success: false, message: e.toString());
+  //     }
+  //   }
 
   static Future<WalletResponse> get_wallet_data() async {
     // final Uri url = Uri.parse(ApiPath.createVehicle);
@@ -486,6 +604,9 @@ static Future<GetByCategoryResponse> get_faq_categories_data({
     required String accountNumber,
     required String accountHolderName,
     required String ifscCode,
+
+    String? type,
+    String? upiId,
   }) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -498,6 +619,25 @@ static Future<GetByCategoryResponse> get_faq_categories_data({
 
       print("Sending driverId: $userId");
 
+      // Build the request body dynamically
+      Map<String, dynamic> requestBody = {
+        "driverId": userId,
+        "bankName": bankName,
+        "accountNumber": accountNumber,
+        "accountHolderName": accountHolderName,
+        "ifscCode": ifscCode,
+      };
+
+      // Add type if provided
+      if (type != null && type.isNotEmpty) {
+        requestBody["type"] = type;
+      }
+
+      // Add upiId ONLY if it's not null and not empty
+      if (upiId != null && upiId.isNotEmpty) {
+        requestBody["upiId"] = upiId;
+      }
+
       final response = await http.post(
         Uri.parse(ApiPath.bank_account_add),
         headers: {
@@ -505,23 +645,7 @@ static Future<GetByCategoryResponse> get_faq_categories_data({
           "Accept": "application/json",
           "Content-Type": "application/json",
         },
-
-        // body: jsonEncode({
-        //   "driverId": userId,
-        //   "bankName": bankName,
-        //   "accountNumber": accountNumber,
-        //   "accountHolderName": accountHolderName,
-        //   "ifscCode": ifscCode,
-        // }),
-        body: jsonEncode({
-          "driverId": userId,
-          "bankName": bankName,
-          "accountNumber": accountNumber,
-          "accountHolderName": accountHolderName,
-          "ifscCode": ifscCode,
-          "type": "UPI",
-          "upiId": "d",
-        }),
+        body: jsonEncode(requestBody),
       );
 
       print("Status Code: ${response.statusCode}");
@@ -557,6 +681,88 @@ static Future<GetByCategoryResponse> get_faq_categories_data({
       );
     }
   }
+  // static Future<BankAccountAddResp> addBankAccountData({
+  //   required String bankName,
+  //   required String accountNumber,
+  //   required String accountHolderName,
+  //   required String ifscCode,
+
+  //   String? type,
+  //   String? upiId,
+  // }) async {
+  //   try {
+  //     final prefs = await SharedPreferences.getInstance();
+  //     final String? userId = prefs.getString("driver_userid");
+  //     final String? token = prefs.getString("auth_token");
+
+  //     if (userId == null || userId.isEmpty) {
+  //       return BankAccountAddResp(success: false, message: "User ID not found");
+  //     }
+
+  //     print("Sending driverId: $userId");
+
+  //     final response = await http.post(
+  //       Uri.parse(ApiPath.bank_account_add),
+  //       headers: {
+  //         "Authorization": "Bearer $token",
+  //         "Accept": "application/json",
+  //         "Content-Type": "application/json",
+  //       },
+
+  //       // body: jsonEncode({
+  //       //   "driverId": userId,
+  //       //   "bankName": bankName,
+  //       //   "accountNumber": accountNumber,
+  //       //   "accountHolderName": accountHolderName,
+  //       //   "ifscCode": ifscCode,
+  //       // }),
+  //       body: jsonEncode({
+  //         "driverId": userId,
+  //         "bankName": bankName,
+  //         "accountNumber": accountNumber,
+  //         "accountHolderName": accountHolderName,
+  //         "ifscCode": ifscCode,
+
+  //         // "type": "UPI",
+  //         // "upiId": "d",
+  //         "type": type,
+  //         // "upiId": upiId,
+  //       }),
+  //     );
+
+  //     print("Status Code: ${response.statusCode}");
+  //     print("Response: ${response.body}");
+
+  //     // ✅ FIX: Parse response regardless of status code
+  //     final responseData = jsonDecode(response.body);
+
+  //     // ✅ Check if success field exists in response
+  //     if (responseData.containsKey('success')) {
+  //       return BankAccountAddResp.fromJson(responseData);
+  //     }
+  //     // ✅ For 201 status (Created), treat as success
+  //     else if (response.statusCode == 200 || response.statusCode == 201) {
+  //       return BankAccountAddResp(
+  //         success: true,
+  //         message: "Bank account created successfully",
+  //         data: BankAccountData.fromJson(responseData),
+  //       );
+  //     }
+  //     // ✅ For error responses
+  //     else {
+  //       return BankAccountAddResp(
+  //         success: false,
+  //         message: responseData['message'] ?? "Failed to add bank account",
+  //       );
+  //     }
+  //   } catch (e) {
+  //     print("Error in addBankAccountData: $e");
+  //     return BankAccountAddResp(
+  //       success: false,
+  //       message: "Network error: ${e.toString()}",
+  //     );
+  //   }
+  // }
 
   ////
   ///
@@ -1073,7 +1279,6 @@ static Future<GetByCategoryResponse> get_faq_categories_data({
 
   //     final Map<String, dynamic> decodedJson = jsonDecode(response.body);
 
-          
   //     Fluttertoast.showToast(
   //       msg: decodedJson['message'] ?? "Something went wrong",
   //       toastLength: Toast.LENGTH_SHORT,
@@ -1291,17 +1496,17 @@ static Future<GetByCategoryResponse> get_faq_categories_data({
       print("✅ Status Code : ${response.statusCode}");
 
       // Check if response is valid JSON
-      if (response.body.trim().isEmpty) {
-        throw FormatException("Empty response from server");
-      }
+      // if (response.body.trim().isEmpty) {
+      //   throw FormatException("Empty response from server");
+      // }
 
-      // Check if response is HTML (error page)
-      if (response.body.trim().startsWith('<!DOCTYPE html>') ||
-          response.body.trim().startsWith('<html')) {
-        throw FormatException(
-          "Server returned HTML error page. Check endpoint URL.",
-        );
-      }
+      // // Check if response is HTML (error page)
+      // if (response.body.trim().startsWith('<!DOCTYPE html>') ||
+      //     response.body.trim().startsWith('<html')) {
+      //   throw FormatException(
+      //     "Server returned HTML error page. Check endpoint URL.",
+      //   );
+      // }
 
       // Try to parse JSON
       dynamic decodedJson;
@@ -1389,10 +1594,6 @@ static Future<GetByCategoryResponse> get_faq_categories_data({
       );
 
       print("✅ Status Code : ${response.statusCode}");
-
-      if (response.body.trim().isEmpty) {
-        throw FormatException("Empty response from server");
-      }
 
       final decodedJson = jsonDecode(response.body);
 
@@ -1491,7 +1692,9 @@ static Future<GetByCategoryResponse> get_faq_categories_data({
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
 
-    final Uri url = Uri.parse("${ApiPath.baseUri}/notification/userNotifications");
+    final Uri url = Uri.parse(
+      "${ApiPath.baseUri}/notification/userNotifications",
+    );
 
     print("========== 🔵 CASH PAYMENT API ==========");
     print("URL : $url");
@@ -1541,9 +1744,8 @@ static Future<GetByCategoryResponse> get_faq_categories_data({
       print(prettyJson);
 
       // Parse the response
-      final NotificationResponse notificationResponse = NotificationResponse.fromJson(
-        decodedJson,
-      );
+      final NotificationResponse notificationResponse =
+          NotificationResponse.fromJson(decodedJson);
 
       print("🎯 Parsed Model Object 👇");
       print(notificationResponse);
@@ -1560,7 +1762,6 @@ static Future<GetByCategoryResponse> get_faq_categories_data({
       );
     }
   }
-
 
   static Future<Getpromocodedata> get_promocode_data() async {
     final prefs = await SharedPreferences.getInstance();
