@@ -1,4 +1,3 @@
-
 // import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
 // import 'package:nzcu_driver/modals/home_modal_response.dart';
 // import 'package:nzcu_driver/modals/order_complete_cash_response.dart';
@@ -12,7 +11,7 @@
 // class CashController extends GetxController {
 //   // Change to Rx<HomeModalResponse?> and use .obs
 //   Rx<Ordercompletecashresponse?> cashcompletecashresposne = Rx<Ordercompletecashresponse?>(null);
-  
+
 //   // Add loading state
 //   RxBool isLoading = false.obs;
 //   RxString errorMessage = ''.obs;
@@ -25,18 +24,17 @@
 
 //   Future<void> cash_method({required dynamic orderid,BuildContext? context}) async {
 //     print("home_data_method called");
-    
+
 //     // Set loading state
 //     isLoading.value = true;
 //     errorMessage.value = '';
-    
+
 //     try {
 //       // Call API
 //       final Ordercompletecashresponse res = await ProfileApiServices.cash_update_data(orderid:orderid );
 
-      
 //       print("API Response: ${res.success}");
-      
+
 //       if (res.success == true) {
 //         print("update orderget fetched successfully");
 //         cashcompletecashresposne.value = res;
@@ -45,16 +43,13 @@
 
 //         print("myupdate_order_data22222222  ${res}");
 
-
 //          Future.delayed(const Duration(milliseconds: 300), () {
 //                           CustomNavigator.push(
 //                             context!,
 //                             const CashPaymentScreen(),
 //                             transition: TransitionType.slideLeft,
 //                           );
-                          
-                          
-                      
+
 //                         });
 //       } else {
 //          print("myupdate_order_data22222222  faileddd111");
@@ -85,9 +80,8 @@
 //   }
 // }
 
-
-import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
-import 'package:nzcu_driver/modals/order_complete_cash_response.dart';
+import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
+import 'package:nzcu_driver/modals/home_modals/order_complete_cash_response.dart';
 import 'package:nzcu_driver/views/payment_modes_screen.dart/cash_payment_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -103,20 +97,20 @@ import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 
 //   Future<void> cash_method({required dynamic orderid, required BuildContext context}) async {
 //     print("cash_method called");
-    
+
 //     isLoading.value = true;
 //     errorMessage.value = '';
-    
+
 //     try {
 //       final Ordercompletecashresponse res = await ProfileApiServices.cash_update_data(orderid: orderid);
-      
+
 //       print("API Response success: ${res.success}");
 //       print("API Response message: ${res.message}");
-      
+
 //       if (res.success == true) {
 //         print("Cash payment successful");
 //         cashcompletecashresponse.value = res;
-        
+
 //         // Navigate to cash payment screen on success
 //         Future.delayed(Duration.zero, () {
 //           Get.to(() => CashPaymentScreen(),
@@ -127,7 +121,7 @@ import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 //       } else {
 //         errorMessage.value = res.message ?? 'Payment failed';
 //         print("Payment failed: ${errorMessage.value}");
-        
+
 //         // Show error using ScaffoldMessenger instead of Get.snackbar
 //         Future.delayed(Duration.zero, () {
 //           ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +136,7 @@ import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 //     } catch (e) {
 //       errorMessage.value = 'An error occurred: $e';
 //       print("Exception in cash_method: $e");
-      
+
 //       // Show error using ScaffoldMessenger
 //       Future.delayed(Duration.zero, () {
 //         ScaffoldMessenger.of(context).showSnackBar(
@@ -160,15 +154,17 @@ import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 // }
 
 // import 'package:nzcu_driver/api_services/profile_api_services.dart';
-import 'package:nzcu_driver/modals/order_complete_cash_response.dart';
+import 'package:nzcu_driver/modals/home_modals/order_complete_cash_response.dart';
 // import 'package:nzcu_driver/views/payment_modes_screen/cash_payment_screen.dart';
-import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CashController extends GetxController {
   // Rx variables for state management
-  Rx<Ordercompletecashresponse?> cashResponse = Rx<Ordercompletecashresponse?>(null);
+  Rx<Ordercompletecashresponse?> cashResponse = Rx<Ordercompletecashresponse?>(
+    null,
+  );
   RxBool isLoading = false.obs;
   RxString errorMessage = ''.obs;
 
@@ -178,33 +174,34 @@ class CashController extends GetxController {
     dynamic rideData,
   }) async {
     print("🔄 Processing cash payment for order: $orderId");
-    
+
     // Reset states
     isLoading.value = true;
     errorMessage.value = '';
     cashResponse.value = null;
-    
+
     try {
       // Call API
-      final Ordercompletecashresponse response = 
+      final Ordercompletecashresponse response =
           await ProfileApiServices.cash_update_data(orderid: orderId);
-      
+
       // Update response
       cashResponse.value = response;
-      
+
       if (response.success == true) {
         print("✅ Cash payment successful");
-        
+
         // Navigate to cash payment success screen
-        Get.offAll(() => CashPaymentScreen(
-          rideData: rideData,
-        ), transition: Transition.rightToLeft);
-        
+        Get.offAll(
+          () => CashPaymentScreen(rideData: rideData),
+          transition: Transition.rightToLeft,
+        );
       } else {
         // Payment failed
-        errorMessage.value = response.message ?? 'Payment failed. Please try again.';
+        errorMessage.value =
+            response.message ?? 'Payment failed. Please try again.';
         print("❌ Payment failed: ${errorMessage.value}");
-        
+
         // Show error snackbar
         Get.snackbar(
           'Payment Failed',
@@ -216,12 +213,11 @@ class CashController extends GetxController {
           margin: const EdgeInsets.all(10),
         );
       }
-      
     } catch (e) {
       // Handle exceptions
       errorMessage.value = 'An error occurred: $e';
       print("❌ Exception in processCashPayment: $e");
-      
+
       // Show error snackbar
       Get.snackbar(
         'Error',
@@ -232,7 +228,6 @@ class CashController extends GetxController {
         duration: const Duration(seconds: 3),
         margin: const EdgeInsets.all(10),
       );
-      
     } finally {
       // Always reset loading state
       isLoading.value = false;
@@ -241,7 +236,8 @@ class CashController extends GetxController {
 
   // Navigate to home screen
   void navigateToHome() {
-    Get.offAll(() => BottomnavmainScreen(),
+    Get.offAll(
+      () => BottomnavmainScreen(),
       transition: Transition.fade,
       duration: const Duration(milliseconds: 300),
     );

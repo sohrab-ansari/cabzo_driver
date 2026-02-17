@@ -1,13 +1,13 @@
-import 'package:nzcu_driver/utilities/app_buttons.dart';
+import 'package:nzcu_driver/utilities/widgets/app_buttons.dart';
 import 'package:nzcu_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
-import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/colors/colors_list.dart';
-import 'package:nzcu_driver/utilities/custom_font.dart';
-import 'package:nzcu_driver/utilities/custom_images.dart';
-import 'package:nzcu_driver/utilities/custom_text.dart';
-import 'package:nzcu_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_images.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_text.dart';
+import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:nzcu_driver/views/auth/login_screen.dart';
-import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
 
 class PopUps {

@@ -1,6 +1,7 @@
-import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
+import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
+import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
-import 'package:nzcu_driver/modals/update_order_response.dart';
+import 'package:nzcu_driver/modals/home_modals/update_order_response.dart';
 import 'package:nzcu_driver/utilities/utils/api_response_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -59,7 +60,7 @@ class OrderUpdateController extends GetxController {
     String orderId,
   ) async {
     try {
-      return await ProfileApiServices.order_update_data(
+      return await HomeApiServices.order_update_data(
         orderstatus: orderStatus,
         orderid: orderId,
       );

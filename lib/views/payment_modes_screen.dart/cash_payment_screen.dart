@@ -54,9 +54,9 @@
 //   }
 // }
 
-import 'package:nzcu_driver/utilities/colors.dart';
-import 'package:nzcu_driver/utilities/custom_font.dart';
-import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/utilities/colors/colors.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
+import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';

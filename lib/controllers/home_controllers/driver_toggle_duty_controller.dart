@@ -1,8 +1,9 @@
 
 
-import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
-import 'package:nzcu_driver/modals/driver_toggle_duty_response.dart';
-import 'package:nzcu_driver/modals/home_modal_response.dart';
+import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
+import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
+import 'package:nzcu_driver/modals/home_modals/driver_toggle_duty_response.dart';
+import 'package:nzcu_driver/modals/home_modals/home_modal_response.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -26,7 +27,7 @@ class DriverToggleDutyController extends GetxController {
     
     try {
       // Call API
-      final Drivertoggledutyresponse res = await ProfileApiServices.toggle_duty_data();
+      final Drivertoggledutyresponse res = await HomeApiServices.toggle_duty_data();
       
       print("API Response: ${res.success}");
       

@@ -1,7 +1,8 @@
 
 
-import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
-import 'package:nzcu_driver/modals/home_modal_response.dart';
+import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
+import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
+import 'package:nzcu_driver/modals/home_modals/home_modal_response.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -29,7 +30,7 @@ class HomeController extends GetxController {
     
     try {
       // Call API
-      final HomeModalResponse res = await ProfileApiServices.get_home_data();
+      final HomeModalResponse res = await HomeApiServices.get_home_data();
       
       print("API Response: ${res.success}");
       

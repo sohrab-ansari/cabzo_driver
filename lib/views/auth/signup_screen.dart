@@ -1706,14 +1706,14 @@ import 'package:get/get.dart';
 import 'package:nzcu_driver/controllers/auth_controllers/signup_controller.dart';
 import 'package:nzcu_driver/controllers/auth_controllers/login.controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
-import 'package:nzcu_driver/utilities/Custom_Snackbar.dart';
-import 'package:nzcu_driver/utilities/app_buttons.dart';
-import 'package:nzcu_driver/utilities/colors.dart';
-import 'package:nzcu_driver/utilities/custom_font.dart';
-import 'package:nzcu_driver/utilities/form_field.dart';
-import 'package:nzcu_driver/utilities/navigator.dart';
+import 'package:nzcu_driver/utilities/widgets/Custom_Snackbar.dart';
+import 'package:nzcu_driver/utilities/widgets/app_buttons.dart';
+import 'package:nzcu_driver/utilities/colors/colors.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
+import 'package:nzcu_driver/utilities/widgets/form_field.dart';
+import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:nzcu_driver/views/auth/login_screen.dart';
-import 'package:nzcu_driver/views/profile_related.dart/terms_condition.dart';
+import 'package:nzcu_driver/views/profile_screens/terms_condition.dart';
 import 'package:nzcu_driver/views/auth/enter_otp_screen.dart';
 
 class SignupScreen extends StatefulWidget {

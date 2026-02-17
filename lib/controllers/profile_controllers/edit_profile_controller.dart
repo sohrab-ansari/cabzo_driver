@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
+import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
-import 'package:nzcu_driver/modals/driver_Image_upload_res.dart';
-import 'package:nzcu_driver/modals/home_modal_response.dart';
-import 'package:nzcu_driver/utilities/navigator.dart';
-import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/modals/auth_modals/driver_Image_upload_res.dart';
+import 'package:nzcu_driver/modals/home_modals/home_modal_response.dart';
+import 'package:nzcu_driver/utilities/widgets/navigator.dart';
+import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
@@ -73,13 +73,13 @@ class EditProfileController extends GetxController {
           gender: gender,
         );
 
-    print("API Response: ${res.success}");
+    print("API>>>>>>Ressssponse: ${res.success}");
 
     if (res.success == true) {
       print("Profile updated successfully");
 
       Fluttertoast.showToast(
-        msg: res.message ?? "Profile updated successfully",
+        msg: res.message ?? "Profile upssdated successfully",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.TOP,
       );

@@ -1,24 +1,13 @@
-import 'dart:io';
+import 'package:nzcu_driver/modals/profile_modals/wallet_response.dart';
+import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 
-import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
-import 'package:nzcu_driver/modals/driver_Image_upload_res.dart';
-import 'package:nzcu_driver/modals/home_modal_response.dart';
-import 'package:nzcu_driver/modals/wallet_response.dart';
-import 'package:nzcu_driver/apiervices/services/profile_api_services.dart';
-
-// import 'package:nzcu_driver/apiServices/services/auth_api_service.dart';
-// import 'package:nzcu_driver/apiServices/services/profile_api_services.dart';
-import 'package:nzcu_driver/utilities/navigator.dart';
-import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
 class WalletController extends GetxController {
   // Change to Rx<HomeModalResponse?> and use .obs
-  Rx<WalletResponse?> walletresponse = Rx<WalletResponse?>(
-    null,
-  );
+  Rx<WalletResponse?> walletresponse = Rx<WalletResponse?>(null);
 
   // Add loading state
   RxBool isLoading = false.obs;
@@ -29,9 +18,7 @@ class WalletController extends GetxController {
     super.onInit();
   }
 
-  Future<void> wallet_method(
-   
-  ) async {
+  Future<void> wallet_method() async {
     print("home_data_method called");
 
     // Set loading state
@@ -40,34 +27,20 @@ class WalletController extends GetxController {
 
     try {
       // Call API
-      final WalletResponse res =
-          await ProfileApiServices.get_wallet_data(
-          
-          );
+      final WalletResponse res = await ProfileApiServices.get_wallet_data();
 
       print("API Response: ${res.success}");
 
-       print("API Response2222: ${res.data}");
+      print("API Response2222: ${res.data}");
 
       if (res.success == true) {
         print("wallet data fetched successfully");
 
-        Fluttertoast.showToast(
-          msg: res.message ?? "Something went wrong",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP,
-        );
-
-        // Get.offAll(BottomnavmainScreen());
-
-        // ✅ IMPORTANT: Refresh home data after profile update
-        // try {
-        //   final HomeController homeController = Get.find<HomeController>();
-        //   await homeController.home_data_method();
-        //   print("wallet data refreshed after profile update");
-        // } catch (e) {
-        //   print("Failed to refresh home data: $e");
-        // }
+        // Fluttertoast.showToast(
+        //   msg: res.message ?? "Something went wrong",
+        //   toastLength: Toast.LENGTH_SHORT,
+        //   gravity: ToastGravity.TOP,
+        // );
 
         walletresponse.value = res;
       } else {

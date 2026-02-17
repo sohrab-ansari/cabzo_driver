@@ -5,21 +5,45 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/core/dependency_injection.dart';
 import 'package:nzcu_driver/firebase_options.dart';
-import 'package:nzcu_driver/services/notification_service.dart';
-import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/services/notification_services/notification_service.dart';
+import 'package:nzcu_driver/services/background_service.dart';
+// import 'package:flutter_background/flutter_background.dart';
+// import 'package:flutter_background_geolocation/flutter_background_geolocation.dart'
+//     as bg;
+import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/views/splash/splash_screen.dart';
+
+// @pragma('vm:entry-point')
+// void headlessTask(bg.HeadlessEvent event) async {
+//   print('[HeadlessTask] Event: ${event.name}');
+//   if (event.name == bg.Event.LOCATION) {
+//     bg.Location location = event.event;
+//     print(
+//       '[HeadlessTask] Location: ${location.coords.latitude}, ${location.coords.longitude}',
+//     );
+//     // Note: We could emit socket here, but BackgroundService should already be doing it if running.
+//     // Headless tasks are for when the app is completely terminated and BackgroundService isolate might be resting.
+//   }
+// }
 
 @pragma('vm:entry-point')
 Future<void> _firebaseBackgroundMessageHandler(RemoteMessage message) async {
+  // IMPORTANT: Firebase must be initialized in background isolate
+  // Background handlers run in a separate Dart isolate where Firebase is NOT initialized
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   print('📩 [Background] Message received: ${message.messageId}');
 
-  // Use the singleton instance
+  // Use the singleton instance------
   await NotificationService.instance.showNotificationInBackground(message);
 }
 
 void main() async {
   // Ensure Flutter widgets are initialized
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Register HeadlessTask for flutter_background_geolocation
+  // bg.BackgroundGeolocation.registerHeadlessTask(headlessTask);
 
   print('');
   print('=' * 60);
@@ -65,10 +89,26 @@ void main() async {
     // ========================================================================
     // 6. PRINT SUCCESS MESSAGE
     // ========================================================================
-    print('');
     print('🎉 All services initialized successfully!');
     print('=' * 60);
     print('');
+
+    // ========================================================================
+    // 7. BACKGROUND SERVICE INITIALIZATION
+    // ========================================================================
+    print('7️⃣ Initializing Background Service...');
+    // await BackgroundService.initializeService();
+    print('   ✅ Background service initialized');
+
+    print('8️⃣ Initializing Flutter Background (App Keep-Alive)...');
+    // const androidConfig = FlutterBackgroundAndroidConfig(
+    //   notificationTitle: "NZCU Driver",
+    //   notificationText: "App is running in the background",
+    //   notificationImportance: AndroidNotificationImportance.high,
+    //   notificationIcon: AndroidResource(name: 'ic_launcher', defType: 'mipmap'),
+    // );
+    // await FlutterBackground.initialize(androidConfig: androidConfig);
+    print('   ✅ Flutter Background initialized');
   } catch (e, stackTrace) {
     print('');
     print('❌ ERROR DURING INITIALIZATION ❌');

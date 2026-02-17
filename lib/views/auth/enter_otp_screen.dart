@@ -1,18 +1,18 @@
 import 'package:nzcu_driver/controllers/auth_controllers/login.controller.dart';
-import 'package:nzcu_driver/utilities/colors.dart';
+import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/views/auth/login_screen.dart';
-import 'package:nzcu_driver/views/profile_related.dart/documents_related/driver_registration.dart';
+import 'package:nzcu_driver/views/profile_screens/documents_related/driver_registration.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nzcu_driver/controllers/controllers.dart';
+import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 import 'package:nzcu_driver/controllers/auth_controllers/otp_controller.dart';
 import 'package:nzcu_driver/utilities/colors/colors_list.dart';
-import 'package:nzcu_driver/utilities/custom_text.dart';
-import 'package:nzcu_driver/utilities/navigator.dart';
-import 'package:nzcu_driver/utilities/app_buttons.dart';
-import 'package:nzcu_driver/views/bottomNavigation/bottomNavMain_screen.dart';
-import 'package:nzcu_driver/apiervices/services/auth_api_service.dart';
-import 'package:nzcu_driver/modals/Otp_verify_res.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_text.dart';
+import 'package:nzcu_driver/utilities/widgets/navigator.dart';
+import 'package:nzcu_driver/utilities/widgets/app_buttons.dart';
+import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/services/apiservices/auth_api_service.dart';
+import 'package:nzcu_driver/modals/auth_modals/Otp_verify_res.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -199,7 +199,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
           vehicleStatus == "draft") {
         print("📝 All Draft - Navigating to Registration");
         driverFormController.activeStep.value = 0; // Ensure start
-        CustomNavigator.push(
+        CustomNavigator.removeUntil(
           context,
           DriverRegistration(),
           transition: TransitionType.slideLeft,
