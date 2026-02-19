@@ -620,33 +620,67 @@ class _AddBankState extends State<AddBank> {
             SizedBox(height: w * .08),
 
             /// Confirm Button
+            ///
             Obx(
-              () => AppButtons.solid(
-                context: context,
-                text: "Confirm",
-                isFullWidth: true,
-                backgroundColor:
-                    controllers.addBankAccoundButtonController.value
-                    ? AppColors.primaryRed
-                    : AppColors.lightGray,
-                textColor: controllers.addBankAccoundButtonController.value
-                    ? AppColors.white
-                    : AppColors.mediumGray,
-                fontSize: w * .045,
+              () => SizedBox(
+                width: double.infinity,
                 height: w * .140,
-                radius: 12.0,
-                onClicked: () {
-                  bankAccountAddController.addbankaccount_method(
-                    accountHolderName: nameController.text.trim(),
-                    accountNumber: accountNumberController.text.trim(),
-                    bankName: bankNameController.text.trim(),
-                    ifscCode: ifscController.text.trim(),
-                    type: "BankAccount",
-                    context: context,
-                  );
-                },
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.cyan.shade300, // Aqua color
+                    foregroundColor: Colors.white, // Text color
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    elevation: 0,
+                  ),
+                  onPressed: () {
+                    bankAccountAddController.addbankaccount_method(
+                      accountHolderName: nameController.text.trim(),
+                      accountNumber: accountNumberController.text.trim(),
+                      bankName: bankNameController.text.trim(),
+                      ifscCode: ifscController.text.trim(),
+                      type: "BankAccount",
+                      context: context,
+                    );
+                  },
+                  child: Text(
+                    "Confirm",
+                    style: TextStyle(
+                      fontSize: w * .045,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ),
             ),
+
+            // Obx(
+            //   () => AppButtons.solid(
+            //     context: context,
+            //     text: "Confirm",
+            //     isFullWidth: true,
+            //     backgroundColor:
+            //         controllers.addBankAccoundButtonController.value
+            //         ? AppColors.primaryRed
+            //         : AppColors.lightGray,
+            //     textColor: controllers.addBankAccoundButtonController.value
+            //         ? AppColors.white
+            //         : AppColors.mediumGray,
+            //     fontSize: w * .045,
+            //     height: w * .140,
+            //     radius: 12.0,
+            //     onClicked: () {
+            //       bankAccountAddController.addbankaccount_method(
+            //         accountHolderName: nameController.text.trim(),
+            //         accountNumber: accountNumberController.text.trim(),
+            //         bankName: bankNameController.text.trim(),
+            //         ifscCode: ifscController.text.trim(),
+            //         type: "BankAccount",
+            //         context: context,
+            //       );
+            //     },
+            //   ),
           ],
         ),
       ),

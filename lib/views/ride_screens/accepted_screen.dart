@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:nzcu_driver/controllers/chart_id_controller/chatid_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
+import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/utilities/colors/colors_list.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_images.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_text.dart';
@@ -22,6 +23,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:http/http.dart' as http;
@@ -88,7 +90,11 @@ class _ArrivingClientState extends State<ArrivingClient> {
   @override
   void initState() {
     super.initState();
+
+    image_get_from_shared();
     myridedataprint();
+    image_get_from_shared();
+
     _isScreenActive = true;
     print('🚗 ArrivingClient initState called');
 
@@ -99,6 +105,18 @@ class _ArrivingClientState extends State<ArrivingClient> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _initializeAll();
     });
+  }
+
+  dynamic profileImage = "";
+
+  void image_get_from_shared() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        profileImage = prefs.getString('active_ride_profile_image') ?? "";
+      });
+    }
+    print("profileImage>>>> : $profileImage");
   }
 
   void _setupNavigationListener() {
@@ -127,10 +145,10 @@ class _ArrivingClientState extends State<ArrivingClient> {
     });
   }
 
-void myridedataprint() {
+  void myridedataprint() {
+    print("my_datat_print ${widget.rideData}");
+  }
 
-  print("my_datat_print ${widget.rideData}");
-}
   void _onStepChanged(int step) {
     print('🔄 Stepper step changed to: $step');
     if (step == 2) {
@@ -1187,7 +1205,9 @@ void myridedataprint() {
     // Navigate to OTP screen using GetX
     try {
       await Get.to(
-        () => ArrivedOtpScreen(rideData: _rideData),
+        () => ArrivedOtpScreen(rideData: _rideData,
+        
+        imagepath: profileImage,),
         transition: Transition.rightToLeft,
         duration: const Duration(milliseconds: 300),
       );
@@ -1409,12 +1429,74 @@ void myridedataprint() {
               CircleAvatar(
                 radius: w * .055,
                 backgroundColor: Colors.grey.shade300,
-                child: Icon(
-                  Icons.person,
-                  size: w * .07,
-                  color: Colors.grey.shade700,
+                child: 
+                
+                ClipOval(
+                  child:
+                      profileImage != null && profileImage.toString().isNotEmpty
+                      ? Image.network(
+                          ApiPath.imagebaseUrl + profileImage.toString(),
+                          width: w * .11,
+                          height: w * .11,
+                          fit: BoxFit.cover,
+
+                          // ✅ Show loader while loading
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+
+                            return SizedBox(
+                              width: w * .05,
+                              height: w * .05,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                            );
+                          },
+
+                          // ✅ If image fails
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              Icons.person,
+                              size: w * .07,
+                              color: Colors.grey.shade700,
+                            );
+                          },
+                        )
+                      : Icon(
+                          Icons.person,
+                          size: w * .07,
+                          color: Colors.grey.shade700,
+                        ),
                 ),
+             
               ),
+
+              // CircleAvatar(
+              //   radius: w * .055,
+              //   backgroundColor: Colors.grey.shade300,
+              //   child: Image.network(
+              //     ApiPath.imagebaseUrl + profileImage,
+              //     fit: BoxFit.cover,
+              //     errorBuilder: (context, error, stackTrace) {
+              //       return Icon(
+              //         Icons.person,
+              //         size: w * .07,
+              //         color: Colors.grey.shade700,
+              //       );
+              //     },
+              //   ),
+              // ),
+              // CircleAvatar(
+              //   radius: w * .055,
+              //   backgroundColor: Colors.grey.shade300,
+              //   child:
+
+              //   Icon(
+              //     Icons.person,
+              //     size: w * .07,
+              //     color: Colors.grey.shade700,
+              //   ),
+              // ),
               SizedBox(width: w * .03),
               Expanded(
                 child: Column(

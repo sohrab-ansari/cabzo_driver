@@ -11,18 +11,17 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
 class PaymentsWithdrawController extends GetxController {
-  Rx<PaymentsWithdrawResponse?> transactionsres = Rx<PaymentsWithdrawResponse?>(null);
+  Rx<PaymentsWithdrawResponse?> transactionsres = Rx<PaymentsWithdrawResponse?>(
+    null,
+  );
   RxBool isLoading = false.obs;
   RxString errorMessage = ''.obs;
 
-  Future<void> withdrawal_method(
-    
-     {
+  Future<void> withdrawal_method({
     required String amount,
 
     required String? BankAccountId,
-  }
-  ) async {
+  }) async {
     print("add bankaccount called");
 
     // Validate inputs
@@ -39,7 +38,8 @@ class PaymentsWithdrawController extends GetxController {
       // Call API
       final PaymentsWithdrawResponse res =
           await ProfileApiServices.money_transfer(
-     BankAccountId: BankAccountId,amount: amount
+            BankAccountId: BankAccountId,
+            amount: amount,
           );
 
       print("API Response success: ${res.success}");
@@ -62,6 +62,7 @@ class PaymentsWithdrawController extends GetxController {
               Get.find<WalletController>();
 
           walletController.wallet_method();
+
           print("Wallet data refreshed after profile update");
         } catch (e) {
           print("Failed to refresh home data: $e");
@@ -75,6 +76,9 @@ class PaymentsWithdrawController extends GetxController {
         // Option 1: Using GetX navigation
 
         Get.off(PaymentScreen());
+
+        final WalletController walletController = Get.find<WalletController>();
+        walletController.wallet_method();
         // Get.offAll(() => PaymentScreen());
 
         // Option 2: Using Navigator if you prefer

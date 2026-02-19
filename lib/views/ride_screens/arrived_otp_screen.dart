@@ -13,8 +13,14 @@ import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
 class ArrivedOtpScreen extends StatefulWidget {
   final bool? bookridetypecheck;
   final Map<String, dynamic>? rideData;
+  dynamic imagepath;
 
-  const ArrivedOtpScreen({super.key, this.bookridetypecheck, this.rideData});
+  ArrivedOtpScreen({
+    super.key,
+    this.bookridetypecheck,
+    this.rideData,
+    required this.imagepath,
+  });
 
   @override
   State<ArrivedOtpScreen> createState() => _ArrivedOtpScreenState();
@@ -274,6 +280,19 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
               const SizedBox(height: 30),
 
               /// Profile Image
+              // Container(
+              //   height: w * 0.35,
+              //   width: w * 0.35,
+              //   decoration: const BoxDecoration(
+              //     shape: BoxShape.circle,
+              //     color: Colors.white,
+              //   ),
+              //   padding: const EdgeInsets.all(20),
+              //   child: Image.asset(
+              //     "assets/images/profile3.png",
+              //     fit: BoxFit.contain,
+              //   ),
+              // ),
               Container(
                 height: w * 0.35,
                 width: w * 0.35,
@@ -282,10 +301,46 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
                   color: Colors.white,
                 ),
                 padding: const EdgeInsets.all(20),
-                child: Image.asset(
-                  "assets/images/profile3.png",
-                  fit: BoxFit.contain,
+                child: ClipOval(
+                  child:
+                      widget.imagepath != null &&
+                          widget.imagepath.toString().isNotEmpty
+                      ? Image.network(
+                          ApiPath.imagebaseUrl + widget.imagepath.toString(),
+                          width: w * .11,
+                          height: w * .11,
+                          fit: BoxFit.cover,
+
+                          // ✅ Show loader while loading
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+
+                            return SizedBox(
+                              width: w * .05,
+                              height: w * .05,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                            );
+                          },
+
+                          // ✅ If image fails
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              Icons.person,
+                              size: w * .07,
+                              color: Colors.grey.shade700,
+                            );
+                          },
+                        )
+                      : Icon(
+                          Icons.person,
+                          size: w * .07,
+                          color: Colors.grey.shade700,
+                        ),
                 ),
+
+                // Image.network(widget.imagepath, fit: BoxFit.contain),
               ),
 
               const SizedBox(height: 24),

@@ -15,6 +15,7 @@ import 'package:nzcu_driver/services/apiservices/auth_api_service.dart';
 import 'package:nzcu_driver/modals/auth_modals/Otp_verify_res.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EnterOtpScreen extends StatefulWidget {
   final dynamic typecheck;
@@ -162,6 +163,11 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
       print("  - Complete Verified: $completeVerified");
       print("  - Profile Completed: $isProfileCompleted");
 
+      print(">>>>>> imageStatus: $imageStatus");
+      print(">>>>> profileStatus: $profileStatus");
+      print(">>>>>> vehicleStatus: $vehicleStatus");
+      print(">>>>>> completeVerified: $completeVerified");
+
       // CASE 6: All Verified -> Home
       if (imageStatus == "verified" &&
           profileStatus == "verified" &&
@@ -201,18 +207,48 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
         driverFormController.activeStep.value = 0; // Ensure start
         CustomNavigator.removeUntil(
           context,
-          DriverRegistration(),
+          DriverRegistration(mobileNumber: widget.phoneNumber),
           transition: TransitionType.slideLeft,
         );
         return;
       }
 
+      // // CASE 5: All Pending -> Wait (Toast)
+      // if (imageStatus == "pending" &&
+      //     profileStatus == "pending" &&
+      //     vehicleStatus == "pending" &&
+      //     completeVerified == "pending") {
+      //   print("⏳ All Pending - Showing toast");
+      //   Fluttertoast.showToast(
+      //     msg: "Please wait, admin will approve your account.",
+      //     toastLength: Toast.LENGTH_LONG,
+      //     gravity: ToastGravity.TOP,
+      //     backgroundColor: Colors.black87,
+      //     textColor: Colors.white,
+      //   );
+      //   if (mounted) {
+      //     setState(() {
+      //       isLoading = false;
+      //     });
+      //   }
+      //   return;
+      // }
+      print(">>>>>> imageStatus: $imageStatus");
+      print(">>>>> profileStatus: $profileStatus");
+      print(">>>>>> vehicleStatus: $vehicleStatus");
+      print(">>>>>> completeVerified: $completeVerified");
       // CASE 5: All Pending -> Wait (Toast)
       if (imageStatus == "pending" &&
           profileStatus == "pending" &&
           vehicleStatus == "pending" &&
           completeVerified == "pending") {
         print("⏳ All Pending - Showing toast");
+
+        // ✅ Save in SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("account_status", "pending");
+        // You can change to "approve" if needed
+
         Fluttertoast.showToast(
           msg: "Please wait, admin will approve your account.",
           toastLength: Toast.LENGTH_LONG,
@@ -220,21 +256,24 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
           backgroundColor: Colors.black87,
           textColor: Colors.white,
         );
+
+        Get.offAll(LoginScreen());
         if (mounted) {
           setState(() {
             isLoading = false;
           });
         }
+
         return;
       }
 
       // CASE 4: Profile Pending -> Step 3
       if (profileStatus == "pending") {
         print("� Profile Pending - Setting step 3");
-        driverFormController.activeStep.value = 3;
+        driverFormController.activeStep.value = 2;
         CustomNavigator.push(
           context,
-          DriverRegistration(),
+          DriverRegistration(mobileNumber: widget.phoneNumber),
           transition: TransitionType.slideLeft,
         );
         return;
@@ -243,10 +282,10 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
       // CASE 3: Vehicle Pending -> Step 2
       if (vehicleStatus == "pending") {
         print("� Vehicle Pending - Setting step 2");
-        driverFormController.activeStep.value = 2;
+        driverFormController.activeStep.value = 1;
         CustomNavigator.push(
           context,
-          DriverRegistration(),
+          DriverRegistration(mobileNumber: widget.phoneNumber),
           transition: TransitionType.slideLeft,
         );
         return;
@@ -274,7 +313,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
       print("⚠️ No specific case matched - defaulting to Registration");
       CustomNavigator.push(
         context,
-        DriverRegistration(),
+        DriverRegistration(mobileNumber: widget.phoneNumber),
         transition: TransitionType.slideLeft,
       );
     } catch (e) {
@@ -427,17 +466,17 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
                     SizedBox(height: w * .02),
 
                     // Error message
-                    if (errorMessage.isNotEmpty)
-                      Padding(
-                        padding: EdgeInsets.only(bottom: w * .02),
-                        child: Text(
-                          errorMessage,
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontSize: w * 0.035,
-                          ),
-                        ),
-                      ),
+                    // if (errorMessage.isNotEmpty)
+                    //   Padding(
+                    //     padding: EdgeInsets.only(bottom: w * .02),
+                    //     child: Text(
+                    //       errorMessage,
+                    //       style: TextStyle(
+                    //         color: Colors.red,
+                    //         fontSize: w * 0.035,
+                    //       ),
+                    //     ),
+                    //   ),
 
                     // Timer/Resend OTP
                     Obx(() {
@@ -491,7 +530,10 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
               child: AppButtons.solid(
                 context: context,
                 text: isLoading ? "Verifying..." : "Verify",
-                onClicked: verifyOtp2,
+                onClicked: () {
+                  verifyOtp2();
+                },
+
                 isFullWidth: true,
                 backgroundColor: isLoading
                     ? Colors.grey

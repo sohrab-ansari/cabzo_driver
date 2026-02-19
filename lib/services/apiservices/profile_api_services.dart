@@ -5,8 +5,10 @@ import 'dart:math';
 
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:nzcu_driver/modals/home_modals/get_city_by_location_response.dart';
 import 'package:nzcu_driver/modals/profile_modals/faq_category_responses.dart';
 import 'package:nzcu_driver/modals/profile_modals/get_by_category_response.dart';
+import 'package:nzcu_driver/modals/profile_modals/update_bank_and_upi_response.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/modals/profile_modals/add_money_wallet_response.dart';
 import 'package:nzcu_driver/modals/profile_modals/bank_account_add_Res.dart';
@@ -42,146 +44,55 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileApiServices {
-  // static Future<HomeModalResponse> get_home_data() async {
-  //   // final Uri url = Uri.parse(ApiPath.createVehicle);
-  //   final Uri url = Uri.parse("${ApiPath.driver_home}");
+  static Future<GetCityByLocationResponse> get_cit_by_loc_method({
+    required String lat,
+    required String lng,
+  }) async {
+    // final Uri url = Uri.parse("${ApiPath.get_All_Categories}");
 
-  //   /// 🔐 GET TOKEN
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final String? token = prefs.getString("auth_token");
+    final Uri url = Uri.parse(
+      "${ApiPath.baseUri}/location/city?lat=$lat&lng=$lng",
+    );
 
-  //   print("========== CREATE VEHICLE API ==========");
-  //   print("URL : $url");
-  //   print("Token : $token");
-  //   // print("Request Body : ${jsonEncode(requestBody)}");
-  //   print("my_tokennnn ${token}");
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
 
-  //   try {
-  //     final http.Response response = await http.get(
-  //       url,
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         "Authorization": "Bearer $token", // ✅ BEARER TOKEN
-  //       },
-  //       // body: jsonEncode(requestBody),
-  //     );
+    print("========== GET FAQS CATEGORIES API ==========");
+    print("URL : $url");
+    print("Token : $token");
 
-  //     print("Status Code : ${response.statusCode}");
-  //     print("Response Body : ${response.body}");
+    try {
+      final http.Response response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
 
-  //     final Map<String, dynamic> data = jsonDecode(response.body);
-  //     final HomeModalResponse homeModalResponse = HomeModalResponse.fromJson(
-  //       data,
-  //     );
+      print("Status Code : ${response.statusCode}");
+      print("Response Body  get city by id>>>>>> data : ${response.body}");
 
-  //     print("Response Body222222222 : ${homeModalResponse.driver!.id}");
-
-  //     if (homeModalResponse.success == true &&
-  //         homeModalResponse.driver != null &&
-  //         homeModalResponse.driver!.id != null) {
-  //       print("Response Body222222222kkkk : ${homeModalResponse.driver!.id}");
-  //       // Use ! to assert non-null or provide default value
-  //       await prefs.setString(
-  //         "driver_userid",
-  //         homeModalResponse.driver!.id.toString(),
-  //       );
-
-  //       await prefs.setString(
-  //         "driver_name",
-  //         homeModalResponse.driver!.name.toString(),
-  //       );
-
-  //       print("Response Body222222222jjjj : ${homeModalResponse.driver!.id}");
-  //       // print(
-  //       //   "✅ Driver user ID saved to SharedPreferences: ${registerProfileRes.data!.id}",
-  //       // );
-  //     } else {
-  //       print(
-  //         "⚠️  Could not save driver_userid - ID is null or response not successful",
-  //       );
-  //     }
-  //     return homeModalResponse;
-  //   } catch (e) {
-  //     print("❌ Exception in Create Vehicle1 : $e");
-  //     return HomeModalResponse(success: false, message: "Connection error: $e");
-  //   }
-  // }
-
-  // static Future<Drivertoggledutyresponse> toggle_duty_data() async {
-  //   // final Uri url = Uri.parse(ApiPath.createVehicle);
-  //   // final Uri url = Uri.parse("${ApiPath.driver_home}");
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final String? userId = prefs.getString("driver_userid");
-  //   final String? token = prefs.getString("auth_token");
-
-  //   //  final Uri url = Uri.parse(
-  //   //   "${ApiPath.baseUri}/driver/toggleDuty?$userId",
-  //   // );
-
-  //   final Uri url = Uri.parse("${ApiPath.baseUri}/driver/toggleDuty/$userId");
-  //   print("========== CREATE VEHICLE API ==========");
-  //   print("URL : $url");
-  //   print("Token : $token");
-  //   // print("Request Body : ${jsonEncode(requestBody)}");
-  //   print("my_tokennnn ${token}");
-
-  //   try {
-  //     final http.Response response = await http.patch(
-  //       url,
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         "Authorization": "Bearer $token", // ✅ BEARER TOKEN
-  //       },
-  //       // body: jsonEncode(requestBody),
-  //     );
-
-  //     print("Status Code : ${response.statusCode}");
-  //     print("Response Body : ${response.body}");
-
-  //     final Map<String, dynamic> data = jsonDecode(response.body);
-  //     final Drivertoggledutyresponse drivertoggledutyresponse =
-  //         Drivertoggledutyresponse.fromJson(data);
-
-  //     print("my_driver_tokennnn_toggle_respose ${data}");
-  //     print("Response Body222222222 : ${drivertoggledutyresponse.driver!.id}");
-
-  //     if (drivertoggledutyresponse.success == true &&
-  //         drivertoggledutyresponse.driver != null &&
-  //         drivertoggledutyresponse.driver!.id != null) {
-  //       print(
-  //         "Response Body222222222kkkk : ${drivertoggledutyresponse.driver!.id}",
-  //       );
-  //       // Use ! to assert non-null or provide default value
-  //       await prefs.setString(
-  //         "driver_userid",
-  //         drivertoggledutyresponse.driver!.id.toString(),
-  //       );
-
-  //       await prefs.setString(
-  //         "driver_name",
-  //         drivertoggledutyresponse.driver!.name.toString(),
-  //       );
-
-  //       print(
-  //         "Response Body222222222jjjj : ${drivertoggledutyresponse.driver!.id}",
-  //       );
-  //       // print(
-  //       //   "✅ Driver user ID saved to SharedPreferences: ${registerProfileRes.data!.id}",
-  //       // );
-  //     } else {
-  //       print(
-  //         "⚠️  Could not save driver_userid - ID is null or response not successful",
-  //       );
-  //     }
-  //     return drivertoggledutyresponse;
-  //   } catch (e) {
-  //     print("❌ Exception in Create Vehicle1 : $e");
-  //     return Drivertoggledutyresponse(
-  //       success: false,
-  //       message: "Connection error: $e",
-  //     );
-  //   }
-  // }
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        final GetCityByLocationResponse categoriesResponse =
+            GetCityByLocationResponse.fromJson(data);
+        return categoriesResponse;
+      } else {
+        // Handle non-200 status codes
+        return GetCityByLocationResponse(
+          success: false,
+          message: "Error: ${response.statusCode}",
+        );
+      }
+    } catch (e) {
+      print("❌ Exception in get city by id>>>>>> data : $e");
+      return GetCityByLocationResponse(
+        success: false,
+        message: "Connection error: $e",
+      );
+    }
+  }
 
   static Future<FaqsCategoriesResponse> get_all_categories_data() async {
     final Uri url = Uri.parse("${ApiPath.get_All_Categories}");
@@ -379,107 +290,8 @@ class ProfileApiServices {
       return DriverImageUploadRes(success: false, message: e.toString());
     }
   }
-  //   static Future<DriverImageUploadRes> edit_profile_data_api({
-  //     File? image,
-  //     required String userType,
-  //     String? name,
-  //     String? email,
-  //     String? dateOfBirth,
-  //     String? gender,
-  //   }) async {
-  //     final prefs = await SharedPreferences.getInstance();
-  //     final String? userId = prefs.getString("driver_userid");
-  //     final String? token = prefs.getString("auth_token");
-
-  //     print("my_tokennnnn ${token}");
-  //     final Uri url = Uri.parse(
-  //       "${ApiPath.baseUri}/driver/update?userId=$userId&userType=$userType",
-  //     );
-
-  //     print("URL => $url");
-  //     print("Name => $name");
-  //     print("Email => $email");
-  //     print("dateOfBirth ===== => $dateOfBirth");
-  //     print("gender =====> $gender");
-  //     print("Image provided: ${image != null ? 'Yes' : 'No'}");
-
-  //     try {
-  //       final request = http.MultipartRequest('PUT', url);
-
-  //       /// ✅ Headers
-  //       request.headers.addAll({
-  //         "Authorization": "Bearer $token",
-  //         "Accept": "application/json",
-  //       });
-
-  //       /// ✅ TEXT FIELDS (Add only if not empty/null)
-  //       if (name != null && name.isNotEmpty) {
-  //         request.fields['name'] = name;
-  //       }
-
-  //       if (email != null && email.isNotEmpty) {
-  //         request.fields['email'] = email;
-  //       }
-
-  //       if (dateOfBirth != null && dateOfBirth.isNotEmpty) {
-  //         request.fields['dateOfBirth'] = dateOfBirth;
-  //       }
-
-  //       if (gender != null && gender.isNotEmpty) {
-  //         request.fields['gender'] = gender;
-  //       }
-
-  //       /// ✅ IMAGE FILE (only if provided and exists)
-  //       if (image != null && await image.exists()) {
-  //         request.files.add(
-  //           await http.MultipartFile.fromPath('image', image.path),
-  //         );
-  //         print("Image attached: ${image.path}");
-  //       } else {
-  //         print("No image provided - skipping image upload");
-  //       }
-
-  //       final response = await request.send();
-  //       final statusCode = response.statusCode;
-  //       final body = await response.stream.bytesToString();
-
-  //       print("Status Code: $statusCode");
-  //       print("Response Body: $body");
-
-  //       Map<String, dynamic> responseData = json.decode(response);
-
-  // // Extract driver name from the nested structure
-  // String driverName = responseData['driver']['name'] ?? '';
-
-  // // Store in SharedPreferences
-  // SharedPreferences prefs = await SharedPreferences.getInstance();
-  // await prefs.setString('driver_name', driverName);
-
-  //       if (response.statusCode == 200) {
-
-  //         print("hekllooooo");
-
-  // prefs.setString("driver_name", response.fields['name'] ?? name ?? ""); // Update name in SharedPreferences if changed
-  //               Get.offAll(BottomnavmainScreen());
-
-  //         return DriverImageUploadRes.fromJson(jsonDecode(body));
-  //       } else {
-  //          print("hekllooooo222");
-  //         return DriverImageUploadRes(
-  //           success: false,
-  //           message: "Unexpected response format",
-  //         );
-  //       }
-  //     } catch (e) {
-
-  //        print("hekllooooo3333");
-  //       print("API Error: $e");
-  //       return DriverImageUploadRes(success: false, message: e.toString());
-  //     }
-  //   }
 
   static Future<WalletResponse> get_wallet_data() async {
-    // final Uri url = Uri.parse(ApiPath.createVehicle);
     final Uri url = Uri.parse("${ApiPath.wallet_api}");
 
     /// 🔐 GET TOKEN
@@ -681,93 +493,6 @@ class ProfileApiServices {
       );
     }
   }
-  // static Future<BankAccountAddResp> addBankAccountData({
-  //   required String bankName,
-  //   required String accountNumber,
-  //   required String accountHolderName,
-  //   required String ifscCode,
-
-  //   String? type,
-  //   String? upiId,
-  // }) async {
-  //   try {
-  //     final prefs = await SharedPreferences.getInstance();
-  //     final String? userId = prefs.getString("driver_userid");
-  //     final String? token = prefs.getString("auth_token");
-
-  //     if (userId == null || userId.isEmpty) {
-  //       return BankAccountAddResp(success: false, message: "User ID not found");
-  //     }
-
-  //     print("Sending driverId: $userId");
-
-  //     final response = await http.post(
-  //       Uri.parse(ApiPath.bank_account_add),
-  //       headers: {
-  //         "Authorization": "Bearer $token",
-  //         "Accept": "application/json",
-  //         "Content-Type": "application/json",
-  //       },
-
-  //       // body: jsonEncode({
-  //       //   "driverId": userId,
-  //       //   "bankName": bankName,
-  //       //   "accountNumber": accountNumber,
-  //       //   "accountHolderName": accountHolderName,
-  //       //   "ifscCode": ifscCode,
-  //       // }),
-  //       body: jsonEncode({
-  //         "driverId": userId,
-  //         "bankName": bankName,
-  //         "accountNumber": accountNumber,
-  //         "accountHolderName": accountHolderName,
-  //         "ifscCode": ifscCode,
-
-  //         // "type": "UPI",
-  //         // "upiId": "d",
-  //         "type": type,
-  //         // "upiId": upiId,
-  //       }),
-  //     );
-
-  //     print("Status Code: ${response.statusCode}");
-  //     print("Response: ${response.body}");
-
-  //     // ✅ FIX: Parse response regardless of status code
-  //     final responseData = jsonDecode(response.body);
-
-  //     // ✅ Check if success field exists in response
-  //     if (responseData.containsKey('success')) {
-  //       return BankAccountAddResp.fromJson(responseData);
-  //     }
-  //     // ✅ For 201 status (Created), treat as success
-  //     else if (response.statusCode == 200 || response.statusCode == 201) {
-  //       return BankAccountAddResp(
-  //         success: true,
-  //         message: "Bank account created successfully",
-  //         data: BankAccountData.fromJson(responseData),
-  //       );
-  //     }
-  //     // ✅ For error responses
-  //     else {
-  //       return BankAccountAddResp(
-  //         success: false,
-  //         message: responseData['message'] ?? "Failed to add bank account",
-  //       );
-  //     }
-  //   } catch (e) {
-  //     print("Error in addBankAccountData: $e");
-  //     return BankAccountAddResp(
-  //       success: false,
-  //       message: "Network error: ${e.toString()}",
-  //     );
-  //   }
-  // }
-
-  ////
-  ///
-  ///
-  ///
 
   static Future<PaymentsWithdrawResponse> money_transfer({
     required String amount,
@@ -837,152 +562,6 @@ class ProfileApiServices {
       );
     }
   }
-
-  // static Future<DriverIdResponse> get_driverid_data() async {
-  //   /// 🔐 GET TOKEN
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final String? token = prefs.getString("auth_token");
-  //   final String? userId = prefs.getString("driver_userid");
-
-  //   print("herrrerrere_the_driverrrriddd_calling>>>>");
-  //   print("theeeee____ useriddddd ${userId}");
-
-  //   final Uri url = Uri.parse(
-  //     "${ApiPath.baseUri}/driver/getDriverProfile/${userId}",
-  //   );
-
-  //   print("========== CREATE VEHICLE API ==========");
-  //   print("URL : $url");
-  //   print("Token : $token");
-  //   print("my_tokennnn ${token}");
-
-  //   try {
-  //     final http.Response response = await http.get(
-  //       url,
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         "Authorization": "Bearer $token", // ✅ BEARER TOKEN
-  //       },
-  //     );
-
-  //     print("Status Code : ${response.statusCode}");
-  //     print("drievrrrrrid>>>>>>> resss >>>> Response Body : ${response.body}");
-
-  //     final Map<String, dynamic> data = jsonDecode(response.body);
-  //     final DriverIdResponse driverIdResponse = DriverIdResponse.fromJson(data);
-
-  //     print(
-  //       "vehicleSubType>>>>> comingggg >>>>> ${driverIdResponse.driver?.vehicle?.vehicleSubType}",
-  //     );
-
-  //     // Store driver basic info
-  //     if (driverIdResponse.driver?.name != null) {
-  //       await prefs.setString("driver_name", driverIdResponse.driver!.name!);
-  //     }
-
-  //     if (driverIdResponse.driver?.image != null) {
-  //       await prefs.setString("driver_image", driverIdResponse.driver!.image!);
-  //     }
-
-  //     if (driverIdResponse.driver?.vehicle?.vehicleSubType != null) {
-  //       await prefs.setString(
-  //         "vehicle_SubType",
-  //         driverIdResponse.driver!.vehicle!.vehicleSubType!,
-  //       );
-  //     }
-
-  //     if (driverIdResponse.driver?.phone != null) {
-  //       await prefs.setString("driver_mobile", driverIdResponse.driver!.phone!);
-  //     }
-
-  //     // Store vehicle info if available
-  //     if (driverIdResponse.driver?.vehicle != null) {
-  //       final vehicle = driverIdResponse.driver!.vehicle!;
-
-  //       // Store vehicle ID
-  //       if (vehicle.id != null && vehicle.id!.isNotEmpty) {
-  //         await prefs.setString("vehicle_id", vehicle.id!);
-  //         print("✅ Vehicle ID stored: ${vehicle.id}");
-  //       }
-
-  //       // Store vehicle type ID
-  //       if (vehicle.vehicleType != null && vehicle.vehicleType!.isNotEmpty) {
-  //         await prefs.setString("vehicle_type_id", vehicle.vehicleType!);
-  //         print("✅ Vehicle Type ID stored: ${vehicle.vehicleType}");
-  //       }
-
-  //       // Optionally store other vehicle info if needed
-  //       await prefs.setString("vehicle_name", vehicle.vehicleName ?? "");
-  //       await prefs.setString("vehicle_number", vehicle.vehicleNumber ?? "");
-  //       await prefs.setString("vehicle_color", vehicle.vehicleColor ?? "");
-  //       await prefs.setString("vehicle_model", vehicle.vehicleModel ?? "");
-  //       // await prefs.setInt("vehicle_capacity", vehicle.vehicleCapacity ?? 0);
-  //     } else {
-  //       print("⚠️ No vehicle data available");
-  //     }
-
-  //     return driverIdResponse;
-  //   } catch (e) {
-  //     print("❌ Exception in Create Vehicle5 : $e");
-  //     return DriverIdResponse(success: false, message: "Connection error: $e");
-  //   }
-  // }
-
-  //   static Future<DriverIdResponse> get_driverid_data() async {
-  //     /// 🔐 GET TOKEN
-  //     final prefs = await SharedPreferences.getInstance();
-  //     final String? token = prefs.getString("auth_token");
-
-  //     final String? userId = prefs.getString("driver_userid");
-
-  //   print("herrrerrere_the_driverrrriddd_calling>>>>")
-  // ;
-  //     print("theeeee____ useriddddd ${userId}");
-
-  //     final Uri url = Uri.parse(
-  //       "${ApiPath.baseUri}/driver/getDriverProfile/${userId}",
-  //     );
-
-  //     print("========== CREATE VEHICLE API ==========");
-  //     print("URL : $url");
-  //     print("Token : $token");
-  //     // print("Request Body : ${jsonEncode(requestBody)}");
-  //     print("my_tokennnn ${token}");
-
-  //     try {
-  //       final http.Response response = await http.get(
-  //         url,
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           "Authorization": "Bearer $token", // ✅ BEARER TOKEN
-  //         },
-  //         // body: jsonEncode(requestBody),
-  //       );
-
-  //       print("Status Code : ${response.statusCode}");
-  //       print("drievrrrrrid>>>>>>> resss >>>> Response Body : ${response.body}");
-
-  //       final Map<String, dynamic> data = jsonDecode(response.body);
-  //       final DriverIdResponse driverIdResponse = DriverIdResponse.fromJson(data);
-
-  //   final prefs = await SharedPreferences.getInstance();
-
-  //         await prefs.setString("driver_name", driverIdResponse.driver!.name ?? "");
-
-  //         await prefs.setString("driver_mobile", driverIdResponse.driver!.phone ?? "");
-
-  // //  if (driverIdResponse.token != null &&
-  // //           otpResponse.token!.isNotEmpty &&
-  // //           driverId != null &&
-  // //           driverId.isNotEmpty) {
-
-  // //       }
-  //       return driverIdResponse;
-  //     } catch (e) {
-  //       print("❌ Exception in Create Vehicle5 : $e");
-  //       return DriverIdResponse(success: false, message: "Connection error: $e");
-  //     }
-  //   }
 
   static Future<AddMoneyWalletResponse> initializeWalletTopUp({
     required dynamic amount,
@@ -1140,7 +719,7 @@ class ProfileApiServices {
       final GetBankAccountsResponse walletResponse =
           GetBankAccountsResponse.fromJson(data);
 
-      Fluttertoast.showToast(msg: data['message'] ?? "Something went wrong");
+      // Fluttertoast.showToast(msg: data['message'] ?? "Something went wrong");
 
       return walletResponse;
     } catch (e) {
@@ -1149,6 +728,57 @@ class ProfileApiServices {
         success: false,
         message: "Connection error: $e",
       );
+    }
+  }
+
+  static Future<UpdateBankAndUpiResponse> UpdateBankAndUpi_data({
+    required dynamic acoountid,
+
+    required String type,
+
+    required dynamic upiId,
+  }) async {
+    /// 🔐 GET TOKEN
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+    final String? userId = prefs.getString("driver_userid");
+
+    print("herrrerrere_the_driverrrriddd_calling>>>>");
+    print("theeeee____ accountidddddd ${acoountid}");
+
+ print("theeeee____ type ${type}");
+  print("theeeee____ upiId ${upiId}");
+    final Uri url = Uri.parse(
+      "${ApiPath.baseUri}/bank-accounts/update/${acoountid}",
+    );
+
+    print("========== CREATE VEHICLE API ==========");
+    print("URL : $url");
+    print("Token : $token");
+    print("my_tokennnn ${token}");
+
+    try {
+      final http.Response response = await http.put(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token", // ✅ BEARER TOKEN
+        },
+
+        body: jsonEncode({"type": type, "upiId": upiId}),
+      );
+
+      print("Status Code : ${response.statusCode}");
+      print("drievrrrrrid>>>>>>> resss >>>> Response Body : ${response.body}");
+
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      final UpdateBankAndUpiResponse driverIdResponse =
+          UpdateBankAndUpiResponse.fromJson(data);
+
+      return driverIdResponse;
+    } catch (e) {
+      print("❌ Exception in Create Vehicle5 : $e");
+      return UpdateBankAndUpiResponse(success: false, message: "Connection error: $e");
     }
   }
 

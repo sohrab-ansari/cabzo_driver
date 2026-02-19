@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
@@ -12,7 +13,6 @@ import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart
 import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
-
 
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
 
@@ -34,15 +34,13 @@ class SocketManager {
 
   // static const String SOCKET_URL = 'https://corezap.smarttechbros.com';
 
-
   static const String SOCKET_URL = 'https://nzcu.smarttechbros.com';
 
-
+  // static const String SOCKET_URL = "https://api.nzcu.framekarts.com";
 
   // static const String SOCKET_URL = 'https://api.syrus.framekarts.com';
 
   // https://api.syrus.framekarts.com/
- 
 
   //nzcu url
   // static const String SOCKET_URL = 'https://api.nzcu.framekarts.com';
@@ -582,9 +580,24 @@ class SocketManager {
     // RIDE REQUEST EVENTS
     _socket!.on('ride:newRide', (data) {
       final rideData = _mapRideData(data);
+
+      // Pretty print the full ride request data
+      print('🚕 NEW RIDE REQUEST RECEIVED:');
+      print('╔═══════════════════════════════════════════════════════════');
+      print('║ RIDE DETAILS:');
+      print('╠═══════════════════════════════════════════════════════════');
+
+      // Convert rideData to JSON with pretty formatting
+      final prettyJson = JsonEncoder.withIndent('  ').convert(rideData);
+      prettyJson.split('\n').forEach((line) {
+        print('║ $line');
+      });
+
+      print('╠═══════════════════════════════════════════════════════════');
       print(
-        '🚕 NEW RIDE REQUEST RECEIVED: ${jsonEncode(rideData).substring(0, 100)}...',
+        '║ Raw data preview: ${jsonEncode(data).substring(0, min(200, jsonEncode(data).length))}...',
       );
+      print('╚═══════════════════════════════════════════════════════════');
 
       if (!isOnDuty) {
         print('⚠️ Received ride request but driver is offline');
@@ -599,22 +612,47 @@ class SocketManager {
         prefs.setString('last_ride_request', jsonEncode(data));
       });
 
+      Get.to(RideRequestScreen(rideData: rideData));
 
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => RideRequestScreen(rideData: rideData),
-    //   ),
-    // );
-
-
-
-    Get.to(RideRequestScreen(rideData: rideData));
       // Trigger interactive notification
       // NotificationService.instance.showRideRequestNotification(rideData);
 
       onNewRide?.call(rideData);
     });
+
+    // // RIDE REQUEST EVENTS
+    // _socket!.on('ride:newRide', (data) {
+    //   final rideData = _mapRideData(data);
+    //   print(
+    //     '🚕 NEW RIDE REQUEST RECEIVED: ${jsonEncode(rideData).substring(0, 100)}...',
+    //   );
+
+    //   if (!isOnDuty) {
+    //     print('⚠️ Received ride request but driver is offline');
+    //     return;
+    //   }
+
+    //   // Store ride data for potential notification actions
+    //   _lastRideData = rideData;
+
+    //   // Persist for cross-isolate access (if app launches from notification)
+    //   SharedPreferences.getInstance().then((prefs) {
+    //     prefs.setString('last_ride_request', jsonEncode(data));
+    //   });
+
+    // // Navigator.push(
+    // //   context,
+    // //   MaterialPageRoute(
+    // //     builder: (context) => RideRequestScreen(rideData: rideData),
+    // //   ),
+    // // );
+
+    // Get.to(RideRequestScreen(rideData: rideData));
+    //   // Trigger interactive notification
+    //   // NotificationService.instance.showRideRequestNotification(rideData);
+
+    //   onNewRide?.call(rideData);
+    // });
 
     _socket!.on('ride:orderCancelled', (data) {
       print('userrrr_side____Canceeledddd>>>>>>>>>>>>>>>>: ${data}');
@@ -622,29 +660,98 @@ class SocketManager {
     });
 
     _socket!.on('ride:confirmed', (data) async {
-      print("🚗 [SOCKET] Ride Confirmed");
-      print("📦 Full Ride Data: ${jsonEncode(data)}");
+      print(">>>>>>>>> [SOCKET] Ride Confirmed");
 
-      final orderId = data['orderId'] ?? data['_id'];
+      // Convert incoming data to Map
+      final rideData = Map<String, dynamic>.from(data);
 
-      // ✅ Save FULL backend data
+      final orderId = rideData['orderId'] ?? rideData['_id'];
+
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('active_ride_full_data', jsonEncode(data));
+
+      // ✅ 1. Store FULL ride data
+      await prefs.setString('active_ride_full_data', jsonEncode(rideData));
+
+      // ✅ 2. Store profile image (from rider object)
+      final profileImage = rideData['rider']?['profileImage'] ?? '';
+      await prefs.setString('active_ride_profile_image', profileImage);
+
+      // ✅ 3. Store order id
       await prefs.setString('active_order_id', orderId.toString());
 
-      // App memory state
-      _currentRide = Map<String, dynamic>.from(data);
+      print("✅ Ride Data Stored Successfully");
+
+      // =====================================================
+      // 🔄 READ AGAIN FROM SHARED PREFERENCES (Verification)
+      // =====================================================
+
+      final storedRideString = prefs.getString('active_ride_full_data');
+
+      print("📦 Stored Ride Data From Prefs: $storedRideString");
+
+      if (storedRideString != null) {
+        final storedRideMap =
+            jsonDecode(storedRideString) as Map<String, dynamic>;
+
+        print("🚗 Stored Order ID: ${storedRideMap['orderId']}");
+        print(
+          "👤 Stored Profile Image: ${storedRideMap['rider']?['profileImage']}",
+        );
+        print("💰 Stored Fare: ${storedRideMap['fare']}");
+      }
+
+      // =====================================================
+      // 🧠 Update App Memory State
+      // =====================================================
+
+      _currentRide = rideData;
       _activeRideId = orderId.toString();
       _isRideInProgress = true;
       _rideStartTime = DateTime.now();
-      _saveRideStateToPrefs(); // Call to save ride state
 
-      // Join socket room
+      _saveRideStateToPrefs();
+
+      // Join ride room
       _joinRideRoom(orderId.toString());
 
       // Notify listeners
       onRideConfirmed?.call(_currentRide!);
     });
+
+    // _socket!.on('ride:confirmed', (data) async {
+    //   print(">>>>>>>>> [SOCKET] Ride Confirmed");
+    //   print(">>>>>>>>>>> 2 Full Ride Data: ${jsonEncode(data)}");
+
+    //   print("my_profile_image_log ${data['rider']?['profileImage']}");
+
+    //   final orderId = data['orderId'] ?? data['_id'];
+
+    //   // ✅ Save FULL backend data
+    //   final prefs = await SharedPreferences.getInstance();
+    //   await prefs.setString('active_ride_full_data', jsonEncode(data));
+    //   // await prefs.setString(
+    //   //   'active_ride_profile_image',
+    //   //   jsonEncode(data['profileImage']),
+    //   // );
+    //   final riderProfileImage = data['rider']?['profileImage'] ?? '';
+
+    //   await prefs.setString('active_ride_profile_image', riderProfileImage);
+
+    //   await prefs.setString('active_order_id', orderId.toString());
+
+    //   // App memory state
+    //   _currentRide = Map<String, dynamic>.from(data);
+    //   _activeRideId = orderId.toString();
+    //   _isRideInProgress = true;
+    //   _rideStartTime = DateTime.now();
+    //   _saveRideStateToPrefs(); // Call to save ride state
+
+    //   // Join socket room
+    //   _joinRideRoom(orderId.toString());
+
+    //   // Notify listeners
+    //   onRideConfirmed?.call(_currentRide!);
+    // });
 
     _socket!.on('ride:status', (data) {
       print('📊 Ride status update: $data');
@@ -1285,7 +1392,8 @@ class SocketManager {
     print('✅ Emitting ride:accept: $payload');
     _socket!.emit('ride:accept', payload);
 
-    // Keep driver online but mark as busy
+    // Keep driver online but mark
+    //as busy
     isOnDuty = true; // Keep online to receive updates
 
     return true;

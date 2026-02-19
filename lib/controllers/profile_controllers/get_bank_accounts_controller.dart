@@ -30,9 +30,7 @@ class GetBankAccountsController extends GetxController {
     super.onInit();
   }
 
-  Future<void> bankdetails_mdethod(
-   
-  ) async {
+  Future<void> bankdetails_mdethod() async {
     print("get bank details  called");
 
     // Set loading state
@@ -42,19 +40,16 @@ class GetBankAccountsController extends GetxController {
     try {
       // Call API
       final GetBankAccountsResponse res =
-          await ProfileApiServices.get_bankdetails_data(   
-          );
-
-    
+          await ProfileApiServices.get_bankdetails_data();
 
       if (res.success == true) {
         print("get bank details  data fetched successfully");
 
-        Fluttertoast.showToast(
-          msg: res.message ?? "Something went wrong",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP,
-        );
+        // Fluttertoast.showToast(
+        //   msg: res.message ?? "Something went wrong",
+        //   toastLength: Toast.LENGTH_SHORT,
+        //   gravity: ToastGravity.TOP,
+        // );
 
         driveridresponse.value = res;
       } else {

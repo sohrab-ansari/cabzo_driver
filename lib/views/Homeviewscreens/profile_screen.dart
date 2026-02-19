@@ -1,5 +1,3 @@
-
-
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/colors/colors_list.dart';
@@ -19,7 +17,6 @@ import 'package:nzcu_driver/views/profile_screens/payment_screen.dart';
 import 'package:nzcu_driver/views/profile_screens/privacy_policy.dart';
 import 'package:nzcu_driver/views/profile_screens/rating.dart';
 import 'package:nzcu_driver/views/profile_screens/terms_condition.dart';
-
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -76,39 +73,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
     "Privacy Policy",
   ];
 
+  String? driverName;
 
+  String? driverphone;
 
-String? driverName;
+  dynamic profileimage;
 
-
-
-String? driverphone;
-
-dynamic profileimage;
-
-
-initState() {
+  initState() {
     super.initState();
-    
+
     sharedpreferences();
   }
 
-
-   Future<void> sharedpreferences() async {
+  Future<void> sharedpreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    
 
-     setState(() {
+    setState(() {
+      driverName = prefs.getString("driver_name");
 
-        driverName = prefs.getString("driver_name");
+      driverphone = prefs.getString("driver_mobile");
 
-        driverphone =   prefs.getString("driver_mobile");
-
-        profileimage =   prefs.getString("driver_image");
-     });
+      profileimage = prefs.getString("driver_image");
+    });
     print("Driver__Name from SharedPreferences: $driverName");
-    print("Driver__Phone from SharedPreferences: $driverphone");  
-    print("Driver__Image from SharedPreferences: $profileimage");  
+    print("Driver__Phone from SharedPreferences: $driverphone");
+    print("Driver__Image from SharedPreferences: $profileimage");
   }
 
   @override
@@ -121,27 +110,32 @@ initState() {
         backgroundColor: AppColors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
+        automaticallyImplyLeading: false,
+        // centerTitle: false,
         leading: const SizedBox(),
-        title:
-            AppFonts.textRubik(
-                  context,
-                  "Profile",
-                  w * 0.055,
-                  FontWeight.w600,
-                  AppColors.black,
-                  TextAlign.center,
-                  TextOverflow.ellipsis,
-                  maxLines: 1,
-                )
-                .animate()
-                .fade(duration: 800.ms)
-                .scale(begin: const Offset(0.95, 0.95)),
+        title: Transform.translate(
+          offset: Offset(w * -0.15, 0),
+          child:
+              AppFonts.textRubik(
+                    context,
+                    "Profile",
+                    w * 0.055,
+                    FontWeight.w600,
+                    AppColors.black,
+                    TextAlign.center,
+                    TextOverflow.ellipsis,
+                    maxLines: 1,
+                  )
+                  .animate()
+                  .fade(duration: 800.ms)
+                  .scale(begin: const Offset(0.95, 0.95)),
+        ),
       ),
       body: ListView(
         padding: EdgeInsets.symmetric(horizontal: w * .02),
         children: [
           SizedBox(height: w * .02),
-          _profileCard(w,profileimage),
+          _profileCard(w, profileimage),
           SizedBox(height: w * .02),
           _menuCard(w, firstImagePathList, firstTitleList, firstScreens),
           SizedBox(height: w * .02),
@@ -155,7 +149,7 @@ initState() {
   }
 
   /// PROFILE CARD
-  Widget _profileCard(double w , String? profileimage) {
+  Widget _profileCard(double w, String? profileimage) {
     return Card(
       elevation: 1,
       color: ColorsList.scaffoldColor,
@@ -184,24 +178,22 @@ initState() {
                     //   textFontSize: w * .05,
                     //   textFontWeight: FontWeight.w500,
                     // ),
-CustomText(
+                    CustomText(
                       text: "${driverName ?? ''}",
                       textFontSize: w * .05,
                       textFontWeight: FontWeight.w500,
                     ),
+
                     // CustomText
                     //   text: "+91 123456789",
                     //   textFontSize: w * .04,
                     //   textFontWeight: FontWeight.w400,
                     // ),
-
-                      CustomText(
+                    CustomText(
                       text: "+91 ${driverphone ?? ''}",
                       textFontSize: w * .04,
                       textFontWeight: FontWeight.w400,
                     ),
-
-                    
                   ],
                 ),
               ],
@@ -248,9 +240,7 @@ CustomText(
                 screens[index],
                 transition: TransitionType.slideLeft,
               ),
-              child: 
-              
-              customMenuItemsButton(images[index], titles[index]),
+              child: customMenuItemsButton(images[index], titles[index]),
             ),
           ),
         );
@@ -258,110 +248,175 @@ CustomText(
     );
   }
 
-  /// LOGOUT
-  /// 
-  /// 
   Widget _logoutButton(double w) {
-  return GestureDetector(
-    onTap: () async {
-      // 1️⃣ Get SharedPreferences instance
-      final prefs = await SharedPreferences.getInstance();
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          barrierDismissible: false, // user must press button
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              title: const Text("Confirm Logout"),
+              content: const Text("Are you sure you want to logout?"),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close dialog
+                  },
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(context); // Close dialog first
 
-      // 2️⃣ Remove auth token (logout)
-      await prefs.remove("auth_token");
+                    // 1️⃣ Get SharedPreferences instance
+                    final prefs = await SharedPreferences.getInstance();
 
-      // If you want full clear instead, use:
-      // await prefs.clear();
+                    // 2️⃣ Remove auth token
+                    await prefs.remove("auth_token");
 
-      // 3️⃣ Navigate to Login screen (remove all previous routes)
-      CustomNavigator.removeUntil(
-        context,
-        const LoginScreen(),
-        transition: TransitionType.fade,
-      );
-    },
-    child: Card(
-      elevation: 1,
-      child: Padding(
-        padding: EdgeInsets.all(w * .04),
-        child: Row(
-          children: [
-            CustomImages.images(
-              "assets/icons/Sign_Out.png",
-              w * .06,
-              w * .06,
-            ),
-            SizedBox(width: w * .03),
-            CustomText(
-              text: "Logout",
-              textFontSize: w * .04,
-              textFontWeight: FontWeight.w500,
-            ),
-          ],
+                    // 3️⃣ Navigate to Login screen
+                    CustomNavigator.removeUntil(
+                      context,
+                      const LoginScreen(),
+                      transition: TransitionType.fade,
+                    );
+                  },
+                  child: const Text("Logout"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: Card(
+        elevation: 1,
+        child: Padding(
+          padding: EdgeInsets.all(w * .04),
+          child: Row(
+            children: [
+              CustomImages.images(
+                "assets/icons/Sign_Out.png",
+                w * .06,
+                w * .06,
+              ),
+              SizedBox(width: w * .03),
+              CustomText(
+                text: "Logout",
+                textFontSize: w * .04,
+                textFontWeight: FontWeight.w500,
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-//   Widget _logoutButton(double w) {
-//   return GestureDetector(
-//     onTap: () async {
+  /// LOGOUT
+  ///
+  ///
+  //   Widget _logoutButton(double w) {
+  //   return GestureDetector(
+  //     onTap: () async {
+  //       // 1️⃣ Get SharedPreferences instance
+  //       final prefs = await SharedPreferences.getInstance();
 
-      
-//       // 1️⃣ Get SharedPreferences instance
-//       final prefs = await SharedPreferences.getInstance();
+  //       // 2️⃣ Remove auth token (logout)
+  //       await prefs.remove("auth_token");
 
-//         final String? token = prefs.getString("auth_token");
+  //       // If you want full clear instead, use:
+  //       // await prefs.clear();
 
-//       // 2️⃣ Clear all stored data
-//       await prefs.clear();
-//       // OR remove specific keys:
-//       // await prefs.remove("user_id");
-//       // await prefs.remove("auth_token");
+  //       // 3️⃣ Navigate to Login screen (remove all previous routes)
+  //       CustomNavigator.removeUntil(
+  //         context,
+  //         const LoginScreen(),
+  //         transition: TransitionType.fade,
+  //       );
+  //     },
+  //     child: Card(
+  //       elevation: 1,
+  //       child: Padding(
+  //         padding: EdgeInsets.all(w * .04),
+  //         child: Row(
+  //           children: [
+  //             CustomImages.images(
+  //               "assets/icons/Sign_Out.png",
+  //               w * .06,
+  //               w * .06,
+  //             ),
+  //             SizedBox(width: w * .03),
+  //             CustomText(
+  //               text: "Logout",
+  //               textFontSize: w * .04,
+  //               textFontWeight: FontWeight.w500,
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
-//       // 3️⃣ Navigate to Login screen (remove all previous routes)
-//       CustomNavigator.removeUntil(
-//         context,
-//         const LoginScreen(),
-//         transition: TransitionType.fade,
-//       );
-//     },
-//     child: Card(
-//       elevation: 1,
-//       child: Padding(
-//         padding: EdgeInsets.all(w * .04),
-//         child: Row(
-//           children: [
-//             CustomImages.images(
-//               "assets/icons/Sign_Out.png",
-//               w * .06,
-//               w * .06,
-//             ),
-//             SizedBox(width: w * .03),
-//             CustomText(
-//               text: "Logout",
-//               textFontSize: w * .04,
-//               textFontWeight: FontWeight.w500,
-//             ),
-//           ],
-//         ),
-//       ),
-//     ),
-//   );
-// }
+  //   Widget _logoutButton(double w) {
+  //   return GestureDetector(
+  //     onTap: () async {
+
+  //       // 1️⃣ Get SharedPreferences instance
+  //       final prefs = await SharedPreferences.getInstance();
+
+  //         final String? token = prefs.getString("auth_token");
+
+  //       // 2️⃣ Clear all stored data
+  //       await prefs.clear();
+  //       // OR remove specific keys:
+  //       // await prefs.remove("user_id");
+  //       // await prefs.remove("auth_token");
+
+  //       // 3️⃣ Navigate to Login screen (remove all previous routes)
+  //       CustomNavigator.removeUntil(
+  //         context,
+  //         const LoginScreen(),
+  //         transition: TransitionType.fade,
+  //       );
+  //     },
+  //     child: Card(
+  //       elevation: 1,
+  //       child: Padding(
+  //         padding: EdgeInsets.all(w * .04),
+  //         child: Row(
+  //           children: [
+  //             CustomImages.images(
+  //               "assets/icons/Sign_Out.png",
+  //               w * .06,
+  //               w * .06,
+  //             ),
+  //             SizedBox(width: w * .03),
+  //             CustomText(
+  //               text: "Logout",
+  //               textFontSize: w * .04,
+  //               textFontWeight: FontWeight.w500,
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   // Widget _logoutButton(double w) {
   //   return GestureDetector(
   //     onTap: () => {
-
 
   // CustomNavigator.removeUntil(
   //       context,
   //       const LoginScreen(),
   //       transition: TransitionType.fade,
   //     ),
-
 
   //     },
   //     child: Card(

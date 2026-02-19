@@ -5,6 +5,7 @@ import 'package:nzcu_driver/controllers/home_controllers/driver_toggle_duty_cont
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/driverid_controller.dart';
+import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
 import 'package:nzcu_driver/utilities/widgets/map_helper.dart';
@@ -74,6 +75,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Map<String, BitmapDescriptor> _vehicleIcons = {};
 
   String? driverName;
+
+  dynamic profileimage;
   @override
   void initState() {
     super.initState(); // Call super first
@@ -102,6 +105,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     setState(() {
       driverName = prefs.getString("driver_name");
+
+      profileimage = prefs.getString("driver_image");
     });
     print("Driver Name from SharedPreferences: $driverName");
   }
@@ -538,11 +543,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         children: [
                           Row(
                             children: [
+                              // CircleAvatar(
+                              //   radius: w * 0.06,
+                              //   backgroundImage: const AssetImage(
+                              //     'assets/images/home2.png',
+                              //   ),
+                              // ),
                               CircleAvatar(
                                 radius: w * 0.06,
-                                backgroundImage: const AssetImage(
-                                  'assets/images/home2.png',
-                                ),
+                                backgroundColor: Colors.grey.shade300,
+                                backgroundImage: profileimage != null
+                                    ? NetworkImage(
+                                        ApiPath.imagebaseUrl + profileimage,
+                                      )
+                                    : null,
+                                child: profileimage == null
+                                    ? Icon(Icons.person, size: w * .08)
+                                    : null,
                               ),
                               SizedBox(width: w * 0.03),
 
@@ -557,7 +574,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               // ),
                               Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start  ,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   AppFonts.textPoppins(
                                     context,
@@ -569,12 +586,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                     TextOverflow.visible,
                                   ),
 
-                        
-
-
-                                    AppFonts.textPoppins(
+                                  AppFonts.textPoppins(
                                     context,
-                                  "Driver",
+                                    "Driver",
                                     w * 0.03,
                                     FontWeight.w600,
                                     AppColors.darkGray,

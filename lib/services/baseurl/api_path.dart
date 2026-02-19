@@ -4,13 +4,19 @@ class ApiPath {
     static const String baseUri2 = "https://nzcu.smarttechbros.com/api/v1";
 
 
+    // static const String baseUri2 = "https://api.nzcu.framekarts.com/api/v1";
+
+
+
+// api and socket is working with this URL check it @240715753873593 @223110783615175
+
   // static const String baseUri2 = "https://api.nzcu.framekarts.com/api/v1";
 
 // ==========================================================================
  
   // static const String baseUri = "http://api.corezap.framekarts.com:7000/api/v1";
   
-  // static const String baseUri = "https://api.corezap.framekarts.com/api/v1"; //
+  // static const String baseUrpi = "https://api.corezap.framekarts.com/api/v1"; //
 
   // static const String baseUri = "https://corezap.smarttechbros.com/api/v1";
 
@@ -22,6 +28,9 @@ class ApiPath {
 
 
   static const String baseUri = "https://nzcu.smarttechbros.com/api/v1";
+
+    // static const String baseUri = "https://api.nzcu.framekarts.com/api/v1";
+
 
 
 //  =======================================================================4

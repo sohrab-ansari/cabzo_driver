@@ -1,6 +1,3 @@
-
-
-
 import 'package:nzcu_driver/modals/profile_modals/review_rating_response.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 
@@ -10,9 +7,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
 class ReviewAndRatingController extends GetxController {
-  Rx<ReviewRatingResponse?> reviewRatingResponse = Rx<ReviewRatingResponse?>(null);
-  
- 
+  Rx<ReviewRatingResponse?> reviewRatingResponse = Rx<ReviewRatingResponse?>(
+    null,
+  );
+
   RxBool isLoading = false.obs;
   RxString errorMessage = ''.obs;
 
@@ -39,22 +37,22 @@ class ReviewAndRatingController extends GetxController {
 
       if (res.success == true) {
         print("Reviews fetched successfully");
-        
+
         // Update the response
         reviewRatingResponse.value = res;
-        
+
         // Show success message only if there are new reviews
         if (res.data != null && res.data!.isNotEmpty) {
-          Fluttertoast.showToast(
-            msg: "${res.data!.length} reviews loaded",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.TOP,
-          );
+          // Fluttertoast.showToast(
+          //   msg: "${res.data!.length} reviews loaded",
+          //   toastLength: Toast.LENGTH_SHORT,
+          //   gravity: ToastGravity.TOP,
+          // );
         }
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch reviews';
         print("Error: ${errorMessage.value}");
-        
+
         // Only show snackbar if there's no existing data
         if (reviewRatingResponse.value == null) {
           Get.snackbar(
@@ -69,7 +67,7 @@ class ReviewAndRatingController extends GetxController {
     } catch (e) {
       errorMessage.value = 'An error occurred: ${e.toString()}';
       print("Exception: $e");
-      
+
       // Only show snackbar if there's no existing data
       if (reviewRatingResponse.value == null) {
         Get.snackbar(
@@ -93,7 +91,7 @@ class ReviewAndRatingController extends GetxController {
   double get averageRating {
     final reviews = reviewRatingResponse.value?.data;
     if (reviews == null || reviews.isEmpty) return 0.0;
-    
+
     double total = 0;
     for (var review in reviews) {
       total += (review.rating ?? 0).toDouble();

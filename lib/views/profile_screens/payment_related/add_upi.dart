@@ -148,8 +148,9 @@ class _AddUpiState extends State<AddUpi> {
                   );
                 },
                 isFullWidth: true,
-                backgroundColor: AppColors.lightGray,
-                textColor: AppColors.mediumGray,
+                // backgroundColor: AppColors.lightGray,
+                backgroundColor: Colors.cyan.shade300,
+                textColor: AppColors.white,
                 fontSize: w * .045,
                 height: w * .140,
                 radius: 12.0,

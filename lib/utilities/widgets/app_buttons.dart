@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../colors/colors.dart';
 
 class AppButtons {
-    static Widget solid({
+  static Widget solid({
     required BuildContext context,
     required String text,
     required VoidCallback onClicked,
@@ -11,10 +11,10 @@ class AppButtons {
     bool isFullWidth = false,
     Widget? prefixIcon,
     Widget? suffixIcon,
-    Color backgroundColor = AppColors.primaryRed,
+    // Color backgroundColor = AppColors.primaryblue,
+    Color backgroundColor = AppColors.primaryblue,
     Color textColor = AppColors.white,
 
-    
     double height = 48.0,
     double? width,
     double fontSize = 16.0,
@@ -73,86 +73,89 @@ class AppButtons {
   }
 
   static Widget solid2({
-  required BuildContext context,
-  required String text,
-  required VoidCallback onClicked,  // Changed from isButtonEnabled to onClicked
-  bool isButtonEnabled = true,  // Add this parameter to control enabled state
-  bool isLoading = false,
-  bool isFullWidth = false,
-  Widget? prefixIcon,
-  Widget? suffixIcon,
-  Color backgroundColor = AppColors.primaryRed,
-  Color textColor = AppColors.white,
-  Color disabledBackgroundColor = AppColors.lightGray, // Optional: color when disabled
-  // ignore: deprecated_member_use
-  Color disabledTextColor = AppColors.darkGray, // Optional: text color when disabled
-  
-  double height = 48.0,
-  double? width,
-  double fontSize = 16.0,
-  FontWeight fontWeight = FontWeight.w600,
-  double radius = 8.0,
-  EdgeInsetsGeometry? padding,
-}) {
-  // Determine if button should be enabled
-  bool buttonEnabled = isButtonEnabled && !isLoading;
-  
-  // Determine colors based on enabled state
-  Color finalBackgroundColor = buttonEnabled 
-      ? backgroundColor 
-      : (disabledBackgroundColor ?? backgroundColor.withOpacity(0.3));
-      
-  Color finalTextColor = buttonEnabled 
-      ? textColor 
-      : (disabledTextColor ?? textColor.withOpacity(0.5));
+    required BuildContext context,
+    required String text,
+    required VoidCallback
+    onClicked, // Changed from isButtonEnabled to onClicked
+    bool isButtonEnabled = true, // Add this parameter to control enabled state
+    bool isLoading = false,
+    bool isFullWidth = false,
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+    Color backgroundColor = AppColors.primaryRed,
+    Color textColor = AppColors.white,
+    Color disabledBackgroundColor =
+        AppColors.lightGray, // Optional: color when disabled
+    // ignore: deprecated_member_use
+    Color disabledTextColor =
+        AppColors.darkGray, // Optional: text color when disabled
 
-  return SizedBox(
-    width: isFullWidth ? double.infinity : width,
-    height: height,
-    child: ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: finalBackgroundColor,
-        padding: padding,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(radius),
+    double height = 48.0,
+    double? width,
+    double fontSize = 16.0,
+    FontWeight fontWeight = FontWeight.w600,
+    double radius = 8.0,
+    EdgeInsetsGeometry? padding,
+  }) {
+    // Determine if button should be enabled
+    bool buttonEnabled = isButtonEnabled && !isLoading;
+
+    // Determine colors based on enabled state
+    Color finalBackgroundColor = buttonEnabled
+        ? backgroundColor
+        : (disabledBackgroundColor ?? backgroundColor.withOpacity(0.3));
+
+    Color finalTextColor = buttonEnabled
+        ? textColor
+        : (disabledTextColor ?? textColor.withOpacity(0.5));
+
+    return SizedBox(
+      width: isFullWidth ? double.infinity : width,
+      height: height,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: finalBackgroundColor,
+          padding: padding,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radius),
+          ),
         ),
-      ),
-      onPressed: buttonEnabled ? onClicked : null,
-      child: isLoading
-          ? SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                color: buttonEnabled ? textColor : finalTextColor,
-                strokeWidth: 2,
-              ),
-            )
-          : Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (prefixIcon != null) ...[
-                  prefixIcon,
-                  const SizedBox(width: 8),
-                ],
-                Text(
-                  text,
-                  style: GoogleFonts.poppins(
-                    fontSize: fontSize,
-                    fontWeight: fontWeight,
-                    color: finalTextColor,
-                  ),
+        onPressed: buttonEnabled ? onClicked : null,
+        child: isLoading
+            ? SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: buttonEnabled ? textColor : finalTextColor,
+                  strokeWidth: 2,
                 ),
-                if (suffixIcon != null) ...[
-                  const SizedBox(width: 8),
-                  suffixIcon,
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (prefixIcon != null) ...[
+                    prefixIcon,
+                    const SizedBox(width: 8),
+                  ],
+                  Text(
+                    text,
+                    style: GoogleFonts.poppins(
+                      fontSize: fontSize,
+                      fontWeight: fontWeight,
+                      color: finalTextColor,
+                    ),
+                  ),
+                  if (suffixIcon != null) ...[
+                    const SizedBox(width: 8),
+                    suffixIcon,
+                  ],
                 ],
-              ],
-            ),
-    ),
-  );
-}
+              ),
+      ),
+    );
+  }
 
   // solid button
   // static Widget solid2({
@@ -166,14 +169,12 @@ class AppButtons {
   //   Color backgroundColor = AppColors.primaryRed,
   //   Color textColor = AppColors.white,
 
-    
   //   double height = 48.0,
   //   double? width,
   //   double fontSize = 16.0,
   //   FontWeight fontWeight = FontWeight.w600,
   //   double radius = 8.0,
   //   EdgeInsetsGeometry? padding,
-
 
   //   // VoidCallback isButtonEnabled
   // }) {

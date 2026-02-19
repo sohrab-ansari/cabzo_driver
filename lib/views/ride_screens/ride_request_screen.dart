@@ -1331,22 +1331,30 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundImage: NetworkImage(_rideData!['riderImage']),
-              ),
-              SizedBox(width: 12),
-              Text(
-                _rideData!['riderName'],
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
-              ),
-            ],
+          // Row(
+          //   children: [
+          //     CircleAvatar(
+          //       radius: 24,
+          //       backgroundImage: NetworkImage(_rideData!['riderImage']),
+          //     ),
+          //     SizedBox(width: 12),
+          //     Text(
+          //       _rideData!['riderName'],
+          //       style: TextStyle(
+          //         fontSize: 18,
+          //         fontWeight: FontWeight.w600,
+          //         color: Colors.black,
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          Text(
+            "Estimated Fare",
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           Row(
             children: [

@@ -485,7 +485,7 @@ class _CustomDocumentUploaderState extends State<CustomDocumentUploader> {
                         child: AppButtons.solid(
                           context: context,
                           text: widget.uploadText ?? "Upload",
-                          onClicked: _pickImage,
+                        onClicked: _pickImage,
                           prefixIcon: Icon(
                             Icons.file_upload_outlined,
                             color: AppColors.white,
