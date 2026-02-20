@@ -197,13 +197,24 @@ Future<void> addbankaccount_method({
   void _showError(BuildContext context, String message) {
     // Try using ScaffoldMessenger first (more reliable with context)
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 3),
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text(message),
+      //     backgroundColor: Colors.red,
+      //     duration: Duration(seconds: 3),
+      //   ),
+      // );
+
+
+
+      Fluttertoast.showToast(
+  msg: message,
+  toastLength: Toast.LENGTH_SHORT,
+  gravity: ToastGravity.TOP, // 👈 Top position
+  backgroundColor: Colors.green,
+  textColor: Colors.white,
+  fontSize: 16.0,
+);
     } else {
       // Fallback to Fluttertoast if context is not available
       Fluttertoast.showToast(
@@ -220,13 +231,22 @@ Future<void> addbankaccount_method({
   void _showSuccess(BuildContext context, String message) {
     // Try using ScaffoldMessenger first (more reliable with context)
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 3),
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text(message),
+      //     backgroundColor: Colors.green,
+      //     duration: Duration(seconds: 3),
+      //   ),
+      // );
+
+        Fluttertoast.showToast(
+  msg: message,
+  toastLength: Toast.LENGTH_SHORT,
+  gravity: ToastGravity.TOP, // 👈 Top position
+  backgroundColor: Colors.green,
+  textColor: Colors.white,
+  fontSize: 16.0,
+);
     } else {
       // Fallback to Fluttertoast if context is not available
       Fluttertoast.showToast(

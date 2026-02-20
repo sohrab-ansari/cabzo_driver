@@ -986,11 +986,20 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     _hasDeclined = true;
     _countdownTimer?.cancel();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Ride auto-cancelled (timeout)'),
-        backgroundColor: Colors.orange,
-      ),
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text('Ride auto-cancelled (timeout)'),
+    //     backgroundColor: Colors.orange,
+    //   ),
+    // );
+
+    Fluttertoast.showToast(
+      msg: 'Ride auto-cancelled (timeout)',
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.TOP, // 👈 Top position
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0,
     );
 
     // Navigate to BottomnavmainScreen after 1 second

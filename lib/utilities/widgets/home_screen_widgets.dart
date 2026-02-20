@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 /// Reusable Custom Widgets for Home Screen
 class HomeScreenWidgets {
@@ -204,12 +205,21 @@ class HomeScreenWidgets {
 
   /// Toast Notification (simple implementation)
   static void showToast(BuildContext context, String message, {Duration duration = const Duration(seconds: 2)}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: duration,
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text(message),
+    //     duration: duration,
+    //   ),
+    // );
+
+        Fluttertoast.showToast(
+  msg: message,
+  toastLength: Toast.LENGTH_SHORT,
+  gravity: ToastGravity.TOP, // 👈 Top position
+  backgroundColor: Colors.green,
+  textColor: Colors.white,
+  fontSize: 16.0,
+);
   }
 
   /// Info Section Header

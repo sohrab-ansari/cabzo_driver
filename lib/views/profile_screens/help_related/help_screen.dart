@@ -818,6 +818,7 @@
 // }
 
 
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
@@ -1019,13 +1020,23 @@ class _HelpScreenState extends State<HelpScreen> {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () {
-                        // TODO: Navigate to Live Support
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Coming soon!"),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
+                        // // TODO: Navigate to Live Support
+                        // ScaffoldMessenger.of(context).showSnackBar(
+                        //   const SnackBar(
+                        //     content: Text("Coming soon!"),
+                        //     duration: Duration(seconds: 2),
+                        //   ),
+                        // );
+
+
+                                                      Fluttertoast.showToast(
+  msg: "Coming soon!",
+  toastLength: Toast.LENGTH_SHORT,
+  gravity: ToastGravity.TOP, // 👈 Top position
+  backgroundColor: Colors.green,
+  textColor: Colors.white,
+  fontSize: 16.0,
+);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF0088FF),

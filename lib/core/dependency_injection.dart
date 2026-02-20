@@ -62,12 +62,10 @@ class DependencyInjection {
 
     Get.put(NotificationController(), permanent: true);
 
-
     Get.put(NotificationController(), permanent: true);
 
     Get.put(FaqsCategoriesControler(), permanent: true);
 
     // final LoginController loginController = Get.put(LoginController());
-
   }
 }

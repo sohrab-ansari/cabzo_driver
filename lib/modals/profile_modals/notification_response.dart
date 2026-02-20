@@ -59,8 +59,8 @@
 //       id: json['_id'],
 //       title: json['title'],
 //       body: json['body'],
-//       userModel: json['userModel'] != null 
-//           ? User.fromJson(json['userModel']) 
+//       userModel: json['userModel'] != null
+//           ? User.fromJson(json['userModel'])
 //           : null,
 //       seen: json['seen'],
 //       topic: json['topic'],
@@ -115,18 +115,13 @@
 //   }
 // }
 
-
 // Rename Notification to NotificationItem to avoid conflict
 class NotificationResponse {
   bool? success;
   String? message;
   List<NotificationItem>? data;
 
-  NotificationResponse({
-    this.success,
-    this.message,
-    this.data,
-  });
+  NotificationResponse({this.success, this.message, this.data});
 
   factory NotificationResponse.fromJson(Map<String, dynamic> json) {
     return NotificationResponse(
@@ -134,7 +129,8 @@ class NotificationResponse {
       message: json['message'],
       data: json['data'] != null
           ? List<NotificationItem>.from(
-              json['data'].map((x) => NotificationItem.fromJson(x)))
+              json['data'].map((x) => NotificationItem.fromJson(x)),
+            )
           : [],
     );
   }
@@ -179,8 +175,9 @@ class NotificationItem {
       id: json['_id'],
       title: json['title'],
       body: json['body'],
-      userModel: json['userModel'] != null 
-          ? User.fromJson(json['userModel']) 
+      userModel:
+          json['userModel'] != null && json['userModel'] is Map<String, dynamic>
+          ? User.fromJson(json['userModel'])
           : null,
       seen: json['seen'],
       topic: json['topic'],
@@ -212,25 +209,13 @@ class User {
   String? name;
   int? phone;
 
-  User({
-    this.id,
-    this.name,
-    this.phone,
-  });
+  User({this.id, this.name, this.phone});
 
   factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['_id'],
-      name: json['name'],
-      phone: json['phone'],
-    );
+    return User(id: json['_id'], name: json['name'], phone: json['phone']);
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      '_id': id,
-      'name': name,
-      'phone': phone,
-    };
+    return {'_id': id, 'name': name, 'phone': phone};
   }
 }

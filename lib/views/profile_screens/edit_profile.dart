@@ -641,6 +641,7 @@
 
 import 'dart:io';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/driverid_controller.dart';
@@ -697,9 +698,19 @@ class _EditProfileState extends State<EditProfile> {
       }
     } catch (e) {
       debugPrint('Image picking failed: $e');
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Failed to pick image')));
+      // ScaffoldMessenger.of(
+      //   context,
+      // ).showSnackBar(const SnackBar(content: Text('Failed to pick image')));
+
+
+            Fluttertoast.showToast(
+  msg: "Failed to pick image",
+  toastLength: Toast.LENGTH_SHORT,
+  gravity: ToastGravity.TOP, // 👈 Top position
+  backgroundColor: Colors.green,
+  textColor: Colors.white,
+  fontSize: 16.0,
+);
     }
   }
 
@@ -731,14 +742,23 @@ class _EditProfileState extends State<EditProfile> {
       Get.back(); // Close loading dialog
 
       // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profile updated successfully'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text('Profile updated successfully'),
+      //     backgroundColor: Colors.green,
+      //     duration: Duration(seconds: 2),
+      //   ),
+      // );
 
+
+Fluttertoast.showToast(
+  msg: "Profile updated successfully",
+  toastLength: Toast.LENGTH_SHORT,
+  gravity: ToastGravity.TOP, // 👈 Top position
+  backgroundColor: Colors.green,
+  textColor: Colors.white,
+  fontSize: 16.0,
+);
       // Refresh driver data
       await driveridController.driverid_mdethod();
 

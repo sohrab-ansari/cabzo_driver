@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 import 'dart:convert';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 import 'package:nzcu_driver/controllers/home_controllers/driver_toggle_duty_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
@@ -347,9 +348,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void _showToast(String message) {
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+    // );
+
+          Fluttertoast.showToast(
+  msg: message,
+  toastLength: Toast.LENGTH_SHORT,
+  gravity: ToastGravity.TOP, // 👈 Top position
+  backgroundColor: Colors.green,
+  textColor: Colors.white,
+  fontSize: 16.0,
+);
   }
 
   // ==================== APP LIFECYCLE (Background Sync) ====================

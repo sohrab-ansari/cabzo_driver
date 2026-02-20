@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nzcu_driver/services/apiservices/places_api_service.dart';
 import 'package:nzcu_driver/controllers/book_ride_controller/create_By_driver_controller.dart';
 import 'package:nzcu_driver/modals/home_modals/place_prediction.dart';
@@ -212,12 +213,23 @@ class _BookRideState extends State<BookRide> {
       if (createByDriverController.cashResponse.value?.success == true) {
         // Show success message using ScaffoldMessenger
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Ride booked successfully!'),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 2),
-            ),
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(
+          //     content: Text('Ride booked successfully!'),
+          //     backgroundColor: Colors.green,
+          //     duration: const Duration(seconds: 2),
+          //   ),
+          // );
+
+
+
+            Fluttertoast.showToast(
+            msg: 'Ride booked successfully!',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.TOP, // 👈 Top position
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0,
           );
         }
 
@@ -238,16 +250,27 @@ class _BookRideState extends State<BookRide> {
       } else {
         // Show error message using ScaffoldMessenger
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                createByDriverController.errorMessage.value.isNotEmpty
-                    ? createByDriverController.errorMessage.value
-                    : 'Failed to book ride. Please try again.',
-              ),
-              backgroundColor: Colors.red,
-              duration: const Duration(seconds: 3),
-            ),
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(
+          //     content: Text(
+          //       createByDriverController.errorMessage.value.isNotEmpty
+          //           ? createByDriverController.errorMessage.value
+          //           : 'Failed to book ride. Please try again.',
+          //     ),
+          //     backgroundColor: Colors.red,
+          //     duration: const Duration(seconds: 3),
+          //   ),
+          // );
+
+          Fluttertoast.showToast(
+            msg: createByDriverController.errorMessage.value.isNotEmpty
+                ? createByDriverController.errorMessage.value
+                : 'Failed to book ride. Please try again.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.TOP, // 👈 Top position
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0,
           );
         }
       }

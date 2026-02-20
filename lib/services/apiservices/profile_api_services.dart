@@ -731,10 +731,8 @@ class ProfileApiServices {
     }
   }
 
-  static Future<UpdateBankAndUpiResponse> UpdateBankAndUpi_data({
+  static Future<UpdateBankAndUpiResponse> update_Upi_data({
     required dynamic acoountid,
-
-    required String type,
 
     required dynamic upiId,
   }) async {
@@ -746,8 +744,7 @@ class ProfileApiServices {
     print("herrrerrere_the_driverrrriddd_calling>>>>");
     print("theeeee____ accountidddddd ${acoountid}");
 
- print("theeeee____ type ${type}");
-  print("theeeee____ upiId ${upiId}");
+    print("theeeee____ upiId ${upiId}");
     final Uri url = Uri.parse(
       "${ApiPath.baseUri}/bank-accounts/update/${acoountid}",
     );
@@ -765,7 +762,84 @@ class ProfileApiServices {
           "Authorization": "Bearer $token", // ✅ BEARER TOKEN
         },
 
-        body: jsonEncode({"type": type, "upiId": upiId}),
+        body: jsonEncode({
+          // "type": type,
+          "type": "UPI",
+
+          "upiId": upiId,
+        }),
+      );
+
+      print("Status Code : ${response.statusCode}");
+      print(
+        "update upiiiii respsoneeee>>>>>>> resss >>>> Response Body : ${response.body}",
+      );
+
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      final UpdateBankAndUpiResponse driverIdResponse =
+          UpdateBankAndUpiResponse.fromJson(data);
+
+      return driverIdResponse;
+    } catch (e) {
+      print("❌ Exception in Create Vehicle5 : $e");
+      return UpdateBankAndUpiResponse(
+        success: false,
+        message: "Connection error: $e",
+      );
+    }
+  }
+
+  static Future<UpdateBankAndUpiResponse> update_bank_data({
+    required dynamic acoountid,
+
+    required dynamic bankName,
+
+    required dynamic accountNumber,
+
+    required dynamic ifscCode,
+
+    required dynamic accountHolderName,
+  }) async {
+    /// 🔐 GET TOKEN
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+    final String? userId = prefs.getString("driver_userid");
+
+    print("herrrerrere_the_driverrrriddd_calling>>>>");
+    print("theeeee____ accountidddddd ${acoountid}");
+
+    //  print("theeeee____ type ${type}");
+    print("theeeee____ bankName ${bankName}");
+
+    print("theeeee____ accountNumber ${accountNumber}");
+    print("theeeee____ ifscCode ${ifscCode}");
+    print("theeeee____ accountHolderName ${accountHolderName}");
+    final Uri url = Uri.parse(
+      "${ApiPath.baseUri}/bank-accounts/update/${acoountid}",
+    );
+
+    print("========== CREATE VEHICLE API ==========");
+    print("URL : $url");
+    print("Token : $token");
+    print("my_tokennnn ${token}");
+
+    try {
+      final http.Response response = await http.put(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token", // ✅ BEARER TOKEN
+        },
+
+        body: jsonEncode({
+          "type": "BankAccount",
+          "bankName": bankName,
+
+          "accountNumber": accountNumber,
+
+          "ifscCode": ifscCode,
+          "accountHolderName": accountHolderName,
+        }),
       );
 
       print("Status Code : ${response.statusCode}");
@@ -778,10 +852,121 @@ class ProfileApiServices {
       return driverIdResponse;
     } catch (e) {
       print("❌ Exception in Create Vehicle5 : $e");
-      return UpdateBankAndUpiResponse(success: false, message: "Connection error: $e");
+      return UpdateBankAndUpiResponse(
+        success: false,
+        message: "Connection error: $e",
+      );
     }
   }
 
+  // In your profile_api_services.dart file
+
+static Future<UpdateBankAndUpiResponse> delete_bank_upi_data({
+  required dynamic accountid,  // Fixed spelling
+}) async {
+  /// 🔐 GET TOKEN
+  final prefs = await SharedPreferences.getInstance();
+  final String? token = prefs.getString("auth_token");
+  final String? userId = prefs.getString("driver_userid");
+
+  print("herrrerrere_the_driverrrriddd_calling>>>>");
+  print("theeeee____ accountid: $accountid");  // Fixed print
+  print("userId: $userId");
+  print("token exists: ${token != null}");
+
+  final Uri url = Uri.parse(
+    "${ApiPath.baseUri}/bank-accounts/delete/$accountid",  // Use fixed parameter
+  );
+
+  print("========== DELETE BANK/UPI API ==========");
+  print("URL: $url");
+  print("Token: ${token != null ? token!.substring(0, token.length > 10 ? 10 : token.length) + '...' : 'null'}");
+
+  try {
+    final http.Response response = await http.delete(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    print("Status Code: ${response.statusCode}");
+    print("Response Body: ${response.body}");
+
+    final Map<String, dynamic> data = jsonDecode(response.body);
+    final UpdateBankAndUpiResponse driverIdResponse =
+        UpdateBankAndUpiResponse.fromJson(data);
+
+    return driverIdResponse;
+  } catch (e) {
+    print("❌ Exception in delete_bank_upi_data: $e");
+    return UpdateBankAndUpiResponse(
+      success: false,
+      message: "Connection error: $e",
+    );
+  }
+}
+
+  // static Future<UpdateBankAndUpiResponse> delete_bank_upi_data({
+  //   required dynamic acoountid,
+  // }) async {
+  //   /// 🔐 GET TOKEN
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final String? token = prefs.getString("auth_token");
+  //   final String? userId = prefs.getString("driver_userid");
+
+  //   print("herrrerrere_the_driverrrriddd_calling>>>>");
+  //   print("theeeee____ accountidddddd___delete ${acoountid}");
+
+  //   //  print("theeeee____ type ${type}");
+
+  //   final Uri url = Uri.parse(
+  //     "${ApiPath.baseUri}/bank-accounts/delete/${acoountid}",
+  //   );
+
+  //   print("========== CREATE VEHICLE API ==========");
+  //   print("URL__delete : $url");
+  //   print("Token : $token");
+  //   print("my_tokennnn ${token}");
+
+  //   try {
+  //     final http.Response response = await http.delete(
+  //       url,
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "Authorization": "Bearer $token", // ✅ BEARER TOKEN
+  //       },
+
+  //       // body: jsonEncode({
+  //       //   "type": "BankAccount",
+  //       //   "bankName": bankName,
+
+  //       //   "accountNumber": accountNumber,
+
+  //       //   "ifscCode": ifscCode,
+  //       //   "accountHolderName": accountHolderName,
+  //       // }),
+  //     );
+
+  //     print("Status Code : ${response.statusCode}");
+  //     print("drievrrrrrid>>>>>>> resss >>>> Response Body : ${response.body}");
+
+  //     final Map<String, dynamic> data = jsonDecode(response.body);
+  //     final UpdateBankAndUpiResponse driverIdResponse =
+  //         UpdateBankAndUpiResponse.fromJson(data);
+
+  //     return driverIdResponse;
+  //   } catch (e) {
+  //     print("❌ Exception in Create Vehicle5 : $e");
+  //     return UpdateBankAndUpiResponse(
+  //       success: false,
+  //       message: "Connection error: $e",
+  //     );
+  //   }
+  // }
+
+  // delete_bank_upi_data
   static Future<ReviewRatingResponse> get_review_rating_data() async {
     /// 🔐 GET TOKEN
     final prefs = await SharedPreferences.getInstance();

@@ -334,6 +334,7 @@
 
 import 'dart:io';
 import 'dart:math' as math;
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nzcu_driver/utilities/widgets/app_buttons.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
@@ -419,9 +420,19 @@ class _CustomDocumentUploaderState extends State<CustomDocumentUploader> {
       }
     } catch (e) {
       debugPrint('Image picking failed: $e');
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to pick image')));
+      // ScaffoldMessenger.of(
+      //   context,
+      // ).showSnackBar(SnackBar(content: Text('Failed to pick image')));
+   
+   
+      Fluttertoast.showToast(
+  msg: "Failed to pick image",
+  toastLength: Toast.LENGTH_SHORT,
+  gravity: ToastGravity.TOP, // 👈 Top position
+  backgroundColor: Colors.green,
+  textColor: Colors.white,
+  fontSize: 16.0,
+);
     }
   }
 

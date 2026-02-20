@@ -1225,13 +1225,24 @@ class _ArrivingClientState extends State<ArrivingClient> {
   // Helper method to show snackbar
   void _showSnackbar(String message, {bool isError = true}) {
     if (mounted && _isScreenActive) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: isError ? Colors.red : Colors.green,
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text(message),
+      //     backgroundColor: isError ? Colors.red : Colors.green,
+      //     duration: const Duration(seconds: 2),
+      //   ),
+      // );
+
+                                                      Fluttertoast.showToast(
+  msg: message,
+  toastLength: Toast.LENGTH_SHORT,
+  gravity: ToastGravity.TOP, // 👈 Top position
+  backgroundColor: Colors.green,
+  textColor: Colors.white,
+  fontSize: 16.0,
+);
+
+      
     }
   }
 
@@ -1907,12 +1918,23 @@ class _ArrivingClientState extends State<ArrivingClient> {
         successMessage: 'Order cancelled successfully',
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Invalid order ID'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text('Invalid order ID'),
+      //     backgroundColor: Colors.red,
+      //   ),
+      // );
+
+      
+                                                      Fluttertoast.showToast(
+  msg: "Invalid order ID",
+  toastLength: Toast.LENGTH_SHORT,
+  gravity: ToastGravity.TOP, // 👈 Top position
+  backgroundColor: Colors.red,
+  textColor: Colors.white,
+  fontSize: 16.0,
+);
+
     }
   }
 

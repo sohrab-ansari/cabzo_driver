@@ -512,6 +512,7 @@
 // }
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 
 class FaqsDetailsScreen extends StatefulWidget {
@@ -612,13 +613,21 @@ class _FaqsDetailsScreenState extends State<FaqsDetailsScreen> {
                       });
                       
                       // Show feedback message
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Thank you for your feedback!"),
-                          duration: Duration(seconds: 2),
-                          backgroundColor: Colors.blue,
-                        ),
-                      );
+                      // ScaffoldMessenger.of(context).showSnackBar(
+                      //   const SnackBar(
+                      //     content: Text("Thank you for your feedback!"),
+                      //     duration: Duration(seconds: 2),
+                      //     backgroundColor: Colors.blue,
+                      //   ),
+                      // );
+                               Fluttertoast.showToast(
+  msg: "Thank you for your feedback!",
+  toastLength: Toast.LENGTH_SHORT,
+  gravity: ToastGravity.TOP, // 👈 Top position
+  backgroundColor: Colors.green,
+  textColor: Colors.white,
+  fontSize: 16.0,
+);
                     },
                     child: Column(
                       children: [
@@ -668,14 +677,23 @@ class _FaqsDetailsScreenState extends State<FaqsDetailsScreen> {
                         isHelpful = false;
                       });
                       
-                      // Show feedback message
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Thank you for your feedback!"),
-                          duration: Duration(seconds: 2),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
+                      // // Show feedback message
+                      // ScaffoldMessenger.of(context).showSnackBar(
+                      //   const SnackBar(
+                      //     content: Text("Thank you for your feedback!"),
+                      //     duration: Duration(seconds: 2),
+                      //     backgroundColor: Colors.red,
+                      //   ),
+                      // );
+
+                                                    Fluttertoast.showToast(
+  msg: "Thank you for your feedback!",
+  toastLength: Toast.LENGTH_SHORT,
+  gravity: ToastGravity.TOP, // 👈 Top position
+  backgroundColor: Colors.green,
+  textColor: Colors.white,
+  fontSize: 16.0,
+);
                     },
                     child: Column(
                       children: [

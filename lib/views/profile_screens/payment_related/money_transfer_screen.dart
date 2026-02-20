@@ -1542,30 +1542,6 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
                                           ),
                                         ),
                                         SizedBox(width: w * 0.02),
-                                        InkWell(
-                                          onTap: () {
-                                            _showDeleteConfirmationDialog(
-                                              context,
-                                              w,
-                                              account,
-                                              "BANK",
-                                            );
-                                          },
-                                          child: Container(
-                                            padding: EdgeInsets.all(w * 0.02),
-                                            decoration: BoxDecoration(
-                                              color: Colors.red.withOpacity(
-                                                0.1,
-                                              ),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Icon(
-                                              Icons.delete,
-                                              size: w * 0.04,
-                                              color: Colors.red,
-                                            ),
-                                          ),
-                                        ),
                                       ],
                                     ),
                                   ],
@@ -1854,30 +1830,6 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
                                           ),
                                         ),
                                         SizedBox(width: w * 0.02),
-                                        InkWell(
-                                          onTap: () {
-                                            _showDeleteConfirmationDialog(
-                                              context,
-                                              w,
-                                              account,
-                                              "UPI",
-                                            );
-                                          },
-                                          child: Container(
-                                            padding: EdgeInsets.all(w * 0.02),
-                                            decoration: BoxDecoration(
-                                              color: Colors.red.withOpacity(
-                                                0.1,
-                                              ),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Icon(
-                                              Icons.delete,
-                                              size: w * 0.04,
-                                              color: Colors.red,
-                                            ),
-                                          ),
-                                        ),
                                       ],
                                     ),
                                   ],
