@@ -1547,7 +1547,12 @@ class _ArrivingClientState extends State<ArrivingClient> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChatScreen(rideData: widget.rideData),
+                    builder: (context) => ChatScreen(rideData: widget.rideData,
+                    
+                      profileImage: profileImage,
+
+                      driverName:  riderName ,
+                    ),
                   ),
                 );
 
