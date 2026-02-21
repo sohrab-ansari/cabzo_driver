@@ -275,7 +275,7 @@ class ProfileApiServices {
           print("Driver name updated with request name: $name");
         }
 
-        Get.offAll(BottomnavmainScreen());
+        Get.offAll(BottomnavmainScreen(initialIndex: 3));
         return DriverImageUploadRes.fromJson(responseData);
       } else {
         print("hekllooooo222");
@@ -327,9 +327,16 @@ class ProfileApiServices {
     }
   }
 
-  static Future<TransactionsResponse> get_transactions_data() async {
+  static Future<TransactionsResponse> get_transactions_data(
+    dynamic limit,
+    dynamic page,
+  ) async {
     // final Uri url = Uri.parse(ApiPath.createVehicle);
-    final Uri url = Uri.parse("${ApiPath.transactions_api}");
+    // final Uri url = Uri.parse("${ApiPath.transactions_api}");
+
+    final Uri url = Uri.parse(
+      "${ApiPath.baseUri}/transactions?limit=$limit&page=$page",
+    );
 
     /// 🔐 GET TOKEN
     final prefs = await SharedPreferences.getInstance();
@@ -532,10 +539,46 @@ class ProfileApiServices {
 
       // ✅ If response has success field, parse normally
       if (responseData.containsKey('success')) {
+        print("helloooo111");
+
+        Fluttertoast.showToast(
+          msg: "Withdrawal Successful",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP, // 👈 This makes it show on top
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+
+        if (responseData['success'] == true) {
+        } else {
+          print("helloooo111 failedd data");
+
+          Fluttertoast.showToast(
+            msg: "insufficient balance",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.TOP, // 👈 This makes it show on top
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }
+
         return PaymentsWithdrawResponse.fromJson(responseData);
       }
       // ✅ For successful status codes but unexpected format
       else if (response.statusCode == 200 || response.statusCode == 201) {
+        print("helloooo1112222");
+
+        // Fluttertoast.showToast(
+        //   msg: "Withdrawal Successful",
+        //   toastLength: Toast.LENGTH_SHORT,
+        //   gravity: ToastGravity.TOP, // 👈 This makes it show on top
+        //   backgroundColor: Colors.green,
+        //   textColor: Colors.white,
+        //   fontSize: 16.0,
+        // );
+
         return PaymentsWithdrawResponse(
           success: true,
           message:
@@ -548,12 +591,16 @@ class ProfileApiServices {
       }
       // ✅ For error responses
       else {
+        print("helloooo111333");
+
         return PaymentsWithdrawResponse(
           success: false,
           message: responseData['message'] ?? "Failed to process withdrawal",
         );
       }
     } catch (e) {
+      print("helloooo1114444");
+
       print("Error in money_transfer: $e");
       // ✅ FIXED: Return correct type
       return PaymentsWithdrawResponse(
@@ -861,52 +908,54 @@ class ProfileApiServices {
 
   // In your profile_api_services.dart file
 
-static Future<UpdateBankAndUpiResponse> delete_bank_upi_data({
-  required dynamic accountid,  // Fixed spelling
-}) async {
-  /// 🔐 GET TOKEN
-  final prefs = await SharedPreferences.getInstance();
-  final String? token = prefs.getString("auth_token");
-  final String? userId = prefs.getString("driver_userid");
+  static Future<UpdateBankAndUpiResponse> delete_bank_upi_data({
+    required dynamic accountid, // Fixed spelling
+  }) async {
+    /// 🔐 GET TOKEN
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+    final String? userId = prefs.getString("driver_userid");
 
-  print("herrrerrere_the_driverrrriddd_calling>>>>");
-  print("theeeee____ accountid: $accountid");  // Fixed print
-  print("userId: $userId");
-  print("token exists: ${token != null}");
+    print("herrrerrere_the_driverrrriddd_calling>>>>");
+    print("theeeee____ accountid: $accountid"); // Fixed print
+    print("userId: $userId");
+    print("token exists: ${token != null}");
 
-  final Uri url = Uri.parse(
-    "${ApiPath.baseUri}/bank-accounts/delete/$accountid",  // Use fixed parameter
-  );
-
-  print("========== DELETE BANK/UPI API ==========");
-  print("URL: $url");
-  print("Token: ${token != null ? token!.substring(0, token.length > 10 ? 10 : token.length) + '...' : 'null'}");
-
-  try {
-    final http.Response response = await http.delete(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
+    final Uri url = Uri.parse(
+      "${ApiPath.baseUri}/bank-accounts/delete/$accountid", // Use fixed parameter
     );
 
-    print("Status Code: ${response.statusCode}");
-    print("Response Body: ${response.body}");
-
-    final Map<String, dynamic> data = jsonDecode(response.body);
-    final UpdateBankAndUpiResponse driverIdResponse =
-        UpdateBankAndUpiResponse.fromJson(data);
-
-    return driverIdResponse;
-  } catch (e) {
-    print("❌ Exception in delete_bank_upi_data: $e");
-    return UpdateBankAndUpiResponse(
-      success: false,
-      message: "Connection error: $e",
+    print("========== DELETE BANK/UPI API ==========");
+    print("URL: $url");
+    print(
+      "Token: ${token != null ? token!.substring(0, token.length > 10 ? 10 : token.length) + '...' : 'null'}",
     );
+
+    try {
+      final http.Response response = await http.delete(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      final UpdateBankAndUpiResponse driverIdResponse =
+          UpdateBankAndUpiResponse.fromJson(data);
+
+      return driverIdResponse;
+    } catch (e) {
+      print("❌ Exception in delete_bank_upi_data: $e");
+      return UpdateBankAndUpiResponse(
+        success: false,
+        message: "Connection error: $e",
+      );
+    }
   }
-}
 
   // static Future<UpdateBankAndUpiResponse> delete_bank_upi_data({
   //   required dynamic acoountid,

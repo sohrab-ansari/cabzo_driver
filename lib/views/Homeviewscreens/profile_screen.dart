@@ -1,6 +1,7 @@
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+import 'package:nzcu_driver/utilities/widgets/app_buttons.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_images.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_text.dart';
@@ -251,48 +252,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _logoutButton(double w) {
     return GestureDetector(
       onTap: () {
-        showDialog(
-          context: context,
-          barrierDismissible: false, // user must press button
-          builder: (context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              title: const Text("Confirm Logout"),
-              content: const Text("Are you sure you want to logout?"),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Close dialog
-                  },
-                  child: const Text("Cancel"),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    Navigator.pop(context); // Close dialog first
-
-                    // 1️⃣ Get SharedPreferences instance
-                    final prefs = await SharedPreferences.getInstance();
-
-                    // 2️⃣ Remove auth token
-                    await prefs.remove("auth_token");
-
-                    // 3️⃣ Navigate to Login screen
-                    CustomNavigator.removeUntil(
-                      context,
-                      const LoginScreen(),
-                      transition: TransitionType.fade,
-                    );
-                  },
-                  child: const Text("Logout"),
-                ),
-              ],
-            );
-          },
-        );
+        logout(context);
       },
-      child: Card(
+      child: 
+      
+      Card(
         elevation: 1,
         child: Padding(
           padding: EdgeInsets.all(w * .04),
@@ -469,6 +433,111 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  // logout
+  void logout(BuildContext context) {
+    double w = MediaQuery.of(context).size.width;
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: AppColors.white,
+          insetPadding: EdgeInsets.symmetric(horizontal: w * .03),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: w * .1),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: w * .2,
+                  vertical: w * .05,
+                ),
+                child: CustomImages.images(
+                  "assets/images/logout_image.png",
+                  w * .45,
+                  w * .45,
+                ),
+              ),
+              CustomText(
+                text: "Logout",
+                textColor: ColorsList.titleTextColor,
+                textFontSize: w * .07,
+                textFontWeight: FontWeight.w500,
+              ),
+              CustomText(
+                text: "Are you sure you want to logout? ",
+                textColor: ColorsList.subtitleTextColor,
+                textFontSize: w * .045,
+                textFontWeight: FontWeight.w400,
+              ),
+              SizedBox(height: w * .05),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: w * .04,
+                  //     //  vertical: w * .05,
+                ),
+                child: AppButtons.solid(
+                  context: context,
+                  text: "Logout",
+                  onClicked: () async {
+                    Navigator.pop(context); // Close dialog first
+
+                    // 1️⃣ Get SharedPreferences instance
+                    final prefs = await SharedPreferences.getInstance();
+
+                    // 2️⃣ Remove auth token
+                    await prefs.remove("auth_token");
+
+                    // 3️⃣ Navigate to Login screen
+                    CustomNavigator.removeUntil(
+                      context,
+                      const LoginScreen(),
+                      transition: TransitionType.fade,
+                    );
+                    // CustomNavigator.push(
+                    //   context,
+                    //   LoginScreen(),
+                    //   // transition: TransitionType.slideLeft,
+                    // );
+                  },
+                  isFullWidth: true,
+                  backgroundColor: ColorsList.mainButtonColor,
+                  textColor: ColorsList.mainButtonTextColor,
+                  fontSize: w * .045,
+                  height: w * .140,
+                  radius: 12.0,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: w * .04,
+                  // vertical: w * .02,
+                ),
+                child: AppButtons.solid(
+                  context: context,
+                  text: "Cancel",
+                  onClicked: () {
+                    CustomNavigator.pop(context);
+                  },
+                  isFullWidth: true,
+                  backgroundColor: AppColors.white,
+                  textColor: AppColors.mediumGray,
+                  fontSize: w * .045,
+                  height: w * .140,
+                  radius: 12.0,
+                ),
+              ),
+              SizedBox(height: w * .05),
+            ],
+          ),
+        );
+      },
     );
   }
 }

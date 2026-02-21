@@ -38,7 +38,7 @@ class CustomSnackbar {
     Get.snackbar(
       title,
       subtitle,
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
       backgroundColor: backgroundColor,
       colorText: Colors.white,
       borderRadius: 10,
@@ -52,7 +52,7 @@ class CustomSnackbar {
     Get.snackbar(
       'Error',
       message,
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
       backgroundColor: Colors.red,
       colorText: Colors.white,
       borderRadius: 10,
@@ -65,7 +65,7 @@ class CustomSnackbar {
     Get.snackbar(
       'Success',
       message,
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
       backgroundColor: Colors.green,
       colorText: Colors.white,
       borderRadius: 10,
@@ -78,7 +78,7 @@ class CustomSnackbar {
     Get.snackbar(
       'Warning',
       message,
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
       backgroundColor: Colors.orange,
       colorText: Colors.white,
       borderRadius: 10,
@@ -91,7 +91,7 @@ class CustomSnackbar {
     Get.snackbar(
       'Info',
       message,
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
       backgroundColor: Colors.blue,
       colorText: Colors.white,
       borderRadius: 10,

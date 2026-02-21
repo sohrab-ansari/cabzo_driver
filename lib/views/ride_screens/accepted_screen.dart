@@ -105,6 +105,8 @@ class _ArrivingClientState extends State<ArrivingClient> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _initializeAll();
     });
+
+    print("hellooooo_stepss_screen  ${stepperController.activeStep}");
   }
 
   dynamic profileImage = "";
@@ -1205,9 +1207,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
     // Navigate to OTP screen using GetX
     try {
       await Get.to(
-        () => ArrivedOtpScreen(rideData: _rideData,
-        
-        imagepath: profileImage,),
+        () => ArrivedOtpScreen(rideData: _rideData, imagepath: profileImage),
         transition: Transition.rightToLeft,
         duration: const Duration(milliseconds: 300),
       );
@@ -1233,16 +1233,14 @@ class _ArrivingClientState extends State<ArrivingClient> {
       //   ),
       // );
 
-                                                      Fluttertoast.showToast(
-  msg: message,
-  toastLength: Toast.LENGTH_SHORT,
-  gravity: ToastGravity.TOP, // 👈 Top position
-  backgroundColor: Colors.green,
-  textColor: Colors.white,
-  fontSize: 16.0,
-);
-
-      
+      Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP, // 👈 Top position
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
     }
   }
 
@@ -1440,9 +1438,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
               CircleAvatar(
                 radius: w * .055,
                 backgroundColor: Colors.grey.shade300,
-                child: 
-                
-                ClipOval(
+                child: ClipOval(
                   child:
                       profileImage != null && profileImage.toString().isNotEmpty
                       ? Image.network(
@@ -1479,7 +1475,6 @@ class _ArrivingClientState extends State<ArrivingClient> {
                           color: Colors.grey.shade700,
                         ),
                 ),
-             
               ),
 
               // CircleAvatar(
@@ -1547,11 +1542,12 @@ class _ArrivingClientState extends State<ArrivingClient> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChatScreen(rideData: widget.rideData,
-                    
+                    builder: (context) => ChatScreen(
+                      rideData: widget.rideData,
+
                       profileImage: profileImage,
 
-                      driverName:  riderName ,
+                      driverName: riderName,
                     ),
                   ),
                 );
@@ -1930,16 +1926,14 @@ class _ArrivingClientState extends State<ArrivingClient> {
       //   ),
       // );
 
-      
-                                                      Fluttertoast.showToast(
-  msg: "Invalid order ID",
-  toastLength: Toast.LENGTH_SHORT,
-  gravity: ToastGravity.TOP, // 👈 Top position
-  backgroundColor: Colors.red,
-  textColor: Colors.white,
-  fontSize: 16.0,
-);
-
+      Fluttertoast.showToast(
+        msg: "Invalid order ID",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP, // 👈 Top position
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
     }
   }
 

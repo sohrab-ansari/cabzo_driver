@@ -739,7 +739,7 @@ class _EditProfileState extends State<EditProfile> {
         gender: genderController.text.isNotEmpty ? genderController.text : null,
       );
 
-      Get.back(); // Close loading dialog
+      // Get.back(); // Close loading dialog
 
       // Show success message
       // ScaffoldMessenger.of(context).showSnackBar(
@@ -763,7 +763,7 @@ Fluttertoast.showToast(
       await driveridController.driverid_mdethod();
 
       // Navigate back after successful update
-      CustomNavigator.pop(context);
+      // CustomNavigator.pop(context);
     } catch (e) {
       Get.back(); // Close loading dialog
       ScaffoldMessenger.of(context).showSnackBar(

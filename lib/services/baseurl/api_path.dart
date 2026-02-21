@@ -56,7 +56,7 @@ class ApiPath {
 
   static String wallet_api = "$baseUri/wallet";
 
-  static String transactions_api = "$baseUri/transactions";
+  // static String transactions_api = "$baseUri/transactions?limit=$limit&page=$page";
 
   // static String ratings_api = "$baseUri/rating/getDriver";
 

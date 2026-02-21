@@ -604,10 +604,8 @@ class SocketManager {
         return;
       }
 
-      // Store ride data for potential notification actions
       _lastRideData = rideData;
 
-      // Persist for cross-isolate access (if app launches from notification)
       SharedPreferences.getInstance().then((prefs) {
         prefs.setString('last_ride_request', jsonEncode(data));
       });
@@ -620,42 +618,13 @@ class SocketManager {
       onNewRide?.call(rideData);
     });
 
-    // // RIDE REQUEST EVENTS
-    // _socket!.on('ride:newRide', (data) {
-    //   final rideData = _mapRideData(data);
-    //   print(
-    //     '🚕 NEW RIDE REQUEST RECEIVED: ${jsonEncode(rideData).substring(0, 100)}...',
-    //   );
+ 
 
-    //   if (!isOnDuty) {
-    //     print('⚠️ Received ride request but driver is offline');
-    //     return;
-    //   }
-
-    //   // Store ride data for potential notification actions
-    //   _lastRideData = rideData;
-
-    //   // Persist for cross-isolate access (if app launches from notification)
-    //   SharedPreferences.getInstance().then((prefs) {
-    //     prefs.setString('last_ride_request', jsonEncode(data));
-    //   });
-
-    // // Navigator.push(
-    // //   context,
-    // //   MaterialPageRoute(
-    // //     builder: (context) => RideRequestScreen(rideData: rideData),
-    // //   ),
-    // // );
-
-    // Get.to(RideRequestScreen(rideData: rideData));
-    //   // Trigger interactive notification
-    //   // NotificationService.instance.showRideRequestNotification(rideData);
-
-    //   onNewRide?.call(rideData);
-    // });
 
     _socket!.on('ride:orderCancelled', (data) {
+
       print('userrrr_side____Canceeledddd>>>>>>>>>>>>>>>>: ${data}');
+
       // Handle order cancelled notification
     });
 
@@ -718,40 +687,7 @@ class SocketManager {
       onRideConfirmed?.call(_currentRide!);
     });
 
-    // _socket!.on('ride:confirmed', (data) async {
-    //   print(">>>>>>>>> [SOCKET] Ride Confirmed");
-    //   print(">>>>>>>>>>> 2 Full Ride Data: ${jsonEncode(data)}");
-
-    //   print("my_profile_image_log ${data['rider']?['profileImage']}");
-
-    //   final orderId = data['orderId'] ?? data['_id'];
-
-    //   // ✅ Save FULL backend data
-    //   final prefs = await SharedPreferences.getInstance();
-    //   await prefs.setString('active_ride_full_data', jsonEncode(data));
-    //   // await prefs.setString(
-    //   //   'active_ride_profile_image',
-    //   //   jsonEncode(data['profileImage']),
-    //   // );
-    //   final riderProfileImage = data['rider']?['profileImage'] ?? '';
-
-    //   await prefs.setString('active_ride_profile_image', riderProfileImage);
-
-    //   await prefs.setString('active_order_id', orderId.toString());
-
-    //   // App memory state
-    //   _currentRide = Map<String, dynamic>.from(data);
-    //   _activeRideId = orderId.toString();
-    //   _isRideInProgress = true;
-    //   _rideStartTime = DateTime.now();
-    //   _saveRideStateToPrefs(); // Call to save ride state
-
-    //   // Join socket room
-    //   _joinRideRoom(orderId.toString());
-
-    //   // Notify listeners
-    //   onRideConfirmed?.call(_currentRide!);
-    // });
+ 
 
     _socket!.on('ride:status', (data) {
       print('📊 Ride status update: $data');

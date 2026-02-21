@@ -26,79 +26,94 @@ class EditProfileController extends GetxController {
   }
 
   Future<void> edit_profile_method({
-  File? image,
-  String? name,
-  String? email,
-  String? dateOfBirth,
-  String? gender,
-}) async {
-  print("edit_profile_method called");
+    File? image,
+    String? name,
+    String? email,
+    String? dateOfBirth,
+    String? gender,
+  }) async {
+    print("edit_profile_method called");
 
-  // Set loading state
-  isLoading.value = true;
-  errorMessage.value = '';
+    // Set loading state
+    isLoading.value = true;
+    errorMessage.value = '';
 
-  try {
-    // Format date from DD/MM/YYYY to YYYY-MM-DD if provided
-    String? formattedDateOfBirth;
-    if (dateOfBirth != null && dateOfBirth.isNotEmpty) {
-      try {
-        // Parse from DD/MM/YYYY to DateTime
-        final parts = dateOfBirth.split('/');
-        if (parts.length == 3) {
-          final day = int.parse(parts[0]);
-          final month = int.parse(parts[1]);
-          final year = int.parse(parts[2]);
-          final date = DateTime(year, month, day);
-          // Format to YYYY-MM-DD
-          formattedDateOfBirth = "${date.year.toString().padLeft(4, '0')}-"
-                               "${date.month.toString().padLeft(2, '0')}-"
-                               "${date.day.toString().padLeft(2, '0')}";
-          print("Formatted date: $dateOfBirth -> $formattedDateOfBirth");
+    try {
+      // Format date from DD/MM/YYYY to YYYY-MM-DD if provided
+      String? formattedDateOfBirth;
+      if (dateOfBirth != null && dateOfBirth.isNotEmpty) {
+        try {
+          // Parse from DD/MM/YYYY to DateTime
+          final parts = dateOfBirth.split('/');
+          if (parts.length == 3) {
+            final day = int.parse(parts[0]);
+            final month = int.parse(parts[1]);
+            final year = int.parse(parts[2]);
+            final date = DateTime(year, month, day);
+            // Format to YYYY-MM-DD
+            formattedDateOfBirth =
+                "${date.year.toString().padLeft(4, '0')}-"
+                "${date.month.toString().padLeft(2, '0')}-"
+                "${date.day.toString().padLeft(2, '0')}";
+            print("Formatted date: $dateOfBirth -> $formattedDateOfBirth");
+          }
+        } catch (e) {
+          print("Error parsing date: $e");
+          formattedDateOfBirth = dateOfBirth; // Keep original if parsing fails
         }
-      } catch (e) {
-        print("Error parsing date: $e");
-        formattedDateOfBirth = dateOfBirth; // Keep original if parsing fails
       }
-    }
 
-    // Call API with all optional parameters
-    final DriverImageUploadRes res =
-        await ProfileApiServices.edit_profile_data_api(
-          image: image,
-          userType: '',
-          name: name,
-          email: email,
-          dateOfBirth: formattedDateOfBirth ?? dateOfBirth,
-          gender: gender,
+      // Call API with all optional parameters
+      final DriverImageUploadRes res =
+          await ProfileApiServices.edit_profile_data_api(
+            image: image,
+            userType: '',
+            name: name,
+            email: email,
+            dateOfBirth: formattedDateOfBirth ?? dateOfBirth,
+            gender: gender,
+          );
+
+      print("API>>>>>>Ressssponse: ${res.success}");
+
+      if (res.success == true) {
+        print("Profile updated successfully");
+
+        Fluttertoast.showToast(
+          msg: res.message ?? "Profile upssdated successfully",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
         );
 
-    print("API>>>>>>Ressssponse: ${res.success}");
+        print("helloooooo>>> navigation_done");
+        // Get.offAll(BottomnavmainScreen());
 
-    if (res.success == true) {
-      print("Profile updated successfully");
+        // Get.offAll(BottomnavmainScreen(initialIndex: 3,));
 
-      Fluttertoast.showToast(
-        msg: res.message ?? "Profile upssdated successfully",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.TOP,
-      );
+        // ✅ Refresh home data after profile update
+        try {
+          final HomeController homeController = Get.find<HomeController>();
+          await homeController.home_data_method();
+          print("Home data refreshed after profile update");
+        } catch (e) {
+          print("Failed to refresh home data: $e");
+        }
 
-      Get.offAll(BottomnavmainScreen());
-
-      // ✅ Refresh home data after profile update
-      try {
-        final HomeController homeController = Get.find<HomeController>();
-        await homeController.home_data_method();
-        print("Home data refreshed after profile update");
-      } catch (e) {
-        print("Failed to refresh home data: $e");
+        driverImageUploadRes.value = res;
+      } else {
+        errorMessage.value = res.message ?? 'Failed to update profile';
+        print("Error: ${errorMessage.value}");
+        Get.snackbar(
+          'Error',
+          errorMessage.value,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
-
-      driverImageUploadRes.value = res;
-    } else {
-      errorMessage.value = res.message ?? 'Failed to update profile';
-      print("Error: ${errorMessage.value}");
+    } catch (e) {
+      errorMessage.value = 'An error occurred: $e';
+      print("Exception: $e");
       Get.snackbar(
         'Error',
         errorMessage.value,
@@ -106,109 +121,98 @@ class EditProfileController extends GetxController {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
+    } finally {
+      // Reset loading state
+      isLoading.value = false;
     }
-  } catch (e) {
-    errorMessage.value = 'An error occurred: $e';
-    print("Exception: $e");
-    Get.snackbar(
-      'Error',
-      errorMessage.value,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-    );
-  } finally {
-    // Reset loading state
-    isLoading.value = false;
   }
-}
 
-//   Future<void> edit_profile_method({
-//   dynamic image, // Make it optional
-//   String? name,
-//   String? email,
-//   required String dateOfBirth,
-//   required String gender,
-// }) async {
-//   print("edit_profile_method called");
+  //   Future<void> edit_profile_method({
+  //   dynamic image, // Make it optional
+  //   String? name,
+  //   String? email,
+  //   required String dateOfBirth,
+  //   required String gender,
+  // }) async {
+  //   print("edit_profile_method called");
 
-//   // Validate required fields
-//   if (dateOfBirth.isEmpty || gender.isEmpty) {
-//     Get.snackbar(
-//       'Error',
-//       'Date of Birth and Gender are required',
-//       snackPosition: SnackPosition.BOTTOM,
-//       backgroundColor: Colors.red,
-//       colorText: Colors.white,
-//     );
-//     return;
-//   }
+  //   // Validate required fields
+  //   if (dateOfBirth.isEmpty || gender.isEmpty) {
+  //     Get.snackbar(
+  //       'Error',
+  //       'Date of Birth and Gender are required',
+  //       snackPosition: SnackPosition.BOTTOM,
+  //       backgroundColor: Colors.red,
+  //       colorText: Colors.white,
+  //     );
+  //     return;
+  //   }
 
-//   // Set loading state
-//   isLoading.value = true;
-//   errorMessage.value = '';
+  //   // Set loading state
+  //   isLoading.value = true;
+  //   errorMessage.value = '';
 
-//   try {
-//     // Call API with optional image
-//     final DriverImageUploadRes res =
-//         await ProfileApiServices.edit_profile_data_api(
-//           image: image, // Can be null
-//           userType: '',
-//           name: name ?? '',
-//           email: email ?? '',
-//           dateOfBirth: dateOfBirth,
-//           gender: gender,
-//         );
+  //   try {
+  //     // Call API with optional image
+  //     final DriverImageUploadRes res =
+  //         await ProfileApiServices.edit_profile_data_api(
+  //           image: image, // Can be null
+  //           userType: '',
+  //           name: name ?? '',
+  //           email: email ?? '',
+  //           dateOfBirth: dateOfBirth,
+  //           gender: gender,
+  //         );
 
-//     print("API Response: ${res.success}");
+  //     print("API Response: ${res.success}");
 
-//     if (res.success == true) {
-//       print("Profile updated successfully");
+  //     if (res.success == true) {
+  //       print("Profile updated successfully");
 
-//       Fluttertoast.showToast(
-//         msg: res.message ?? "Profile updated successfully",
-//         toastLength: Toast.LENGTH_SHORT,
-//         gravity: ToastGravity.BOTTOM,
-//       );
+  //       Fluttertoast.showToast(
+  //         msg: res.message ?? "Profile updated successfully",
+  //         toastLength: Toast.LENGTH_SHORT,
+  //         gravity: ToastGravity.BOTTOM,
+  //       );
 
-//       Get.offAll(BottomnavmainScreen());
+  //       Get.offAll(BottomnavmainScreen());
 
-//       // ✅ Refresh home data after profile update
-//       try {
-//         final HomeController homeController = Get.find<HomeController>();
-//         await homeController.home_data_method();
-//         print("Home data refreshed after profile update");
-//       } catch (e) {
-//         print("Failed to refresh home data: $e");
-//       }
+  //       // ✅ Refresh home data after profile update
+  //       try {
+  //         final HomeController homeController = Get.find<HomeController>();
+  //         await homeController.home_data_method();
+  //         print("Home data refreshed after profile update");
+  //       } catch (e) {
+  //         print("Failed to refresh home data: $e");
+  //       }
 
-//       driverImageUploadRes.value = res;
-//     } else {
-//       errorMessage.value = res.message ?? 'Failed to update profile';
-//       print("Error: ${errorMessage.value}");
-//       Get.snackbar(
-//         'Error',
-//         errorMessage.value,
-//         snackPosition: SnackPosition.BOTTOM,
-//         backgroundColor: Colors.red,
-//         colorText: Colors.white,
-//       );
-//     }
-//   } catch (e) {
-//     errorMessage.value = 'An error occurred: $e';
-//     print("Exception: $e");
-//     Get.snackbar(
-//       'Error',
-//       errorMessage.value,
-//       snackPosition: SnackPosition.BOTTOM,
-//       backgroundColor: Colors.red,
-//       colorText: Colors.white,
-//     );
-//   } finally {
-//     // Reset loading state
-//     isLoading.value = false;
-//   }
-// }
+  //       driverImageUploadRes.value = res;
+  //     } else {
+  //       errorMessage.value = res.message ?? 'Failed to update profile';
+  //       print("Error: ${errorMessage.value}");
+  //       Get.snackbar(
+  //         'Error',
+  //         errorMessage.value,
+  //         snackPosition: SnackPosition.BOTTOM,
+  //         backgroundColor: Colors.red,
+  //         colorText: Colors.white,
+  //       );
+  //     }
+  //   } catch (e) {
+  //     errorMessage.value = 'An error occurred: $e';
+  //     print("Exception: $e");
+  //     Get.snackbar(
+  //       'Error',
+  //       errorMessage.value,
+  //       snackPosition: SnackPosition.BOTTOM,
+  //       backgroundColor: Colors.red,
+  //       colorText: Colors.white,
+  //     );
+  //   } finally {
+  //     // Reset loading state
+  //     isLoading.value = false;
+  //   }
+  // }
 
   // Future<void> edit_profile_method({
   //   required dynamic image,
@@ -290,6 +294,4 @@ class EditProfileController extends GetxController {
   //     isLoading.value = false;
   //   }
   // }
-
-
 }

@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/controllers/home_controllers/network_controller.dart';
 import 'package:nzcu_driver/core/dependency_injection.dart';
 import 'package:nzcu_driver/firebase_options.dart';
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
@@ -11,6 +12,7 @@ import 'package:nzcu_driver/services/background_service.dart';
 // import 'package:flutter_background_geolocation/flutter_background_geolocation.dart'
 //     as bg;
 import 'package:nzcu_driver/utilities/colors/colors.dart';
+import 'package:nzcu_driver/utilities/widgets/network_status_overlay.dart';
 import 'package:nzcu_driver/views/splash/splash_screen.dart';
 
 // @pragma('vm:entry-point')
@@ -117,6 +119,8 @@ void main() async {
     print('');
   }
 
+
+  Get.put(NetworkController(), permanent: true);
   // ========================================================================
   // RUN THE APP
   // ========================================================================
@@ -139,6 +143,16 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         home: const SplashScreen(),
+
+         builder: (context, child) {
+        return Stack(
+          children: [
+            if (child != null) child,
+            const NetworkStatusOverlay(), // Shows automatically when offline
+          ],
+        );
+
+         }
       ),
     );
   }

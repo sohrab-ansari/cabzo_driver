@@ -228,7 +228,6 @@
 //         type:  "BankAccount"
 //       );
 
-
 //                     // bankAccountAddController.addbankaccount_method(
 //                     //   accountHolderName: nameController.text.trim(),
 //                     //   accountNumber: accountNumberController.text.trim(),
@@ -254,8 +253,6 @@
 //     );
 //   }
 // }
-
-
 
 import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/bank_account_add_controller.dart';
@@ -285,15 +282,16 @@ class _EditBankState extends State<EditBank> {
 
   TextEditingController nameController = TextEditingController();
   TextEditingController accountNumberController = TextEditingController();
-  TextEditingController confirmAccountNumberController = TextEditingController();
+  TextEditingController confirmAccountNumberController =
+      TextEditingController();
   TextEditingController ifscController = TextEditingController();
   TextEditingController bankNameController = TextEditingController();
 
   final BankAccountAddController bankAccountAddController =
       Get.find<BankAccountAddController>();
-  
+
   late final UpdateBankAndUpiController updateBankAndUpiController;
-  
+
   bool _isLoading = false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -301,7 +299,7 @@ class _EditBankState extends State<EditBank> {
   void initState() {
     super.initState();
     updateBankAndUpiController = Get.put(UpdateBankAndUpiController());
-    
+
     // Pre-fill existing bank details
     if (widget.account != null) {
       nameController.text = widget.account.accountHolderName ?? "";
@@ -328,7 +326,8 @@ class _EditBankState extends State<EditBank> {
     if (!_formKey.currentState!.validate()) return;
 
     // Check if account numbers match
-    if (accountNumberController.text.trim() != confirmAccountNumberController.text.trim()) {
+    if (accountNumberController.text.trim() !=
+        confirmAccountNumberController.text.trim()) {
       Get.snackbar(
         "Error",
         "Account numbers do not match",
@@ -351,7 +350,6 @@ class _EditBankState extends State<EditBank> {
         accountNumber: accountNumberController.text.trim(),
         bankName: bankNameController.text.trim(),
         ifscCode: ifscController.text.trim().toUpperCase(),
-        
       );
 
       // Show success message
@@ -366,7 +364,6 @@ class _EditBankState extends State<EditBank> {
 
       // Navigate back with success
       Navigator.pop(context, true);
-      
     } catch (e) {
       Get.snackbar(
         "Error",
@@ -431,63 +428,6 @@ class _EditBankState extends State<EditBank> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Current Bank Info
-              Container(
-                margin: EdgeInsets.only(bottom: w * 0.03),
-                padding: EdgeInsets.all(w * 0.03),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryRed.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(w * 0.02),
-                  border: Border.all(
-                    color: AppColors.primaryRed.withOpacity(0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.account_balance,
-                      color: AppColors.primaryRed,
-                      size: w * 0.05,
-                    ),
-                    SizedBox(width: w * 0.02),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          AppFonts.textPoppins(
-                            context,
-                            "Editing:",
-                            w * 0.028,
-                            FontWeight.w400,
-                            AppColors.primaryRed.withOpacity(0.8),
-                            TextAlign.left,
-                            TextOverflow.ellipsis,
-                          ),
-                          AppFonts.textPoppins(
-                            context,
-                            widget.account?.bankName ?? 'N/A',
-                            w * 0.035,
-                            FontWeight.w600,
-                            AppColors.primaryRed,
-                            TextAlign.left,
-                            TextOverflow.ellipsis,
-                          ),
-                          AppFonts.textPoppins(
-                            context,
-                            "A/C: ${widget.account?.accountNumber ?? 'N/A'}",
-                            w * 0.03,
-                            FontWeight.w400,
-                            AppColors.primaryRed.withOpacity(0.8),
-                            TextAlign.left,
-                            TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
               AppFonts.textPoppins(
                 context,
                 "Bank Account Details",
@@ -631,7 +571,7 @@ class _EditBankState extends State<EditBank> {
                 context: context,
                 hintText: "Enter bank name",
                 controller: bankNameController,
-         
+
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter bank name';
@@ -648,7 +588,9 @@ class _EditBankState extends State<EditBank> {
                 height: w * .140,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _isLoading ? Colors.grey : Colors.cyan.shade300,
+                    backgroundColor: _isLoading
+                        ? Colors.grey
+                        : Colors.cyan.shade300,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),

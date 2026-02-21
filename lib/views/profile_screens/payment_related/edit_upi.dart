@@ -332,53 +332,52 @@ class _EditUpiState extends State<EditUpi> {
                 ),
 
                 // Show current UPI ID being edited
-                Container(
-                  margin: EdgeInsets.symmetric(vertical: w * 0.02),
-                  padding: EdgeInsets.all(w * 0.03),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryRed.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(w * 0.02),
-                    border: Border.all(
-                      color: AppColors.primaryRed.withOpacity(0.3),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: AppColors.primaryRed,
-                        size: w * 0.05,
-                      ),
-                      SizedBox(width: w * 0.02),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            AppFonts.textPoppins(
-                              context,
-                              "Current UPI ID:",
-                              w * 0.028,
-                              FontWeight.w400,
-                              AppColors.primaryRed.withOpacity(0.8),
-                              TextAlign.left,
-                              TextOverflow.ellipsis,
-                            ),
-                            AppFonts.textPoppins(
-                              context,
-                              widget.account?.upiId ?? 'N/A',
-                              w * 0.035,
-                              FontWeight.w600,
-                              AppColors.primaryRed,
-                              TextAlign.left,
-                              TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
+                // Container(
+                //   margin: EdgeInsets.symmetric(vertical: w * 0.02),
+                //   padding: EdgeInsets.all(w * 0.03),
+                //   decoration: BoxDecoration(
+                //     color: AppColors.primaryRed.withOpacity(0.1),
+                //     borderRadius: BorderRadius.circular(w * 0.02),
+                //     border: Border.all(
+                //       color: AppColors.primaryRed.withOpacity(0.3),
+                //     ),
+                //   ),
+                //   child: Row(
+                //     children: [
+                //       Icon(
+                //         Icons.info_outline,
+                //         color: AppColors.primaryRed,
+                //         size: w * 0.05,
+                //       ),
+                //       SizedBox(width: w * 0.02),
+                //       Expanded(
+                //         child: Column(
+                //           crossAxisAlignment: CrossAxisAlignment.start,
+                //           children: [
+                //             AppFonts.textPoppins(
+                //               context,
+                //               "Current UPI ID:",
+                //               w * 0.028,
+                //               FontWeight.w400,
+                //               AppColors.primaryRed.withOpacity(0.8),
+                //               TextAlign.left,
+                //               TextOverflow.ellipsis,
+                //             ),
+                //             AppFonts.textPoppins(
+                //               context,
+                //               widget.account?.upiId ?? 'N/A',
+                //               w * 0.035,
+                //               FontWeight.w600,
+                //               AppColors.primaryRed,
+                //               TextAlign.left,
+                //               TextOverflow.ellipsis,
+                //             ),
+                //           ],
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
                 Padding(
                   padding: EdgeInsets.only(top: w * .03, bottom: w * .02),
                   child: AppFormFields.custTextFormOther(
@@ -467,22 +466,22 @@ class _EditUpiState extends State<EditUpi> {
                 ),
 
                 // Delete Button
-                SizedBox(height: w * .02),
-                AppButtons.solid(
-                  context: context,
-                  text: _isDeleting ? "Deleting..." : "Delete UPI",
-                  onClicked: _deleteUpi,
-                  isFullWidth: true,
-                  backgroundColor: (_isLoading || _isDeleting)
-                      ? AppColors.mediumGray
-                      : Colors.red.shade50,
-                  textColor: (_isLoading || _isDeleting)
-                      ? Colors.white
-                      : Colors.red,
-                  fontSize: w * .045,
-                  height: w * .140,
-                  radius: 12.0,
-                ),
+                // SizedBox(height: w * .02),
+                // AppButtons.solid(
+                //   context: context,
+                //   text: _isDeleting ? "Deleting..." : "Delete UPI",
+                //   onClicked: _deleteUpi,
+                //   isFullWidth: true,
+                //   backgroundColor: (_isLoading || _isDeleting)
+                //       ? AppColors.mediumGray
+                //       : Colors.red.shade50,
+                //   textColor: (_isLoading || _isDeleting)
+                //       ? Colors.white
+                //       : Colors.red,
+                //   fontSize: w * .045,
+                //   height: w * .140,
+                //   radius: 12.0,
+                // ),
 
                 // Cancel Button
                 SizedBox(height: w * .02),

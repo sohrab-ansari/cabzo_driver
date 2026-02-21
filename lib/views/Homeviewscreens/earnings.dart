@@ -1147,7 +1147,6 @@
 //   }
 // }
 
-
 import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 import 'package:nzcu_driver/utilities/widgets/app_buttons.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
@@ -1171,9 +1170,10 @@ class _EarningsState extends State<Earnings> {
   PageController _pageController = PageController(initialPage: 0);
   late Future<Map<String, dynamic>> earningsReportFuture;
   late Future<List<dynamic>> rideHistoryFuture;
-  
+
   // Refresh indicator key
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
 
   // final tripStatuses = [
   //   {'name': 'Completed Trip', 'progress': 3, 'color': AppColors.yellow},
@@ -1204,7 +1204,7 @@ class _EarningsState extends State<Earnings> {
   // Modified to return Future<void>
   Future<void> _loadData(int pageIndex) async {
     String period = ['today', 'weekly', 'monthly'][pageIndex];
-    
+
     // Assign the futures but don't await them here
     // This allows the UI to show loading states while data loads
     earningsReportFuture = EarningsService.getEarningReport(period);
@@ -1212,7 +1212,7 @@ class _EarningsState extends State<Earnings> {
 
     print("my___eraning_report_came ${rideHistoryFuture}");
     setState(() {});
-    
+
     // Optionally await if you need to ensure data is loaded before continuing
     // But this would block the UI
     // await Future.wait([earningsReportFuture, rideHistoryFuture]);
@@ -1428,7 +1428,8 @@ class _EarningsState extends State<Earnings> {
             String period = ['today', 'weekly', 'monthly'][pageIndex];
 
             return SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator
+              physics:
+                  const AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: w * 0.04,
@@ -1440,7 +1441,8 @@ class _EarningsState extends State<Earnings> {
                     FutureBuilder<Map<String, dynamic>>(
                       future: earningsReportFuture,
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return Card(
                             elevation: 6,
                             shadowColor: Colors.black26,
@@ -1506,7 +1508,8 @@ class _EarningsState extends State<Earnings> {
 
                         final data = snapshot.data ?? {};
                         final earnings = data['earnings'] ?? {};
-                        final totalEarning = earnings['total']?.toString() ?? "0";
+                        final totalEarning =
+                            earnings['total']?.toString() ?? "0";
 
                         return Card(
                               elevation: 6,
@@ -1534,7 +1537,8 @@ class _EarningsState extends State<Earnings> {
                                     ),
                                     SizedBox(height: w * 0.02),
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Icon(
                                           Icons.currency_rupee,
@@ -1594,7 +1598,8 @@ class _EarningsState extends State<Earnings> {
                         final data = snapshot.data ?? {};
                         final earnings = data['earnings'] ?? {};
                         final trips = data['trips'] ?? {};
-                        final cashEarnings = earnings['cash']?.toString() ?? "0";
+                        final cashEarnings =
+                            earnings['cash']?.toString() ?? "0";
                         final completed = trips['completed']?.toString() ?? "0";
                         final cancelled = trips['cancelled']?.toString() ?? "0";
 
@@ -1629,6 +1634,10 @@ class _EarningsState extends State<Earnings> {
                                       EarningsService.calculateTimeOnline(
                                         historySnapshot.data ?? [],
                                       );
+
+                                  print(
+                                    "helloooo_my_data ${historySnapshot.data}",
+                                  );
                                 }
                                 return _infoCard(
                                   imagePath: "assets/images/new1.png",
@@ -1671,7 +1680,8 @@ class _EarningsState extends State<Earnings> {
                     FutureBuilder<List<dynamic>>(
                       future: rideHistoryFuture,
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return Center(
                             child: Padding(
                               padding: EdgeInsets.symmetric(vertical: w * 0.05),

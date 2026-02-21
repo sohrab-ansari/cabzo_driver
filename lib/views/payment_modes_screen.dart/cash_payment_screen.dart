@@ -54,6 +54,7 @@
 //   }
 // }
 
+import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
@@ -70,6 +71,8 @@ class CashPaymentScreen extends StatefulWidget {
 }
 
 class _CashPaymentScreenState extends State<CashPaymentScreen> {
+
+    final StepperController stepperController = Get.find<StepperController>();
   @override
   void initState() {
     super.initState();
@@ -82,11 +85,15 @@ class _CashPaymentScreenState extends State<CashPaymentScreen> {
         );
       }
     });
-
+resetStepper();
 
     print("myyyy_full_ride_datat ${widget.rideData}");
   }
 
+
+void resetStepper() {
+  stepperController.resetSteps();
+}
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
