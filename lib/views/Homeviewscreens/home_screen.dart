@@ -84,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     _isEffectiveFirstLaunch = widget.isFirstLaunch;
 
-    // handleonline();
+    handleonline();
     homeController.home_data_method();
     driveridController.driverid_mdethod();
     // driverToggleDutyController.driver_toggle_method();
@@ -121,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (widget.isOnDuty == true) {
       socketManager.isOnDuty = true;
       print("✅ Driver set to ONLINE");
+      _updateDriverMarker();
     } else {
       socketManager.isOnDuty = false;
       print("🔴 Driver set to OFFLINE");
@@ -147,7 +148,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     // Initialize socket manager in background (don't await to unblock UI)
     socketManager.initialize().then((_) {
-      if (mounted) setState(() {});
+      if (mounted) {
+        setState(() {});
+        _updateDriverMarker();
+      }
     });
 
     // Start location listener
