@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Added for SystemChrome
 import 'package:http/http.dart' as http;
 import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -61,9 +62,17 @@ class _AgreementScreenState extends State<AgreementScreen> {
     });
 
     try {
-      const String apiUrl =
-          'http://api.corezap.framekarts.com/api/v1/company/getCompany';
+      // const String apiUrl =
+      //     'http://api.corezap.framekarts.com/api/v1/company/getCompany';
+// ApiPath.baseUri;
 
+        // const String apiUrl =
+        //   'http://api.corezap.framekarts.com/api/v1/company/getCompany';
+
+
+
+        const String apiUrl =
+          '${ApiPath.baseUri}/company/getCompany';
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},

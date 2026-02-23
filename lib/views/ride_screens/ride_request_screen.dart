@@ -127,6 +127,8 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   LatLng? dropLatLng;
   LatLng? pickupLatLng;
 
+  StepperController _stepperController = Get.put(StepperController());
+
   @override
   void initState() {
     super.initState();
@@ -136,8 +138,15 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
     // Initialize everything
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      //clear addedd here
+      cleardata();
+
       await _initializeAll();
     });
+  }
+
+  void cleardata() {
+    _stepperController.resetSteps();
   }
 
   void _setupNavigationListener() {

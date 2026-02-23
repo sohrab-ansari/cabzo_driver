@@ -1204,8 +1204,6 @@
 // //   });
 // // }
 
-
-
 // import 'dart:async';
 // import 'dart:convert';
 // import 'dart:io';
@@ -2028,7 +2026,7 @@
 //   // ✅ Fixed profile image widget with proper network handling
 //   Widget _buildProfileImage(double w) {
 //     final String imagePath = widget.profileImage?.toString() ?? '';
-    
+
 //     return Container(
 //       width: w * 0.1,
 //       height: w * 0.1,
@@ -2043,11 +2041,11 @@
 //                 width: w * 0.1,
 //                 height: w * 0.1,
 //                 fit: BoxFit.cover,
-                
+
 //                 // Show loader while loading
 //                 loadingBuilder: (context, child, loadingProgress) {
 //                   if (loadingProgress == null) return child;
-                  
+
 //                   return Center(
 //                     child: SizedBox(
 //                       width: w * 0.04,
@@ -2055,14 +2053,14 @@
 //                       child: CircularProgressIndicator(
 //                         strokeWidth: 2,
 //                         value: loadingProgress.expectedTotalBytes != null
-//                             ? loadingProgress.cumulativeBytesLoaded / 
+//                             ? loadingProgress.cumulativeBytesLoaded /
 //                               loadingProgress.expectedTotalBytes!
 //                             : null,
 //                       ),
 //                     ),
 //                   );
 //                 },
-                
+
 //                 // Error builder in case image fails to load
 //                 errorBuilder: (context, error, stackTrace) {
 //                   print('❌ Image failed to load: $error');
@@ -2450,7 +2448,6 @@
 //     this.messageType = 'text',
 //   });
 // }
-
 
 import 'dart:async';
 import 'dart:convert';
@@ -3112,12 +3109,37 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     final orderId = widget.rideData?['orderId']?.toString();
-    final riderId = widget.rideData?['rider']?['id']?.toString();
+    // final riderId = widget.rideData?['rider']?['id']?.toString();
 
-    print("Rider ID >>> $riderId");
+    // print("Rider ID >>> $riderId");
     print("rideeeid >>>> fulll_ride_data  ${widget.rideData}");
     print("orderrrrriddd>>>> after___close_myy_app ${orderId}");
-    print("rideeeid >>>> after___close_myy_app ${riderId}");
+    // print("rideeeid >>>> after___close_myy_app ${riderId}");
+
+    //  print("rideeeid >>>> fulll_ride_data  ${widget.rideData['riderId']}");
+
+    print("rideeeidkkk >>>> ${widget.rideData?['riderId']}");
+
+    String? riderId;
+
+    if (widget.rideData?['riderId'] != null) {
+      riderId = widget.rideData?['riderId'];
+    } else {
+      riderId = widget.rideData?['rider']?['id'];
+    }
+
+    print("myyyy_rideeeee_iddd_iss>>>> storingg>>> $riderId");
+    // if (widget.rideData?['riderId'] != null) {
+    //   final riderId = widget.rideData?['riderId'];
+
+    //   print("myyyy_rideeeee_iddd_iss>>>> ${riderId}");
+    // } else {
+    //   final riderId = widget.rideData?['rider']?['id'];
+    // }
+
+    // final riderId = widget.rideData?['riderId'];
+
+    print("myyyy_rideeeee_iddd_iss>>>> ${riderId}");
 
     if (orderId != null && riderId != null && _driverId != null) {
       // Set sending flag to prevent double sending
@@ -3180,7 +3202,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 text: text,
                 senderId: _driverId!,
                 senderRole: 'driver',
-                receiverId: riderId,
+                receiverId: riderId.toString(),
                 receiverRole: 'rider',
                 timestamp: DateTime.now().toIso8601String(),
                 isRead: false,
@@ -3246,7 +3268,7 @@ class _ChatScreenState extends State<ChatScreen> {
   // ✅ Fixed profile image widget with proper network handling
   Widget _buildProfileImage(double w) {
     final String imagePath = widget.profileImage?.toString() ?? '';
-    
+
     return Container(
       width: w * 0.1,
       height: w * 0.1,
@@ -3261,11 +3283,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 width: w * 0.1,
                 height: w * 0.1,
                 fit: BoxFit.cover,
-                
+
                 // Show loader while loading
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;
-                  
+
                   return Center(
                     child: SizedBox(
                       width: w * 0.04,
@@ -3273,14 +3295,14 @@ class _ChatScreenState extends State<ChatScreen> {
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded / 
-                              loadingProgress.expectedTotalBytes!
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
                             : null,
                       ),
                     ),
                   );
                 },
-                
+
                 // Error builder in case image fails to load
                 errorBuilder: (context, error, stackTrace) {
                   print('❌ Image failed to load: $error');
@@ -3300,11 +3322,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 width: w * 0.1,
                 height: w * 0.1,
                 color: Colors.grey.shade200,
-                child: Icon(
-                  Icons.person,
-                  color: Colors.grey,
-                  size: w * 0.06,
-                ),
+                child: Icon(Icons.person, color: Colors.grey, size: w * 0.06),
               ),
       ),
     );

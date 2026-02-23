@@ -9,6 +9,7 @@ import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:nzcu_driver/views/auth/login_screen.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PopUps {
   void cancelRidePopup(BuildContext context) {
@@ -160,13 +161,59 @@ class PopUps {
                 child: AppButtons.solid(
                   context: context,
                   text: "Logout",
-                  onClicked: () {
-                    CustomNavigator.push(
+
+                  onClicked: () async {
+                    final prefs = await SharedPreferences.getInstance();
+
+                    // 🔥 Clear ALL stored data
+                    await prefs.clear();
+
+                    // Close dialog
+                    Navigator.pop(context);
+
+                    // Navigate to Login and remove all screens
+                    Navigator.pushAndRemoveUntil(
                       context,
-                      LoginScreen(),
-                      // transition: TransitionType.slideLeft,
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
+                      (route) => false,
                     );
                   },
+
+                  // onClicked: () async {
+                  //   // Get SharedPreferences
+                  //   final prefs = await SharedPreferences.getInstance();
+
+                  //   // Remove only required keys (recommended)
+                  //   await prefs.remove("driver_userid");
+                  //   await prefs.remove("auth_token");
+
+                  //   // OR clear everything
+                  //   // await prefs.clear();
+
+                  //   // Close dialog first
+                  //   Navigator.pop(context);
+
+                  //   // Navigate to Login and remove all previous screens
+                  //   Navigator.pushAndRemoveUntil(
+                  //     context,
+                  //     MaterialPageRoute(builder: (context) => LoginScreen()),
+                  //     (route) => false,
+                  //   );
+                  // },
+
+                  //               onClicked: () {
+
+                  //                 CustomNavigator.push(
+                  //                   context,
+                  //                   LoginScreen(),
+                  //                   // transition: TransitionType.slideLeft,
+                  //                 );
+
+                  //                     final prefs = await SharedPreferences.getInstance();
+                  // final String? userId = prefs.getString("driver_userid");
+                  // final String? token = prefs.getString("auth_token");
+
+                  //               },
                   isFullWidth: true,
                   backgroundColor: ColorsList.mainButtonColor,
                   textColor: ColorsList.mainButtonTextColor,

@@ -282,7 +282,7 @@ class LoginController extends GetxController {
       if (res.success == true) {
         isOtpVerified.value = true;
 
-        driverFormController.activeStep.value = 2;
+        // driverFormController.activeStep.value = 2;
         Get.snackbar(
           'Success',
           'Vehicle created successfully',
@@ -526,11 +526,10 @@ class LoginController extends GetxController {
         //   transition: TransitionType.fade,
         // );
 
-
-         CustomNavigator.removeUntil(
+        CustomNavigator.removeUntil(
           context!,
           LoginScreen(),
-          transition: TransitionType.fade,   
+          transition: TransitionType.fade,
         );
         Get.snackbar(
           'Success',

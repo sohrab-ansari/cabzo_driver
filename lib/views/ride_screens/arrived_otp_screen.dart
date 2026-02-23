@@ -66,15 +66,8 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
   void _showSnackbar(String message, {bool isError = true}) {
     if (mounted && !_isDisposed) {
       try {
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(
-        //     content: Text(message),
-        //     backgroundColor: isError ? Colors.red : Colors.green,
-        //     duration: Duration(seconds: isError ? 3 : 2),
-        //     behavior: SnackBarBehavior.floating,
-        //     margin: EdgeInsets.all(10),
-        //   ),
-        // );
+       
+       
 
         Fluttertoast.showToast(
           msg: message,

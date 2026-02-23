@@ -352,14 +352,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     //   SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
     // );
 
-          Fluttertoast.showToast(
-  msg: message,
-  toastLength: Toast.LENGTH_SHORT,
-  gravity: ToastGravity.TOP, // 👈 Top position
-  backgroundColor: Colors.green,
-  textColor: Colors.white,
-  fontSize: 16.0,
-);
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.TOP, // 👈 Top position
+      backgroundColor: Colors.green,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
   }
 
   // ==================== APP LIFECYCLE (Background Sync) ====================

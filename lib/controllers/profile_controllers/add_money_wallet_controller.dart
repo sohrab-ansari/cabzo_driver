@@ -192,10 +192,12 @@ class AddMoneyWalletController extends GetxController {
         // Future.delayed(Duration(seconds: 2), () {
         //   Get.back(); // Close payment screen
         // });
-          final WalletController walletController = Get.find<WalletController>();
+        final WalletController walletController = Get.find<WalletController>();
 
- walletController.wallet_method();
-        Get.off(PaymentScreen());
+        walletController.wallet_method();
+        // Get.off(PaymentScreen());
+
+        Get.offAll(() => PaymentScreen());
       } else {
         Fluttertoast.showToast(
           msg: "Payment verification failed",

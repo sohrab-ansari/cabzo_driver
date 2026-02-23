@@ -541,16 +541,17 @@ class ProfileApiServices {
       if (responseData.containsKey('success')) {
         print("helloooo111");
 
-        Fluttertoast.showToast(
-          msg: "Withdrawal Successful",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP, // 👈 This makes it show on top
-          backgroundColor: Colors.green,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-
+        print("came_or_not");
         if (responseData['success'] == true) {
+          print("came_or_no222t");
+          Fluttertoast.showToast(
+            msg: "Withdrawal Successful",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.TOP, // 👈 This makes it show on top
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
         } else {
           print("helloooo111 failedd data");
 
@@ -562,6 +563,7 @@ class ProfileApiServices {
             textColor: Colors.white,
             fontSize: 16.0,
           );
+          Get.back();
         }
 
         return PaymentsWithdrawResponse.fromJson(responseData);

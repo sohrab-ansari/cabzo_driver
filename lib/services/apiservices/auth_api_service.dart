@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/modals/auth_modals/Otp_verify_res.dart';
 import 'package:nzcu_driver/modals/auth_modals/create_vehicle_res.dart';
@@ -628,6 +629,44 @@ class AuthApiService {
         print("❌ Server returned error");
         print("Response Body: $responseBody");
 
+        // Fluttertoast.
+
+        print("❌ Server returned error");
+        print("Response Body: $responseBody");
+
+        try {
+          final decoded = jsonDecode(responseBody);
+
+          Fluttertoast.showToast(
+            msg: decoded['message'] ?? "Something went wrong",
+            toastLength: Toast.LENGTH_SHORT, // ≈ 2 seconds
+            gravity: ToastGravity.TOP,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+          );
+
+          // Fluttertoast.showToast(
+          //   msg: decoded['message'] ?? "Something went wrong",
+          //   toastLength: Toast.LENGTH_SHORT,
+          //   gravity: ToastGravity.TOP,
+
+          //   backgroundColor: Colors.red,
+          // );
+        } catch (e) {
+          Fluttertoast.showToast(
+            msg: "Something went wrong",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.TOP,
+            backgroundColor: Colors.red,
+          );
+        }
+
+        //   Fluttertoast.showToast(
+        //   msg: responseBody['']?? "Something went wrong",
+        //   toastLength: Toast.LENGTH_SHORT,
+        //   gravity: ToastGravity.TOP,
+        // );
+
         String errorMessage = "Server error (${response.statusCode})";
 
         if (response.statusCode == 413) {
@@ -650,6 +689,8 @@ class AuthApiService {
           data,
         );
 
+        print("hellooo5");
+
         print("hello_regiter_vehical_Api");
 
         final data1 = jsonDecode(responseBody);
@@ -659,12 +700,23 @@ class AuthApiService {
 
         if (createVehicleRes.success == true) {
           print("✅ Vehicle created successfully!");
+
+          print("hellooo4");
+
+          print("after_suceesssssssss");
+          final DriverFormController driverFormController =
+              Get.find<DriverFormController>();
+          // driverFormController.activeStep.value = 0;
+          driverFormController.activeStep.value = 1;
         } else {
+          print("hellooo2");
           print("❌ Vehicle creation failed: ${createVehicleRes.message}");
         }
 
         return createVehicleRes;
       } catch (e) {
+        print("hellooo3");
+
         print("❌ Failed to parse JSON response: $e");
         print("Raw response: ${responseBody}");
 

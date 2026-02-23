@@ -74,7 +74,7 @@ class PaymentsWithdrawController extends GetxController {
         await Future.delayed(Duration(milliseconds: 500));
 
         // Option 1: Using GetX navigation
-
+// PaymentScreen
         Get.off(PaymentScreen());
 
         final WalletController walletController = Get.find<WalletController>();

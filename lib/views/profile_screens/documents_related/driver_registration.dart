@@ -973,7 +973,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       );
 
       // Move to next step
-      driverFormController.activeStep.value = 1;
+      // driverFormController.activeStep.value = 1;
       // Clear vehicle images
       _clearVehicleImages();
       // Scroll to top
@@ -2379,7 +2379,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
 
                                     SizedBox(height: w * .04),
 
-                                    Text("hello ${widget.mobileNumber}"),
+                                    // Text("hello ${widget.mobileNumber}"),
                                     // AppFonts.textPoppins(
                                     //   context,
                                     //   "Phone Number",
