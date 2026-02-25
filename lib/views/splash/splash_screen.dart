@@ -167,17 +167,13 @@
 //   }
 // }
 
-
-
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
-import 'package:nzcu_driver/controllers/profile_controllers/driverid_controller.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:nzcu_driver/services/apiservices/socket_manager.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:nzcu_driver/views/auth/login_screen.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
-import 'package:nzcu_driver/views/Homeviewscreens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -189,23 +185,84 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  //  final DriveridController driveridController = Get.put(DriveridController());
-  
   @override
   void initState() {
     super.initState();
-    
-    // Initialize and navigate after splash screen delay
-    _initializeAndNavigate();
+    _initialize();
   }
-  
-  Future<void> _initializeAndNavigate() async {
-    // Show splash screen for at least 2 seconds for better UX
-    await Future.delayed(const Duration(seconds: 2));
-    
+
+  Future<void> _initialize() async {
+    // 1. Show splash screen for at least 2 seconds for better UX
+    final splashDelay = Future.delayed(const Duration(seconds: 2));
+
+    // 2. Request permissions and get initial position in parallel
+    final locationFuture = _requestLocationAndCache();
+
+    await Future.wait([splashDelay, locationFuture]);
+
     if (!mounted) return;
-    
+
     await tokenbasednav();
+  }
+
+  Future<void> _requestLocationAndCache() async {
+    try {
+      // 1. Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        print('⚠️ [Splash] Location services are disabled');
+        return;
+      }
+
+      // 2. Check / request location permission
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        print('⚠️ [Splash] Location permission denied');
+        return;
+      }
+
+      print('✅ [Splash] Location permission granted');
+
+      // 3. Request notification permission (non-blocking)
+      try {
+        final notificationStatus = await Permission.notification.request();
+        if (notificationStatus.isGranted) {
+          print('✅ [Splash] Notification permission granted');
+        }
+      } catch (e) {
+        print('⚠️ [Splash] Notification permission error: $e');
+      }
+
+      // 4. Get the current position (initial GPS fix)
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+
+      print(
+        '📍 [Splash] Got initial position: ${position.latitude}, ${position.longitude}',
+      );
+
+      // 5. Cache position in SharedPreferences for instant map loading on home screen
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble('cached_latitude', position.latitude);
+      await prefs.setDouble('cached_longitude', position.longitude);
+
+      // 6. Also update SocketManager
+      final socketManager = SocketManager();
+      socketManager.updateLocation(position.latitude, position.longitude);
+
+      print('✅ [Splash] Location cached and SocketManager updated');
+    } catch (error) {
+      print('❌ [Splash] Error during location initialization: $error');
+    }
   }
 
   Future<void> tokenbasednav() async {
@@ -244,72 +301,89 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: w * 0.06),
-            child: Column(
-              children: [
-                SizedBox(height: h * 0.08),
-
-                /// LOGO STACK
-                Center(
-                  child: Stack(
-                    alignment: Alignment.center,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: w * 0.06),
+                  child: Column(
                     children: [
-                      Image.asset('assets/images/logo3.png', width: w * 0.5),
-                      Positioned(
-                        top: w * 0.13,
-                        child: Image.asset(
-                          'assets/images/logo4.png',
-                          width: w * 0.25,
+                      SizedBox(height: h * 0.08),
+
+                      /// LOGO STACK
+                      Center(
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/images/logo3.png',
+                              width: w * 0.5,
+                            ),
+                            Positioned(
+                              top: w * 0.13,
+                              child: Image.asset(
+                                'assets/images/logo4.png',
+                                width: w * 0.25,
+                              ),
+                            ),
+                          ],
                         ),
+                      ),
+
+                      SizedBox(height: h * 0.02),
+
+                      /// SECOND LOGO
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 5),
+                        width: double.infinity,
+                        child: Image.asset(
+                          'assets/images/logo6.png',
+                          width: w * 0.6,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+
+                      SizedBox(height: h * 0.06),
+
+                      /// TEXT SECTION
+                      Column(
+                        children: [
+                          Text(
+                            "Every journey made safer,every\n mile made better.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: w * 0.06,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                              height: 1.3,
+                            ),
+                          ),
+                          SizedBox(height: h * 0.02),
+                          Text(
+                            "We take the wheel for your comfort.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: w * 0.038,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-
-                SizedBox(height: h * 0.02),
-
-                /// SECOND LOGO
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 5),
-                  width: double.infinity,
-                  child: Image.asset(
-                    'assets/images/logo6.png',
-                    width: w * 0.6,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-
-                SizedBox(height: h * 0.06),
-
-                /// TEXT SECTION
-                Column(
-                  children: [
-                    Text(
-                      "Every journey made safer,every\n mile made better.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: w * 0.06, // responsive text
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                        height: 1.3,
-                      ),
-                    ),
-                    SizedBox(height: h * 0.02),
-                    Text(
-                      "We take the wheel for your comfort.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: w * 0.038,
-                        color: Colors.black54,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
+
+            /// Loading indicator at the bottom
+            Padding(
+              padding: EdgeInsets.only(bottom: h * 0.05),
+              child: const CircularProgressIndicator(
+                color: AppColors.primaryblue,
+              ),
+            ),
+          ],
         ),
       ),
     );

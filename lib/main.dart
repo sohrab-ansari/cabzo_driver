@@ -13,6 +13,7 @@ import 'package:nzcu_driver/services/background_service.dart';
 //     as bg;
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/network_status_overlay.dart';
+import 'package:nzcu_driver/utilities/widgets/location_guard.dart';
 import 'package:nzcu_driver/views/splash/splash_screen.dart';
 
 // @pragma('vm:entry-point')
@@ -119,7 +120,6 @@ void main() async {
     print('');
   }
 
-
   Get.put(NetworkController(), permanent: true);
   // ========================================================================
   // RUN THE APP
@@ -143,16 +143,16 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         home: const SplashScreen(),
-
-         builder: (context, child) {
-        return Stack(
-          children: [
-            if (child != null) child,
-            const NetworkStatusOverlay(), // Shows automatically when offline
-          ],
-        );
-
-         }
+        builder: (context, child) {
+          return LocationGuard(
+            child: Stack(
+              children: [
+                if (child != null) child,
+                const NetworkStatusOverlay(), // Shows automatically when offline
+              ],
+            ),
+          );
+        },
       ),
     );
   }

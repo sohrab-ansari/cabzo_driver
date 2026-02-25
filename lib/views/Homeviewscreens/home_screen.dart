@@ -21,7 +21,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:permission_handler/permission_handler.dart';
+// import 'package:permission_handler/permission_handler.dart';
 
 // Import the SocketManager
 import 'package:nzcu_driver/services/apiservices/socket_manager.dart'
@@ -62,10 +62,25 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _isEffectiveFirstLaunch = false;
 
   // Map variables
-  final CameraPosition _initialCameraPosition = const CameraPosition(
-    target: LatLng(23.2508131, 77.4647936),
-    zoom: 17,
-  );
+  CameraPosition get _initialCameraPosition {
+    // 1. Try SocketManager (most recent)
+    if (socketManager.currentLatitude != 0.0 &&
+        socketManager.currentLongitude != 0.0) {
+      return CameraPosition(
+        target: LatLng(
+          socketManager.currentLatitude - 0.0015,
+          socketManager.currentLongitude,
+        ),
+        zoom: 17,
+      );
+    }
+    // 2. Default fallback
+    return const CameraPosition(
+      target: LatLng(23.2508131, 77.4647936),
+      zoom: 17,
+    );
+  }
+
   late GoogleMapController _mapController;
   Set<Marker> markers = {};
   Set<Circle> circles = {};
@@ -129,8 +144,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _initializeApp() async {
-    // Request permissions
-    await _requestPermissions();
+    // Redundant permission request removed - handled by LocationGuard globally
 
     // Load custom icons
     await _loadCustomBikeMarker();
@@ -196,27 +210,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         }
       }
     };
-  }
-
-  Future<void> _requestPermissions() async {
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) return;
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-
-      if (permission == LocationPermission.deniedForever) return;
-
-      final notificationStatus = await Permission.notification.request();
-      if (notificationStatus.isGranted) {
-        print('✅ Notification permission granted');
-      }
-    } catch (error) {
-      print('❌ Error requesting permissions: $error');
-    }
   }
 
   void _startLocationListener() {
@@ -1007,6 +1000,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               zoomControlsEnabled: false,
               onMapCreated: (controller) {
                 _mapController = controller;
+
+                // Immediately move camera if we have location
+                if (socketManager.currentLatitude != 0.0 &&
+                    socketManager.currentLongitude != 0.0) {
+                  controller.moveCamera(
+                    CameraUpdate.newLatLng(
+                      LatLng(
+                        socketManager.currentLatitude - 0.0015,
+                        socketManager.currentLongitude,
+                      ),
+                    ),
+                  );
+                }
               },
               markers: markers,
               circles: circles,
