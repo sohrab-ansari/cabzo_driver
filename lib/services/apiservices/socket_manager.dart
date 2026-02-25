@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
+import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:nzcu_driver/views/ride_screens/ride_request_screen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -36,7 +37,13 @@ class SocketManager {
 
   // static const String SOCKET_URL = 'https://nzcu.smarttechbros.com';
 
-  static const String SOCKET_URL = "https://api.nzcu.framekarts.com";
+
+
+  static const String SOCKET_URL = '${ApiPath.SOCKET_URL}';
+
+  
+
+  // static const String SOCKET_URL = "https://api.nzcu.framekarts.com";
 
   // static const String SOCKET_URL = 'https://api.syrus.framekarts.com';
 

@@ -33,6 +33,19 @@ class ApiPath {
 
 
 
+    // static const String SOCKET_URL = 'https://nzcu.smarttechbros.com';
+
+
+
+
+// socket url 
+
+    static const String SOCKET_URL = 'https://api.nzcu.framekarts.com';
+
+    
+
+
+
 //  =======================================================================4
   static const String imagebaseUrl =
       "https://sgp1.digitaloceanspaces.com/satyakabir-bucket/";
