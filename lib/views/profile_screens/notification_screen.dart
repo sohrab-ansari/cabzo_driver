@@ -145,9 +145,6 @@
 //   }
 // }
 
-
-
-
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
@@ -164,7 +161,9 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  final NotificationController notificationController = Get.put(NotificationController());
+  final NotificationController notificationController = Get.put(
+    NotificationController(),
+  );
 
   @override
   void initState() {
@@ -244,10 +243,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.black,
-          ),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -255,9 +251,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       ),
       body: Obx(() {
         if (notificationController.isLoading.value) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
 
         if (notificationController.errorMessage.value.isNotEmpty) {
@@ -281,11 +275,19 @@ class _NotificationScreenState extends State<NotificationScreen> {
           );
         }
 
-        final todayNotifications = notifications.where((n) => _isToday(n.createdAt ?? '')).toList();
-        final yesterdayNotifications = notifications.where((n) => _isYesterday(n.createdAt ?? '')).toList();
-        final olderNotifications = notifications.where((n) => 
-          !_isToday(n.createdAt ?? '') && !_isYesterday(n.createdAt ?? '')
-        ).toList();
+        final todayNotifications = notifications
+            .where((n) => _isToday(n.createdAt ?? ''))
+            .toList();
+        final yesterdayNotifications = notifications
+            .where((n) => _isYesterday(n.createdAt ?? ''))
+            .toList();
+        final olderNotifications = notifications
+            .where(
+              (n) =>
+                  !_isToday(n.createdAt ?? '') &&
+                  !_isYesterday(n.createdAt ?? ''),
+            )
+            .toList();
 
         return ListView(
           padding: const EdgeInsets.all(16),
@@ -296,12 +298,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
-              ...todayNotifications.map((notification) => NotificationCard(
-                    notification: notification,
-                    formattedTime: _formatDateTime(notification.createdAt ?? ''),
-                    iconPath: _getIconForNotification(notification.title ?? ''),
-                    backgroundColor: const Color(0xFFEFFCFC),
-                  )),
+              ...todayNotifications.map(
+                (notification) => NotificationCard(
+                  notification: notification,
+                  formattedTime: _formatDateTime(notification.createdAt ?? ''),
+                  iconPath: _getIconForNotification(notification.title ?? ''),
+                  backgroundColor: const Color(0xFFEFFCFC),
+                ),
+              ),
               const SizedBox(height: 20),
             ],
 
@@ -311,12 +315,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
-              ...yesterdayNotifications.map((notification) => NotificationCard(
-                    notification: notification,
-                    formattedTime: _formatDateTime(notification.createdAt ?? ''),
-                    iconPath: _getIconForNotification(notification.title ?? ''),
-                    backgroundColor: Colors.white,
-                  )),
+              ...yesterdayNotifications.map(
+                (notification) => NotificationCard(
+                  notification: notification,
+                  formattedTime: _formatDateTime(notification.createdAt ?? ''),
+                  iconPath: _getIconForNotification(notification.title ?? ''),
+                  backgroundColor: Colors.white,
+                ),
+              ),
               const SizedBox(height: 20),
             ],
 
@@ -326,12 +332,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
-              ...olderNotifications.map((notification) => NotificationCard(
-                    notification: notification,
-                    formattedTime: _formatDateTime(notification.createdAt ?? ''),
-                    iconPath: _getIconForNotification(notification.title ?? ''),
-                    backgroundColor: Colors.white,
-                  )),
+              ...olderNotifications.map(
+                (notification) => NotificationCard(
+                  notification: notification,
+                  formattedTime: _formatDateTime(notification.createdAt ?? ''),
+                  iconPath: _getIconForNotification(notification.title ?? ''),
+                  backgroundColor: Colors.white,
+                ),
+              ),
             ],
           ],
         );
@@ -379,7 +387,7 @@ class NotificationCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -394,11 +402,8 @@ class NotificationCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     notification.body ?? 'No content',
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 14,
-                    ),
-                    maxLines: 2,
+                    style: const TextStyle(color: Colors.grey, fontSize: 14),
+                    maxLines: 8,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
@@ -412,6 +417,7 @@ class NotificationCard extends StatelessWidget {
                           fontSize: 12,
                         ),
                       ),
+
                       if (notification.seen == false)
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -444,7 +450,9 @@ class NotificationCard extends StatelessWidget {
 
   IconData _getIconData(String title) {
     title = title.toLowerCase();
-    if (title.contains('payment') || title.contains('cash') || title.contains('success')) {
+    if (title.contains('payment') ||
+        title.contains('cash') ||
+        title.contains('success')) {
       return Icons.payment;
     } else if (title.contains('cancel')) {
       return Icons.cancel;

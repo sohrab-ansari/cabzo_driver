@@ -715,7 +715,11 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
     // Follow driver on map after initial fit
     if (_initialFitDone && _mapController != null) {
-      _mapController!.animateCamera(CameraUpdate.newLatLng(_driverLocation!));
+      try {
+        _mapController!.animateCamera(CameraUpdate.newLatLng(_driverLocation!));
+      } catch (e) {
+        print('❌ Error animating camera: $e');
+      }
     }
   }
 
@@ -964,10 +968,14 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
     Future.delayed(const Duration(milliseconds: 300), () {
       if (_mapController != null && _isScreenActive && mounted) {
-        _mapController!.animateCamera(
-          CameraUpdate.newLatLngBounds(bounds, 150),
-        );
-        _initialFitDone = true;
+        try {
+          _mapController!.animateCamera(
+            CameraUpdate.newLatLngBounds(bounds, 150),
+          );
+          _initialFitDone = true;
+        } catch (e) {
+          print('❌ Error animating camera: $e');
+        }
       }
     });
   }

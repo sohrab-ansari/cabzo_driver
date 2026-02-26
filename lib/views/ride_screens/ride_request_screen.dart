@@ -797,11 +797,15 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     final bounds = _boundsFromLatLngList(allPoints);
 
     Future.delayed(const Duration(milliseconds: 500), () {
-      if (_mapController != null) {
-        _mapController!.animateCamera(
-          CameraUpdate.newLatLngBounds(bounds, 150),
-        );
-        print('✅ Map fitted to show all markers');
+      if (mounted && _mapController != null) {
+        try {
+          _mapController!.animateCamera(
+            CameraUpdate.newLatLngBounds(bounds, 150),
+          );
+          print('✅ Map fitted to show all markers');
+        } catch (e) {
+          print('❌ Error animating camera: $e');
+        }
       }
     });
   }
@@ -1014,9 +1018,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     // Navigate to BottomnavmainScreen after 1 second
     await Future.delayed(Duration(seconds: 1));
     if (mounted) {
-      // Get.offAll(() => BottomnavmainScreen());
+      Get.offAll(() => BottomnavmainScreen(isOnDuty: true));
 
-      Navigator.pop(context);
+      // Navigator.pop(context);
     }
   }
 

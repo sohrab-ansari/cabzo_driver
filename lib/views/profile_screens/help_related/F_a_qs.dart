@@ -147,7 +147,6 @@
 //   }
 // }
 
-
 // import 'package:nzcu_driver/utilities/colors/colors_list.dart';
 // import 'package:nzcu_driver/utilities/widgets/custom_text.dart';
 // import 'package:nzcu_driver/utilities/widgets/navigator.dart';
@@ -373,8 +372,9 @@ class _FAQsState extends State<FAQs> {
             CustomText(
               text: widget.categoryName ?? "FAQs",
               textColor: ColorsList.titleTextColor,
-              textFontSize: w * .05,
+              textFontSize: w * .052,
               textFontWeight: FontWeight.w500,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
