@@ -1055,6 +1055,8 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
 
+    print("helloooooo_secduleeddd_ride_hererrer2 ${_rideData!['isScheduled']}");
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -1069,23 +1071,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
           fontSize: 14,
         );
       },
-      // canPop: false,
-      // onPopInvoked: (didPop) {
-      //   if (didPop) return;
-      //   if (_showCancelSheet) {
-      //     setState(() => _showCancelSheet = false);
-      //     return;
-      //   }
-      //   // Prevent back navigation and show message
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(
-      //       content: Text('Please complete the ride first'),
-      //       backgroundColor: Colors.orange,
-      //       duration: Duration(seconds: 2),
-      //       behavior: SnackBarBehavior.floating,
-      //     ),
-      //   );
-      // },
+
       child: Scaffold(
         backgroundColor: Colors.white,
         body: _rideData == null
@@ -1251,6 +1237,11 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   }
 
   Widget _buildRideDetails(double w) {
+    print("helloooooo_secduleeddd_ride_hererrer ${_rideData!['isScheduled']}");
+    print(
+      "helloooooo_secduleeddd_ride_hererrer2222 ${_rideData!['scheduledStartTime']}",
+    );
+
     return Padding(
       padding: EdgeInsets.all(16),
       child: Column(
@@ -1288,24 +1279,56 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
                       ),
                     ),
                     if (_rideData!['scheduledStartTime'] != null)
-                      Text(
-                        DateFormat('hh:mm a, dd MMM yyyy').format(
-                          DateTime.parse(_rideData!['scheduledStartTime']),
-                        ),
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.orange[700],
-                          fontWeight: FontWeight.w500,
-                        ),
+                      Builder(
+                        builder: (context) {
+                          final utcTime = DateTime.parse(
+                            _rideData!['scheduledStartTime'],
+                          );
+
+                          final localTime = utcTime.toLocal(); // ✅ important
+
+                          return Text(
+                            DateFormat(
+                              'hh:mm a, dd MMM yyyy',
+                            ).format(localTime),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.orange[700],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          );
+                        },
                       ),
                   ],
                 ),
+                // Column(
+                //   children: [
+                //     Text(
+                //       'Scheduled Pickup',
+                //       style: TextStyle(
+                //         fontSize: 14,
+                //         color: Colors.orange[800],
+                //         fontWeight: FontWeight.bold,
+                //       ),
+                //     ),
+                //     if (_rideData!['scheduledStartTime'] != null)
+                //       Text(
+                //         DateFormat('hh:mm a, dd MMM yyyy').format(
+                //           DateTime.parse(_rideData!['scheduledStartTime']),
+                //         ),
+                //         style: TextStyle(
+                //           fontSize: 13,
+                //           color: Colors.orange[700],
+                //           fontWeight: FontWeight.w500,
+                //         ),
+                //       ),
+                //   ],
+                // ),
               ),
             ),
           ],
           SizedBox(height: 16),
 
-          // Trip Information
           Text(
             'Trip Information',
             style: TextStyle(
