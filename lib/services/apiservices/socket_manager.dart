@@ -72,6 +72,48 @@ class SocketManager {
     }
   }
 
+  /// Check for a pending ride request from the native Kotlin service.
+  /// Called when the app cold-starts from a killed state after a ride notification.
+  /// The Kotlin SocketForegroundService sets `pending_ride_from_killed=true`
+  /// and stores the ride JSON in `last_ride_request`.
+  Future<void> checkPendingRideFromKilledState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final bool hasPending =
+          prefs.getBool("pending_ride_from_killed") ?? false;
+
+      if (!hasPending) return;
+
+      final String? rideJson = prefs.getString("last_ride_request");
+      if (rideJson == null || rideJson.isEmpty) {
+        await prefs.setBool("pending_ride_from_killed", false);
+        return;
+      }
+
+      print('🚕 [SocketManager] Pending ride from killed state detected!');
+
+      // Clear flag immediately
+      await prefs.setBool("pending_ride_from_killed", false);
+
+      // Parse ride data
+      final Map<String, dynamic> rideData = json.decode(rideJson);
+      _lastRideData = rideData;
+
+      print('🚕 [SocketManager] Navigating to RideRequestScreen...');
+
+      // Navigate to ride request screen (GetX navigates on top of current page)
+      Get.to(() => RideRequestScreen(rideData: rideData));
+
+      // Also trigger the callback if registered
+      onNewRide?.call(rideData);
+    } catch (e) {
+      print('❌ [SocketManager] Error checking pending ride: $e');
+      // Clear bad data
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool("pending_ride_from_killed", false);
+    }
+  }
+
   // Socket instance
   IO.Socket? _socket;
 
@@ -1147,9 +1189,11 @@ class SocketManager {
       _startLocationUpdates();
       startLocationWatch();
 
-      // START FOREGROUND SERVICE (keeps app alive in background)
+      // START NATIVE FOREGROUND SERVICE (keeps app alive in background)
       print('🚀 [SocketManager] Starting Native Foreground Service...');
       await _startNativeService();
+
+      // Native SocketForegroundService handles killed-state socket via Kotlin
 
       // START APP KEEP-ALIVE (isolated try-catch)
       // try {
@@ -1258,6 +1302,8 @@ class SocketManager {
       print("hellooooo7777");
 
       print("hellooooo7777");
+
+      // Native SocketForegroundService is stopped via _stopNativeService() below
 
       // STOP FOREGROUND SERVICE
       print('🛑 Stopping Native Foreground Service...');

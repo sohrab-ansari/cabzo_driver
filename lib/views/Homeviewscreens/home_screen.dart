@@ -1,4 +1,4 @@
-
+import 'dart:async';
 import 'dart:ui' as ui;
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -27,6 +27,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Import the SocketManager
 import 'package:nzcu_driver/services/apiservices/socket_manager.dart'
     hide LatLng;
+import 'package:nzcu_driver/services/background_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool? isOnDuty;
@@ -56,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _hasPendingRideRequest = false;
 
   // App lifecycle
-  // bool _appInBackground = false; // Removed as requested to use background plugins instead
+  Timer? _heartbeatTimer;
 
   // UI State
   String _selectedTab = "Driver";
@@ -110,6 +111,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     ); // Lifecycle observer for background sync
     _initializeApp();
     sharedpreferences();
+
+    // Start heartbeat timer — tells BG isolate the main app is alive
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      BackgroundService.sendHeartbeat();
+    });
+    // Notify background service we are in foreground
+    BackgroundService.notifyAppState('Foreground');
 
     // Ensure build is called after state is set
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -167,6 +175,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         setState(() {});
         _updateDriverMarker();
       }
+      // Check if there's a pending ride request from killed state
+      // (native Kotlin service received ride while app was dead)
+      socketManager.checkPendingRideFromKilledState();
     });
 
     // Start location listener
@@ -368,6 +379,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (state == AppLifecycleState.paused) {
       // App is going to background (minimized)
       print('⏸️ [HomeScreen] App moved to BACKGROUND');
+      BackgroundService.notifyAppState('Background');
 
       // If driver is online, ensure background service is running
       if (socketManager.isOnDuty) {
@@ -376,6 +388,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     } else if (state == AppLifecycleState.resumed) {
       // App is coming back to foreground
       print('▶️ [HomeScreen] App moved to FOREGROUND');
+      BackgroundService.notifyAppState('Foreground');
+      BackgroundService.sendHeartbeat();
 
       // Re-sync state from SharedPreferences (background may have changed things)
       _syncStateFromBackground();
@@ -440,6 +454,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _heartbeatTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this); // Remove lifecycle observer
     // ❌ DON'T dispose SocketManager here - it's a singleton used across the app
     // Only remove the observer and cleanup local resources

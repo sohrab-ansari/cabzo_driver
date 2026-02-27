@@ -8,6 +8,7 @@ import 'package:nzcu_driver/core/dependency_injection.dart';
 import 'package:nzcu_driver/firebase_options.dart';
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
 import 'package:nzcu_driver/background/ride_notification_service.dart';
+
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/network_status_overlay.dart';
 import 'package:nzcu_driver/utilities/widgets/location_guard.dart';
@@ -100,6 +101,9 @@ void main() async {
     await RideNotificationService.init();
     await RideNotificationService.requestPermission();
     print('   ✅ Ride Notification Service initialized');
+
+    // Background socket is now handled natively by SocketForegroundService.kt
+    print('9️⃣ Native socket service configured (starts on go-online)');
   } catch (e, stackTrace) {
     print('');
     print('❌ ERROR DURING INITIALIZATION ❌');
