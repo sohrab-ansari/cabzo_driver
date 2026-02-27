@@ -12,16 +12,65 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
-import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
-
-import 'package:nzcu_driver/services/notification_services/notification_service.dart';
+import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:nzcu_driver/background/ride_notification_service.dart';
 
 class SocketManager {
   // Singleton instance
   static final SocketManager _instance = SocketManager._internal();
   factory SocketManager() => _instance;
   SocketManager._internal();
+
+  Future<void> _requestBatteryOptimizations() async {
+    try {
+      print('🔋 Requesting to ignore battery optimizations...');
+      final status = await Permission.ignoreBatteryOptimizations.request();
+      if (status.isGranted) {
+        print('✅ Battery optimizations ignored - App should stay alive');
+      } else {
+        print(
+          '⚠️ Battery optimizations NOT ignored - App might be killed in background',
+        );
+      }
+    } catch (e) {
+      print('❌ Error requesting battery permission: $e');
+    }
+  }
+
+  // Platform channel for native service
+  static const MethodChannel _platform = MethodChannel(
+    'com.nzcu_driver/background_service',
+  );
+
+  Future<void> _startNativeService() async {
+    try {
+      await _platform.invokeMethod('startService');
+      print('🚀 Native Foreground Service Started');
+    } catch (e) {
+      print("❌ Failed to start native service: $e");
+    }
+  }
+
+  Future<void> _stopNativeService() async {
+    try {
+      await _platform.invokeMethod('stopService');
+      print('🛑 Native Foreground Service Stopped');
+    } catch (e) {
+      print("❌ Failed to stop native service: $e");
+    }
+  }
+
+  Future<void> _updateNativeNotification(String title, String body) async {
+    try {
+      await _platform.invokeMethod('updateNotification', {
+        'title': title,
+        'body': body,
+      });
+    } catch (e) {
+      print("❌ Failed to update native notification: $e");
+    }
+  }
 
   // Socket instance
   IO.Socket? _socket;
@@ -37,20 +86,12 @@ class SocketManager {
 
   // static const String SOCKET_URL = 'https://nzcu.smarttechbros.com';
 
-
-
-  static const String SOCKET_URL = '${ApiPath.SOCKET_URL}';
-
-  
-
-  // static const String SOCKET_URL = "https://api.nzcu.framekarts.com";
-
   // static const String SOCKET_URL = 'https://api.syrus.framekarts.com';
 
   // https://api.syrus.framekarts.com/
 
   //nzcu url
-  // static const String SOCKET_URL = 'https://api.nzcu.framekarts.com';
+  static const String SOCKET_URL = 'https://api.nzcu.framekarts.com';
 
   static const int MAX_RECONNECT_ATTEMPTS = 5;
   static const int CONNECTION_TIMEOUT = 10000;
@@ -87,6 +128,7 @@ class SocketManager {
   DateTime? _lastLocationUpdate;
   StreamSubscription<Position>? _positionStreamSubscription;
   Timer? _locationUpdateTimer;
+  Timer? _reconnectTimer;
 
   // Ride tracking
   String? _activeRideId;
@@ -119,6 +161,46 @@ class SocketManager {
   Future<void> initialize() async {
     print('🔄 Initializing SocketManager...');
     await _loadDriverData();
+
+    // Request Battery Optimizations to prevent background kill
+    await _requestBatteryOptimizations();
+
+    // Wire up notification service actions
+    RideNotificationService.onAccept = (orderId) {
+      print('🔔 [SocketManager] Notification ACCEPT callback for $orderId');
+      acceptRideFromNotification(orderId);
+    };
+
+    RideNotificationService.onDecline = (orderId) async {
+      print('🔔 [SocketManager] Notification DECLINE callback for $orderId');
+
+      // Wait for socket to be connected before emitting decline
+      if (!_isSocketConnected) {
+        print(
+          '⏳ Socket not connected, waiting for connection before declining ride...',
+        );
+        int retries = 0;
+        while (!_isSocketConnected && retries < 15) {
+          await Future.delayed(const Duration(milliseconds: 500));
+          retries++;
+        }
+      }
+
+      if (_isSocketConnected) {
+        declineRide(orderId);
+      } else {
+        print(
+          '❌ [SocketManager] Failed to connect socket within timeout. Cannot decline ride.',
+        );
+      }
+    };
+
+    // Check if we have a pending action from when the app was killed
+    // We delay slightly to ensure _loadDriverData is done and socket init starts
+    Future.delayed(const Duration(seconds: 2), () {
+      RideNotificationService.checkPendingAction();
+    });
+
     await _getInitialLocation();
 
     // Initialize Advanced Geolocation
@@ -127,6 +209,16 @@ class SocketManager {
     await connectSocket();
     // Restore online status from SharedPreferences
     await _restoreOnlineStatus();
+
+    // Wire notification Accept/Decline actions to socket methods
+    RideNotificationService.onAccept = (orderId) {
+      print('🔔 [SocketManager] Notification ACCEPT for $orderId');
+      acceptRideFromNotification(orderId);
+    };
+    RideNotificationService.onDecline = (orderId) {
+      print('🔔 [SocketManager] Notification DECLINE for $orderId');
+      declineRide(orderId, reason: 'Declined from notification');
+    };
   }
 
   // Future<void> _initAdvancedGeolocation() async {
@@ -353,6 +445,12 @@ class SocketManager {
           );
           isOnDuty = true;
         }
+      } else {
+        // Ensure service is stopped if we are offline
+        print(
+          '✅ [SocketManager] Driver is offline, ensuring service is stopped',
+        );
+        await _stopNativeService();
       }
 
       isRestorationInProgress = false;
@@ -558,9 +656,19 @@ class SocketManager {
       print('❌ Driver socket disconnected');
       _isSocketConnected = false;
       _socketStatus = 'Disconnected';
-      _stopLocationUpdates();
+
+      // Only stop location updates if driver went offline intentionally.
+      // If still on duty, keep GPS alive so we can resume on reconnect.
+      if (!isOnDuty) {
+        _stopLocationUpdates();
+      }
 
       onConnectionStatusChange?.call(false);
+
+      // Auto-reconnect if driver is still on duty (background disconnect)
+      if (isOnDuty) {
+        _scheduleReconnect();
+      }
     });
 
     _socket!.onConnectError((data) {
@@ -570,7 +678,16 @@ class SocketManager {
 
     _socket!.onReconnect((data) {
       print('🔄 Socket reconnected after $data attempts');
+      _isSocketConnected = true;
+      _socketStatus = 'Connected';
+      _cancelReconnect();
       onConnectionStatusChange?.call(true);
+
+      // Re-emit online status and restart location after reconnect
+      if (isOnDuty) {
+        print('🔄 [Reconnect] Driver is on duty — re-emitting user:online');
+        goOnline();
+      }
     });
 
     // DRIVER STATUS EVENTS
@@ -617,19 +734,22 @@ class SocketManager {
         prefs.setString('last_ride_request', jsonEncode(data));
       });
 
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => RideRequestScreen(rideData: rideData),
+      //   ),
+      // );
+
       Get.to(RideRequestScreen(rideData: rideData));
 
-      // Trigger interactive notification
-      // NotificationService.instance.showRideRequestNotification(rideData);
+      // Trigger heads-up notification for background/lock screen
+      RideNotificationService.showRideRequest(rideData);
 
       onNewRide?.call(rideData);
     });
 
- 
-
-
     _socket!.on('ride:orderCancelled', (data) {
-
       print('userrrr_side____Canceeledddd>>>>>>>>>>>>>>>>: ${data}');
 
       // Handle order cancelled notification
@@ -692,9 +812,11 @@ class SocketManager {
 
       // Notify listeners
       onRideConfirmed?.call(_currentRide!);
+      _updateNativeNotification(
+        'NZCU Driver — Ride in Progress',
+        'Ride #${orderId.toString().substring(orderId.toString().length > 6 ? orderId.toString().length - 6 : 0)} is active.',
+      );
     });
-
- 
 
     _socket!.on('ride:status', (data) {
       print('📊 Ride status update: $data');
@@ -855,28 +977,66 @@ class SocketManager {
       }
     }
 
+    // Robust extraction for pickup address
+    String pickupAddress = 'Pickup Location';
+    final rawStart =
+        rideData['startLocation'] ?? rideData['pickup'] ?? rideData['source'];
+    if (rawStart is Map) {
+      pickupAddress =
+          rawStart['address']?.toString() ??
+          rawStart['name']?.toString() ??
+          'Pickup Location';
+    } else if (rawStart is String) {
+      pickupAddress = rawStart;
+    } else if (rideData['pickupAddress'] != null) {
+      pickupAddress = rideData['pickupAddress'].toString();
+    }
+
+    // Robust extraction for dropoff address
+    String dropAddress = 'Drop Location';
+    final rawEnd =
+        rideData['endLocation'] ??
+        rideData['destination'] ??
+        rideData['dropoff'];
+    if (rawEnd is Map) {
+      dropAddress =
+          rawEnd['address']?.toString() ??
+          rawEnd['name']?.toString() ??
+          'Drop Location';
+    } else if (rawEnd is String) {
+      dropAddress = rawEnd;
+    } else if (rideData['dropoffAddress'] != null) {
+      dropAddress = rideData['dropoffAddress'].toString();
+    }
+
+    // Robust extraction for rider name
+    String riderName = 'Customer';
+    if (rideData['riderName'] != null) {
+      riderName = rideData['riderName'].toString();
+    } else {
+      final rawUser =
+          rideData['userId'] ?? rideData['rider'] ?? rideData['user'];
+      if (rawUser is Map) {
+        riderName =
+            rawUser['name']?.toString() ??
+            rawUser['firstName']?.toString() ??
+            'Customer';
+      }
+    }
+
     // Build mapped data
     return {
       ...rideData,
       'orderId': rideData['orderId'] ?? rideData['rideId'] ?? rideData['_id'],
       'pickup': pickupCoords,
       'destination': dropoffCoords,
-      'startLocation': {
-        'address': rideData['startLocation']?['address'] ?? 'Pickup Location',
-        'coordinates': pickupCoords,
-      },
-      'endLocation': rideData['endLocation'] != null
-          ? {
-              'address': rideData['endLocation']?['address'] ?? 'Drop Location',
-              'coordinates': dropoffCoords,
-            }
-          : null,
+      'startLocation': {'address': pickupAddress, 'coordinates': pickupCoords},
+      'endLocation': {'address': dropAddress, 'coordinates': dropoffCoords},
       'riderId':
           rideData['riderId'] ??
           rideData['userId']?['_id'] ??
           rideData['userId'],
-      'riderName':
-          rideData['riderName'] ?? rideData['userId']?['name'] ?? 'Customer',
+      'riderName': riderName,
       'riderNumber':
           (rideData['riderNumber'] ?? rideData['userId']?['phone'] ?? '')
               .toString(),
@@ -987,11 +1147,9 @@ class SocketManager {
       _startLocationUpdates();
       startLocationWatch();
 
-      // NOTIFY BACKGROUND SERVICE TO CONNECT
-      print(
-        '🚀 [SocketManager] Sending "goOnline" command to Background Service...',
-      );
-      FlutterBackgroundService().invoke('goOnline');
+      // START FOREGROUND SERVICE (keeps app alive in background)
+      print('🚀 [SocketManager] Starting Native Foreground Service...');
+      await _startNativeService();
 
       // START APP KEEP-ALIVE (isolated try-catch)
       // try {
@@ -1086,6 +1244,7 @@ class SocketManager {
       _isRideInProgress = false;
       _activeRideId = null;
       _currentRide = null;
+      _cancelReconnect();
       print("hellooooo5555");
 
       // Save offline status to SharedPreferences
@@ -1100,9 +1259,9 @@ class SocketManager {
 
       print("hellooooo7777");
 
-      // NOTIFY BACKGROUND SERVICE TO DISCONNECT
-      print('🛑 Sending "goOffline" command to Background Service...');
-      FlutterBackgroundService().invoke('goOffline');
+      // STOP FOREGROUND SERVICE
+      print('🛑 Stopping Native Foreground Service...');
+      await _stopNativeService();
 
       // STOP APP KEEP-ALIVE
       print('🛑 [SocketManager] Disabling FlutterBackground keep-alive...');
@@ -1144,6 +1303,9 @@ class SocketManager {
     print('❌ DRIVER ONLINE FAILED');
     isOnDuty = false;
     _isProcessingOnline = false;
+
+    // Stop foreground service if online attempt failed
+    _stopNativeService();
 
     onDriverStatusChange?.call(false);
   }
@@ -1225,6 +1387,52 @@ class SocketManager {
       _locationUpdateTimer = null;
       print('⏹️ Stopped location update broadcasts');
     }
+  }
+
+  // ==================== AUTO-RECONNECT ====================
+
+  /// Schedules exponential-backoff reconnect attempts while driver is on duty.
+  void _scheduleReconnect() {
+    _cancelReconnect();
+
+    const initialDelay = Duration(seconds: 5);
+    int attempt = 0;
+
+    void tryReconnect() {
+      if (!isOnDuty || _isSocketConnected) {
+        _cancelReconnect();
+        return;
+      }
+
+      attempt++;
+      // Exponential backoff: 5s, 10s, 20s, 40s … capped at 60s
+      final delay = Duration(
+        seconds: (initialDelay.inSeconds * (1 << (attempt - 1))).clamp(5, 60),
+      );
+      print('🔄 [AutoReconnect] Attempt #$attempt in ${delay.inSeconds}s');
+
+      _reconnectTimer = Timer(delay, () async {
+        if (!isOnDuty || _isSocketConnected) return;
+
+        print('🔌 [AutoReconnect] Trying to reconnect...');
+        final connected = await connectSocket();
+        if (connected && isOnDuty) {
+          print('✅ [AutoReconnect] Reconnected — re-emitting user:online');
+          await goOnline();
+        } else if (isOnDuty) {
+          // Retry again
+          tryReconnect();
+        }
+      });
+    }
+
+    tryReconnect();
+  }
+
+  /// Cancels any pending reconnect timer.
+  void _cancelReconnect() {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
   }
 
   // ==================== RIDE METHODS ====================
@@ -1375,6 +1583,13 @@ class SocketManager {
         _isRideInProgress = false;
         _currentRide = null;
         _saveRideStateToPrefs(); // Reset state for background isolate
+
+        // Reset foreground notification back to online status
+        // Reset foreground notification back to online status
+        _updateNativeNotification(
+          'NZCU Driver — Online',
+          'You are online and ready for ride requests.',
+        );
 
         // Clear persisted ride data
         _clearPersistedRide();

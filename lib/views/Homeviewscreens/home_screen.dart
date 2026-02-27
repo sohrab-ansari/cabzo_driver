@@ -1,6 +1,8 @@
+
 import 'dart:ui' as ui;
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 import 'package:nzcu_driver/controllers/home_controllers/driver_toggle_duty_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
@@ -12,11 +14,10 @@ import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
 import 'package:nzcu_driver/utilities/widgets/map_helper.dart';
 import 'package:nzcu_driver/views/ride_screens/book_ride.dart';
 import 'package:nzcu_driver/views/Homeviewscreens/Agreement_screen.dart';
-import 'package:nzcu_driver/views/ride_screens/ride_request_screen.dart';
+
 import 'package:nzcu_driver/utilities/widgets/home_screen_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -381,21 +382,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  /// Ensure background service is running when app goes to background
+  /// Ensure foreground task is running when app goes to background
   Future<void> _ensureBackgroundServiceRunning() async {
-    try {
-      final service = FlutterBackgroundService();
-      bool isRunning = await service.isRunning();
-      if (!isRunning) {
-        print(
-          '🚀 [HomeScreen] Starting background service (app going to bg)...',
-        );
-        await service.startService();
-      } else {
-        print('✅ [HomeScreen] Background service already running');
-      }
-    } catch (e) {
-      print('⚠️ [HomeScreen] Error ensuring background service: $e');
+    if (socketManager.isOnDuty) {
+      print(
+        '🚀 [HomeScreen] Ensuring online status (Native Service handled by SocketManager)...',
+      );
+      // socketManager.goOnline(); // Optional: idempotent call
     }
   }
 
@@ -415,16 +408,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       // Refresh vehicle data (may have been updated)
       await socketManager.refreshVehicleData();
 
-      // Ensure socket is still connected (reconnect if needed)
-      if (socketManager.isOnDuty && !socketManager.isSocketConnected) {
-        print(
-          '🔌 [HomeScreen] Socket disconnected while in bg, reconnecting...',
-        );
-        await socketManager.connectSocket();
+      if (socketManager.isOnDuty) {
+        // Ensure foreground task is handled by SocketManager
+        // if (!socketManager.isNativeServiceRunning) { ... } // internal logic
 
-        // Re-emit online status after reconnect
-        if (socketManager.isSocketConnected) {
-          await socketManager.goOnline();
+        // Restart location watch if it was killed by the OS
+        socketManager.startLocationWatch();
+
+        // Ensure socket is still connected (reconnect if needed)
+        if (!socketManager.isSocketConnected) {
+          print(
+            '🔌 [HomeScreen] Socket disconnected while in bg, reconnecting...',
+          );
+          await socketManager.connectSocket();
+
+          // Re-emit online status after reconnect
+          if (socketManager.isSocketConnected) {
+            await socketManager.goOnline();
+          }
         }
       }
 

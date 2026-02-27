@@ -7,10 +7,7 @@ import 'package:nzcu_driver/controllers/home_controllers/network_controller.dart
 import 'package:nzcu_driver/core/dependency_injection.dart';
 import 'package:nzcu_driver/firebase_options.dart';
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
-import 'package:nzcu_driver/services/background_service.dart';
-// import 'package:flutter_background/flutter_background.dart';
-// import 'package:flutter_background_geolocation/flutter_background_geolocation.dart'
-//     as bg;
+import 'package:nzcu_driver/background/ride_notification_service.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/network_status_overlay.dart';
 import 'package:nzcu_driver/utilities/widgets/location_guard.dart';
@@ -97,21 +94,12 @@ void main() async {
     print('');
 
     // ========================================================================
-    // 7. BACKGROUND SERVICE INITIALIZATION
+    // 8. RIDE NOTIFICATION SERVICE (heads-up ride request alerts)
     // ========================================================================
-    print('7️⃣ Initializing Background Service...');
-    // await BackgroundService.initializeService();
-    print('   ✅ Background service initialized');
-
-    print('8️⃣ Initializing Flutter Background (App Keep-Alive)...');
-    // const androidConfig = FlutterBackgroundAndroidConfig(
-    //   notificationTitle: "NZCU Driver",
-    //   notificationText: "App is running in the background",
-    //   notificationImportance: AndroidNotificationImportance.high,
-    //   notificationIcon: AndroidResource(name: 'ic_launcher', defType: 'mipmap'),
-    // );
-    // await FlutterBackground.initialize(androidConfig: androidConfig);
-    print('   ✅ Flutter Background initialized');
+    print('8️⃣ Initializing Ride Notification Service...');
+    await RideNotificationService.init();
+    await RideNotificationService.requestPermission();
+    print('   ✅ Ride Notification Service initialized');
   } catch (e, stackTrace) {
     print('');
     print('❌ ERROR DURING INITIALIZATION ❌');

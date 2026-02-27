@@ -28,6 +28,7 @@ class DependencyInjection {
   static void init() {
     Get.put(HomeController(), permanent: true);
     Get.put(StepperController(), permanent: true);
+    Get.put(DriverFormController(), permanent: true);
     Get.put(RiedsHistoryController(), permanent: true);
     Get.put(TransactionController(), permanent: true);
     Get.put(WalletController(), permanent: true);

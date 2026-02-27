@@ -1,7 +1,7 @@
 class ApiPath {
   // static const String baseUri2 = "https://corezap.smarttechbros.com/api/v1";
 
-    // static const String baseUri2 = "https://nzcu.smarttechbros.com/api/v1";
+    // // static const String baseUri2 = "https://nzcu.smarttechbros.com/api/v1";
 
 
     static const String baseUri2 = "https://api.nzcu.framekarts.com/api/v1";
@@ -27,7 +27,7 @@ class ApiPath {
   // new _baseurl
 
 
-  // static const String baseUri = "https://nzcu.smarttechbros.com/api/v1";
+  // // static const String baseUri = "https://nzcu.smarttechbros.com/api/v1";
 
     static const String baseUri = "https://api.nzcu.framekarts.com/api/v1";
 
@@ -43,7 +43,6 @@ class ApiPath {
     static const String SOCKET_URL = 'https://api.nzcu.framekarts.com';
 
     
-
 
 
 //  =======================================================================4

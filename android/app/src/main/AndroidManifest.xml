@@ -38,6 +38,9 @@
 
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <application
         android:label="NZCU Driver"
@@ -123,6 +126,13 @@
         <meta-data
             android:name="id.flutter.flutter_background_service.notification_icon"
             android:resource="@mipmap/ic_launcher" />
+
+        <!-- Native Foreground Service -->
+        <service
+            android:name=".ForegroundService"
+            android:foregroundServiceType="location|dataSync"
+            android:enabled="true"
+            android:exported="false" />
 
         <!-- Add this provider for file sharing -->
         <!-- <provider
