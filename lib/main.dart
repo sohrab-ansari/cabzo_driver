@@ -12,6 +12,7 @@ import 'package:nzcu_driver/services/background_service.dart';
 // import 'package:flutter_background_geolocation/flutter_background_geolocation.dart'
 //     as bg;
 import 'package:nzcu_driver/utilities/colors/colors.dart';
+import 'package:nzcu_driver/controllers/chart_id_controller/chat_notification_controller.dart';
 import 'package:nzcu_driver/utilities/widgets/network_status_overlay.dart';
 import 'package:nzcu_driver/utilities/widgets/location_guard.dart';
 import 'package:nzcu_driver/views/splash/splash_screen.dart';
@@ -121,6 +122,7 @@ void main() async {
   }
 
   Get.put(NetworkController(), permanent: true);
+  Get.put(ChatNotificationController(), permanent: true);
   // ========================================================================
   // RUN THE APP
   // ========================================================================

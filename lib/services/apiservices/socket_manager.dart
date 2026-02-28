@@ -37,11 +37,7 @@ class SocketManager {
 
   // static const String SOCKET_URL = 'https://nzcu.smarttechbros.com';
 
-
-
   static const String SOCKET_URL = '${ApiPath.SOCKET_URL}';
-
-  
 
   // static const String SOCKET_URL = "https://api.nzcu.framekarts.com";
 
@@ -108,6 +104,12 @@ class SocketManager {
   Function(bool)? onConnectionStatusChange;
   Function(bool)? onDriverStatusChange;
   Function(Map<String, dynamic>)? onSocketError;
+
+  // Stream for chat messages to allow multiple listeners
+  final StreamController<Map<String, dynamic>> _chatMessageStreamController =
+      StreamController<Map<String, dynamic>>.broadcast();
+  Stream<Map<String, dynamic>> get chatMessageStream =>
+      _chatMessageStreamController.stream;
 
   // Listeners
   final Map<String, List<Function(dynamic)>> _socketListeners = {};
@@ -625,11 +627,7 @@ class SocketManager {
       onNewRide?.call(rideData);
     });
 
- 
-
-
     _socket!.on('ride:orderCancelled', (data) {
-
       print('userrrr_side____Canceeledddd>>>>>>>>>>>>>>>>: ${data}');
 
       // Handle order cancelled notification
@@ -693,8 +691,6 @@ class SocketManager {
       // Notify listeners
       onRideConfirmed?.call(_currentRide!);
     });
-
- 
 
     _socket!.on('ride:status', (data) {
       print('📊 Ride status update: $data');
@@ -805,11 +801,13 @@ class SocketManager {
     _socket!.on('chat:receiveMessage', (data) {
       print('💬 New chat message received (chat:receiveMessage): $data');
       onChatMessage?.call(data);
+      _chatMessageStreamController.add(Map<String, dynamic>.from(data));
     });
 
     _socket!.on('chat:message', (data) {
       print('💬 New chat message received (chat:message): $data');
       onChatMessage?.call(data);
+      _chatMessageStreamController.add(Map<String, dynamic>.from(data));
     });
 
     _socket!.on('chat:message_sent', (data) {

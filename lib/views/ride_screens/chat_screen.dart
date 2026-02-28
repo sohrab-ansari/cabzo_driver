@@ -2454,6 +2454,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:nzcu_driver/controllers/chart_id_controller/chatid_controller.dart';
+import 'package:nzcu_driver/controllers/chart_id_controller/chat_notification_controller.dart';
 import 'package:nzcu_driver/services/apiservices/socket_manager.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
@@ -2484,6 +2485,8 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final ChatidController chartidController = Get.find<ChatidController>();
+  final ChatNotificationController chatNotificationController =
+      Get.find<ChatNotificationController>();
   final FocusNode _focusNode = FocusNode();
 
   // Store messages locally
@@ -2506,6 +2509,7 @@ class _ChatScreenState extends State<ChatScreen> {
     print('💬 ChatScreen initState');
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      chatNotificationController.setChatScreenActive(true);
       await _loadDriverInfo();
       await _initializeChat();
     });
@@ -2553,6 +2557,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _focusNode.dispose();
 
     // Leave chat room when screen is disposed
+    chatNotificationController.setChatScreenActive(false);
     if (_socketManager != null) {
       final orderId = widget.rideData?['orderId']?.toString();
       if (orderId != null) {
