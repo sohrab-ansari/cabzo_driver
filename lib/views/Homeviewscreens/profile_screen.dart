@@ -1,3 +1,6 @@
+
+
+import 'package:nzcu_driver/modals/home_modals/ride_history_response.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/colors/colors_list.dart';
@@ -10,7 +13,6 @@ import 'package:nzcu_driver/views/auth/login_screen.dart';
 import 'package:nzcu_driver/views/popups/pop_ups.dart';
 import 'package:nzcu_driver/views/profile_screens/documents.dart';
 import 'package:nzcu_driver/views/profile_screens/edit_profile.dart';
-
 import 'package:nzcu_driver/views/profile_screens/help_related/help_screen.dart';
 import 'package:nzcu_driver/views/profile_screens/notification.dart';
 import 'package:nzcu_driver/views/profile_screens/notification_screen.dart';
@@ -18,7 +20,6 @@ import 'package:nzcu_driver/views/profile_screens/payment_screen.dart';
 import 'package:nzcu_driver/views/profile_screens/privacy_policy.dart';
 import 'package:nzcu_driver/views/profile_screens/rating.dart';
 import 'package:nzcu_driver/views/profile_screens/terms_condition.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,39 +34,36 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   String imagePath = "";
 
-  /// First section
-  final List<String> firstImagePathList = [
-    "assets/icons/material-symbols_payments-outline-sharp.png",
-    "assets/icons/ic_round-star.png",
-    // "assets/icons/mingcute_document-2-fill.png",
-    "assets/icons/Gift.png",
+  /// First section - Changed to List<IconData>
+  final List<IconData> firstIconsList = [
+    Icons.payment,
+    Icons.star_rate,
+    Icons.notifications,
   ];
 
   final List<Widget> firstScreens = [
-    PaymentScreen(),
-    Review(),
-    // Documents(),
-    NotificationScreen(),
+    const PaymentScreen(),
+     Review(), // Make sure this is the correct widget name
+    const NotificationScreen(),
   ];
 
   final List<String> firstTitleList = [
     "Payment",
     "Rating",
-    // "Documents",
     "Notifications",
   ];
 
-  /// Second section
-  final List<String> secondImagePathList = [
-    "assets/icons/Question_Circle.png",
-    "assets/icons/material-symbols_policy.png",
-    "assets/icons/material-symbols_policy.png",
+  /// Second section - Changed to List<IconData>
+  final List<IconData> secondIconsList = [
+    Icons.help,
+    Icons.description,
+    Icons.privacy_tip,
   ];
 
   final List<Widget> secondScreens = [
-    HelpScreen(),
-    TermsCondition(),
-    PrivacyPolicy(),
+    const HelpScreen(),
+    const TermsCondition(),
+    const PrivacyPolicy(),
   ];
 
   final List<String> secondTitleList = [
@@ -75,14 +73,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   ];
 
   String? driverName;
-
   String? driverphone;
-
   dynamic profileimage;
 
-  initState() {
+  @override
+  void initState() {
     super.initState();
-
     sharedpreferences();
   }
 
@@ -91,9 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     setState(() {
       driverName = prefs.getString("driver_name");
-
       driverphone = prefs.getString("driver_mobile");
-
       profileimage = prefs.getString("driver_image");
     });
     print("Driver__Name from SharedPreferences: $driverName");
@@ -103,6 +97,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     final double w = MediaQuery.of(context).size.width;
 
     return Scaffold(
@@ -112,24 +107,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         automaticallyImplyLeading: false,
-        // centerTitle: false,
         leading: const SizedBox(),
         title: Transform.translate(
           offset: Offset(w * -0.15, 0),
-          child:
-              AppFonts.textRubik(
-                    context,
-                    "Profile",
-                    w * 0.055,
-                    FontWeight.w600,
-                    AppColors.black,
-                    TextAlign.center,
-                    TextOverflow.ellipsis,
-                    maxLines: 1,
-                  )
-                  .animate()
-                  .fade(duration: 800.ms)
-                  .scale(begin: const Offset(0.95, 0.95)),
+          child: AppFonts.textRubik(
+            context,
+            "Profile",
+            w * 0.055,
+            FontWeight.w600,
+            AppColors.black,
+            TextAlign.center,
+            TextOverflow.ellipsis,
+            maxLines: 1,
+          )
+              .animate()
+              .fade(duration: 800.ms)
+              .scale(begin: const Offset(0.95, 0.95)),
         ),
       ),
       body: ListView(
@@ -138,9 +131,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           SizedBox(height: w * .02),
           _profileCard(w, profileimage),
           SizedBox(height: w * .02),
-          _menuCard(w, firstImagePathList, firstTitleList, firstScreens),
+          _menuCard(w, firstIconsList, firstTitleList, firstScreens),
           SizedBox(height: w * .02),
-          _menuCard(w, secondImagePathList, secondTitleList, secondScreens),
+          _menuCard(w, secondIconsList, secondTitleList, secondScreens),
           SizedBox(height: w * .02),
           _logoutButton(w),
           SizedBox(height: w * .03),
@@ -174,22 +167,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // CustomText(
-                    //   text: "Juanita Valencia",
-                    //   textFontSize: w * .05,
-                    //   textFontWeight: FontWeight.w500,
-                    // ),
                     CustomText(
                       text: "${driverName ?? ''}",
                       textFontSize: w * .05,
                       textFontWeight: FontWeight.w500,
                     ),
-
-                    // CustomText
-                    //   text: "+91 123456789",
-                    //   textFontSize: w * .04,
-                    //   textFontWeight: FontWeight.w400,
-                    // ),
                     CustomText(
                       text: "+91 ${driverphone ?? ''}",
                       textFontSize: w * .04,
@@ -200,16 +182,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
-          Divider(),
+          const Divider(),
           GestureDetector(
             onTap: () => CustomNavigator.push(
               context,
-              EditProfile(),
+              const EditProfile(),
               transition: TransitionType.slideLeft,
             ),
             child: customMenuItemsButton(
-              "assets/icons/editProfile.png",
-              "Edit",
+              Icons.edit,
+              "Edit Profile",
             ),
           ),
           SizedBox(height: w * .02),
@@ -218,15 +200,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  /// MENU CARD
+  /// MENU CARD - Updated to use List<IconData>
   Widget _menuCard(
     double w,
-    List<String> images,
+    List<IconData> icons,
     List<String> titles,
     List<Widget> screens,
   ) {
+    // Ensure all lists have the same length
+    assert(icons.length == titles.length && titles.length == screens.length);
+    
     return Column(
-      children: List.generate(images.length, (index) {
+      children: List.generate(icons.length, (index) {
         return Padding(
           padding: EdgeInsets.only(bottom: w * .02),
           child: Card(
@@ -241,7 +226,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 screens[index],
                 transition: TransitionType.slideLeft,
               ),
-              child: customMenuItemsButton(images[index], titles[index]),
+              child: customMenuItemsButton(icons[index], titles[index]),
             ),
           ),
         );
@@ -254,18 +239,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       onTap: () {
         logout(context);
       },
-      child: 
-      
-      Card(
+      child: Card(
         elevation: 1,
         child: Padding(
           padding: EdgeInsets.all(w * .04),
           child: Row(
             children: [
-              CustomImages.images(
-                "assets/icons/Sign_Out.png",
-                w * .06,
-                w * .06,
+              Icon(
+                Icons.logout,
+                size: w * .06,
+                color: ColorsList.mainButtonColor,
               ),
               SizedBox(width: w * .03),
               CustomText(
@@ -280,135 +263,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  /// LOGOUT
-  ///
-  ///
-  //   Widget _logoutButton(double w) {
-  //   return GestureDetector(
-  //     onTap: () async {
-  //       // 1️⃣ Get SharedPreferences instance
-  //       final prefs = await SharedPreferences.getInstance();
-
-  //       // 2️⃣ Remove auth token (logout)
-  //       await prefs.remove("auth_token");
-
-  //       // If you want full clear instead, use:
-  //       // await prefs.clear();
-
-  //       // 3️⃣ Navigate to Login screen (remove all previous routes)
-  //       CustomNavigator.removeUntil(
-  //         context,
-  //         const LoginScreen(),
-  //         transition: TransitionType.fade,
-  //       );
-  //     },
-  //     child: Card(
-  //       elevation: 1,
-  //       child: Padding(
-  //         padding: EdgeInsets.all(w * .04),
-  //         child: Row(
-  //           children: [
-  //             CustomImages.images(
-  //               "assets/icons/Sign_Out.png",
-  //               w * .06,
-  //               w * .06,
-  //             ),
-  //             SizedBox(width: w * .03),
-  //             CustomText(
-  //               text: "Logout",
-  //               textFontSize: w * .04,
-  //               textFontWeight: FontWeight.w500,
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  //   Widget _logoutButton(double w) {
-  //   return GestureDetector(
-  //     onTap: () async {
-
-  //       // 1️⃣ Get SharedPreferences instance
-  //       final prefs = await SharedPreferences.getInstance();
-
-  //         final String? token = prefs.getString("auth_token");
-
-  //       // 2️⃣ Clear all stored data
-  //       await prefs.clear();
-  //       // OR remove specific keys:
-  //       // await prefs.remove("user_id");
-  //       // await prefs.remove("auth_token");
-
-  //       // 3️⃣ Navigate to Login screen (remove all previous routes)
-  //       CustomNavigator.removeUntil(
-  //         context,
-  //         const LoginScreen(),
-  //         transition: TransitionType.fade,
-  //       );
-  //     },
-  //     child: Card(
-  //       elevation: 1,
-  //       child: Padding(
-  //         padding: EdgeInsets.all(w * .04),
-  //         child: Row(
-  //           children: [
-  //             CustomImages.images(
-  //               "assets/icons/Sign_Out.png",
-  //               w * .06,
-  //               w * .06,
-  //             ),
-  //             SizedBox(width: w * .03),
-  //             CustomText(
-  //               text: "Logout",
-  //               textFontSize: w * .04,
-  //               textFontWeight: FontWeight.w500,
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  // Widget _logoutButton(double w) {
-  //   return GestureDetector(
-  //     onTap: () => {
-
-  // CustomNavigator.removeUntil(
-  //       context,
-  //       const LoginScreen(),
-  //       transition: TransitionType.fade,
-  //     ),
-
-  //     },
-  //     child: Card(
-  //       elevation: 1,
-  //       child: Padding(
-  //         padding: EdgeInsets.all(w * .04),
-  //         child: Row(
-  //           children: [
-  //             CustomImages.images(
-  //               "assets/icons/Sign_Out.png",
-  //               w * .06,
-  //               w * .06,
-  //             ),
-  //             SizedBox(width: w * .03),
-  //             CustomText(
-  //               text: "Logout",
-  //               textFontSize: w * .04,
-  //               textFontWeight: FontWeight.w500,
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  /// COMMON MENU ITEM
-  Widget customMenuItemsButton(String imagePath, String title) {
+  /// COMMON MENU ITEM - Updated to use IconData
+  Widget customMenuItemsButton(IconData icon, String title) {
     final double w = MediaQuery.of(context).size.width;
     return Container(
       width: double.infinity,
@@ -420,7 +276,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: EdgeInsets.all(w * .04),
         child: Row(
           children: [
-            CustomImages.images(imagePath, w * .06, w * .06),
+            Icon(icon, size: w * .06, color: ColorsList.mainButtonColor),
             SizedBox(width: w * .03),
             Expanded(
               child: CustomText(
@@ -436,7 +292,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // logout
+  /// LOGOUT DIALOG
   void logout(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     showDialog(
@@ -471,7 +327,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 textFontWeight: FontWeight.w500,
               ),
               CustomText(
-                text: "Are you sure you want to logout? ",
+                text: "Are you sure you want to logout?",
                 textColor: ColorsList.subtitleTextColor,
                 textFontSize: w * .045,
                 textFontWeight: FontWeight.w400,
@@ -480,7 +336,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: w * .04,
-                  //     //  vertical: w * .05,
                 ),
                 child: AppButtons.solid(
                   context: context,
@@ -488,23 +343,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onClicked: () async {
                     Navigator.pop(context); // Close dialog first
 
-                    // 1️⃣ Get SharedPreferences instance
+                    // Get SharedPreferences instance
                     final prefs = await SharedPreferences.getInstance();
 
-                    // 2️⃣ Remove auth token
-                    await prefs.remove("auth_token");
+                    // Clear all stored data
+                    await prefs.clear();
 
-                    // 3️⃣ Navigate to Login screen
+                    // Navigate to Login screen
                     CustomNavigator.removeUntil(
                       context,
                       const LoginScreen(),
                       transition: TransitionType.fade,
                     );
-                    // CustomNavigator.push(
-                    //   context,
-                    //   LoginScreen(),
-                    //   // transition: TransitionType.slideLeft,
-                    // );
                   },
                   isFullWidth: true,
                   backgroundColor: ColorsList.mainButtonColor,
@@ -517,7 +367,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: w * .04,
-                  // vertical: w * .02,
                 ),
                 child: AppButtons.solid(
                   context: context,
