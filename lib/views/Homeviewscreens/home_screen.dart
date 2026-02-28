@@ -28,6 +28,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nzcu_driver/services/apiservices/socket_manager.dart'
     hide LatLng;
 import 'package:nzcu_driver/services/background_service.dart';
+import 'package:nzcu_driver/background/ride_notification_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool? isOnDuty;
@@ -393,6 +394,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
       // Re-sync state from SharedPreferences (background may have changed things)
       _syncStateFromBackground();
+
+      // Process any Accept/Decline tapped on notification while app was in background
+      RideNotificationService.checkPendingAction();
     }
   }
 

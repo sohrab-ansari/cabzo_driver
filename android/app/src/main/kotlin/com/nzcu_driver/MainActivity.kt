@@ -42,8 +42,8 @@ class MainActivity : FlutterActivity() {
                 "setAppState" -> {
                     val state = call.argument<String>("state") ?: "Foreground"
                     val intent = Intent(this, SocketForegroundService::class.java)
-                    intent.putExtra(SocketForegroundService.EXTRA_ACTION, SocketForegroundService.ACTION_UPDATE)
-                    // The service will pick up the state
+                    intent.putExtra(SocketForegroundService.EXTRA_ACTION, SocketForegroundService.ACTION_SET_APP_STATE)
+                    intent.putExtra(SocketForegroundService.EXTRA_APP_STATE, state)
                     startService(intent)
                     result.success("App state updated")
                 }

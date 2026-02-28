@@ -70,13 +70,17 @@ class SocketForegroundService : Service() {
         private const val PREF_IS_RIDE_IN_PROGRESS = "flutter.is_ride_in_progress"
         private const val PREF_ACTIVE_RIDE_ID = "flutter.active_ride_id"
         private const val PREF_LAST_RIDE_REQUEST = "flutter.last_ride_request"
+        private const val PREF_PENDING_ACCEPT_ORDER_ID = "flutter.pending_accept_order_id"
+        private const val PREF_PENDING_DECLINE_ORDER_ID = "flutter.pending_decline_order_id"
 
         // Extra keys for intent
         const val EXTRA_ACTION = "action"
         const val ACTION_STOP = "stop"
         const val ACTION_UPDATE = "update"
+        const val ACTION_SET_APP_STATE = "set_app_state"
         const val ACTION_ACCEPT_RIDE = "accept_ride"
         const val ACTION_DECLINE_RIDE = "decline_ride"
+        const val EXTRA_APP_STATE = "app_state"
         const val EXTRA_TITLE = "title"
         const val EXTRA_BODY = "body"
         const val EXTRA_ORDER_ID = "order_id"
@@ -128,6 +132,11 @@ class SocketForegroundService : Service() {
                 val title = intent.getStringExtra(EXTRA_TITLE) ?: "NZCU Driver — Online"
                 val body = intent.getStringExtra(EXTRA_BODY) ?: "Waiting for rides..."
                 updateStatusNotification(title, body)
+                return START_STICKY
+            }
+            ACTION_SET_APP_STATE -> {
+                val state = intent.getStringExtra(EXTRA_APP_STATE) ?: "Foreground"
+                setAppState(state)
                 return START_STICKY
             }
             ACTION_ACCEPT_RIDE -> {
@@ -379,9 +388,34 @@ class SocketForegroundService : Service() {
 
             socket?.on("ride:orderCancelled") { args ->
                 Log.i(TAG, "❌ Ride cancelled by user")
-                // Dismiss ride notification
                 val nm = getSystemService(NotificationManager::class.java)
                 nm.cancel(RIDE_NOTIFICATION_ID)
+                // Clear ride state so we emit driver:location:update again (waiting for ride)
+                try {
+                    getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
+                        .putBoolean(PREF_IS_RIDE_IN_PROGRESS, false)
+                        .putString(PREF_ACTIVE_RIDE_ID, "")
+                        .apply()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error clearing ride state: ${e.message}")
+                }
+            }
+
+            socket?.on("ride:status") { args ->
+                if (args.isEmpty()) return@on
+                try {
+                    val data = args[0] as? JSONObject ?: return@on
+                    val status = data.optString("status", "").lowercase()
+                    if (status in listOf("completed", "finished", "ended", "cancelled")) {
+                        Log.i(TAG, "✅ Ride ended (status=$status) — clearing ride state")
+                        getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
+                            .putBoolean(PREF_IS_RIDE_IN_PROGRESS, false)
+                            .putString(PREF_ACTIVE_RIDE_ID, "")
+                            .apply()
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error handling ride:status: ${e.message}")
+                }
             }
 
             socket?.on("driver:online_success") { args ->
@@ -592,13 +626,43 @@ class SocketForegroundService : Service() {
     private fun handleAcceptRide(orderId: String) {
         Log.i(TAG, "✅ Accepting ride: $orderId")
 
-        // Emit accept via socket
-        if (socket != null && isSocketConnected) {
-            val payload = JSONObject().apply {
-                put("orderId", orderId)
-            }
-            socket?.emit("ride:accept", payload)
+        // Persist user's decision so Flutter can reconcile if needed
+        try {
+            val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            prefs.edit()
+                .putString(PREF_PENDING_ACCEPT_ORDER_ID, orderId)
+                .remove(PREF_PENDING_DECLINE_ORDER_ID)
+                .apply()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error persisting pending accept: ${e.message}")
         }
+
+        // Emit accept via socket (best-effort, with reconnect)
+        Thread {
+            try {
+                if (socket == null || !isSocketConnected) {
+                    Log.i(TAG, "Socket not connected, attempting reconnect before accept")
+                    connectSocket()
+
+                    val start = System.currentTimeMillis()
+                    while (!isSocketConnected && System.currentTimeMillis() - start < 5000) {
+                        Thread.sleep(200)
+                    }
+                }
+
+                if (socket != null && isSocketConnected) {
+                    val payload = JSONObject().apply {
+                        put("orderId", orderId)
+                    }
+                    socket?.emit("ride:accept", payload)
+                    Log.i(TAG, "📡 Emitted ride:accept from native service")
+                } else {
+                    Log.e(TAG, "❌ Could not emit ride:accept - socket not connected")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error during native ride accept: ${e.message}", e)
+            }
+        }.start()
 
         // Dismiss ride notification
         val nm = getSystemService(NotificationManager::class.java)
@@ -622,13 +686,43 @@ class SocketForegroundService : Service() {
     private fun handleDeclineRide(orderId: String) {
         Log.i(TAG, "❌ Declining ride: $orderId")
 
-        // Emit decline via socket
-        if (socket != null && isSocketConnected) {
-            val payload = JSONObject().apply {
-                put("orderId", orderId)
-            }
-            socket?.emit("ride:decline", payload)
+        // Persist user's decision so Flutter can reconcile if needed
+        try {
+            val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            prefs.edit()
+                .putString(PREF_PENDING_DECLINE_ORDER_ID, orderId)
+                .remove(PREF_PENDING_ACCEPT_ORDER_ID)
+                .apply()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error persisting pending decline: ${e.message}")
         }
+
+        // Emit decline via socket (best-effort, with reconnect)
+        Thread {
+            try {
+                if (socket == null || !isSocketConnected) {
+                    Log.i(TAG, "Socket not connected, attempting reconnect before decline")
+                    connectSocket()
+
+                    val start = System.currentTimeMillis()
+                    while (!isSocketConnected && System.currentTimeMillis() - start < 5000) {
+                        Thread.sleep(200)
+                    }
+                }
+
+                if (socket != null && isSocketConnected) {
+                    val payload = JSONObject().apply {
+                        put("orderId", orderId)
+                    }
+                    socket?.emit("ride:decline", payload)
+                    Log.i(TAG, "📡 Emitted ride:decline from native service")
+                } else {
+                    Log.e(TAG, "❌ Could not emit ride:decline - socket not connected")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error during native ride decline: ${e.message}", e)
+            }
+        }.start()
 
         // Dismiss ride notification
         val nm = getSystemService(NotificationManager::class.java)

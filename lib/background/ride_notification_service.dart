@@ -184,8 +184,8 @@ class RideNotificationService {
   // Action handler (static — required by awesome_notifications)
   // ---------------------------------------------------------------------------
 
-  /// Handles notification button presses. This is called on a background
-  /// isolate for silent actions.
+  /// Handles notification button presses. Runs in background isolate — do not
+  /// call onAccept/onDecline here; save pending action and let main app process it.
   @pragma("vm:entry-point")
   static Future<void> _onActionReceived(ReceivedAction action) async {
     final String orderId = action.payload?['orderId'] ?? '';
@@ -199,23 +199,11 @@ class RideNotificationService {
     _autoDismissTimer = null;
 
     if (buttonKey == 'ACCEPT') {
-      if (onAccept != null) {
-        onAccept?.call(orderId);
-      } else {
-        _savePendingAction('accept', orderId);
-      }
+      await _savePendingAction('accept', orderId);
     } else if (buttonKey == 'DECLINE') {
-      if (onDecline != null) {
-        onDecline?.call(orderId);
-      } else {
-        _savePendingAction('decline', orderId);
-      }
-    } else {
-      // Body tap - bring to foreground
-      print(
-        "🔔 [RideNotificationService] Notification body tapped - opening app",
-      );
+      await _savePendingAction('decline', orderId);
     }
+    // Body tap: app opens via notification content intent; no action to save.
   }
 
   static Future<void> _savePendingAction(String action, String orderId) async {
@@ -226,28 +214,34 @@ class RideNotificationService {
     await prefs.setString('pending_ride_action', '$action:$orderId');
   }
 
-  /// Check and execute any pending actions from notification taps (when app was killed)
+  /// Check and execute any pending actions from notification taps.
+  /// Call when app becomes active (startup + resume) so Accept/Decline run on main isolate.
   static Future<void> checkPendingAction() async {
     final prefs = await SharedPreferences.getInstance();
     final pending = prefs.getString('pending_ride_action');
 
-    if (pending != null) {
-      final parts = pending.split(':');
-      if (parts.length == 2) {
-        final action = parts[0];
-        final orderId = parts[1];
+    if (pending == null || pending.isEmpty) return;
 
-        print(
-          '🚀 [RideNotificationService] Executing pending action: $action for $orderId',
-        );
-
-        if (action == 'accept') {
-          onAccept?.call(orderId);
-        } else if (action == 'decline') {
-          onDecline?.call(orderId);
-        }
-      }
+    final parts = pending.split(':');
+    if (parts.length < 2) {
       await prefs.remove('pending_ride_action');
+      return;
+    }
+
+    final action = parts[0];
+    final orderId = parts.length == 2 ? parts[1] : parts.sublist(1).join(':');
+
+    print(
+      '🚀 [RideNotificationService] Executing pending action: $action for $orderId',
+    );
+
+    await prefs.remove('pending_ride_action');
+    await dismiss();
+
+    if (action == 'accept' && onAccept != null) {
+      onAccept!.call(orderId);
+    } else if (action == 'decline' && onDecline != null) {
+      onDecline!.call(orderId);
     }
   }
 }

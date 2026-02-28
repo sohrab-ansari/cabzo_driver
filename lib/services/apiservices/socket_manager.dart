@@ -72,6 +72,16 @@ class SocketManager {
     }
   }
 
+  Future<void> _setNativeAppState(String state) async {
+    try {
+      await _platform.invokeMethod('setAppState', {
+        'state': state,
+      });
+    } catch (e) {
+      print("❌ Failed to update native app state: $e");
+    }
+  }
+
   /// Check for a pending ride request from the native Kotlin service.
   /// Called when the app cold-starts from a killed state after a ride notification.
   /// The Kotlin SocketForegroundService sets `pending_ride_from_killed=true`
@@ -95,17 +105,18 @@ class SocketManager {
       // Clear flag immediately
       await prefs.setBool("pending_ride_from_killed", false);
 
-      // Parse ride data
-      final Map<String, dynamic> rideData = json.decode(rideJson);
-      _lastRideData = rideData;
+      // Parse and MAP ride data (same normalization as live socket - required for Accept/Cancel)
+      final Map<String, dynamic> rideDataRaw = json.decode(rideJson);
+      final Map<String, dynamic> rideDataMapped = _mapRideData(rideDataRaw);
+      _lastRideData = rideDataMapped;
 
-      print('🚕 [SocketManager] Navigating to RideRequestScreen...');
+      print('🚕 [SocketManager] Navigating to RideRequestScreen (orderId=${rideDataMapped['orderId']})...');
 
       // Navigate to ride request screen (GetX navigates on top of current page)
-      Get.to(() => RideRequestScreen(rideData: rideData));
+      Get.to(() => RideRequestScreen(rideData: rideDataMapped));
 
       // Also trigger the callback if registered
-      onNewRide?.call(rideData);
+      onNewRide?.call(rideDataMapped);
     } catch (e) {
       print('❌ [SocketManager] Error checking pending ride: $e');
       // Clear bad data
@@ -204,6 +215,9 @@ class SocketManager {
     print('🔄 Initializing SocketManager...');
     await _loadDriverData();
 
+    // Inform native foreground service that Flutter app is now in foreground.
+    await _setNativeAppState('Foreground');
+
     // Request Battery Optimizations to prevent background kill
     await _requestBatteryOptimizations();
 
@@ -252,6 +266,9 @@ class SocketManager {
     // Restore online status from SharedPreferences
     await _restoreOnlineStatus();
 
+    // Process any pending accept/decline actions coming from native notification
+    await _processPendingNativeNotificationActions();
+
     // Wire notification Accept/Decline actions to socket methods
     RideNotificationService.onAccept = (orderId) {
       print('🔔 [SocketManager] Notification ACCEPT for $orderId');
@@ -261,6 +278,50 @@ class SocketManager {
       print('🔔 [SocketManager] Notification DECLINE for $orderId');
       declineRide(orderId, reason: 'Declined from notification');
     };
+  }
+
+  Future<void> _processPendingNativeNotificationActions() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final pendingAcceptOrderId =
+          prefs.getString('pending_accept_order_id') ?? '';
+      final pendingDeclineOrderId =
+          prefs.getString('pending_decline_order_id') ?? '';
+
+      if (pendingAcceptOrderId.isNotEmpty) {
+        print(
+          '🚕 [SocketManager] Processing pending native ACCEPT for $pendingAcceptOrderId',
+        );
+        await prefs.remove('pending_accept_order_id');
+
+        if (!_isSocketConnected) {
+          await connectSocket();
+        }
+
+        await acceptRideFromNotification(pendingAcceptOrderId);
+      } else if (pendingDeclineOrderId.isNotEmpty) {
+        print(
+          '🚕 [SocketManager] Processing pending native DECLINE for $pendingDeclineOrderId',
+        );
+        await prefs.remove('pending_decline_order_id');
+
+        if (!_isSocketConnected) {
+          await connectSocket();
+        }
+
+        final success = declineRide(
+          pendingDeclineOrderId,
+          reason: 'Declined from native notification',
+        );
+        if (!success) {
+          print(
+            '❌ [SocketManager] Failed to decline pending native ride action',
+          );
+        }
+      }
+    } catch (e) {
+      print('❌ [SocketManager] Error processing pending native actions: $e');
+    }
   }
 
   // Future<void> _initAdvancedGeolocation() async {
@@ -776,25 +837,16 @@ class SocketManager {
         prefs.setString('last_ride_request', jsonEncode(data));
       });
 
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => RideRequestScreen(rideData: rideData),
-      //   ),
-      // );
-
-      Get.to(RideRequestScreen(rideData: rideData));
+      // Run navigation on main/UI isolate so screen always shows (avoids "only notification" in foreground)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!isOnDuty) return;
+        Get.to(() => RideRequestScreen(rideData: rideData));
+      });
 
       // Trigger heads-up notification for background/lock screen
       RideNotificationService.showRideRequest(rideData);
 
       onNewRide?.call(rideData);
-    });
-
-    _socket!.on('ride:orderCancelled', (data) {
-      print('userrrr_side____Canceeledddd>>>>>>>>>>>>>>>>: ${data}');
-
-      // Handle order cancelled notification
     });
 
     _socket!.on('ride:confirmed', (data) async {
