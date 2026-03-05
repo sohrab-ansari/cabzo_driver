@@ -432,6 +432,48 @@ class NotificationService {
     }
   }
 
+  /// Show a local notification with custom title and body
+  Future<void> showNotificationDirectly({
+    required String title,
+    required String body,
+    Map<String, dynamic>? payload,
+  }) async {
+    try {
+      final androidDetails = AndroidNotificationDetails(
+        channelId,
+        channelName,
+        channelDescription: channelDescription,
+        importance: Importance.high,
+        priority: Priority.high,
+      );
+
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      final notificationDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      final notificationId = Random().nextInt(100000);
+
+      await _localNotifications.show(
+        notificationId,
+        title,
+        body,
+        notificationDetails,
+        payload: payload != null ? jsonEncode(payload) : null,
+      );
+
+      print('✅ [NotificationService] Direct notification displayed: $title');
+    } catch (e) {
+      print('❌ [NotificationService] Failed to show direct notification: $e');
+    }
+  }
+
   /// Show a local notification from a RemoteMessage
   Future<void> showNotification(RemoteMessage message) async {
     try {

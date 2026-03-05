@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'dart:typed_data';
 
 import 'package:nzcu_driver/controllers/chart_id_controller/chatid_controller.dart';
+import 'package:nzcu_driver/controllers/chart_id_controller/chat_notification_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
@@ -47,6 +48,8 @@ class _ArrivingClientState extends State<ArrivingClient> {
       Get.find<OrderUpdateController>();
 
   final ChatidController chartidController = Get.find<ChatidController>();
+  final ChatNotificationController chatNotificationController =
+      Get.find<ChatNotificationController>();
 
   // Google API Key for Directions
   static const String GOOGLE_API_KEY =
@@ -1542,105 +1545,56 @@ class _ArrivingClientState extends State<ArrivingClient> {
               ],
 
               // In ArrivingClient.dart, update the chat button:
-              _circleImage("assets/images/mess.png", () async {
-                print(
-                  "📱 Chat button tapped with ride data: ${widget.rideData}",
+              Obx(() {
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    _circleImage("assets/images/mess.png", () async {
+                      print(
+                        "📱 Chat button tapped with ride data: ${widget.rideData}",
+                      );
+
+                      // Reset count when opening chat
+                      chatNotificationController.resetCount();
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatScreen(
+                            rideData: widget.rideData,
+                            profileImage: profileImage,
+                            driverName: riderName,
+                          ),
+                        ),
+                      );
+                    }),
+                    if (chatNotificationController.unreadCount.value > 0)
+                      Positioned(
+                        right: -5,
+                        top: -5,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            '${chatNotificationController.unreadCount.value}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
                 );
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChatScreen(
-                      rideData: widget.rideData,
-
-                      profileImage: profileImage,
-
-                      driverName: riderName,
-                    ),
-                  ),
-                );
-
-                //                 try {
-                //                   // Show loading
-                //                   ScaffoldMessenger.of(context).showSnackBar(
-                //                     const SnackBar(
-                //                       content: Text('Opening chat...'),
-                //                       duration: Duration(seconds: 1),
-                //                     ),
-                //                   );
-
-                //                   // Get chart ID first
-                //                   await _getchartidmethod();
-
-                //                   // Wait for controller to update
-                //                   await Future.delayed(const Duration(milliseconds: 1000));
-
-                //                   // Check if we have chart response
-                //                   if (chartidController.chartresposne.value != null &&
-                //                       chartidController.chartresposne.value!.success == true &&
-                //                       chartidController.chartresposne.value!.data != null &&
-                //                       chartidController.chartresposne.value!.data!.id != null &&
-                //                       chartidController
-                //                           .chartresposne
-                //                           .value!
-                //                           .data!
-                //                           .id!
-                //                           .isNotEmpty) {
-                //                     final chatId =
-                //                         chartidController.chartresposne.value!.data!.id!;
-                //                     print("✅ Chat ID obtained: $chatId");
-
-                //                     // Navigate to chat screen
-                //                     // await CustomNavigator.push(
-                //                     //   context,
-                //                     //   ChatScreen(rideData: widget.rideData),
-                //                     // );
-                // Navigator.push(
-                //                       context,
-                //                       MaterialPageRoute(
-                //                         builder: (context) =>
-                //                             ChatScreen(rideData: widget.rideData),
-                //                       ),
-                //                     );
-
-                //                   } else if (chartidController.isLoading.value) {
-                //                     print("⏳ Still loading chart ID...");
-                //                     ScaffoldMessenger.of(context).showSnackBar(
-                //                       const SnackBar(
-                //                         content: Text('Loading chat... Please wait.'),
-                //                         backgroundColor: Colors.orange,
-                //                       ),
-                //                     );
-                //                   } else if (chartidController.errorMessage.value.isNotEmpty) {
-                //                     print(
-                //                       "❌ Error getting chart ID: ${chartidController.errorMessage.value}",
-                //                     );
-                //                     ScaffoldMessenger.of(context).showSnackBar(
-                //                       SnackBar(
-                //                         content: Text(
-                //                           'Chat error: ${chartidController.errorMessage.value}',
-                //                         ),
-                //                         backgroundColor: Colors.red,
-                //                       ),
-                //                     );
-                //                   } else {
-                //                     print("❌ No chart ID available after loading");
-                //                     ScaffoldMessenger.of(context).showSnackBar(
-                //                       const SnackBar(
-                //                         content: Text('Chat not available. Please try again.'),
-                //                         backgroundColor: Colors.orange,
-                //                       ),
-                //                     );
-                //                   }
-                //                 } catch (e) {
-                //                   print("❌ Error navigating to chat: $e");
-                //                   ScaffoldMessenger.of(context).showSnackBar(
-                //                     SnackBar(
-                //                       content: Text('Failed to open chat: ${e.toString()}'),
-                //                       backgroundColor: Colors.red,
-                //                     ),
-                //                   );
-                //                 }
               }),
             ],
           ),
