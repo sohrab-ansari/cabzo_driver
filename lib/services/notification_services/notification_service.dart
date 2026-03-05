@@ -95,6 +95,17 @@ class NotificationService {
   /// Show notification from background handler (without GetX dependencies)
   Future<void> showNotificationInBackground(RemoteMessage message) async {
     try {
+      // Check if driver is online before showing notification
+      final prefs = await SharedPreferences.getInstance();
+      final isOnline = prefs.getBool('driver_is_online') ?? false;
+
+      if (!isOnline) {
+        print(
+          '🔕 [Background] Notification suppressed because driver is OFFLINE',
+        );
+        return;
+      }
+
       // Initialize local notifications plugin in background
       const androidSettings = AndroidInitializationSettings(
         '@mipmap/ic_launcher',

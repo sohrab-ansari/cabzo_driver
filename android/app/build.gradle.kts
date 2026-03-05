@@ -54,4 +54,10 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    // Java Socket.IO client — used by SocketForegroundService for killed-state socket
+    implementation("io.socket:socket.io-client:2.1.1") {
+        exclude(group = "org.json", module = "json")
+    }
+    // Google Location Services for native background location
+    implementation("com.google.android.gms:play-services-location:21.3.0")
 }

@@ -1055,7 +1055,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
 
-    print("helloooooo_secduleeddd_ride_hererrer2 ${_rideData!['isScheduled']}");
+    print("helloooooo_secduleeddd_ride_hererrer2 ${_rideData?['isScheduled']}");
 
     return PopScope(
       canPop: false,
