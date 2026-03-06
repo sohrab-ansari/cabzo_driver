@@ -64,14 +64,6 @@ class NotificationService {
       // Step 2: Create notification channel (Android)
       await _createNotificationChannel();
 
-      // Step 3: Request permission
-      final permissionGranted = await _requestPermission();
-      if (!permissionGranted) {
-        print(
-          '⚠️ [NotificationService] Permission not granted, some features may not work',
-        );
-      }
-
       // Step 4: Get and persist FCM token
       await _getFcmToken();
 
@@ -218,41 +210,54 @@ class NotificationService {
   // ============================================================================
   // PERMISSION HANDLING
   // ============================================================================
+  bool _isRequestingPermission = false;
 
   Future<bool> _requestPermission() async {
+    print('ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+    if (_isRequestingPermission) {
+      print("⚠️ Permission request already in progress");
+      return false;
+    }
+
+    _isRequestingPermission = true;
+
     try {
       final settings = await _messaging.requestPermission(
         alert: true,
-        announcement: false,
         badge: true,
+        sound: true,
+        announcement: false,
         carPlay: false,
         criticalAlert: false,
         provisional: false,
-        sound: true,
       );
 
       final status = settings.authorizationStatus;
 
       switch (status) {
         case AuthorizationStatus.authorized:
-          print('✅ [NotificationService] Permission granted: authorized');
+          print('✅ Permission granted: authorized');
           return true;
+
         case AuthorizationStatus.provisional:
-          print('✅ [NotificationService] Permission granted: provisional');
+          print('✅ Permission granted: provisional');
           return true;
+
         case AuthorizationStatus.denied:
-          print('❌ [NotificationService] Permission denied');
+          print('❌ Permission denied');
           return false;
+
         case AuthorizationStatus.notDetermined:
-          print('⚠️ [NotificationService] Permission not determined');
+          print('⚠️ Permission not determined');
           return false;
       }
     } catch (e) {
-      print('❌ [NotificationService] Permission request failed: $e');
+      print('❌ Permission request failed: $e');
       return false;
+    } finally {
+      _isRequestingPermission = false;
     }
   }
-
   // ============================================================================
   // TOKEN MANAGEMENT
   // ============================================================================
@@ -276,6 +281,7 @@ class NotificationService {
   }
 
   void _listenForTokenRefresh() {
+    print('listening for token refresh');
     _messaging.onTokenRefresh
         .listen((newToken) async {
           print('🔄 [NotificationService] FCM Token refreshed: $newToken');

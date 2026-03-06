@@ -49,7 +49,7 @@ class SocketForegroundService : Service() {
         const val STATUS_NOTIFICATION_ID = 1
         const val RIDE_NOTIFICATION_ID = 900
         const val STATUS_CHANNEL_ID = "nzcu_driver_foreground_service"
-        const val RIDE_CHANNEL_ID = "ride_request_channel"
+        const val RIDE_CHANNEL_ID = "ride_request_channel_v4"
 
         // Location update interval (ms)
         private const val LOCATION_INTERVAL_MS = 5000L

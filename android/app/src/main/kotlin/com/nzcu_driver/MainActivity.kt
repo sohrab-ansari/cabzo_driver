@@ -11,6 +11,7 @@ class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.nzcu_driver/background_service"
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+        val soundTest = R.raw.ride_sound
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {

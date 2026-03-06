@@ -18,7 +18,6 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    home_data_method();
   }
 
   Future<void> home_data_method() async {

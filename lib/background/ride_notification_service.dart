@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Notification channel & IDs used exclusively for ride request alerts.
-const String _kRideChannelKey = 'ride_request_channel';
+const String _kRideChannelKey = 'ride_request_channel_v4';
 const int _kRideNotificationId = 900;
 
 /// Service that displays a high-priority heads-up notification when a new ride
@@ -56,17 +56,19 @@ class RideNotificationService {
           channelName: 'Ride Requests',
           channelDescription: 'Heads-up alerts for new ride requests',
           importance: NotificationImportance.Max,
+          defaultRingtoneType: DefaultRingtoneType.Notification,
           channelShowBadge: true,
           playSound: true,
-          defaultRingtoneType: DefaultRingtoneType.Notification,
           enableVibration: true,
           enableLights: true,
           ledColor: Colors.blue,
           locked: true,
           criticalAlerts: true,
+          soundSource: 'resource://raw/ride_sound',
         ),
       ],
     );
+
 
     // Listen for button presses
     AwesomeNotifications().setListeners(
@@ -79,12 +81,17 @@ class RideNotificationService {
 
   /// Request notification permissions (Android 13+).
   static Future<bool> requestPermission() async {
-    final isAllowed = await AwesomeNotifications().isNotificationAllowed();
-    if (!isAllowed) {
-      return await AwesomeNotifications()
-          .requestPermissionToSendNotifications();
+    try {
+      final isAllowed = await AwesomeNotifications().isNotificationAllowed();
+      if (!isAllowed) {
+        return await AwesomeNotifications()
+            .requestPermissionToSendNotifications();
+      }
+      return true;
+    } catch (e) {
+      print('failed request: $e');
+      return false;
     }
-    return true;
   }
 
   // ---------------------------------------------------------------------------
@@ -101,10 +108,10 @@ class RideNotificationService {
   ///   - `totalFare` (String)
   ///   - `distance` (String)
   static Future<void> showRideRequest(Map<String, dynamic> rideData) async {
-    if (!_isInitialized) {
-      print('⚠️ [RideNotificationService] Not initialized, calling init()');
-      await init();
-    }
+    // if (!_isInitialized) {
+    //   print('⚠️ [RideNotificationService] Not initialized, calling init()');
+    //   await init();
+    // }
 
     final String orderId = (rideData['orderId'] ?? rideData['_id'] ?? '')
         .toString();

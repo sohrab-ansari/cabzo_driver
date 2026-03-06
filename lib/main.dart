@@ -84,9 +84,9 @@ void main() async {
     // ========================================================================
     // 5. NOTIFICATION SERVICE INITIALIZATION
     // ========================================================================
-    print('5️⃣ Initializing Notification Service...');
-    await NotificationService.instance.initialize();
-    print('   ✅ Notification service initialized');
+    // print('5️⃣ Initializing Notification Service...');
+    // await NotificationService.instance.initialize();
+    // print('   ✅ Notification service initialized');
 
     // ========================================================================
     // 6. PRINT SUCCESS MESSAGE
