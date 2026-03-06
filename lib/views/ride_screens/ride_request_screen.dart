@@ -8,7 +8,7 @@ import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_images.dart';
 import 'package:nzcu_driver/utilities/widgets/map_helper.dart';
-import 'package:nzcu_driver/utilities/widgets/navigator.dart';
+
 import 'package:nzcu_driver/utilities/utils/button_state_manager.dart';
 import 'package:nzcu_driver/utilities/utils/navigation_command.dart';
 import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
@@ -24,8 +24,7 @@ import 'package:geolocator/geolocator.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'dart:ui' as ui;
-import 'dart:typed_data';
+
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -55,7 +54,6 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   GoogleMapController? _mapController;
   LatLng? _driverLocation;
   double _driverHeading = 0;
-  double _distanceToPickup = 0;
   bool _locationError = false;
   StreamSubscription<Position>? _positionStreamSubscription;
 
@@ -408,18 +406,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       // Extract coordinates
       _extractCoordinates();
 
-      // Initialize driver location
-      _initializeDriverLocation();
-
-      // Calculate distance to pickup
-      if (_driverLocation != null && _rideData!['pickupCoordinates'] != null) {
-        _distanceToPickup = _calculateDistance(
-          _driverLocation!.latitude,
-          _driverLocation!.longitude,
-          _rideData!['pickupCoordinates'].latitude,
-          _rideData!['pickupCoordinates'].longitude,
-        );
-      }
+      // Removed simulated driver location logic
 
       print('✅ Ride data extracted successfully');
       print('📍 Pickup: ${_pickupAddress}');
@@ -461,14 +448,6 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       _formattedDate = DateFormat('dd MMMM, yyyy').format(DateTime.now());
       _rideId = 'N/A';
       _orderId = 'N/A';
-
-      // Calculate distance
-      _distanceToPickup = _calculateDistance(
-        _driverLocation!.latitude,
-        _driverLocation!.longitude,
-        _rideData!['pickupCoordinates'].latitude,
-        _rideData!['pickupCoordinates'].longitude,
-      );
     }
   }
 
@@ -526,44 +505,6 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       _rideData!['pickupCoordinates'] = LatLng(23.2599, 77.4126); // Bhopal
       _rideData!['dropoffCoordinates'] = LatLng(18.5204, 73.8567); // Pune
     }
-  }
-
-  /// Initialize driver location
-  void _initializeDriverLocation() {
-    // For Ride Request screen, driver is not at pickup yet
-    // Simulate driver location slightly away from pickup
-    if (_rideData!['pickupCoordinates'] != null) {
-      _driverLocation = LatLng(
-        _rideData!['pickupCoordinates'].latitude - 0.01,
-        _rideData!['pickupCoordinates'].longitude - 0.01,
-      );
-    } else {
-      _driverLocation = LatLng(23.2550, 77.4000); // Near Bhopal
-    }
-    print('📍 Driver location initialized: $_driverLocation');
-  }
-
-  double _calculateDistance(
-    double lat1,
-    double lon1,
-    double lat2,
-    double lon2,
-  ) {
-    const R = 6371; // Earth radius in km
-    final dLat = _toRadians(lat2 - lat1);
-    final dLon = _toRadians(lon2 - lon1);
-    final a =
-        sin(dLat / 2) * sin(dLat / 2) +
-        cos(_toRadians(lat1)) *
-            cos(_toRadians(lat2)) *
-            sin(dLon / 2) *
-            sin(dLon / 2);
-    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
-    return R * c;
-  }
-
-  double _toRadians(double degree) {
-    return degree * pi / 180;
   }
 
   Future<bool> _requestLocationPermission() async {
@@ -635,17 +576,6 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
               _locationError = false;
             });
-
-            // Recalculate distance to pickup
-            if (_rideData!['pickupCoordinates'] != null) {
-              final pickupCoords = _rideData!['pickupCoordinates'] as LatLng;
-              _distanceToPickup = _calculateDistance(
-                position.latitude,
-                position.longitude,
-                pickupCoords.latitude,
-                pickupCoords.longitude,
-              );
-            }
 
             // Update markers
             _setMarkers();
@@ -1423,10 +1353,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     return Row(
       children: [
         Expanded(
-          child: _buildInfoCard(
-            label: 'Pick up',
-            value: '${_distanceToPickup.toStringAsFixed(1)} Km',
-          ),
+          child: _routeInfo['distance']?.isNotEmpty == true
+              ? _buildInfoCard(label: 'Pick up', value: _routeInfo['distance']!)
+              : _buildCalculatingCard('Pick up'),
         ),
         SizedBox(width: 16),
         Expanded(
@@ -1459,6 +1388,43 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
             fontWeight: FontWeight.w600,
             color: Colors.black,
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCalculatingCard(String label) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[600],
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        SizedBox(height: 4),
+        TweenAnimationBuilder<int>(
+          tween: IntTween(begin: 0, end: 3),
+          duration: const Duration(milliseconds: 1500),
+          builder: (context, value, child) {
+            String dots = '.' * value;
+            return Text(
+              'Calculating$dots',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey,
+                fontStyle: FontStyle.italic,
+              ),
+            );
+          },
+          onEnd: () {
+            // Force rebuild to keep animation looping
+            if (mounted) setState(() {});
+          },
         ),
       ],
     );
