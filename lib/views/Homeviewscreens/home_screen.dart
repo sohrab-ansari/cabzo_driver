@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:ui' as ui;
-import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
@@ -28,7 +26,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nzcu_driver/services/apiservices/socket_manager.dart'
     hide LatLng;
 import 'package:nzcu_driver/services/background_service.dart';
-import 'package:nzcu_driver/background/ride_notification_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool? isOnDuty;
@@ -396,7 +393,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _syncStateFromBackground();
 
       // Process any Accept/Decline tapped on notification while app was in background
-      RideNotificationService.checkPendingAction();
+      // Pending actions are now handled uniformly inside SocketManager
     }
   }
 

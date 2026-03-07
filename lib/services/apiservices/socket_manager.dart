@@ -14,7 +14,7 @@ import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart
 import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:nzcu_driver/background/ride_notification_service.dart';
+import 'package:nzcu_driver/services/notification_services/notification_service.dart';
 
 class SocketManager {
   // Singleton instance
@@ -112,8 +112,14 @@ class SocketManager {
         '🚕 [SocketManager] Navigating to RideRequestScreen (orderId=${rideDataMapped['orderId']})...',
       );
 
-      // Navigate to ride request screen (GetX navigates on top of current page)
-      Get.to(() => RideRequestScreen(rideData: rideDataMapped));
+      // Navigate to ride request screen strictly after rendering frame (stops GetX from swallowing the intent)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // High delay to ensure the splash screen is completely done transitioning
+        // to HomeScreen before projecting the RideRequest view onto the stack.
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          Get.to(() => RideRequestScreen(rideData: rideDataMapped));
+        });
+      });
 
       // Also trigger the callback if registered
       onNewRide?.call(rideDataMapped);
@@ -231,42 +237,6 @@ class SocketManager {
     // Request Battery Optimizations to prevent background kill
     await _requestBatteryOptimizations();
 
-    // Wire up notification service actions
-    RideNotificationService.onAccept = (orderId) {
-      print('🔔 [SocketManager] Notification ACCEPT callback for $orderId');
-      acceptRideFromNotification(orderId);
-    };
-
-    RideNotificationService.onDecline = (orderId) async {
-      print('🔔 [SocketManager] Notification DECLINE callback for $orderId');
-
-      // Wait for socket to be connected before emitting decline
-      if (!_isSocketConnected) {
-        print(
-          '⏳ Socket not connected, waiting for connection before declining ride...',
-        );
-        int retries = 0;
-        while (!_isSocketConnected && retries < 15) {
-          await Future.delayed(const Duration(milliseconds: 500));
-          retries++;
-        }
-      }
-
-      if (_isSocketConnected) {
-        declineRide(orderId);
-      } else {
-        print(
-          '❌ [SocketManager] Failed to connect socket within timeout. Cannot decline ride.',
-        );
-      }
-    };
-
-    // Check if we have a pending action from when the app was killed
-    // We delay slightly to ensure _loadDriverData is done and socket init starts
-    Future.delayed(const Duration(seconds: 2), () {
-      RideNotificationService.checkPendingAction();
-    });
-
     await _getInitialLocation();
 
     // Initialize Advanced Geolocation
@@ -278,16 +248,6 @@ class SocketManager {
 
     // Process any pending accept/decline actions coming from native notification
     await _processPendingNativeNotificationActions();
-
-    // Wire notification Accept/Decline actions to socket methods
-    RideNotificationService.onAccept = (orderId) {
-      print('🔔 [SocketManager] Notification ACCEPT for $orderId');
-      acceptRideFromNotification(orderId);
-    };
-    RideNotificationService.onDecline = (orderId) {
-      print('🔔 [SocketManager] Notification DECLINE for $orderId');
-      declineRide(orderId, reason: 'Declined from notification');
-    };
   }
 
   Future<void> _processPendingNativeNotificationActions() async {
@@ -854,7 +814,7 @@ class SocketManager {
       });
 
       // Trigger heads-up notification for background/lock screen
-      RideNotificationService.showRideRequest(rideData);
+      NotificationService.instance.showRideRequestNotification(rideData);
 
       onNewRide?.call(rideData);
     });
@@ -958,7 +918,7 @@ class SocketManager {
       print('❌ Ride cancelled: $data');
 
       // Ensure any looping background ringtone shuts off if driver hasn't touched the screen
-      RideNotificationService.dismiss();
+      NotificationService.instance.cancelRideNotification();
 
       // FIX: Use rideId instead of orderId
       final rideId = data['rideId'] ?? data['orderId'];
@@ -1331,7 +1291,7 @@ class SocketManager {
     print('🔴 GOING OFFLINE...');
 
     // Stop any looping ride request sounds
-    RideNotificationService.dismiss();
+    NotificationService.instance.cancelRideNotification();
 
     print("hellooooo222 ${_isProcessingOnline}");
     if (_isProcessingOnline) return;

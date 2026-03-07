@@ -7,7 +7,6 @@ import 'package:nzcu_driver/controllers/home_controllers/network_controller.dart
 import 'package:nzcu_driver/core/dependency_injection.dart';
 import 'package:nzcu_driver/firebase_options.dart';
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
-import 'package:nzcu_driver/background/ride_notification_service.dart';
 
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/controllers/chart_id_controller/chat_notification_controller.dart';
@@ -98,10 +97,7 @@ void main() async {
     // ========================================================================
     // 8. RIDE NOTIFICATION SERVICE (heads-up ride request alerts)
     // ========================================================================
-    print('8️⃣ Initializing Ride Notification Service...');
-    await RideNotificationService.init();
-    await RideNotificationService.requestPermission();
-    print('   ✅ Ride Notification Service initialized');
+    print('8️⃣ Using SocketForegroundService for killed-state native notifications.');
 
     // Background socket is now handled natively by SocketForegroundService.kt
     print('9️⃣ Native socket service configured (starts on go-online)');
