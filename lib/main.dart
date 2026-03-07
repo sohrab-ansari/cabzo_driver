@@ -100,6 +100,7 @@ void main() async {
     // ========================================================================
     print('8️⃣ Initializing Ride Notification Service...');
     await RideNotificationService.init();
+
     await RideNotificationService.requestPermission();
     print('   ✅ Ride Notification Service initialized');
 
