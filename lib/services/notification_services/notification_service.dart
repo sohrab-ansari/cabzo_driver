@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:nzcu_driver/services/apiservices/socket_manager.dart';
@@ -20,11 +21,17 @@ class NotificationService {
   // CONSTANTS
   // ============================================================================
 
-  /// Notification channel ID - must match AndroidManifest.xml meta-data
-  static const String channelId = 'high_importance_channel';
-  static const String channelName = 'High Importance Notifications';
+  /// Notification channel ID - must match AndroidManifest.xml meta-data for Rides
+  static const String channelId = 'ride_request_channel_v9';
+  static const String channelName = 'Ride Requests';
   static const String channelDescription =
-      'This channel is used for important notifications';
+      'This channel is used for important ride notifications';
+
+  /// Generic channel for standard notifications like chat or updates
+  static const String genericChannelId = 'generic_notifications_v1';
+  static const String genericChannelName = 'General Notifications';
+  static const String genericChannelDescription =
+      'General app updates and messages';
 
   // ============================================================================
   // INSTANCES
@@ -98,6 +105,11 @@ class NotificationService {
         return;
       }
 
+      // Check if this is a ride request via FCM
+      final isRideRequest =
+          message.data['type'] == 'NEW_RIDE' ||
+          message.data.containsKey('pickupLocation');
+
       // Initialize local notifications plugin in background
       const androidSettings = AndroidInitializationSettings(
         '@mipmap/ic_launcher',
@@ -121,20 +133,39 @@ class NotificationService {
           >();
 
       if (androidPlugin != null) {
-        const channel = AndroidNotificationChannel(
-          channelId,
-          channelName,
-          description: channelDescription,
-          importance: Importance.high,
-          playSound: true,
-          enableVibration: true,
-          showBadge: true,
-        );
-        await androidPlugin.createNotificationChannel(channel);
+        if (isRideRequest) {
+          const channel = AndroidNotificationChannel(
+            channelId,
+            channelName,
+            description: channelDescription,
+            importance: Importance.max,
+            playSound: true,
+            sound: RawResourceAndroidNotificationSound('ride_sound'),
+            enableVibration: true,
+            showBadge: true,
+            enableLights: true,
+          );
+          await androidPlugin.createNotificationChannel(channel);
+        } else {
+          const genericChannel = AndroidNotificationChannel(
+            genericChannelId,
+            genericChannelName,
+            description: genericChannelDescription,
+            importance: Importance.high,
+            playSound: true,
+            enableVibration: true,
+            showBadge: true,
+          );
+          await androidPlugin.createNotificationChannel(genericChannel);
+        }
       }
 
       // Show notification
-      await showNotification(message);
+      if (isRideRequest) {
+        showRideRequestNotification(message.data);
+      } else {
+        await showNotification(message);
+      }
 
       print('✅ [Background] Notification displayed');
     } catch (e) {
@@ -186,10 +217,22 @@ class NotificationService {
   }
 
   Future<void> _createNotificationChannel() async {
-    const channel = AndroidNotificationChannel(
+    const rideChannel = AndroidNotificationChannel(
       channelId,
       channelName,
       description: channelDescription,
+      importance: Importance.max,
+      playSound: true,
+      sound: RawResourceAndroidNotificationSound('ride_sound'),
+      enableVibration: true,
+      showBadge: true,
+      enableLights: true,
+    );
+
+    const genericChannel = AndroidNotificationChannel(
+      genericChannelId,
+      genericChannelName,
+      description: genericChannelDescription,
       importance: Importance.high,
       playSound: true,
       enableVibration: true,
@@ -202,8 +245,9 @@ class NotificationService {
         >();
 
     if (androidPlugin != null) {
-      await androidPlugin.createNotificationChannel(channel);
-      print('✅ [NotificationService] Notification channel created: $channelId');
+      await androidPlugin.createNotificationChannel(rideChannel);
+      await androidPlugin.createNotificationChannel(genericChannel);
+      print('✅ [NotificationService] Notification channels created');
     }
   }
 
@@ -213,7 +257,9 @@ class NotificationService {
   bool _isRequestingPermission = false;
 
   Future<bool> _requestPermission() async {
-    print('ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+    print(
+      'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+    );
     if (_isRequestingPermission) {
       print("⚠️ Permission request already in progress");
       return false;
@@ -395,13 +441,18 @@ class NotificationService {
           rideData['pickupAddress']?.toString() ?? 'Pickup Location';
 
       final androidDetails = AndroidNotificationDetails(
-        channelId,
+        channelId, // Uses standard high priority channel for flutter foreground
         channelName,
         channelDescription: channelDescription,
         importance: Importance.max,
         priority: Priority.max,
         fullScreenIntent: true,
-        category: AndroidNotificationCategory.call,
+        category: AndroidNotificationCategory.alarm,
+        playSound: true,
+        sound: const RawResourceAndroidNotificationSound('ride_sound'),
+        additionalFlags: Int32List.fromList(<int>[
+          4,
+        ]), // FLAG_INSISTENT loops audio infinitely
         actions: <AndroidNotificationAction>[
           const AndroidNotificationAction(
             'accept_ride',
@@ -438,6 +489,18 @@ class NotificationService {
     }
   }
 
+  /// Cancels the ride request notification (stops the ringing native sound)
+  Future<void> cancelRideNotification() async {
+    try {
+      await _localNotifications.cancel(888);
+      print(
+        '🔇 [NotificationService] Cancelled ride notification and stopped ringtone',
+      );
+    } catch (e) {
+      print('❌ [NotificationService] Failed to cancel ride notification: $e');
+    }
+  }
+
   /// Show a local notification with custom title and body
   Future<void> showNotificationDirectly({
     required String title,
@@ -446,9 +509,9 @@ class NotificationService {
   }) async {
     try {
       final androidDetails = AndroidNotificationDetails(
-        channelId,
-        channelName,
-        channelDescription: channelDescription,
+        genericChannelId,
+        genericChannelName,
+        channelDescription: genericChannelDescription,
         importance: Importance.high,
         priority: Priority.high,
       );
@@ -498,9 +561,9 @@ class NotificationService {
 
       // Android notification details
       final androidDetails = AndroidNotificationDetails(
-        channelId,
-        channelName,
-        channelDescription: channelDescription,
+        genericChannelId,
+        genericChannelName,
+        channelDescription: genericChannelDescription,
         importance: Importance.high,
         priority: Priority.high,
         showWhen: true,

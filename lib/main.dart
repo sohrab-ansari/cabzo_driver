@@ -3,11 +3,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/background/ride_notification_service.dart';
 import 'package:nzcu_driver/controllers/home_controllers/network_controller.dart';
 import 'package:nzcu_driver/core/dependency_injection.dart';
 import 'package:nzcu_driver/firebase_options.dart';
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
-import 'package:nzcu_driver/background/ride_notification_service.dart';
 
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/controllers/chart_id_controller/chat_notification_controller.dart';

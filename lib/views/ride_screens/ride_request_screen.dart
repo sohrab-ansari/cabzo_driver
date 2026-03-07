@@ -13,7 +13,7 @@ import 'package:nzcu_driver/utilities/utils/button_state_manager.dart';
 import 'package:nzcu_driver/utilities/utils/navigation_command.dart';
 import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
-import 'package:nzcu_driver/background/ride_notification_service.dart';
+import 'package:nzcu_driver/services/notification_services/notification_service.dart';
 
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
@@ -931,7 +931,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     _countdownTimer?.cancel();
 
     // Stop notification sound
-    RideNotificationService.dismiss();
+    NotificationService.instance.cancelRideNotification();
 
     // ScaffoldMessenger.of(context).showSnackBar(
     //   SnackBar(
@@ -1580,7 +1580,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
     try {
       // Stop notification sound
-      RideNotificationService.dismiss();
+      NotificationService.instance.cancelRideNotification();
 
       // Use the new updateOrder method for custom decline
       orderUpdateController.updateOrder(
@@ -1896,7 +1896,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     }
 
     // Stop notification sound
-    RideNotificationService.dismiss();
+    NotificationService.instance.cancelRideNotification();
 
     // Use the new updateOrder method
     orderUpdateController.updateOrder(
@@ -1926,7 +1926,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     }
 
     // Stop notification sound
-    RideNotificationService.dismiss();
+    NotificationService.instance.cancelRideNotification();
 
     print("declinennnndd_api");
     print("helloooo_tappeddd>>>   ${_orderId}  ");

@@ -43,6 +43,14 @@ class NZCUApplication : FlutterApplication() {
                 enableVibration(true)
                 enableLights(true)
                 lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+                
+                // Set explicit audio for continuous native ringing
+                val soundUri = android.net.Uri.parse("android.resource://" + packageName + "/" + R.raw.ride_sound)
+                val audioAttributes = android.media.AudioAttributes.Builder()
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(android.media.AudioAttributes.USAGE_ALARM)
+                    .build()
+                setSound(soundUri, audioAttributes)
             }
             manager.createNotificationChannel(rideChannel)
 

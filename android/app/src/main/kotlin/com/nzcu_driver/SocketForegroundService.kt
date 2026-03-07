@@ -49,7 +49,7 @@ class SocketForegroundService : Service() {
         const val STATUS_NOTIFICATION_ID = 1
         const val RIDE_NOTIFICATION_ID = 900
         const val STATUS_CHANNEL_ID = "nzcu_driver_foreground_service"
-        const val RIDE_CHANNEL_ID = "ride_request_channel_v4"
+        const val RIDE_CHANNEL_ID = "ride_request_channel_v9"
 
         // Location update interval (ms)
         private const val LOCATION_INTERVAL_MS = 5000L
@@ -618,6 +618,9 @@ class SocketForegroundService : Service() {
             .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setFullScreenIntent(openPendingIntent, true)
             .build()
+            
+        // 🚨 CRITICAL: Make the notification ring infinitely until cancelled
+        notification.flags = notification.flags or Notification.FLAG_INSISTENT
 
         val nm = getSystemService(NotificationManager::class.java)
         nm.notify(RIDE_NOTIFICATION_ID, notification)
