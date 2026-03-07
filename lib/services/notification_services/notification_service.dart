@@ -21,17 +21,11 @@ class NotificationService {
   // CONSTANTS
   // ============================================================================
 
-  /// Notification channel ID - must match AndroidManifest.xml meta-data for Rides
+  /// Notification channel ID - must match AndroidManifest.xml meta-data
   static const String channelId = 'ride_request_channel_v9';
   static const String channelName = 'Ride Requests';
   static const String channelDescription =
-      'This channel is used for important ride notifications';
-
-  /// Generic channel for standard notifications like chat or updates
-  static const String genericChannelId = 'generic_notifications_v1';
-  static const String genericChannelName = 'General Notifications';
-  static const String genericChannelDescription =
-      'General app updates and messages';
+      'This channel is used for important notifications';
 
   // ============================================================================
   // INSTANCES
@@ -105,11 +99,6 @@ class NotificationService {
         return;
       }
 
-      // Check if this is a ride request via FCM
-      final isRideRequest =
-          message.data['type'] == 'NEW_RIDE' ||
-          message.data.containsKey('pickupLocation');
-
       // Initialize local notifications plugin in background
       const androidSettings = AndroidInitializationSettings(
         '@mipmap/ic_launcher',
@@ -133,39 +122,22 @@ class NotificationService {
           >();
 
       if (androidPlugin != null) {
-        if (isRideRequest) {
-          const channel = AndroidNotificationChannel(
-            channelId,
-            channelName,
-            description: channelDescription,
-            importance: Importance.max,
-            playSound: true,
-            sound: RawResourceAndroidNotificationSound('ride_sound'),
-            enableVibration: true,
-            showBadge: true,
-            enableLights: true,
-          );
-          await androidPlugin.createNotificationChannel(channel);
-        } else {
-          const genericChannel = AndroidNotificationChannel(
-            genericChannelId,
-            genericChannelName,
-            description: genericChannelDescription,
-            importance: Importance.high,
-            playSound: true,
-            enableVibration: true,
-            showBadge: true,
-          );
-          await androidPlugin.createNotificationChannel(genericChannel);
-        }
+        const channel = AndroidNotificationChannel(
+          channelId,
+          channelName,
+          description: channelDescription,
+          importance: Importance.max,
+          playSound: true,
+          sound: RawResourceAndroidNotificationSound('ride_sound'),
+          enableVibration: true,
+          showBadge: true,
+          enableLights: true,
+        );
+        await androidPlugin.createNotificationChannel(channel);
       }
 
       // Show notification
-      if (isRideRequest) {
-        showRideRequestNotification(message.data);
-      } else {
-        await showNotification(message);
-      }
+      await showNotification(message);
 
       print('✅ [Background] Notification displayed');
     } catch (e) {
@@ -217,7 +189,7 @@ class NotificationService {
   }
 
   Future<void> _createNotificationChannel() async {
-    const rideChannel = AndroidNotificationChannel(
+    const channel = AndroidNotificationChannel(
       channelId,
       channelName,
       description: channelDescription,
@@ -229,25 +201,14 @@ class NotificationService {
       enableLights: true,
     );
 
-    const genericChannel = AndroidNotificationChannel(
-      genericChannelId,
-      genericChannelName,
-      description: genericChannelDescription,
-      importance: Importance.high,
-      playSound: true,
-      enableVibration: true,
-      showBadge: true,
-    );
-
     final androidPlugin = _localNotifications
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
         >();
 
     if (androidPlugin != null) {
-      await androidPlugin.createNotificationChannel(rideChannel);
-      await androidPlugin.createNotificationChannel(genericChannel);
-      print('✅ [NotificationService] Notification channels created');
+      await androidPlugin.createNotificationChannel(channel);
+      print('✅ [NotificationService] Notification channel created: $channelId');
     }
   }
 
@@ -509,9 +470,9 @@ class NotificationService {
   }) async {
     try {
       final androidDetails = AndroidNotificationDetails(
-        genericChannelId,
-        genericChannelName,
-        channelDescription: genericChannelDescription,
+        channelId,
+        channelName,
+        channelDescription: channelDescription,
         importance: Importance.high,
         priority: Priority.high,
       );
@@ -561,9 +522,9 @@ class NotificationService {
 
       // Android notification details
       final androidDetails = AndroidNotificationDetails(
-        genericChannelId,
-        genericChannelName,
-        channelDescription: genericChannelDescription,
+        channelId,
+        channelName,
+        channelDescription: channelDescription,
         importance: Importance.high,
         priority: Priority.high,
         showWhen: true,
