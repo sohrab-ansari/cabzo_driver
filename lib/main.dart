@@ -3,7 +3,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:nzcu_driver/background/ride_notification_service.dart';
 import 'package:nzcu_driver/controllers/home_controllers/network_controller.dart';
 import 'package:nzcu_driver/core/dependency_injection.dart';
 import 'package:nzcu_driver/firebase_options.dart';
@@ -98,11 +97,6 @@ void main() async {
     // ========================================================================
     // 8. RIDE NOTIFICATION SERVICE (heads-up ride request alerts)
     // ========================================================================
-    print('8️⃣ Initializing Ride Notification Service...');
-    await RideNotificationService.init();
-
-    await RideNotificationService.requestPermission();
-    print('   ✅ Ride Notification Service initialized');
 
     // Background socket is now handled natively by SocketForegroundService.kt
     print('9️⃣ Native socket service configured (starts on go-online)');
