@@ -3,10 +3,9 @@ import 'dart:async';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 
 /// Notification channel & IDs used exclusively for ride request alerts.
-const String _kRideChannelKey = 'ride_request_channel_v6';
+const String _kRideChannelKey = 'ride_request_channel_v8';
 const int _kRideNotificationId = 900;
 
 /// Service that displays a high-priority heads-up notification when a new ride
@@ -57,9 +56,10 @@ class RideNotificationService {
           channelName: 'Ride Requests',
           channelDescription: 'Heads-up alerts for new ride requests',
           importance: NotificationImportance.Max,
-          defaultRingtoneType: DefaultRingtoneType.Ringtone,
+          defaultRingtoneType: DefaultRingtoneType.Alarm,
           channelShowBadge: true,
-          playSound: false, // Turned off to let audioPlayer handle it
+          playSound: true,
+          soundSource: 'resource://raw/ride_sound',
           enableVibration: true,
           enableLights: true,
           ledColor: Colors.blue,
@@ -107,10 +107,10 @@ class RideNotificationService {
   ///   - `totalFare` (String)
   ///   - `distance` (String)
   static Future<void> showRideRequest(Map<String, dynamic> rideData) async {
-    // if (!_isInitialized) {
-    //   print('⚠️ [RideNotificationService] Not initialized, calling init()');
-    //   await init();
-    // }
+    if (!_isInitialized) {
+      print('⚠️ [RideNotificationService] Not initialized, calling init()');
+      await init();
+    }
 
     final String orderId = (rideData['orderId'] ?? rideData['_id'] ?? '')
         .toString();
@@ -141,7 +141,9 @@ class RideNotificationService {
         title: '🚕 New Ride Request',
         body: body.toString(),
         payload: {'orderId': orderId},
-        category: NotificationCategory.Call,
+        category: NotificationCategory.Alarm,
+        customSound:
+            'resource://raw/ride_sound', // explicitly trigger the audio stream
         notificationLayout: NotificationLayout.BigText,
         wakeUpScreen: true,
         fullScreenIntent: true,
@@ -169,18 +171,6 @@ class RideNotificationService {
 
     print('🔔 [RideNotificationService] Ride notification shown for $orderId');
 
-    try {
-      // Use native Ringtone Manager instead of dart isolates, allowing playback while "killed"
-      FlutterRingtonePlayer().play(
-        fromAsset: "assets/audio/ride_sound.ogg",
-        looping: true, // requires API >= 28, falls back automatically
-        volume: 1.0,
-        asAlarm: true,
-      );
-    } catch (e) {
-      print('🔊 [RideNotificationService] Error playing sound: $e');
-    }
-
     // Auto-dismiss after timeout
     _autoDismissTimer?.cancel();
     _autoDismissTimer = Timer(Duration(seconds: autoTimeoutSeconds), () {
@@ -196,13 +186,7 @@ class RideNotificationService {
     _autoDismissTimer?.cancel();
     _autoDismissTimer = null;
 
-    // Stop the external looping ringtone
-    try {
-      FlutterRingtonePlayer().stop();
-    } catch (e) {
-      print('🔊 [RideNotificationService] Error stopping sound: $e');
-    }
-
+    // Canceling the awesome notification natively stops the continuous alarm playback
     await AwesomeNotifications().cancel(_kRideNotificationId);
   }
 
@@ -221,12 +205,8 @@ class RideNotificationService {
       '🔔 [RideNotificationService] Action received: $buttonKey for $orderId',
     );
 
-    // Stop the ringtone immediately upon interaction
-    try {
-      FlutterRingtonePlayer().stop();
-    } catch (e) {
-      print('🔊 [RideNotificationService] Error stopping sound: $e');
-    }
+    // Cancel notification natively to stop the continuous alarm playback
+    await AwesomeNotifications().cancel(_kRideNotificationId);
 
     _autoDismissTimer?.cancel();
     _autoDismissTimer = null;
