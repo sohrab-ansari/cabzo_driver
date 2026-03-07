@@ -13,6 +13,7 @@ import 'package:nzcu_driver/utilities/utils/button_state_manager.dart';
 import 'package:nzcu_driver/utilities/utils/navigation_command.dart';
 import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/background/ride_notification_service.dart';
 
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
@@ -929,6 +930,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     _hasDeclined = true;
     _countdownTimer?.cancel();
 
+    // Stop notification sound
+    RideNotificationService.dismiss();
+
     // ScaffoldMessenger.of(context).showSnackBar(
     //   SnackBar(
     //     content: Text('Ride auto-cancelled (timeout)'),
@@ -1575,6 +1579,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     if (mounted) setState(() => _isDeclining = true);
 
     try {
+      // Stop notification sound
+      RideNotificationService.dismiss();
+
       // Use the new updateOrder method for custom decline
       orderUpdateController.updateOrder(
         context: context,
@@ -1888,6 +1895,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       return;
     }
 
+    // Stop notification sound
+    RideNotificationService.dismiss();
+
     // Use the new updateOrder method
     orderUpdateController.updateOrder(
       context: context,
@@ -1914,6 +1924,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       );
       return;
     }
+
+    // Stop notification sound
+    RideNotificationService.dismiss();
 
     print("declinennnndd_api");
     print("helloooo_tappeddd>>>   ${_orderId}  ");
