@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Notification channel & IDs used exclusively for ride request alerts.
-const String _kRideChannelKey = 'ride_request_channel_v4';
+const String _kRideChannelKey = 'ride_request_channel_v8';
 const int _kRideNotificationId = 900;
 
 /// Service that displays a high-priority heads-up notification when a new ride
@@ -56,19 +56,18 @@ class RideNotificationService {
           channelName: 'Ride Requests',
           channelDescription: 'Heads-up alerts for new ride requests',
           importance: NotificationImportance.Max,
-          defaultRingtoneType: DefaultRingtoneType.Notification,
+          defaultRingtoneType: DefaultRingtoneType.Alarm,
           channelShowBadge: true,
           playSound: true,
+          soundSource: 'resource://raw/ride_sound',
           enableVibration: true,
           enableLights: true,
           ledColor: Colors.blue,
           locked: true,
           criticalAlerts: true,
-          soundSource: 'resource://raw/ride_sound',
         ),
       ],
     );
-
 
     // Listen for button presses
     AwesomeNotifications().setListeners(
@@ -108,10 +107,10 @@ class RideNotificationService {
   ///   - `totalFare` (String)
   ///   - `distance` (String)
   static Future<void> showRideRequest(Map<String, dynamic> rideData) async {
-    // if (!_isInitialized) {
-    //   print('⚠️ [RideNotificationService] Not initialized, calling init()');
-    //   await init();
-    // }
+    if (!_isInitialized) {
+      print('⚠️ [RideNotificationService] Not initialized, calling init()');
+      await init();
+    }
 
     final String orderId = (rideData['orderId'] ?? rideData['_id'] ?? '')
         .toString();
@@ -142,7 +141,9 @@ class RideNotificationService {
         title: '🚕 New Ride Request',
         body: body.toString(),
         payload: {'orderId': orderId},
-        category: NotificationCategory.Call,
+        category: NotificationCategory.Alarm,
+        customSound:
+            'resource://raw/ride_sound', // explicitly trigger the audio stream
         notificationLayout: NotificationLayout.BigText,
         wakeUpScreen: true,
         fullScreenIntent: true,
@@ -184,6 +185,8 @@ class RideNotificationService {
   static Future<void> dismiss() async {
     _autoDismissTimer?.cancel();
     _autoDismissTimer = null;
+
+    // Canceling the awesome notification natively stops the continuous alarm playback
     await AwesomeNotifications().cancel(_kRideNotificationId);
   }
 
@@ -201,6 +204,9 @@ class RideNotificationService {
     print(
       '🔔 [RideNotificationService] Action received: $buttonKey for $orderId',
     );
+
+    // Cancel notification natively to stop the continuous alarm playback
+    await AwesomeNotifications().cancel(_kRideNotificationId);
 
     _autoDismissTimer?.cancel();
     _autoDismissTimer = null;

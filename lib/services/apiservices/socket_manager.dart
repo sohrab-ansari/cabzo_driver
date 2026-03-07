@@ -74,9 +74,7 @@ class SocketManager {
 
   Future<void> _setNativeAppState(String state) async {
     try {
-      await _platform.invokeMethod('setAppState', {
-        'state': state,
-      });
+      await _platform.invokeMethod('setAppState', {'state': state});
     } catch (e) {
       print("❌ Failed to update native app state: $e");
     }
@@ -110,7 +108,9 @@ class SocketManager {
       final Map<String, dynamic> rideDataMapped = _mapRideData(rideDataRaw);
       _lastRideData = rideDataMapped;
 
-      print('🚕 [SocketManager] Navigating to RideRequestScreen (orderId=${rideDataMapped['orderId']})...');
+      print(
+        '🚕 [SocketManager] Navigating to RideRequestScreen (orderId=${rideDataMapped['orderId']})...',
+      );
 
       // Navigate to ride request screen (GetX navigates on top of current page)
       Get.to(() => RideRequestScreen(rideData: rideDataMapped));
@@ -958,6 +958,9 @@ class SocketManager {
       print("my_cancelledddd_full_datatattt ${data}");
       print('❌ Ride cancelled: $data');
 
+      // Ensure any looping background ringtone shuts off if driver hasn't touched the screen
+      RideNotificationService.dismiss();
+
       // FIX: Use rideId instead of orderId
       final rideId = data['rideId'] ?? data['orderId'];
 
@@ -1327,6 +1330,9 @@ class SocketManager {
 
   Future<void> goOffline() async {
     print('🔴 GOING OFFLINE...');
+
+    // Stop any looping ride request sounds
+    RideNotificationService.dismiss();
 
     print("hellooooo222 ${_isProcessingOnline}");
     if (_isProcessingOnline) return;
