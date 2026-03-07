@@ -808,11 +808,11 @@ class SocketManager {
       });
 
       // Run navigation on main/UI isolate so screen always shows (avoids "only notification" in foreground)
-      // WidgetsBinding.instance.addPostFrameCallback((_) {
-      //   print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXx');
-      //   if (!isOnDuty) return;
-      //   Get.to(() => RideRequestScreen(rideData: rideData));
-      // });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXx');
+        if (!isOnDuty) return;
+        Get.to(() => RideRequestScreen(rideData: rideData));
+      });
 
       // Trigger heads-up notification for background/lock screen
       NotificationService.instance.showRideRequestNotification(rideData);
