@@ -11,9 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
-import 'package:nzcu_driver/views/ride_screens/map_location_picker.dart';
 
 class BookRide extends StatefulWidget {
   const BookRide({super.key});
@@ -145,37 +143,6 @@ class _BookRideState extends State<BookRide> {
               dropError = null;
             }
           });
-        },
-        onPickOnMap: () async {
-          // Close the search sheet first
-          Navigator.pop(context);
-
-          // Open the map picker and await the user's chosen location
-          final PlaceDetails? result = await Get.to<PlaceDetails>(
-            () => MapLocationPicker(
-              isPickup: isPickup,
-              initialLat: isPickup ? pickupLat : dropLat,
-              initialLng: isPickup ? pickupLng : dropLng,
-            ),
-            transition: Transition.rightToLeft,
-            duration: const Duration(milliseconds: 300),
-          );
-
-          if (result != null && mounted) {
-            setState(() {
-              if (isPickup) {
-                pickupController.text = result.address;
-                pickupLat = result.lat;
-                pickupLng = result.lng;
-                pickupError = null;
-              } else {
-                dropController.text = result.address;
-                dropLat = result.lat;
-                dropLng = result.lng;
-                dropError = null;
-              }
-            });
-          }
         },
       ),
     );
@@ -612,13 +579,9 @@ class _PlaceSearchSheet extends StatefulWidget {
   final bool isPickup;
   final Function(PlaceDetails) onPlaceSelected;
 
-  /// Called when user wants to pick location via map pin
-  final VoidCallback onPickOnMap;
-
   const _PlaceSearchSheet({
     required this.isPickup,
     required this.onPlaceSelected,
-    required this.onPickOnMap,
   });
 
   @override
@@ -756,93 +719,7 @@ class _PlaceSearchSheetState extends State<_PlaceSearchSheet> {
             ),
           ),
 
-          SizedBox(height: h * 0.015),
-
-          // ── Pick on map option ─────────────────────────────────────────
-          GestureDetector(
-            onTap: widget.onPickOnMap,
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: w * 0.04,
-                vertical: w * 0.03,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.lightGray,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppColors.primaryblue.withValues(alpha: 0.35),
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryblue.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.map_outlined,
-                      color: AppColors.primaryblue,
-                      size: 18,
-                    ),
-                  ),
-                  SizedBox(width: w * 0.03),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Pick location on map',
-                        style: GoogleFonts.poppins(
-                          fontSize: w * 0.038,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.black,
-                        ),
-                      ),
-                      Text(
-                        'Drag map & place pin exactly',
-                        style: GoogleFonts.poppins(
-                          fontSize: w * 0.03,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.mediumGray,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  const Icon(
-                    Icons.chevron_right,
-                    color: AppColors.mediumGray,
-                    size: 22,
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          SizedBox(height: h * 0.015),
-
-          // Divider between map option and search results
-          Row(
-            children: [
-              Expanded(child: Divider(color: Colors.grey.shade200, height: 1)),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: w * 0.03),
-                child: Text(
-                  'or search below',
-                  style: GoogleFonts.poppins(
-                    fontSize: w * 0.028,
-                    color: AppColors.mediumGray,
-                  ),
-                ),
-              ),
-              Expanded(child: Divider(color: Colors.grey.shade200, height: 1)),
-            ],
-          ),
-
-          SizedBox(height: h * 0.015),
+          SizedBox(height: h * 0.02),
 
           // Predictions list
           Expanded(

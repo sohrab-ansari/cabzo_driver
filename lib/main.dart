@@ -97,6 +97,7 @@ void main() async {
     // ========================================================================
     // 8. RIDE NOTIFICATION SERVICE (heads-up ride request alerts)
     // ========================================================================
+    print('8️⃣ Using SocketForegroundService for killed-state native notifications.');
 
     // Background socket is now handled natively by SocketForegroundService.kt
     print('9️⃣ Native socket service configured (starts on go-online)');

@@ -27,6 +27,11 @@ class NotificationService {
   static const String channelDescription =
       'This channel is used for important notifications';
 
+  static const String generalChannelId = 'general_notifications_channel';
+  static const String generalChannelName = 'General Notifications';
+  static const String generalChannelDescription =
+      'Standard alerts and chat messages';
+
   // ============================================================================
   // INSTANCES
   // ============================================================================
@@ -122,6 +127,16 @@ class NotificationService {
           >();
 
       if (androidPlugin != null) {
+        const generalChannel = AndroidNotificationChannel(
+          generalChannelId,
+          generalChannelName,
+          description: generalChannelDescription,
+          importance: Importance.defaultImportance,
+          playSound: true,
+          enableVibration: true,
+          showBadge: true,
+        );
+
         const channel = AndroidNotificationChannel(
           channelId,
           channelName,
@@ -133,6 +148,7 @@ class NotificationService {
           showBadge: true,
           enableLights: true,
         );
+        await androidPlugin.createNotificationChannel(generalChannel);
         await androidPlugin.createNotificationChannel(channel);
       }
 
@@ -189,6 +205,16 @@ class NotificationService {
   }
 
   Future<void> _createNotificationChannel() async {
+    const generalChannel = AndroidNotificationChannel(
+      generalChannelId,
+      generalChannelName,
+      description: generalChannelDescription,
+      importance: Importance.defaultImportance,
+      playSound: true,
+      enableVibration: true,
+      showBadge: true,
+    );
+
     const channel = AndroidNotificationChannel(
       channelId,
       channelName,
@@ -207,6 +233,7 @@ class NotificationService {
         >();
 
     if (androidPlugin != null) {
+      await androidPlugin.createNotificationChannel(generalChannel);
       await androidPlugin.createNotificationChannel(channel);
       print('✅ [NotificationService] Notification channel created: $channelId');
     }
@@ -520,13 +547,13 @@ class NotificationService {
           message.data['message']?.toString() ??
           '';
 
-      // Android notification details
+      // Android notification details explicitly set to generic channel
       final androidDetails = AndroidNotificationDetails(
-        channelId,
-        channelName,
-        channelDescription: channelDescription,
-        importance: Importance.high,
-        priority: Priority.high,
+        generalChannelId,
+        generalChannelName,
+        channelDescription: generalChannelDescription,
+        importance: Importance.defaultImportance,
+        priority: Priority.defaultPriority,
         showWhen: true,
         enableVibration: true,
         playSound: true,
@@ -537,32 +564,32 @@ class NotificationService {
         ),
       );
 
-      // iOS notification details
       const iosDetails = DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
         presentSound: true,
       );
 
-      final notificationDetails = NotificationDetails(
+      final initSettings = NotificationDetails(
         android: androidDetails,
         iOS: iosDetails,
       );
 
-      // Generate random ID for notification
+      // 5. Generate random ID for notification
       final notificationId = Random().nextInt(100000);
 
+      // 6. Show notification
       await _localNotifications.show(
         notificationId,
         title,
         body,
-        notificationDetails,
-        payload: message.data.toString(),
+        initSettings,
+        payload: jsonEncode(message.data),
       );
 
-      print('✅ [NotificationService] Notification displayed: $title');
+      print('✅ [NotificationService] Local notification displayed: $title');
     } catch (e) {
-      print('❌ [NotificationService] Failed to show notification: $e');
+      print('❌ [NotificationService] Error showing local notification: $e');
     }
   }
 
