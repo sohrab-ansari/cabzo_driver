@@ -178,6 +178,8 @@ class SocketManager {
   bool isOnDuty = false;
   bool _isProcessingOnline = false;
   bool _isRideInProgress = false;
+  /// Guards against stale navigation after a ride is cancelled
+  bool _hasPendingRideRequest = false;
   Map<String, dynamic>?
   _lastRideData; // Store latest ride request for notification actions
   bool _isAppReady = false;
@@ -802,15 +804,18 @@ class SocketManager {
       }
 
       _lastRideData = rideData;
+      _hasPendingRideRequest = true;
 
       SharedPreferences.getInstance().then((prefs) {
         prefs.setString('last_ride_request', jsonEncode(data));
       });
 
-      // Run navigation on main/UI isolate so screen always shows (avoids "only notification" in foreground)
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXx');
-        if (!isOnDuty) return;
+      // Use Future.microtask so navigation fires immediately even when
+      // Flutter's rendering pipeline is idle (no frame queued).
+      // addPostFrameCallback silently drops when no frame is scheduled.
+      Future.microtask(() {
+        if (!isOnDuty || !_hasPendingRideRequest) return;
+        print('🚕 Navigating to RideRequestScreen...');
         Get.to(() => RideRequestScreen(rideData: rideData));
       });
 
@@ -820,11 +825,8 @@ class SocketManager {
       onNewRide?.call(rideData);
     });
 
-    _socket!.on('ride:orderCancelled', (data) {
-      print('userrrr_side____Canceeledddd>>>>>>>>>>>>>>>>: ${data}');
-
-      // Handle order cancelled notification
-    });
+    // NOTE: ride:orderCancelled is fully handled below (line ~915).
+    // The duplicate empty handler that was here has been removed.
 
     _socket!.on('ride:confirmed', (data) async {
       print(">>>>>>>>> [SOCKET] Ride Confirmed");
@@ -918,6 +920,9 @@ class SocketManager {
       print("my_cancelledddd_full_datatattt ${data}");
       print('❌ Ride cancelled: $data');
 
+      // Block any pending ride:newRide microtask from navigating after cancel
+      _hasPendingRideRequest = false;
+
       // Ensure any looping background ringtone shuts off if driver hasn't touched the screen
       NotificationService.instance.cancelRideNotification();
 
@@ -929,9 +934,7 @@ class SocketManager {
         _currentRide = null;
         onRideCancelled?.call(data);
 
-        Get.offAll(BottomnavmainScreen(isOnDuty: true));
-
-        // Get.back();
+        Get.offAll(() => BottomnavmainScreen(isOnDuty: true));
       } else {
         print('⚠️ No valid rideId found in cancellation data');
       }
