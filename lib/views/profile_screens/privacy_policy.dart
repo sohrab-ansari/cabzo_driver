@@ -28,12 +28,12 @@
 //               ),
 //             ),
 //             SizedBox(width: w * .035),
-            // CustomText(
-            //   text: "Privacy Policy",
-            //   textColor: ColorsList.titleTextColor,
-            //   textFontSize: w * .05,
-            //   textFontWeight: FontWeight.w500,
-            // ),
+// CustomText(
+//   text: "Privacy Policy",
+//   textColor: ColorsList.titleTextColor,
+//   textFontSize: w * .05,
+//   textFontWeight: FontWeight.w500,
+// ),
 //           ],
 //         ),
 //       ),
@@ -161,10 +161,6 @@
 //   }
 // }
 
-
-
-
-
 import 'package:nzcu_driver/controllers/profile_controllers/terms_and_policy_controller.dart';
 import 'package:nzcu_driver/utilities/colors/colors_list.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_text.dart';
@@ -181,8 +177,9 @@ class PrivacyPolicy extends StatefulWidget {
 }
 
 class _PrivacyPolicyState extends State<PrivacyPolicy> {
-  final TermsAndPolicyController termsAndPolicyController =
-      Get.put(TermsAndPolicyController());
+  final TermsAndPolicyController termsAndPolicyController = Get.put(
+    TermsAndPolicyController(),
+  );
 
   @override
   void initState() {
@@ -198,6 +195,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
       backgroundColor: ColorsList.scaffoldColor,
       appBar: AppBar(
         backgroundColor: ColorsList.scaffoldColor,
+        surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
         titleSpacing: w * .03,
         elevation: 0,
@@ -212,7 +210,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
               ),
             ),
             SizedBox(width: w * .035),
-              CustomText(
+            CustomText(
               text: "Privacy Policy",
               textColor: ColorsList.titleTextColor,
               textFontSize: w * .05,
@@ -235,11 +233,14 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
         if (termsAndPolicyController.termspolicyres.value!.data == null) {
           return _errorView(w, "Unable to load terms & conditions");
         }
-  
+
         final String privacyPolicy =
             termsAndPolicyController
-                    .termspolicyres.value!.data!.privacyPolicy ??
-                '';
+                .termspolicyres
+                .value!
+                .data!
+                .privacyPolicy ??
+            '';
 
         if (privacyPolicy.isEmpty) {
           return _errorView(w, "No terms & conditions found");
@@ -271,12 +272,8 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
                   margin: Margins.zero,
                   padding: HtmlPaddings.zero,
                 ),
-                "p": Style(
-                  margin: Margins.only(bottom: w * .03),
-                ),
-                "li": Style(
-                  margin: Margins.only(bottom: w * .02),
-                ),
+                "p": Style(margin: Margins.only(bottom: w * .03)),
+                "li": Style(margin: Margins.only(bottom: w * .02)),
               },
               onLinkTap: (url, _, __) {
                 debugPrint("Clicked link: $url");
@@ -293,11 +290,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.description_outlined,
-            size: w * 0.12,
-            color: Colors.grey,
-          ),
+          Icon(Icons.description_outlined, size: w * 0.12, color: Colors.grey),
           SizedBox(height: w * 0.04),
           CustomText(
             text: message,

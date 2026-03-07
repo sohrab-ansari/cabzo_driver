@@ -950,7 +950,7 @@ class SocketManager {
             status == 'ended' ||
             status == 'cancelled') {
           print('✅ Ride end status received: $status');
-          _completeRide(orderId);
+          _completeRide(orderId, isStatusCompleted: status == 'completed');
         }
       }
 
@@ -1790,7 +1790,7 @@ class SocketManager {
     return true;
   }
 
-  void _completeRide(String? rideId) {
+  void _completeRide(String? rideId, {bool isStatusCompleted = false}) {
     if (rideId != null && rideId.isNotEmpty) {
       if (_activeRideId == rideId) {
         print('✅ Ride completed (ID: $rideId)');
@@ -1807,8 +1807,10 @@ class SocketManager {
           'You are online and ready for ride requests.',
         );
 
-        // Clear persisted ride data
-        _clearPersistedRide();
+        if (!isStatusCompleted) {
+          // Clear persisted ride data
+          clearPersistedRide();
+        }
       }
     } else {
       print('⚠️ Invalid rideId provided to _completeRide');
@@ -2048,7 +2050,7 @@ class SocketManager {
 
         if (hoursDiff > 4) {
           print('⚠️ Persisted ride is too old, clearing');
-          await _clearPersistedRide();
+          await clearPersistedRide();
           return null;
         }
 
@@ -2062,10 +2064,11 @@ class SocketManager {
     }
   }
 
-  Future<bool> _clearPersistedRide() async {
+  Future<bool> clearPersistedRide() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('activeRide');
+      await prefs.remove('pending_payment_ride');
       print('🗑️ Cleared persisted ride data');
       return true;
     } catch (error) {

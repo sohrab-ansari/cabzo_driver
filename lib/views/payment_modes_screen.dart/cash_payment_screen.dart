@@ -61,6 +61,7 @@ import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CashPaymentScreen extends StatefulWidget {
   final Map<String, dynamic>? rideData;
@@ -72,12 +73,14 @@ class CashPaymentScreen extends StatefulWidget {
 
 class _CashPaymentScreenState extends State<CashPaymentScreen> {
 
-    final StepperController stepperController = Get.find<StepperController>();
+    final StepperController stepperController = Get.put(StepperController());
   @override
   void initState() {
     super.initState();
     // Navigate after 3 seconds
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 2), () async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('pending_payment_ride');
       if (mounted) {
         Get.offAll(
           () => BottomnavmainScreen(isOnDuty: true),

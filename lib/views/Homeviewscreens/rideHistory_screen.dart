@@ -2048,8 +2048,6 @@
 // //   }
 // // }
 
-
-
 // import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 // import 'package:nzcu_driver/controllers/rides_controllers/rieds_history_controller.dart';
 // import 'package:nzcu_driver/modals/home_modals/ride_history_response.dart';
@@ -2137,7 +2135,7 @@
 //           final now = DateTime.now();
 //           final timeFormat = DateFormat('h:mm a');
 //           final time = timeFormat.parse(dateTimeStr);
-          
+
 //           final combinedDateTime = DateTime(
 //             now.year,
 //             now.month,
@@ -2145,7 +2143,7 @@
 //             time.hour,
 //             time.minute,
 //           );
-          
+
 //           return {
 //             'full': DateFormat('hh:mm a, dd MMM yyyy').format(combinedDateTime),
 //             'date': DateFormat('MMM dd, yyyy').format(now),
@@ -2156,7 +2154,7 @@
 //         // If all parsing fails, return the original string
 //         print('Error parsing date/time: $dateTimeStr');
 //       }
-      
+
 //       return {
 //         'full': dateTimeStr,
 //         'date': '',
@@ -2548,7 +2546,7 @@
 //                             return SizedBox(
 //                               height: w * 0.05,
 //                               width: w * 0.05,
-//                               child: Icon(Icons.attach_money, 
+//                               child: Icon(Icons.attach_money,
 //                                 color: const Color(0xFf4CAF50),
 //                                 size: w * 0.05,
 //                               ),
@@ -2590,8 +2588,8 @@
 //                   height: 30,
 //                   width: 30,
 //                   errorBuilder: (context, error, stackTrace) {
-//                     return Icon(Icons.directions_bike, 
-//                       size: 30, 
+//                     return Icon(Icons.directions_bike,
+//                       size: 30,
 //                       color: AppColors.primaryRed,
 //                     );
 //                   },
@@ -2634,7 +2632,7 @@
 //                       },
 //                     ),
 //                     Container(
-//                       width: w * 0.002, 
+//                       width: w * 0.002,
 //                       height: w * 0.10,
 //                       color: AppColors.mediumGray.withOpacity(0.4),
 //                     ),
@@ -2745,7 +2743,6 @@
 //   }
 // }
 
-
 import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 import 'package:nzcu_driver/controllers/rides_controllers/rieds_history_controller.dart';
 import 'package:nzcu_driver/modals/home_modals/ride_history_response.dart';
@@ -2809,17 +2806,13 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
   // Helper method to safely format date time from DateTime object
   Map<String, String> _formatDateTime(DateTime? dateTime) {
     if (dateTime == null) {
-      return {
-        'full': '',
-        'date': '',
-        'time': '',
-      };
+      return {'full': '', 'date': '', 'time': ''};
     }
 
     try {
       // Convert to local time if needed
       final localDateTime = dateTime.toLocal();
-      
+
       return {
         'full': DateFormat('hh:mm a, dd MMM yyyy').format(localDateTime),
         'date': DateFormat('MMM dd, yyyy').format(localDateTime),
@@ -3175,16 +3168,17 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                     ),
                   ],
                 ),
-                AppFonts.textPoppins(
-                  context,
-                  "₹${ride.totalFare?.toStringAsFixed(2) ?? "0.00"}",
-                  w * 0.042,
-                  FontWeight.w600,
-                  AppColors.black,
-                  TextAlign.center,
-                  TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
+                if (!isCancelled)
+                  AppFonts.textPoppins(
+                    context,
+                    "₹${ride.totalFare?.toStringAsFixed(2) ?? "0.00"}",
+                    w * 0.042,
+                    FontWeight.w600,
+                    AppColors.black,
+                    TextAlign.center,
+                    TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
               ],
             ),
 
@@ -3218,7 +3212,8 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                             return SizedBox(
                               height: w * 0.05,
                               width: w * 0.05,
-                              child: Icon(Icons.attach_money, 
+                              child: Icon(
+                                Icons.attach_money,
                                 color: const Color(0xFf4CAF50),
                                 size: w * 0.05,
                               ),
@@ -3252,36 +3247,39 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
               thickness: w * .002,
               height: w * 0.1,
             ),
+            if (!isCancelled) ...[
+              Row(
+                children: [
+                  Image.asset(
+                    _getVehicleIcon(ride.vehicleType ?? "bike"),
+                    height: 30,
+                    width: 30,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(
+                        Icons.directions_bike,
+                        size: 30,
+                        color: AppColors.primaryRed,
+                      );
+                    },
+                  ),
+                  SizedBox(width: w * 0.02),
+                  AppFonts.textPoppins(
+                    context,
+                    _getVehicleTypeText(
+                      ride.vehicleId?.vehicleName ?? ride.vehicleType ?? "bike",
+                    ),
+                    w * 0.035,
+                    FontWeight.w600,
+                    AppColors.black,
+                    TextAlign.center,
+                    TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ],
+              ),
 
-            Row(
-              children: [
-                Image.asset(
-                  _getVehicleIcon(ride.vehicleType ?? "bike"),
-                  height: 30,
-                  width: 30,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Icon(Icons.directions_bike, 
-                      size: 30, 
-                      color: AppColors.primaryRed,
-                    );
-                  },
-                ),
-                SizedBox(width: w * 0.02),
-                AppFonts.textPoppins(
-                  context,
-                  _getVehicleTypeText(ride.vehicleId?.vehicleName ?? ride.vehicleType ?? "bike"),
-                  w * 0.035,
-                  FontWeight.w600,
-                  AppColors.black,
-                  TextAlign.center,
-                  TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              ],
-            ),
-
-            SizedBox(height: w * 0.06),
-
+              SizedBox(height: w * 0.06),
+            ],
             // Pickup and Destination
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -3304,7 +3302,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                       },
                     ),
                     Container(
-                      width: w * 0.002, 
+                      width: w * 0.002,
                       height: w * 0.10,
                       color: AppColors.mediumGray.withOpacity(0.4),
                     ),

@@ -31,6 +31,7 @@ class _TermsConditionState extends State<TermsCondition> {
       backgroundColor: ColorsList.scaffoldColor,
       appBar: AppBar(
         backgroundColor: ColorsList.scaffoldColor,
+        surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
         titleSpacing: w * .03,
         elevation: 0,

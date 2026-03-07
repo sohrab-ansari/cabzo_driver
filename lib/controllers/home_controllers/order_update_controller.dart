@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
@@ -5,6 +6,7 @@ import 'package:nzcu_driver/modals/home_modals/update_order_response.dart';
 import 'package:nzcu_driver/utilities/utils/api_response_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderUpdateController extends GetxController {
   final StepperController stepperController = Get.find<StepperController>();
@@ -83,9 +85,15 @@ class OrderUpdateController extends GetxController {
       stepperController.nextStep();
     }
 
+    // Merge new data from response to update local representation
+    Map<String, dynamic> updatedRideData = Map<String, dynamic>.from(rideData ?? {});
+    if (response.data != null) {
+      updatedRideData.addAll(response.data!.toJson());
+    }
+
     // Determine navigation based on order status
     if (shouldTriggerNavigation) {
-      _determineNavigation(orderStatus, rideData);
+      _determineNavigation(orderStatus, updatedRideData);
     }
 
     if (stepControl == "Completed") {
@@ -118,6 +126,26 @@ class OrderUpdateController extends GetxController {
         shouldNavigate$.value = true;
         break;
       case 'completed':
+        if (rideData != null) {
+          SharedPreferences.getInstance().then((prefs) {
+            try {
+              String encodedRide = jsonEncode(rideData, toEncodable: (e) {
+                if (e is num || e is String || e is bool || e == null) return e;
+                if (e is Map || e is List) return e;
+                // If it's a LatLng or something else, handle it safely
+                try {
+                  return (e as dynamic).toJson();
+                } catch (_) {
+                  return e.toString();
+                }
+              });
+              prefs.setString('pending_payment_ride', encodedRide);
+              print("✅ Saved pending_payment_ride successfully");
+            } catch (e) {
+              print("❌ Error encoding pending_payment_ride: $e");
+            }
+          });
+        }
         navigationRoute$.value = 'payment_screen';
         clearAll$.value = true;
         shouldNavigate$.value = true;

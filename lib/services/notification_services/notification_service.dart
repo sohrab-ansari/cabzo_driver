@@ -498,9 +498,9 @@ class NotificationService {
   }) async {
     try {
       final androidDetails = AndroidNotificationDetails(
-        channelId,
-        channelName,
-        channelDescription: channelDescription,
+        generalChannelId,
+        generalChannelName,
+        channelDescription: generalChannelDescription,
         importance: Importance.high,
         priority: Priority.high,
       );

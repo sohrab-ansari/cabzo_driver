@@ -369,12 +369,14 @@ class _FAQsState extends State<FAQs> {
               ),
             ),
             SizedBox(width: w * .02),
-            CustomText(
-              text: widget.categoryName ?? "FAQs",
-              textColor: ColorsList.titleTextColor,
-              textFontSize: w * .052,
-              textFontWeight: FontWeight.w500,
-              overflow: TextOverflow.ellipsis,
+            Flexible(
+              child: CustomText(
+                text: widget.categoryName ?? "FAQs",
+                textColor: ColorsList.titleTextColor,
+                textFontSize: w * .052,
+                textFontWeight: FontWeight.w500,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),

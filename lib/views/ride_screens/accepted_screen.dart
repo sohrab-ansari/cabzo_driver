@@ -1344,7 +1344,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
         _navigateToOtpScreen();
         break;
       case 'payment_screen':
-        Get.offAll(() => ReceivePaymentModes(rideData: widget.rideData));
+        Get.offAll(() => ReceivePaymentModes(
+              rideData: command.arguments ?? widget.rideData,
+            ));
         break;
       case 'arriving_client': // Already on arriving client screen
         break;

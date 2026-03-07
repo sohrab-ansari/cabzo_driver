@@ -416,8 +416,8 @@ class ReceivePaymentModes extends StatefulWidget {
 }
 
 class _ReceivePaymentModesState extends State<ReceivePaymentModes> {
-  final Controllers controllers = Get.find<Controllers>();
-  final CashController cashController = Get.find<CashController>();
+  final Controllers controllers = Get.put(Controllers());
+  final CashController cashController = Get.put(CashController());
 
   // @override
   // void initState() {

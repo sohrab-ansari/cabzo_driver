@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:nzcu_driver/services/apiservices/socket_manager.dart';
@@ -5,6 +6,7 @@ import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:nzcu_driver/views/auth/login_screen.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/views/ride_screens/receive_payment_modes.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -107,18 +109,31 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (token != null) {
-      // User is logged in, navigate to main screen
-      CustomNavigator.removeUntil(
-        context,
-        BottomnavmainScreen(isOnDuty: wasOnline, isFirstLaunch: true),
-        transition: TransitionType.fade,
-      );
+      final String? pendingPayment = prefs.getString("pending_payment_ride");
 
-      // Check if a ride request arrived while the app was killed (from native socket service).
-      // The native SocketForegroundService sets pending_ride_from_killed=true and stores
-      // the ride JSON in last_ride_request. checkPendingRideFromKilledState() already
-      // has a 1500ms internal delay so the home screen is fully rendered before navigation.
-      SocketManager().checkPendingRideFromKilledState();
+      if (pendingPayment != null && pendingPayment.isNotEmpty) {
+        // User has a pending payment, navigate directly to payment screen
+        final Map<String, dynamic> rideData = jsonDecode(pendingPayment);
+        CustomNavigator.removeUntil(
+          context,
+          ReceivePaymentModes(rideData: rideData),
+          transition: TransitionType.fade,
+        );
+        SocketManager().initialize();
+      } else {
+        // User is logged in, navigate to main screen
+        CustomNavigator.removeUntil(
+          context,
+          BottomnavmainScreen(isOnDuty: wasOnline, isFirstLaunch: true),
+          transition: TransitionType.fade,
+        );
+
+        // Check if a ride request arrived while the app was killed (from native socket service).
+        // The native SocketForegroundService sets pending_ride_from_killed=true and stores
+        // the ride JSON in last_ride_request. checkPendingRideFromKilledState() already
+        // has a 1500ms internal delay so the home screen is fully rendered before navigation.
+        SocketManager().checkPendingRideFromKilledState();
+      }
     } else {
       // User is not logged in, navigate to login screen
       CustomNavigator.removeUntil(

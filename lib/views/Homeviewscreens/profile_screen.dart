@@ -1,5 +1,3 @@
-
-
 import 'package:nzcu_driver/modals/home_modals/ride_history_response.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
@@ -43,15 +41,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   final List<Widget> firstScreens = [
     const PaymentScreen(),
-     Review(), // Make sure this is the correct widget name
+    Review(), // Make sure this is the correct widget name
     const NotificationScreen(),
   ];
 
-  final List<String> firstTitleList = [
-    "Payment",
-    "Rating",
-    "Notifications",
-  ];
+  final List<String> firstTitleList = ["Payment", "Rating", "Notifications"];
 
   /// Second section - Changed to List<IconData>
   final List<IconData> secondIconsList = [
@@ -97,7 +91,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     final double w = MediaQuery.of(context).size.width;
 
     return Scaffold(
@@ -110,19 +103,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
         leading: const SizedBox(),
         title: Transform.translate(
           offset: Offset(w * -0.15, 0),
-          child: AppFonts.textRubik(
-            context,
-            "Profile",
-            w * 0.055,
-            FontWeight.w600,
-            AppColors.black,
-            TextAlign.center,
-            TextOverflow.ellipsis,
-            maxLines: 1,
-          )
-              .animate()
-              .fade(duration: 800.ms)
-              .scale(begin: const Offset(0.95, 0.95)),
+          child:
+              AppFonts.textRubik(
+                    context,
+                    "Profile",
+                    w * 0.055,
+                    FontWeight.w600,
+                    AppColors.black,
+                    TextAlign.center,
+                    TextOverflow.ellipsis,
+                    maxLines: 1,
+                  )
+                  .animate()
+                  .fade(duration: 800.ms)
+                  .scale(begin: const Offset(0.95, 0.95)),
         ),
       ),
       body: ListView(
@@ -189,10 +183,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const EditProfile(),
               transition: TransitionType.slideLeft,
             ),
-            child: customMenuItemsButton(
-              Icons.edit,
-              "Edit Profile",
-            ),
+            child: customMenuItemsButton(Icons.edit, "Edit Profile"),
           ),
           SizedBox(height: w * .02),
         ],
@@ -209,7 +200,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   ) {
     // Ensure all lists have the same length
     assert(icons.length == titles.length && titles.length == screens.length);
-    
+
     return Column(
       children: List.generate(icons.length, (index) {
         return Padding(
@@ -241,6 +232,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       },
       child: Card(
         elevation: 1,
+        color: Colors.white,
         child: Padding(
           padding: EdgeInsets.all(w * .04),
           child: Row(
@@ -334,9 +326,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               SizedBox(height: w * .05),
               Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: w * .04,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: w * .04),
                 child: AppButtons.solid(
                   context: context,
                   text: "Logout",
@@ -365,9 +355,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: w * .04,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: w * .04),
                 child: AppButtons.solid(
                   context: context,
                   text: "Cancel",

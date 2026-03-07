@@ -45,16 +45,6 @@ class AuthApiService {
       print("Response Body222 : ${response.body}");
       final Map<String, dynamic> data = jsonDecode(response.body);
 
-      Fluttertoast.showToast(
-        msg: data['message'] ?? "Something went wrong",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.TOP,
-      );
-      //  Fluttertoast.showToast(
-      //   msg: data['error'] ?? "Something went wrong",
-      //   toastLength: Toast.LENGTH_SHORT,
-      //   gravity: ToastGravity.BOTTOM,
-      // );
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
 

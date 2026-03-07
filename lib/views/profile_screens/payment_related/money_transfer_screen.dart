@@ -3612,6 +3612,9 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
   bool _isDeletingUpi = false;
   String? _deletingItemId;
 
+  final ScrollController _bankScrollController = ScrollController();
+  final ScrollController _upiScrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -3625,6 +3628,8 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
   @override
   void dispose() {
     amountController.dispose();
+    _bankScrollController.dispose();
+    _upiScrollController.dispose();
     super.dispose();
   }
 
@@ -3953,234 +3958,268 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
                           ),
                         )
                       else
-                        ListView.separated(
-                          physics: NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: bankAccounts
-                              .where((a) => a.type == "BankAccount")
-                              .length,
-                          separatorBuilder: (context, index) => Divider(
-                            color: AppColors.lightGray,
-                            height: w * 0.04,
-                            indent: w * 0.07,
-                            endIndent: w * 0.04,
-                          ),
-                          itemBuilder: (context, index) {
-                            final bankAccountsList = bankAccounts
-                                .where((a) => a.type == "BankAccount")
-                                .toList();
-                            final account = bankAccountsList[index];
+                        ConstrainedBox(
+                          constraints: BoxConstraints(maxHeight: w * 0.32),
+                          child: RawScrollbar(
+                            controller: _bankScrollController,
+                            thumbVisibility: true,
+                            thickness: 4.0,
+                            radius: const Radius.circular(8),
+                            thumbColor: AppColors.primaryRed.withOpacity(0.5),
+                            child: ListView.separated(
+                              controller: _bankScrollController,
+                              padding: EdgeInsets.zero,
+                              physics: const BouncingScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount: bankAccounts
+                                  .where((a) => a.type == "BankAccount")
+                                  .length,
+                              separatorBuilder: (context, index) => Divider(
+                                color: AppColors.lightGray,
+                                height: w * 0.04,
+                                indent: w * 0.07,
+                                endIndent: w * 0.04,
+                              ),
+                              itemBuilder: (context, index) {
+                                final bankAccountsList = bankAccounts
+                                    .where((a) => a.type == "BankAccount")
+                                    .toList();
+                                final account = bankAccountsList[index];
 
-                            final isSelected =
-                                selectedAccountId == account.id &&
-                                selectedAccountType == "BankAccount";
+                                final isSelected =
+                                    selectedAccountId == account.id &&
+                                    selectedAccountType == "BankAccount";
 
-                            final isDeletingThis =
-                                _isDeletingBank &&
-                                _deletingItemId == account.id;
+                                final isDeletingThis =
+                                    _isDeletingBank &&
+                                    _deletingItemId == account.id;
 
-                            return GestureDetector(
-                              onTap: () {
-                                if (!isDeletingThis) {
-                                  setState(() {
-                                    if (isSelected) {
-                                      // Deselect if already selected
-                                      selectedAccountId = null;
-                                      selectedAccountType = null;
-                                    } else {
-                                      // Select this bank account and deselect any UPI
-                                      selectedAccountId = account.id;
-                                      selectedAccountType = "BankAccount";
+                                return GestureDetector(
+                                  onTap: () {
+                                    if (!isDeletingThis) {
+                                      setState(() {
+                                        if (isSelected) {
+                                          // Deselect if already selected
+                                          selectedAccountId = null;
+                                          selectedAccountType = null;
+                                        } else {
+                                          // Select this bank account and deselect any UPI
+                                          selectedAccountId = account.id;
+                                          selectedAccountType = "BankAccount";
+                                        }
+                                      });
                                     }
-                                  });
-                                }
-                              },
-                              child: Container(
-                                margin: EdgeInsets.symmetric(
-                                  horizontal: w * .04,
-                                  vertical: w * .01,
-                                ),
-                                padding: EdgeInsets.all(w * 0.03),
-                                decoration: BoxDecoration(
-                                  color: isSelected ? AppColors.primaryRed.withOpacity(0.05) : AppColors.white,
-                                  borderRadius: BorderRadius.circular(w * 0.02),
-                                  border: Border.all(
-                                    color: isSelected ? AppColors.primaryRed : Colors.transparent,
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    // Bank Account Details
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          // Account Holder Name
-                                          Row(
+                                  },
+                                  child: Container(
+                                    margin: EdgeInsets.symmetric(
+                                      horizontal: w * .04,
+                                      vertical: w * .01,
+                                    ),
+                                    padding: EdgeInsets.all(w * 0.03),
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? AppColors.primaryRed.withOpacity(
+                                              0.05,
+                                            )
+                                          : AppColors.white,
+                                      borderRadius: BorderRadius.circular(
+                                        w * 0.02,
+                                      ),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? AppColors.primaryRed
+                                            : Colors.transparent,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        // Bank Account Details
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
+                                              // Account Holder Name
+                                              Row(
+                                                children: [
+                                                  AppFonts.textPoppins(
+                                                    context,
+                                                    account.accountHolderName ??
+                                                        "N/A",
+                                                    w * 0.032,
+                                                    FontWeight.w500,
+                                                    isSelected
+                                                        ? AppColors.primaryRed
+                                                        : AppColors.black,
+                                                    TextAlign.left,
+                                                    TextOverflow.ellipsis,
+                                                  ),
+                                                  if (isSelected)
+                                                    SizedBox(width: w * 0.02),
+                                                  if (isSelected)
+                                                    Container(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                            horizontal:
+                                                                w * 0.02,
+                                                            vertical: w * 0.005,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        color: AppColors
+                                                            .primaryRed
+                                                            .withOpacity(0.1),
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              4,
+                                                            ),
+                                                      ),
+                                                      child:
+                                                          AppFonts.textPoppins(
+                                                            context,
+                                                            "Selected",
+                                                            w * 0.025,
+                                                            FontWeight.w500,
+                                                            AppColors
+                                                                .primaryRed,
+                                                            TextAlign.center,
+                                                            TextOverflow
+                                                                .ellipsis,
+                                                          ),
+                                                    ),
+                                                ],
+                                              ),
+                                              SizedBox(height: w * 0.005),
+                                              // Bank Name
                                               AppFonts.textPoppins(
                                                 context,
-                                                account.accountHolderName ??
-                                                    "N/A",
-                                                w * 0.032,
-                                                FontWeight.w500,
-                                                isSelected
-                                                    ? AppColors.primaryRed
-                                                    : AppColors.black,
+                                                account.bankName ?? "N/A",
+                                                w * 0.030,
+                                                FontWeight.w400,
+                                                AppColors.darkGray,
                                                 TextAlign.left,
                                                 TextOverflow.ellipsis,
                                               ),
-                                              if (isSelected)
-                                                SizedBox(width: w * 0.02),
-                                              if (isSelected)
-                                                Container(
-                                                  padding: EdgeInsets.symmetric(
-                                                    horizontal: w * 0.02,
-                                                    vertical: w * 0.005,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: AppColors.primaryRed
-                                                        .withOpacity(0.1),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          4,
-                                                        ),
-                                                  ),
-                                                  child: AppFonts.textPoppins(
-                                                    context,
-                                                    "Selected",
-                                                    w * 0.025,
-                                                    FontWeight.w500,
-                                                    AppColors.primaryRed,
-                                                    TextAlign.center,
-                                                    TextOverflow.ellipsis,
-                                                  ),
+                                              SizedBox(height: w * 0.005),
+                                              // IFSC Code
+                                              AppFonts.textPoppins(
+                                                context,
+                                                "IFSC: ${account.ifscCode ?? "N/A"}",
+                                                w * 0.030,
+                                                FontWeight.w400,
+                                                AppColors.darkGray,
+                                                TextAlign.left,
+                                                TextOverflow.ellipsis,
+                                              ),
+                                              SizedBox(height: w * 0.005),
+                                              // Account Number (masked for security)
+                                              AppFonts.textPoppins(
+                                                context,
+                                                _maskAccountNumber(
+                                                  account.accountNumber,
                                                 ),
+                                                w * 0.030,
+                                                FontWeight.w400,
+                                                AppColors.darkGray,
+                                                TextAlign.left,
+                                                TextOverflow.ellipsis,
+                                              ),
                                             ],
-                                          ),
-                                          SizedBox(height: w * 0.005),
-                                          // Bank Name
-                                          AppFonts.textPoppins(
-                                            context,
-                                            account.bankName ?? "N/A",
-                                            w * 0.030,
-                                            FontWeight.w400,
-                                            AppColors.darkGray,
-                                            TextAlign.left,
-                                            TextOverflow.ellipsis,
-                                          ),
-                                          SizedBox(height: w * 0.005),
-                                          // IFSC Code
-                                          AppFonts.textPoppins(
-                                            context,
-                                            "IFSC: ${account.ifscCode ?? "N/A"}",
-                                            w * 0.030,
-                                            FontWeight.w400,
-                                            AppColors.darkGray,
-                                            TextAlign.left,
-                                            TextOverflow.ellipsis,
-                                          ),
-                                          SizedBox(height: w * 0.005),
-                                          // Account Number (masked for security)
-                                          AppFonts.textPoppins(
-                                            context,
-                                            _maskAccountNumber(
-                                              account.accountNumber,
-                                            ),
-                                            w * 0.030,
-                                            FontWeight.w400,
-                                            AppColors.darkGray,
-                                            TextAlign.left,
-                                            TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-
-                                    // Edit and Delete Icons
-                                    Row(
-                                      children: [
-                                        // Edit Button
-                                        InkWell(
-                                          onTap: isDeletingThis
-                                              ? null
-                                              : () {
-                                                  Get.to(
-                                                    () => EditBank(
-                                                      account: account,
-                                                      account_id: account.id,
-                                                    ),
-                                                  )?.then((value) {
-                                                    if (value == true) {
-                                                      getBankAccountsController
-                                                          .bankdetails_mdethod();
-                                                    }
-                                                  });
-                                                },
-                                          child: Container(
-                                            padding: EdgeInsets.all(w * 0.02),
-                                            decoration: BoxDecoration(
-                                              color: AppColors.primaryRed
-                                                  .withOpacity(0.1),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Icon(
-                                              Icons.edit,
-                                              size: w * 0.04,
-                                              color: isDeletingThis
-                                                  ? AppColors.mediumGray
-                                                  : AppColors.primaryRed,
-                                            ),
                                           ),
                                         ),
 
-                                        SizedBox(width: 5),
-
-                                        // Delete Button - FIXED: Now calls delete function instead of edit screen
-                                        InkWell(
-                                          onTap: isDeletingThis
-                                              ? null
-                                              : () {
-                                                  _deleteBankAccount(
-                                                    account,
-                                                    account.id,
-                                                  );
-                                                },
-                                          child: Container(
-                                            padding: EdgeInsets.all(w * 0.02),
-                                            decoration: BoxDecoration(
-                                              color: isDeletingThis
-                                                  ? AppColors.lightGray
-                                                  : Colors.red.withOpacity(0.1),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: isDeletingThis
-                                                ? SizedBox(
-                                                    width: w * 0.04,
-                                                    height: w * 0.04,
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                          strokeWidth: 2,
-                                                          color: Colors.red,
+                                        // Edit and Delete Icons
+                                        Row(
+                                          children: [
+                                            // Edit Button
+                                            InkWell(
+                                              onTap: isDeletingThis
+                                                  ? null
+                                                  : () {
+                                                      Get.to(
+                                                        () => EditBank(
+                                                          account: account,
+                                                          account_id:
+                                                              account.id,
                                                         ),
-                                                  )
-                                                : Icon(
-                                                    Icons.delete,
-                                                    size: w * 0.04,
-                                                    color: Colors.red,
-                                                  ),
-                                          ),
+                                                      )?.then((value) {
+                                                        if (value == true) {
+                                                          getBankAccountsController
+                                                              .bankdetails_mdethod();
+                                                        }
+                                                      });
+                                                    },
+                                              child: Container(
+                                                padding: EdgeInsets.all(
+                                                  w * 0.02,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.primaryRed
+                                                      .withOpacity(0.1),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Icon(
+                                                  Icons.edit,
+                                                  size: w * 0.04,
+                                                  color: isDeletingThis
+                                                      ? AppColors.mediumGray
+                                                      : AppColors.primaryRed,
+                                                ),
+                                              ),
+                                            ),
+
+                                            SizedBox(width: 5),
+
+                                            // Delete Button - FIXED: Now calls delete function instead of edit screen
+                                            InkWell(
+                                              onTap: isDeletingThis
+                                                  ? null
+                                                  : () {
+                                                      _deleteBankAccount(
+                                                        account,
+                                                        account.id,
+                                                      );
+                                                    },
+                                              child: Container(
+                                                padding: EdgeInsets.all(
+                                                  w * 0.02,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: isDeletingThis
+                                                      ? AppColors.lightGray
+                                                      : Colors.red.withOpacity(
+                                                          0.1,
+                                                        ),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: isDeletingThis
+                                                    ? SizedBox(
+                                                        width: w * 0.04,
+                                                        height: w * 0.04,
+                                                        child:
+                                                            CircularProgressIndicator(
+                                                              strokeWidth: 2,
+                                                              color: Colors.red,
+                                                            ),
+                                                      )
+                                                    : Icon(
+                                                        Icons.delete,
+                                                        size: w * 0.04,
+                                                        color: Colors.red,
+                                                      ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                         ),
                     ],
                   ),
@@ -4193,275 +4232,310 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
               if (bankAccounts.any((a) => a.type == "UPI"))
                 Container(
                   width: w,
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      spreadRadius: 2,
-                      blurRadius: 3,
-                    ),
-                  ],
-                  borderRadius: BorderRadius.circular(w * 0.03),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: w * .04),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: w * .04),
-                        child: Row(
-                          children: [
-                            CustomImages.images(
-                              "assets/icons/addUpi1.png",
-                              w * .05,
-                              w * .05,
-                            ),
-                            SizedBox(width: w * .02),
-                            AppFonts.textPoppins(
-                              context,
-                              "UPI Details",
-                              w * 0.04,
-                              FontWeight.w400,
-                              AppColors.black,
-                              TextAlign.left,
-                              TextOverflow.ellipsis,
-                            ),
-                            Spacer(),
-                            InkWell(
-                              onTap: () {
-                                Get.to(() => AddUpi())?.then((value) {
-                                  if (value == true) {
-                                    getBankAccountsController
-                                        .bankdetails_mdethod();
-                                    setState(() {
-                                      selectedAccountId = null;
-                                      selectedAccountType = null;
-                                    });
-                                  }
-                                });
-                              },
-                              child: AppFonts.textPoppins(
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 2,
+                        blurRadius: 3,
+                      ),
+                    ],
+                    borderRadius: BorderRadius.circular(w * 0.03),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: w * .04),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: w * .04),
+                          child: Row(
+                            children: [
+                              CustomImages.images(
+                                "assets/icons/addUpi1.png",
+                                w * .05,
+                                w * .05,
+                              ),
+                              SizedBox(width: w * .02),
+                              AppFonts.textPoppins(
                                 context,
-                                "ADD NEW",
-                                w * 0.035,
-                                FontWeight.w500,
-                                ColorsList.linksTextColor,
+                                "UPI Details",
+                                w * 0.04,
+                                FontWeight.w400,
+                                AppColors.black,
                                 TextAlign.left,
                                 TextOverflow.ellipsis,
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: w * .02),
-
-                        ListView.separated(
-                          physics: NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: bankAccounts
-                              .where((a) => a.type == "UPI")
-                              .length,
-                          separatorBuilder: (context, index) => Divider(
-                            color: AppColors.lightGray,
-                            height: w * 0.04,
-                            indent: w * 0.07,
-                            endIndent: w * 0.04,
-                          ),
-                          itemBuilder: (context, index) {
-                            final upiAccounts = bankAccounts
-                                .where((a) => a.type == "UPI")
-                                .toList();
-                            final account = upiAccounts[index];
-                            final isSelected =
-                                selectedAccountId == account.id &&
-                                selectedAccountType == "UPI";
-
-                            final isDeletingThis =
-                                _isDeletingUpi && _deletingItemId == account.id;
-
-                            return GestureDetector(
-                              onTap: () {
-                                if (!isDeletingThis) {
-                                  setState(() {
-                                    if (isSelected) {
-                                      // Deselect if already selected
-                                      selectedAccountId = null;
-                                      selectedAccountType = null;
-                                    } else {
-                                      // Select this UPI and deselect any bank account
-                                      selectedAccountId = account.id;
-                                      selectedAccountType = "UPI";
+                              Spacer(),
+                              InkWell(
+                                onTap: () {
+                                  Get.to(() => AddUpi())?.then((value) {
+                                    if (value == true) {
+                                      getBankAccountsController
+                                          .bankdetails_mdethod();
+                                      setState(() {
+                                        selectedAccountId = null;
+                                        selectedAccountType = null;
+                                      });
                                     }
                                   });
-                                }
-                              },
-                              child: Container(
-                                margin: EdgeInsets.symmetric(
-                                  horizontal: w * .04,
-                                  vertical: w * .01,
+                                },
+                                child: AppFonts.textPoppins(
+                                  context,
+                                  "ADD NEW",
+                                  w * 0.035,
+                                  FontWeight.w500,
+                                  ColorsList.linksTextColor,
+                                  TextAlign.left,
+                                  TextOverflow.ellipsis,
                                 ),
-                                padding: EdgeInsets.all(w * 0.03),
-                                decoration: BoxDecoration(
-                                  color: isSelected ? AppColors.primaryRed.withOpacity(0.05) : AppColors.white,
-                                  borderRadius: BorderRadius.circular(w * 0.02),
-                                  border: Border.all(
-                                    color: isSelected ? AppColors.primaryRed : Colors.transparent,
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: w * .02),
+
+                        ConstrainedBox(
+                          constraints: BoxConstraints(maxHeight: w * 0.22),
+                          child: RawScrollbar(
+                            controller: _upiScrollController,
+                            thumbVisibility: true,
+                            thickness: 4.0,
+                            radius: const Radius.circular(8),
+                            thumbColor: AppColors.primaryRed.withOpacity(0.5),
+                            child: ListView.separated(
+                              controller: _upiScrollController,
+                              padding: EdgeInsets.zero,
+                              physics: const BouncingScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount: bankAccounts
+                                  .where((a) => a.type == "UPI")
+                                  .length,
+                              separatorBuilder: (context, index) => Divider(
+                                color: AppColors.lightGray,
+                                height: w * 0.04,
+                                indent: w * 0.07,
+                                endIndent: w * 0.04,
+                              ),
+                              itemBuilder: (context, index) {
+                                final upiAccounts = bankAccounts
+                                    .where((a) => a.type == "UPI")
+                                    .toList();
+                                final account = upiAccounts[index];
+                                final isSelected =
+                                    selectedAccountId == account.id &&
+                                    selectedAccountType == "UPI";
+
+                                final isDeletingThis =
+                                    _isDeletingUpi &&
+                                    _deletingItemId == account.id;
+
+                                return GestureDetector(
+                                  onTap: () {
+                                    if (!isDeletingThis) {
+                                      setState(() {
+                                        if (isSelected) {
+                                          // Deselect if already selected
+                                          selectedAccountId = null;
+                                          selectedAccountType = null;
+                                        } else {
+                                          // Select this UPI and deselect any bank account
+                                          selectedAccountId = account.id;
+                                          selectedAccountType = "UPI";
+                                        }
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    margin: EdgeInsets.symmetric(
+                                      horizontal: w * .04,
+                                      vertical: w * .01,
+                                    ),
+                                    padding: EdgeInsets.all(w * 0.03),
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? AppColors.primaryRed.withOpacity(
+                                              0.05,
+                                            )
+                                          : AppColors.white,
+                                      borderRadius: BorderRadius.circular(
+                                        w * 0.02,
+                                      ),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? AppColors.primaryRed
+                                            : Colors.transparent,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
+                                              Row(
+                                                children: [
+                                                  AppFonts.textPoppins(
+                                                    context,
+                                                    account.accountHolderName ??
+                                                        "N/A",
+                                                    w * 0.032,
+                                                    FontWeight.w500,
+                                                    isSelected
+                                                        ? AppColors.primaryRed
+                                                        : AppColors.black,
+                                                    TextAlign.left,
+                                                    TextOverflow.ellipsis,
+                                                  ),
+                                                  if (isSelected)
+                                                    Container(
+                                                      margin: EdgeInsets.only(
+                                                        left: w * 0.00,
+                                                      ),
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                            horizontal:
+                                                                w * 0.02,
+                                                            vertical: w * 0.005,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        color: AppColors
+                                                            .primaryRed
+                                                            .withOpacity(0.1),
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              4,
+                                                            ),
+                                                      ),
+                                                      child:
+                                                          AppFonts.textPoppins(
+                                                            context,
+                                                            "Selected",
+                                                            w * 0.025,
+                                                            FontWeight.w500,
+                                                            AppColors
+                                                                .primaryRed,
+                                                            TextAlign.center,
+                                                            TextOverflow
+                                                                .ellipsis,
+                                                          ),
+                                                    ),
+                                                ],
+                                              ),
+                                              SizedBox(height: w * 0.005),
                                               AppFonts.textPoppins(
                                                 context,
-                                                account.accountHolderName ??
-                                                    "N/A",
-                                                w * 0.032,
-                                                FontWeight.w500,
-                                                isSelected
-                                                    ? AppColors.primaryRed
-                                                    : AppColors.black,
+                                                account.upiId ?? "N/A",
+                                                w * 0.030,
+                                                FontWeight.w400,
+                                                AppColors.darkGray,
                                                 TextAlign.left,
                                                 TextOverflow.ellipsis,
                                               ),
-                                              if (isSelected)
-                                                Container(
-                                                  margin: EdgeInsets.only(
-                                                    left: w * 0.00,
-                                                  ),
-                                                  padding: EdgeInsets.symmetric(
-                                                    horizontal: w * 0.02,
-                                                    vertical: w * 0.005,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: AppColors.primaryRed
-                                                        .withOpacity(0.1),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          4,
-                                                        ),
-                                                  ),
-                                                  child: AppFonts.textPoppins(
-                                                    context,
-                                                    "Selected",
-                                                    w * 0.025,
-                                                    FontWeight.w500,
-                                                    AppColors.primaryRed,
-                                                    TextAlign.center,
-                                                    TextOverflow.ellipsis,
-                                                  ),
-                                                ),
                                             ],
-                                          ),
-                                          SizedBox(height: w * 0.005),
-                                          AppFonts.textPoppins(
-                                            context,
-                                            account.upiId ?? "N/A",
-                                            w * 0.030,
-                                            FontWeight.w400,
-                                            AppColors.darkGray,
-                                            TextAlign.left,
-                                            TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-
-                                    // Edit and Delete Icons for UPI
-                                    Row(
-                                      children: [
-                                        // Edit Button
-                                        InkWell(
-                                          onTap: isDeletingThis
-                                              ? null
-                                              : () {
-                                                  Get.to(
-                                                    () => EditUpi(
-                                                      account: account,
-                                                      account_id: account.id,
-                                                    ),
-                                                  )?.then((value) {
-                                                    if (value == true) {
-                                                      getBankAccountsController
-                                                          .bankdetails_mdethod();
-                                                    }
-                                                  });
-                                                },
-                                          child: Container(
-                                            padding: EdgeInsets.all(w * 0.02),
-                                            decoration: BoxDecoration(
-                                              color: AppColors.primaryRed
-                                                  .withOpacity(0.1),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Icon(
-                                              Icons.edit,
-                                              size: w * 0.04,
-                                              color: isDeletingThis
-                                                  ? AppColors.mediumGray
-                                                  : AppColors.primaryRed,
-                                            ),
                                           ),
                                         ),
 
-                                        SizedBox(width: 5),
-
-                                        // Delete Button - FIXED: Removed duplicate navigation
-                                        InkWell(
-                                          onTap: isDeletingThis
-                                              ? null
-                                              : () {
-                                                  _deleteUpi(
-                                                    account,
-                                                    account.id,
-                                                  );
-                                                },
-                                          child: Container(
-                                            padding: EdgeInsets.all(w * 0.02),
-                                            decoration: BoxDecoration(
-                                              color: isDeletingThis
-                                                  ? AppColors.lightGray
-                                                  : Colors.red.withOpacity(0.1),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: isDeletingThis
-                                                ? SizedBox(
-                                                    width: w * 0.04,
-                                                    height: w * 0.04,
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                          strokeWidth: 2,
-                                                          color: Colors.red,
+                                        // Edit and Delete Icons for UPI
+                                        Row(
+                                          children: [
+                                            // Edit Button
+                                            InkWell(
+                                              onTap: isDeletingThis
+                                                  ? null
+                                                  : () {
+                                                      Get.to(
+                                                        () => EditUpi(
+                                                          account: account,
+                                                          account_id:
+                                                              account.id,
                                                         ),
-                                                  )
-                                                : Icon(
-                                                    Icons.delete,
-                                                    size: w * 0.04,
-                                                    color: Colors.red,
-                                                  ),
-                                          ),
+                                                      )?.then((value) {
+                                                        if (value == true) {
+                                                          getBankAccountsController
+                                                              .bankdetails_mdethod();
+                                                        }
+                                                      });
+                                                    },
+                                              child: Container(
+                                                padding: EdgeInsets.all(
+                                                  w * 0.02,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.primaryRed
+                                                      .withOpacity(0.1),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Icon(
+                                                  Icons.edit,
+                                                  size: w * 0.04,
+                                                  color: isDeletingThis
+                                                      ? AppColors.mediumGray
+                                                      : AppColors.primaryRed,
+                                                ),
+                                              ),
+                                            ),
+
+                                            SizedBox(width: 5),
+
+                                            // Delete Button - FIXED: Removed duplicate navigation
+                                            InkWell(
+                                              onTap: isDeletingThis
+                                                  ? null
+                                                  : () {
+                                                      _deleteUpi(
+                                                        account,
+                                                        account.id,
+                                                      );
+                                                    },
+                                              child: Container(
+                                                padding: EdgeInsets.all(
+                                                  w * 0.02,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: isDeletingThis
+                                                      ? AppColors.lightGray
+                                                      : Colors.red.withOpacity(
+                                                          0.1,
+                                                        ),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: isDeletingThis
+                                                    ? SizedBox(
+                                                        width: w * 0.04,
+                                                        height: w * 0.04,
+                                                        child:
+                                                            CircularProgressIndicator(
+                                                              strokeWidth: 2,
+                                                              color: Colors.red,
+                                                            ),
+                                                      )
+                                                    : Icon(
+                                                        Icons.delete,
+                                                        size: w * 0.04,
+                                                        color: Colors.red,
+                                                      ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                         ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
               SizedBox(height: w * .1),
 

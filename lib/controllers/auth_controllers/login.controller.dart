@@ -56,13 +56,6 @@ class LoginController extends GetxController {
         );
       } else {
         phoneError.value = 'Failed to send OTP. Please try again.';
-        Get.snackbar(
-          'Error',
-          'Failed to send OTP',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
       }
     } catch (e) {
       phoneError.value = 'An error occurred. Please try again.';

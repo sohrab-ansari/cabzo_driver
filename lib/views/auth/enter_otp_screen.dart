@@ -114,13 +114,6 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
           });
         }
 
-        Get.snackbar(
-          'Error',
-          errorMessage,
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
         return;
       }
 
@@ -175,7 +168,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
           completeVerified == "verified" &&
           isProfileCompleted) {
         print("🚀 All Verified - Navigating to Home");
-        CustomNavigator.push(
+        CustomNavigator.removeUntil(
           context,
           BottomnavmainScreen(),
           transition: TransitionType.fade,

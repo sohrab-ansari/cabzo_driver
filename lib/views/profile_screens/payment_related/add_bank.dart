@@ -126,6 +126,7 @@ class _AddBankState extends State<AddBank> {
               context: context,
               hintText: "Enter here",
               controller: accountNumberController,
+              keyboardType: TextInputType.number
             ),
 
             SizedBox(height: w * .04),
@@ -145,6 +146,7 @@ class _AddBankState extends State<AddBank> {
               context: context,
               hintText: "Enter here",
               controller: confirmAccountNumberController,
+              keyboardType: TextInputType.number
             ),
 
             SizedBox(height: w * .04),

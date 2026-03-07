@@ -1,0 +1,32 @@
+[33m7cedd11[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: pull origin fix10: Merge made by the 'ort' strategy.
+[33mff487a3[m HEAD@{1}: commit: bug fixes
+[33m696c6f8[m HEAD@{2}: pull origin bubble: Merge made by the 'ort' strategy.
+[33md2abd04[m HEAD@{3}: commit: bg services completed
+[33m813fbfa[m HEAD@{4}: commit (merge): Merge branch 'alert' of github-satyakabir:satyakabiroffical/Rupesh-Flutter-NZCU
+[33m34442de[m HEAD@{5}: commit: fixed ride request popup
+[33m2019530[m HEAD@{6}: commit: fixed merge conflict issue
+[33m475dfa6[m HEAD@{7}: pull origin alert: Merge made by the 'ort' strategy.
+[33m417d620[m HEAD@{8}: commit: removed unwanted code
+[33mf9d644d[m HEAD@{9}: commit (merge): Merge branch 'alert' of github-satyakabir:satyakabiroffical/Rupesh-Flutter-NZCU
+[33mfea5e68[m HEAD@{10}: commit: add dual-mode location selection (search + map pin)
+[33m996548e[m HEAD@{11}: pull origin drop_location_bug: Merge made by the 'ort' strategy.
+[33m4904722[m HEAD@{12}: commit: ride req pop up screen after ride cancellatioin fixed
+[33m83727ec[m HEAD@{13}: commit: custom sound notification
+[33m62ae8b2[m HEAD@{14}: reset: moving to HEAD~
+[33mc43acd0[m HEAD@{15}: commit: custom sound notification
+[33m62ae8b2[m HEAD@{16}: pull origin drop_location_bug: Fast-forward
+[33mbd3d631[m HEAD@{17}: checkout: moving from dev to main
+[33md23c93f[m[33m ([m[1;31morigin/oldcode[m[33m, [m[1;31morigin/dev[m[33m, [m[1;32mdev[m[33m)[m HEAD@{18}: reset: moving to HEAD
+[33md23c93f[m[33m ([m[1;31morigin/oldcode[m[33m, [m[1;31morigin/dev[m[33m, [m[1;32mdev[m[33m)[m HEAD@{19}: reset: moving to HEAD
+[33md23c93f[m[33m ([m[1;31morigin/oldcode[m[33m, [m[1;31morigin/dev[m[33m, [m[1;32mdev[m[33m)[m HEAD@{20}: pull origin oldcode: Fast-forward
+[33mfa59566[m HEAD@{21}: reset: moving to HEAD
+[33mfa59566[m HEAD@{22}: checkout: moving from dev to dev
+[33mfa59566[m HEAD@{23}: checkout: moving from main to dev
+[33mbd3d631[m HEAD@{24}: pull origin main: Fast-forward
+[33mc8e6f6e[m HEAD@{25}: checkout: moving from dev to main
+[33mfa59566[m HEAD@{26}: commit: merged bg services features
+[33mfa10c27[m HEAD@{27}: commit (merge): Merge branch 'main' into dev
+[33md03a747[m[33m ([m[1;31morigin/rkt1[m[33m, [m[1;32mrkt1[m[33m)[m HEAD@{28}: checkout: moving from rkt1 to dev
+[33md03a747[m[33m ([m[1;31morigin/rkt1[m[33m, [m[1;32mrkt1[m[33m)[m HEAD@{29}: checkout: moving from main to rkt1
+[33mc8e6f6e[m HEAD@{30}: reset: moving to HEAD
+[33mc8e6f6e[m HEAD@{31}: clone: from github-satyakabir:satyakabiroffical/Rupesh-Flutter-NZCU.git
