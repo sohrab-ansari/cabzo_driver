@@ -7,6 +7,9 @@ import 'package:nzcu_driver/controllers/home_controllers/network_controller.dart
 import 'package:nzcu_driver/core/dependency_injection.dart';
 import 'package:nzcu_driver/firebase_options.dart';
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
+import 'package:nzcu_driver/services/overlay_service.dart';
+import 'package:nzcu_driver/services/apiservices/socket_manager.dart';
+import 'package:nzcu_driver/ui/screens/overlay_bubble.dart';
 
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/controllers/chart_id_controller/chat_notification_controller.dart';
@@ -97,7 +100,9 @@ void main() async {
     // ========================================================================
     // 8. RIDE NOTIFICATION SERVICE (heads-up ride request alerts)
     // ========================================================================
-    print('8️⃣ Using SocketForegroundService for killed-state native notifications.');
+    print(
+      '8️⃣ Using SocketForegroundService for killed-state native notifications.',
+    );
 
     // Background socket is now handled natively by SocketForegroundService.kt
     print('9️⃣ Native socket service configured (starts on go-online)');
@@ -117,8 +122,41 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    OverlayService.instance.initOverlayListener((message) {
+      print('[MyApp] Overlay tap received: $message');
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    OverlayService.instance.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      if (SocketManager().isOnDuty) {
+        OverlayService.instance.showOverlay();
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      OverlayService.instance.hideOverlay();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -146,4 +184,16 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
+}
+
+// ==========================================================================
+// OVERLAY ENTRY POINT (required by flutter_overlay_window)
+// ==========================================================================
+
+@pragma('vm:entry-point')
+void overlayMain() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(
+    const MaterialApp(debugShowCheckedModeBanner: false, home: OverlayBubble()),
+  );
 }
