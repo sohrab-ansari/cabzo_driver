@@ -57,11 +57,17 @@ class _OverlayBubbleState extends State<OverlayBubble> {
           await Future.delayed(const Duration(milliseconds: 300));
           await FlutterOverlayWindow.closeOverlay();
         },
-        child: Image(
-          image: AssetImage('assets/images/overlay_icon.png'),
-          width: 150,
-          height: 150,
-          fit: BoxFit.contain,
+        child: Container(
+          padding: EdgeInsets.all(20),
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            image: DecorationImage(
+              image: AssetImage('assets/images/overlay_icon.png'),
+              fit: BoxFit.cover,
+            ),
+          ),
         ),
       ),
     );
