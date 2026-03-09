@@ -414,76 +414,141 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
   void _extractCoordinates() {
     try {
+      // ── Pickup ─────────────────────────────────────────────────────────────
       if (widget.rideData?['pickup'] != null) {
         final pickup = widget.rideData!['pickup'];
-        _rideData!['pickupCoordinates'] = LatLng(
-          pickup['latitude']?.toDouble() ?? 23.2599,
-          pickup['longitude']?.toDouble() ?? 77.4126,
-        );
-      } else if (widget.rideData?['startLocation'] != null) {
-        final startLocation = widget.rideData!['startLocation'];
-        if (startLocation['coordinates'] != null &&
-            startLocation['coordinates'].length >= 2) {
-          // Backend sends coordinates as [latitude, longitude]
-          // First check if it looks like [lat, lng] format (lat is typically smaller for India region)
-          final coord0 = startLocation['coordinates'][0]?.toDouble() ?? 0;
-          final coord1 = startLocation['coordinates'][1]?.toDouble() ?? 0;
+        if (pickup is Map) {
+          // 1. Try Map with latitude/longitude keys
+          final lat = pickup['latitude']?.toDouble();
+          final lng = pickup['longitude']?.toDouble();
+          if (lat != null && lng != null) {
+            _rideData!['pickupCoordinates'] = LatLng(lat, lng);
+            print('📍 Pickup: from pickup.lat/lng: $lat, $lng');
+          } 
+          // 2. Try map with GeoJSON 'coordinates' list
+          else if (pickup['coordinates'] != null) {
+            final coords = pickup['coordinates'];
+            if (coords is List && coords.length >= 2) {
+              final coord0 = coords[0]?.toDouble() ?? 0;
+              final coord1 = coords[1]?.toDouble() ?? 0;
+              final bool isLatLngFormat =
+                  (coord0 >= 8 && coord0 <= 37) && (coord1 >= 68 && coord1 <= 97);
 
-          // Determine if coordinates are in [lat, lng] or [lng, lat] format
+              if (isLatLngFormat) {
+                _rideData!['pickupCoordinates'] = LatLng(coord0, coord1);
+                print('📍 Pickup: [lat, lng] format from pickup.coordinates: $coord0, $coord1');
+              } else {
+                _rideData!['pickupCoordinates'] = LatLng(coord1, coord0);
+                print('📍 Pickup: GeoJSON [lng, lat] from pickup.coordinates: $coord1, $coord0');
+              }
+            }
+          }
+        }
+      }
+
+      if (_rideData!['pickupCoordinates'] == null &&
+          widget.rideData?['startLocation'] != null) {
+        final startLocation = widget.rideData!['startLocation'];
+        final coords = startLocation['coordinates'];
+
+        if (coords is List && coords.length >= 2) {
+          final coord0 = coords[0]?.toDouble() ?? 0;
+          final coord1 = coords[1]?.toDouble() ?? 0;
+
           // Latitude for India: 8-37, Longitude for India: 68-97
-          // If coord0 is in latitude range and coord1 is in longitude range, it's [lat, lng]
           final bool isLatLngFormat =
               (coord0 >= 8 && coord0 <= 37) && (coord1 >= 68 && coord1 <= 97);
 
           if (isLatLngFormat) {
-            // Backend format: [latitude, longitude]
             _rideData!['pickupCoordinates'] = LatLng(coord0, coord1);
-            print('📍 Pickup: Using [lat, lng] format: $coord0, $coord1');
+            print('📍 Pickup: [lat, lng] format: $coord0, $coord1');
           } else {
             // GeoJSON format: [longitude, latitude]
             _rideData!['pickupCoordinates'] = LatLng(coord1, coord0);
-            print(
-              '📍 Pickup: Using GeoJSON [lng, lat] format: $coord1, $coord0',
-            );
+            print('📍 Pickup: GeoJSON [lng, lat] format: $coord1, $coord0');
+          }
+        } else if (coords is Map) {
+          // Safety net: coordinates stored as {latitude, longitude} Map
+          final lat = coords['latitude']?.toDouble();
+          final lng = coords['longitude']?.toDouble();
+          if (lat != null && lng != null) {
+            _rideData!['pickupCoordinates'] = LatLng(lat, lng);
+            print('📍 Pickup: coords Map format: $lat, $lng');
           }
         }
       }
 
-      if (widget.rideData?['destination'] != null) {
-        final destination = widget.rideData!['destination'];
-        _rideData!['dropoffCoordinates'] = LatLng(
-          destination['latitude']?.toDouble() ?? 18.5204,
-          destination['longitude']?.toDouble() ?? 73.8567,
-        );
-      } else if (widget.rideData?['endLocation'] != null) {
-        final endLocation = widget.rideData!['endLocation'];
-        if (endLocation['coordinates'] != null &&
-            endLocation['coordinates'].length >= 2) {
-          // Backend sends coordinates as [latitude, longitude]
-          final coord0 = endLocation['coordinates'][0]?.toDouble() ?? 0;
-          final coord1 = endLocation['coordinates'][1]?.toDouble() ?? 0;
+      // ── Drop ───────────────────────────────────────────────────────────────
+      if (widget.rideData?['destination'] != null || widget.rideData?['dropoff'] != null) {
+        final destination = widget.rideData?['destination'] ?? widget.rideData?['dropoff'];
+        if (destination is Map) {
+          // 1. Try Map with latitude/longitude keys
+          final lat = destination['latitude']?.toDouble();
+          final lng = destination['longitude']?.toDouble();
+          if (lat != null && lng != null) {
+            _rideData!['dropoffCoordinates'] = LatLng(lat, lng);
+            print('📍 Drop: from destination.lat/lng: $lat, $lng');
+          }
+          // 2. Try map with GeoJSON 'coordinates' list
+          else if (destination['coordinates'] != null) {
+            final coords = destination['coordinates'];
+            if (coords is List && coords.length >= 2) {
+              final coord0 = coords[0]?.toDouble() ?? 0;
+              final coord1 = coords[1]?.toDouble() ?? 0;
+              final bool isLatLngFormat =
+                  (coord0 >= 8 && coord0 <= 37) && (coord1 >= 68 && coord1 <= 97);
 
-          // Determine if coordinates are in [lat, lng] or [lng, lat] format
+              if (isLatLngFormat) {
+                _rideData!['dropoffCoordinates'] = LatLng(coord0, coord1);
+                print('📍 Drop: [lat, lng] format from destination.coordinates: $coord0, $coord1');
+              } else {
+                _rideData!['dropoffCoordinates'] = LatLng(coord1, coord0);
+                print('📍 Drop: GeoJSON [lng, lat] from destination.coordinates: $coord1, $coord0');
+              }
+            }
+          }
+        }
+      }
+
+      if (_rideData!['dropoffCoordinates'] == null &&
+          widget.rideData?['endLocation'] != null) {
+        final endLocation = widget.rideData!['endLocation'];
+        final coords = endLocation['coordinates'];
+
+        if (coords is List && coords.length >= 2) {
+          final coord0 = coords[0]?.toDouble() ?? 0;
+          final coord1 = coords[1]?.toDouble() ?? 0;
+
           final bool isLatLngFormat =
               (coord0 >= 8 && coord0 <= 37) && (coord1 >= 68 && coord1 <= 97);
 
           if (isLatLngFormat) {
-            // Backend format: [latitude, longitude]
             _rideData!['dropoffCoordinates'] = LatLng(coord0, coord1);
-            print('📍 Drop: Using [lat, lng] format: $coord0, $coord1');
+            print('📍 Drop: [lat, lng] format: $coord0, $coord1');
           } else {
             // GeoJSON format: [longitude, latitude]
             _rideData!['dropoffCoordinates'] = LatLng(coord1, coord0);
-            print('📍 Drop: Using GeoJSON [lng, lat] format: $coord1, $coord0');
+            print('📍 Drop: GeoJSON [lng, lat] format: $coord1, $coord0');
+          }
+        } else if (coords is Map) {
+          // Safety net: coordinates stored as {latitude, longitude} Map
+          final lat = coords['latitude']?.toDouble();
+          final lng = coords['longitude']?.toDouble();
+          if (lat != null && lng != null) {
+            _rideData!['dropoffCoordinates'] = LatLng(lat, lng);
+            print('📍 Drop: coords Map format: $lat, $lng');
           }
         }
       }
 
+      // ── Fallbacks (logged as warnings) ────────────────────────────────────
       if (_rideData!['pickupCoordinates'] == null) {
+        print('⚠️ Pickup coordinates not found in any field — using fallback');
         _rideData!['pickupCoordinates'] = const LatLng(23.2599, 77.4126);
       }
 
       if (_rideData!['dropoffCoordinates'] == null) {
+        print('⚠️ Drop coordinates not found in any field — using fallback');
         _rideData!['dropoffCoordinates'] = const LatLng(18.5204, 73.8567);
       }
 
@@ -495,6 +560,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
       _rideData!['dropoffCoordinates'] = const LatLng(18.5204, 73.8567);
     }
   }
+
 
   Future<bool> _requestLocationPermission() async {
     try {

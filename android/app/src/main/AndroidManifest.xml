@@ -137,7 +137,12 @@
         <receiver
             android:name=".RideActionReceiver"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.nzcu_driver.ACCEPT_RIDE" />
+                <action android:name="com.nzcu_driver.DECLINE_RIDE" />
+            </intent-filter>
+        </receiver>
 
         <!-- Add this provider for file sharing -->
         <!-- <provider

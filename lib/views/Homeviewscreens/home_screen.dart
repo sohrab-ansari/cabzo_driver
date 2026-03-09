@@ -12,6 +12,7 @@ import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
 import 'package:nzcu_driver/utilities/widgets/map_helper.dart';
 import 'package:nzcu_driver/views/ride_screens/book_ride.dart';
 import 'package:nzcu_driver/views/Homeviewscreens/Agreement_screen.dart';
+import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
 
 import 'package:nzcu_driver/utilities/widgets/home_screen_widgets.dart';
 import 'package:flutter/material.dart';
@@ -136,17 +137,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void handleonline() {
     print(
-      "online status in home screen is ::::::::::::::::::::::::::: ${widget.isOnDuty}",
+      "online status in home screen is ::::::::::::::::::::::::::: ${widget.isOnDuty}, SocketManager is: ${socketManager.isOnDuty}",
     );
 
-    // Set socketManager status based on widget parameter
-    if (widget.isOnDuty == true) {
+    // If SocketManager already has a connected/restored state, we should NOT 
+    // overwrite it with `widget.isOnDuty` because `widget.isOnDuty` might be 
+    // stale from BottomNavMainScreen when switching tabs.
+    // We only use `widget.isOnDuty` if it's true and we need to force it, 
+    // or if we're completely uninitialized.
+    if (widget.isOnDuty == true && !socketManager.isOnDuty) {
       socketManager.isOnDuty = true;
-      print("✅ Driver set to ONLINE");
+    } else if (widget.isOnDuty == false && socketManager.isOnDuty) {
+      // Avoid forcing offline if user manually went online and switched tabs
+      // The socketManager is the single source of truth for online status.
+      print("ℹ️ Ignoring widget.isOnDuty=false to preserve true SocketManager state");
+    }
+
+    if (socketManager.isOnDuty) {
+      print("✅ Driver is ONLINE");
       _updateDriverMarker();
     } else {
-      socketManager.isOnDuty = false;
-      print("🔴 Driver set to OFFLINE");
+      print("🔴 Driver is OFFLINE");
     }
   }
 
@@ -333,8 +344,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     // Clear pending request
     _clearPendingRideRequest();
 
-    // Navigate to ride screen
-    // Get.to(() => RideRequestScreen(rideData: rideData));
+    // Navigate to ArrivingClient screen
+    Get.to(() => ArrivingClient(rideData: rideData, typeCheck: false));
   }
 
   void _clearPendingRideRequest() {

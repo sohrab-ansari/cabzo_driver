@@ -113,6 +113,12 @@ class _SplashScreenState extends State<SplashScreen> {
         BottomnavmainScreen(isOnDuty: wasOnline, isFirstLaunch: true),
         transition: TransitionType.fade,
       );
+
+      // Check if a ride request arrived while the app was killed (from native socket service).
+      // The native SocketForegroundService sets pending_ride_from_killed=true and stores
+      // the ride JSON in last_ride_request. checkPendingRideFromKilledState() already
+      // has a 1500ms internal delay so the home screen is fully rendered before navigation.
+      SocketManager().checkPendingRideFromKilledState();
     } else {
       // User is not logged in, navigate to login screen
       CustomNavigator.removeUntil(

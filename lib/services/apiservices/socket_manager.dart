@@ -98,15 +98,50 @@ class SocketManager {
         return;
       }
 
-      print('🚕 [SocketManager] Pending ride from killed state detected!');
-
-      // Clear flag immediately
+      // Clear flag immediately so this block cannot fire twice per session.
       await prefs.setBool("pending_ride_from_killed", false);
+
+      // ── Staleness guard ─────────────────────────────────────────────────
+      // If the ride request is older than 30 seconds the window to accept it
+      // has probably expired — discard silently to avoid a ghost screen.
+      final pendingTs = prefs.getInt('last_ride_request_ts') ?? 0;
+      if (pendingTs > 0) {
+        final ageMs = DateTime.now().millisecondsSinceEpoch - pendingTs;
+        if (ageMs > 60000) {
+          print(
+            '⏰ [SocketManager] Pending ride is ${ageMs ~/ 1000}s old — discarding (too stale)',
+          );
+          return;
+        }
+      }
+
+      // ── Accept-already-tapped guard ──────────────────────────────────────
+      // If the driver tapped "Accept" from the notification before the app
+      // opened, pending_accept_order_id is already set. In that case
+      // _processPendingNativeNotificationActions() (called from initialize())
+      // will emit ride:accept and navigate to AcceptedScreen — don't also
+      // push RideRequestScreen on top of it.
+      final pendingAcceptId = prefs.getString('pending_accept_order_id') ?? '';
+      if (pendingAcceptId.isNotEmpty) {
+        print(
+          '🚕 [SocketManager] Accept already tapped — skipping RideRequestScreen '
+          '(pending_accept_order_id=$pendingAcceptId)',
+        );
+        return;
+      }
+
+      print('🚕 [SocketManager] Pending ride from killed state detected!');
 
       // Parse and MAP ride data (same normalization as live socket - required for Accept/Cancel)
       final Map<String, dynamic> rideDataRaw = json.decode(rideJson);
       final Map<String, dynamic> rideDataMapped = _mapRideData(rideDataRaw);
       _lastRideData = rideDataMapped;
+
+      // Mark that a pending ride request is active so the ride:newRide guard
+      // doesn't block the eventual Accept/Decline from this screen.
+      _hasPendingRideRequest = true;
+      // Also ensure isOnDuty is true — driver must have been online when killed.
+      isOnDuty = true;
 
       print(
         '🚕 [SocketManager] Navigating to RideRequestScreen (orderId=${rideDataMapped['orderId']})...',
@@ -117,6 +152,13 @@ class SocketManager {
         // High delay to ensure the splash screen is completely done transitioning
         // to HomeScreen before projecting the RideRequest view onto the stack.
         Future.delayed(const Duration(milliseconds: 1500), () {
+          // Double-check that accept was not tapped during the delay.
+          if (!_hasPendingRideRequest) {
+            print(
+              '🚕 [SocketManager] Ride cancelled or accepted during delay — skipping navigation',
+            );
+            return;
+          }
           Get.to(() => RideRequestScreen(rideData: rideDataMapped));
         });
       });
@@ -178,6 +220,7 @@ class SocketManager {
   bool isOnDuty = false;
   bool _isProcessingOnline = false;
   bool _isRideInProgress = false;
+
   /// Guards against stale navigation after a ride is cancelled
   bool _hasPendingRideRequest = false;
   Map<String, dynamic>?
@@ -1042,6 +1085,27 @@ class SocketManager {
           'longitude': double.parse(pickup['longitude'].toString()),
         };
       }
+    } else if (rideData['startLocation'] != null && 
+               rideData['startLocation']['coordinates'] != null) {
+      final coords = rideData['startLocation']['coordinates'];
+      if (coords is List && coords.length >= 2) {
+        // Assume [lat, lng] or [lng, lat] handles below, but here we just need to preserve them
+        // usually backend sends [lat, lng] or GeoJSON [lng, lat]
+        // The _extractCoordinates handles the order, we'll just store as Map to let the fallback handle it
+        // Or store it nicely. For simplicity, just read [0] and [1] assuming [lat, lng] like before, 
+        // to populate pickupCoords so it gets converted nicely
+        pickupCoords = {
+          'latitude': double.parse(coords[0].toString()),
+          'longitude': double.parse(coords[1].toString()),
+        };
+      } else if (coords is Map) {
+         if (coords['latitude'] != null && coords['longitude'] != null) {
+           pickupCoords = {
+             'latitude': double.parse(coords['latitude'].toString()),
+             'longitude': double.parse(coords['longitude'].toString()),
+           };
+         }
+      }
     }
 
     // Extract dropoff coordinates
@@ -1053,6 +1117,22 @@ class SocketManager {
           'latitude': double.parse(destination['latitude'].toString()),
           'longitude': double.parse(destination['longitude'].toString()),
         };
+      }
+    } else if (rideData['endLocation'] != null && 
+               rideData['endLocation']['coordinates'] != null) {
+      final coords = rideData['endLocation']['coordinates'];
+      if (coords is List && coords.length >= 2) {
+        dropoffCoords = {
+          'latitude': double.parse(coords[0].toString()),
+          'longitude': double.parse(coords[1].toString()),
+        };
+      } else if (coords is Map) {
+         if (coords['latitude'] != null && coords['longitude'] != null) {
+           dropoffCoords = {
+             'latitude': double.parse(coords['latitude'].toString()),
+             'longitude': double.parse(coords['longitude'].toString()),
+           };
+         }
       }
     }
 
@@ -1109,8 +1189,20 @@ class SocketManager {
       'orderId': rideData['orderId'] ?? rideData['rideId'] ?? rideData['_id'],
       'pickup': pickupCoords,
       'destination': dropoffCoords,
-      'startLocation': {'address': pickupAddress, 'coordinates': pickupCoords},
-      'endLocation': {'address': dropAddress, 'coordinates': dropoffCoords},
+      // Store coordinates as [latitude, longitude] List so _extractCoordinates()
+      // in accepted_screen.dart can parse them with the standard index-based logic.
+      'startLocation': {
+        'address': pickupAddress,
+        'coordinates': pickupCoords != null
+            ? [pickupCoords['latitude'], pickupCoords['longitude']]
+            : null,
+      },
+      'endLocation': {
+        'address': dropAddress,
+        'coordinates': dropoffCoords != null
+            ? [dropoffCoords['latitude'], dropoffCoords['longitude']]
+            : null,
+      },
       'riderId':
           rideData['riderId'] ??
           rideData['userId']?['_id'] ??
@@ -1556,7 +1648,42 @@ class SocketManager {
             }
 
             if (_isSocketConnected) {
-              acceptRide(rideDataMapped);
+              // 1. Call API to properly accept the ride so the backend notifies the rider
+              try {
+                final response = await HomeApiServices.order_update_data(
+                  orderstatus: "Accepted",
+                  orderid: orderId,
+                );
+
+                if (response.success == true) {
+                  print(
+                    "✅ [SocketManager] Ride successfully accepted via API!",
+                  );
+
+                  // Keep local socket state updated
+                  acceptRide(rideDataMapped);
+
+                  // Wait a tick for the backend to process
+                  await Future.delayed(const Duration(milliseconds: 300));
+
+                  // Navigate to ArrivingClient
+                  _handleRideReconnection(rideDataMapped, 'accepted');
+                } else {
+                  print(
+                    "❌ [SocketManager] Failed to accept ride via API: ${response.message}",
+                  );
+                  Get.snackbar(
+                    'Error',
+                    'Failed to accept ride: ${response.message}',
+                  );
+                }
+              } catch (e) {
+                print("❌ [SocketManager] Error accepting ride from API: $e");
+                Get.snackbar(
+                  'Error',
+                  'Connection failed. Please manually check the app.',
+                );
+              }
             } else {
               print(
                 '❌ [SocketManager] Failed to connect socket within timeout. Cannot accept ride.',

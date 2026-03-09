@@ -26,6 +26,38 @@ class MainActivity : FlutterActivity() {
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
             )
         }
+
+        handleIntentExtras(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntentExtras(intent)
+    }
+
+    private fun handleIntentExtras(intent: Intent?) {
+        if (intent == null) return
+        
+        val isFromNotification = intent.getBooleanExtra("from_notification", false)
+        val isAcceptedRide = intent.getBooleanExtra("accepted_ride", false)
+        val orderId = intent.getStringExtra(SocketForegroundService.EXTRA_ORDER_ID)
+        
+        if (isFromNotification && isAcceptedRide && orderId != null) {
+            try {
+                // Emulate what handleAcceptRide used to do in the background service
+                val prefs = getSharedPreferences("FlutterSharedPreferences", android.content.Context.MODE_PRIVATE)
+                prefs.edit()
+                    .putString("flutter.pending_accept_order_id", orderId)
+                    .putLong("flutter.pending_accept_timestamp", System.currentTimeMillis())
+                    // Clear the pending ride screen flag so splash doesn't pause incorrectly
+                    .putBoolean("flutter.pending_ride_from_killed", false)
+                    .apply()
+                android.util.Log.i("MainActivity", "✅ Captured Accept Intent! Wrote orderId=$orderId to SharedPreferences")
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error writing to SharedPreferences: ${e.message}")
+            }
+        }
     }
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {

@@ -137,7 +137,11 @@ class SocketForegroundService : Service() {
             ACTION_SET_APP_STATE -> {
                 val state = intent.getStringExtra(EXTRA_APP_STATE) ?: "Foreground"
                 setAppState(state)
-                return START_STICKY
+                // Only keep the service alive (START_STICKY) if driver is actually online.
+                // When offline, don't persist the service just for state tracking.
+                val driverOnline = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                    .getBoolean("flutter.driver_is_online", false)
+                return if (driverOnline) START_STICKY else START_NOT_STICKY
             }
             ACTION_ACCEPT_RIDE -> {
                 val orderId = intent.getStringExtra(EXTRA_ORDER_ID) ?: ""
@@ -151,17 +155,58 @@ class SocketForegroundService : Service() {
             }
         }
 
-        // Default: start the service
+        // Default: start the service.
+        // IMPORTANT: When the service restarts via START_STICKY after being killed by the OS,
+        // onStartCommand() is called with intent=null, so action=null and we land here.
+        // We must NOT assume the driver is online — check the persisted pref first.
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val driverIsOnline = prefs.getBoolean("flutter.driver_is_online", false)
+
+        if (!driverIsOnline) {
+            // Android rule: when started via startForegroundService(), the service MUST call
+            // startForeground() within 5 seconds or the system throws a fatal exception.
+            // We satisfy this rule with a silent placeholder, then immediately remove it and stop.
+            Log.i(TAG, "Service started but driver is offline — starting foreground briefly then stopping.")
+            try {
+                val notification = buildStatusNotification("NZCU Driver", "Starting...")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    startForeground(
+                        STATUS_NOTIFICATION_ID, 
+                        notification, 
+                        android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION or 
+                        android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                    )
+                } else {
+                    startForeground(STATUS_NOTIFICATION_ID, notification)
+                }
+                stopForeground(STOP_FOREGROUND_REMOVE) // removes the notification immediately
+            } catch (e: Exception) {
+                Log.e(TAG, "startForeground failed while stopping: ${e.message}")
+            }
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         Log.i(TAG, "Starting foreground service")
         isOnDuty = true
         appState = "Foreground"
 
         try {
             // Start as foreground immediately (MUST happen within 5s)
-            startForeground(STATUS_NOTIFICATION_ID, buildStatusNotification(
+            val notification = buildStatusNotification(
                 "NZCU Driver — Online",
                 "\uD83D\uDFE2 App Active — Foreground • Waiting for rides..."
-            ))
+            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(
+                    STATUS_NOTIFICATION_ID, 
+                    notification, 
+                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION or 
+                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                )
+            } else {
+                startForeground(STATUS_NOTIFICATION_ID, notification)
+            }
         } catch (e: Exception) {
             Log.e(TAG, "FATAL: startForeground failed: ${e.message}", e)
             stopSelf()
@@ -271,8 +316,12 @@ class SocketForegroundService : Service() {
         Log.i(TAG, "App state changed: $appState -> $state")
         val oldState = appState
         appState = state
-        val body = buildNotificationBody()
-        updateStatusNotification("NZCU Driver — Online", body)
+        // Only update the notification if we are actually running as foreground (driver is online).
+        // Do NOT show any notification when the service is invoked for state tracking while offline.
+        if (isOnDuty) {
+            val body = buildNotificationBody()
+            updateStatusNotification("NZCU Driver — Online", body)
+        }
 
         // When Flutter comes back alive, disconnect Kotlin socket
         // to let Flutter's socket handle rides (avoid duplicate connections)
@@ -520,21 +569,33 @@ class SocketForegroundService : Service() {
     private fun handleNewRideRequest(data: JSONObject) {
         Log.i(TAG, "Processing ride request: ${data.toString().take(200)}")
 
-        // Store ride data for Flutter
+        // Store ride data for Flutter.
+        // IMPORTANT: Always set pending_ride_from_killed=true here.
+        // The Kotlin socket ONLY connects when the app is killed (called from onTaskRemoved()).
+        // Even though onStartCommand() resets appState="Foreground" after each AlarmManager restart,
+        // the Kotlin socket connection itself is proof that Flutter is not alive.
+        // Do NOT gate this on appState — that check was the root cause of the bug.
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val editor = prefs.edit()
             .putString(PREF_LAST_RIDE_REQUEST, data.toString())
-
-        // ONLY set pending flag when app is actually killed.
-        // When Flutter is alive (Foreground/Background), its socket handles rides directly.
-        if (appState == "Killed") {
-            Log.i(TAG, "App is KILLED — setting pending_ride_from_killed flag")
-            editor.putBoolean("flutter.pending_ride_from_killed", true)
-        }
+            // Store timestamp so Flutter can discard stale rides (>30s old)
+            .putLong("flutter.last_ride_request_ts", System.currentTimeMillis())
+            // Always set this flag — Flutter reads it on cold-start to show RideRequestScreen
+            .putBoolean("flutter.pending_ride_from_killed", true)
         editor.apply()
+        Log.i(TAG, "✅ pending_ride_from_killed=true stored for Flutter (appState=$appState)")
 
-        // Extract display information
-        val orderId = data.optString("orderId", data.optString("_id", ""))
+        // Extract orderId — the backend uses different keys on different events.
+        // Try all known variants: "orderId", "_id", "rideId", "id"
+        val orderId = data.optString("orderId").ifEmpty {
+            data.optString("_id").ifEmpty {
+                data.optString("rideId").ifEmpty {
+                    data.optString("id", "")
+                }
+            }
+        }
+        Log.i(TAG, "Extracted orderId='$orderId' from ride data")
+
         val pickupLocation = data.optString("pickupLocation",
             data.optJSONObject("pickup")?.optString("address", "Pickup") ?: "Pickup"
         )
@@ -548,59 +609,70 @@ class SocketForegroundService : Service() {
 
         // Build notification body
         val body = buildString {
-            append("📍 $pickupLocation")
-            append("\n🏁 $dropLocation")
-            if (fare.isNotEmpty()) append("\n💰 ₹$fare")
+            append("$pickupLocation")
+            append(" → $dropLocation")
+            if (fare.isNotEmpty()) append(" • ₹$fare")
             if (distance.isNotEmpty()) append(" • $distance km")
         }
 
-        // Show ride notification with Accept / Decline actions
-        showRideNotification(orderId, "🚕 New Ride Request!", body)
-
-        // Also try to open the app (works if app is in background)
-        try {
-            val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-            launchIntent?.apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                putExtra("ride_data", data.toString())
-                putExtra("from_notification", true)
-            }
-            startActivity(launchIntent)
-        } catch (e: Exception) {
-            Log.e(TAG, "Could not launch app: ${e.message}")
-        }
+        // Show ride notification with Accept / Decline actions.
+        // Tapping the notification body will open the app via its contentIntent PendingIntent.
+        // For the killed-state, Flutter reads pending_ride_from_killed on startup and pushes
+        // RideRequestScreen — no explicit startActivity() call needed here.
+        showRideNotification(orderId, "New Ride Request!", body)
     }
 
+
     private fun showRideNotification(orderId: String, title: String, body: String) {
-        // Accept action
-        val acceptIntent = Intent(this, RideActionReceiver::class.java).apply {
-            action = "com.nzcu_driver.ACCEPT_RIDE"
+        // Use orderId-based unique request codes + FLAG_CANCEL_CURRENT so each new ride
+        // always gets a fresh PendingIntent with the correct orderId (fixes empty orderId bug).
+        val rideHash = orderId.hashCode() and 0xFFFF  // keep it positive & within int range
+
+        // Accept action (Directly opens the app instead of routing through a BroadcastReceiver)
+        // Android 10+ is notoriously strict about background activity launches.
+        // A direct PendingIntent.getActivity attached to a notification action button
+        // is guaranteed to be allowed to launch the app.
+        val acceptAppIntent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
+            addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK or
+                Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                Intent.FLAG_ACTIVITY_CLEAR_TOP
+            )
+            putExtra("from_notification", true)
+            putExtra("from_ride_notification", true)
+            putExtra("accepted_ride", true)
             putExtra(EXTRA_ORDER_ID, orderId)
+            action = "com.nzcu_driver.ACCEPT_RIDE"
         }
-        val acceptPendingIntent = PendingIntent.getBroadcast(
-            this, 100, acceptIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        val acceptPendingIntent = PendingIntent.getActivity(
+            this, 1000 + rideHash, acceptAppIntent,
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Decline action
+        // Decline action (Still routes through BroadcastReceiver since it doesn't open the app)
         val declineIntent = Intent(this, RideActionReceiver::class.java).apply {
             action = "com.nzcu_driver.DECLINE_RIDE"
             putExtra(EXTRA_ORDER_ID, orderId)
         }
         val declinePendingIntent = PendingIntent.getBroadcast(
-            this, 101, declineIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            this, 2000 + rideHash, declineIntent,
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Tap to open app
+        // Tap notification body to open app
         val openAppIntent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK or
+                Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                Intent.FLAG_ACTIVITY_CLEAR_TOP
+            )
             putExtra("from_notification", true)
+            putExtra("from_ride_notification", true)
             putExtra(EXTRA_ORDER_ID, orderId)
         }
         val openPendingIntent = PendingIntent.getActivity(
-            this, 102, openAppIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            this, 3000 + rideHash, openAppIntent,
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val notification = NotificationCompat.Builder(this, RIDE_CHANNEL_ID)
@@ -629,62 +701,35 @@ class SocketForegroundService : Service() {
     private fun handleAcceptRide(orderId: String) {
         Log.i(TAG, "✅ Accepting ride: $orderId")
 
-        // Persist user's decision so Flutter can reconcile if needed
+        // Persist user's decision so Flutter can reconcile if needed.
+        // Also store a timestamp so Flutter can detect freshness and ignore stale actions.
         try {
             val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             prefs.edit()
                 .putString(PREF_PENDING_ACCEPT_ORDER_ID, orderId)
+                .putLong("flutter.pending_accept_timestamp", System.currentTimeMillis())
                 .remove(PREF_PENDING_DECLINE_ORDER_ID)
                 .apply()
         } catch (e: Exception) {
             Log.e(TAG, "Error persisting pending accept: ${e.message}")
         }
 
-        // Emit accept via socket (best-effort, with reconnect)
-        Thread {
-            try {
-                if (socket == null || !isSocketConnected) {
-                    Log.i(TAG, "Socket not connected, attempting reconnect before accept")
-                    connectSocket()
-
-                    val start = System.currentTimeMillis()
-                    while (!isSocketConnected && System.currentTimeMillis() - start < 5000) {
-                        Thread.sleep(200)
-                    }
-                }
-
-                if (socket != null && isSocketConnected) {
-                    val payload = JSONObject().apply {
-                        put("orderId", orderId)
-                    }
-                    socket?.emit("ride:accept", payload)
-                    Log.i(TAG, "📡 Emitted ride:accept from native service")
-                } else {
-                    Log.e(TAG, "❌ Could not emit ride:accept - socket not connected")
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error during native ride accept: ${e.message}", e)
-            }
-        }.start()
+        // NOTE: We DO NOT emit 'ride:accept' from the native service anymore.
+        // Reason: If we emit here, the server replies with 'ride:confirmed' to the native socket
+        // BEFORE Flutter starts. Flutter then never sees 'ride:confirmed' and gets stuck.
+        // Instead, Flutter will read "pending_accept_order_id" and emit 'ride:accept' with
+        // the full driver payload.
 
         // Dismiss ride notification
         val nm = getSystemService(NotificationManager::class.java)
         nm.cancel(RIDE_NOTIFICATION_ID)
 
-        // Open app
-        try {
-            val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-            launchIntent?.apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                putExtra("from_notification", true)
-                putExtra("accepted_ride", true)
-                putExtra(EXTRA_ORDER_ID, orderId)
-            }
-            startActivity(launchIntent)
-        } catch (e: Exception) {
-            Log.e(TAG, "Could not open app after accept: ${e.message}")
-        }
+        // NOTE: App-open is handled by RideActionReceiver.onReceive() directly —
+        // BroadcastReceivers responding to user-initiated notification taps are exempt
+        // from Android 10+ background activity launch restrictions.
+        Log.i(TAG, "✅ handleAcceptRide complete — app-open delegated to RideActionReceiver")
     }
+
 
     private fun handleDeclineRide(orderId: String) {
         Log.i(TAG, "❌ Declining ride: $orderId")
@@ -700,32 +745,9 @@ class SocketForegroundService : Service() {
             Log.e(TAG, "Error persisting pending decline: ${e.message}")
         }
 
-        // Emit decline via socket (best-effort, with reconnect)
-        Thread {
-            try {
-                if (socket == null || !isSocketConnected) {
-                    Log.i(TAG, "Socket not connected, attempting reconnect before decline")
-                    connectSocket()
-
-                    val start = System.currentTimeMillis()
-                    while (!isSocketConnected && System.currentTimeMillis() - start < 5000) {
-                        Thread.sleep(200)
-                    }
-                }
-
-                if (socket != null && isSocketConnected) {
-                    val payload = JSONObject().apply {
-                        put("orderId", orderId)
-                    }
-                    socket?.emit("ride:decline", payload)
-                    Log.i(TAG, "📡 Emitted ride:decline from native service")
-                } else {
-                    Log.e(TAG, "❌ Could not emit ride:decline - socket not connected")
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error during native ride decline: ${e.message}", e)
-            }
-        }.start()
+        // NOTE: We DO NOT emit 'ride:decline' from the native service anymore.
+        // Reason: Better to let Flutter handle it consistently so that local state is synchronized.
+        // Flutter reads "pending_decline_order_id" and emits 'ride:decline'.
 
         // Dismiss ride notification
         val nm = getSystemService(NotificationManager::class.java)
@@ -895,5 +917,54 @@ class RideActionReceiver : BroadcastReceiver() {
         } else {
             context.startService(serviceIntent)
         }
+
+        // ── For ACCEPT only: open the app directly from here ────────────────
+        // A BroadcastReceiver handling a user-initiated notification button tap is
+        // explicitly exempt from Android 10-12+ background activity launch restrictions.
+        // Context.startActivity() works here even when the app is fully killed.
+        // Do NOT do this from inside the Service (PendingIntent.send() is still restricted).
+        if (intent.action == "com.nzcu_driver.ACCEPT_RIDE") {
+            // Proactively clear the pending_ride_from_killed flag so that when
+            // checkPendingRideFromKilledState() runs in splash it finds nothing and skips
+            // RideRequestScreen. The accepted state is handled by _processPendingNativeNotificationActions.
+            try {
+                val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                prefs.edit()
+                    .putBoolean("flutter.pending_ride_from_killed", false)
+                    .apply()
+                Log.i("RideActionReceiver", "✅ Cleared pending_ride_from_killed to prevent ghost RideRequestScreen")
+            } catch (e: Exception) {
+                Log.e("RideActionReceiver", "Error clearing pending flag: ${e.message}")
+            }
+
+            try {
+                // Collapse the notification panel so the activity can come to the foreground
+                context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
+
+                val pm = context.packageManager
+                val launchIntent = pm.getLaunchIntentForPackage(context.packageName)?.apply {
+                    addFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK or
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                        Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    )
+                    putExtra("from_notification", true)
+                    putExtra("from_ride_notification", true)
+                    putExtra("accepted_ride", true)
+                    putExtra(SocketForegroundService.EXTRA_ORDER_ID, orderId)
+                }
+                
+                if (launchIntent != null) {
+                    context.startActivity(launchIntent)
+                    Log.i("RideActionReceiver", "✅ App launched from BroadcastReceiver via startActivity (notification panel collapsed)")
+                } else {
+                    Log.e("RideActionReceiver", "❌ getLaunchIntentForPackage returned null")
+                }
+            } catch (e: Exception) {
+                Log.e("RideActionReceiver", "Could not open app from receiver: ${e.message}")
+            }
+        }
     }
 }
+

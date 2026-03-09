@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -18,10 +16,7 @@ import 'package:nzcu_driver/modals/home_modals/verify_Otp_Order_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeApiServices {
-
-
-
- static Future<HomeModalResponse> get_home_data() async {
+  static Future<HomeModalResponse> get_home_data() async {
     // final Uri url = Uri.parse(ApiPath.createVehicle);
     final Uri url = Uri.parse("${ApiPath.driver_home}");
 
@@ -86,9 +81,7 @@ class HomeApiServices {
     }
   }
 
-
-
- static Future<Drivertoggledutyresponse> toggle_duty_data() async {
+  static Future<Drivertoggledutyresponse> toggle_duty_data() async {
     // final Uri url = Uri.parse(ApiPath.createVehicle);
     // final Uri url = Uri.parse("${ApiPath.driver_home}");
     final prefs = await SharedPreferences.getInstance();
@@ -164,9 +157,7 @@ class HomeApiServices {
     }
   }
 
-
-
- static Future<DriverIdResponse> get_driverid_data() async {
+  static Future<DriverIdResponse> get_driverid_data() async {
     /// 🔐 GET TOKEN
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
@@ -256,8 +247,7 @@ class HomeApiServices {
     }
   }
 
-
-    static const Duration apiTimeout = Duration(seconds: 15);
+  static const Duration apiTimeout = Duration(seconds: 15);
 
   static Future<Updateorderresposne> order_update_data({
     required dynamic orderstatus,
@@ -297,7 +287,6 @@ class HomeApiServices {
 
       final Map<String, dynamic> decodedJson = jsonDecode(response.body);
 
-          
       Fluttertoast.showToast(
         msg: decodedJson['message'] ?? "Something went wrong",
         toastLength: Toast.LENGTH_SHORT,
@@ -366,8 +355,6 @@ class HomeApiServices {
       );
     }
   }
-
-
 
   static Future<ChatResponse> chartidmethod({required dynamic orderid}) async {
     final prefs = await SharedPreferences.getInstance();
@@ -548,8 +535,6 @@ class HomeApiServices {
     }
   }
 
-
-
   static Future<RideHistoryResponse> get_rides_history_data({
     required String status,
   }) async {
@@ -642,5 +627,4 @@ class HomeApiServices {
       throw Exception(e);
     }
   }
-
 }
