@@ -98,6 +98,13 @@ class MainActivity : FlutterActivity() {
                     startService(intent)
                     result.success("App state updated")
                 }
+                "bringToFront" -> {
+                    val appIntent = Intent(this@MainActivity, MainActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    }
+                    startActivity(appIntent)
+                    result.success("Brought to front")
+                }
                 else -> result.notImplemented()
             }
         }

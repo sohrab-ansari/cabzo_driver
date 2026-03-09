@@ -27,6 +27,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nzcu_driver/services/apiservices/socket_manager.dart'
     hide LatLng;
 import 'package:nzcu_driver/services/background_service.dart';
+import 'package:nzcu_driver/services/overlay_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool? isOnDuty;
@@ -355,10 +356,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     });
   }
 
-  void _toggleOnlineStatus() {
+  void _toggleOnlineStatus() async {
     if (socketManager.isOnDuty) {
+      OverlayService.instance.hideOverlay();
       socketManager.goOffline();
     } else {
+      // Request overlay permission before going online (one-time prompt)
+      final hasOverlayPermission = await OverlayService.instance
+          .hasPermission();
+      if (!hasOverlayPermission) {
+        await OverlayService.instance.requestPermission();
+      }
+
       socketManager.goOnline();
     }
   }
