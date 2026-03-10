@@ -120,6 +120,12 @@ class _DriverRegistrationState extends State<DriverRegistration> {
     );
     super.initState();
 
+    // Pre-populate phone number from login
+    if (widget.mobileNumber != null &&
+        widget.mobileNumber.toString().isNotEmpty) {
+      phoneNumberController.text = widget.mobileNumber.toString();
+    }
+
     // Debug current state
     WidgetsBinding.instance.addPostFrameCallback((_) {
       print("🚀 Initializing Driver Registration Screen");
@@ -419,7 +425,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                             Get.snackbar(
                               "Selected",
                               "${datum.name}",
-                              snackPosition: SnackPosition.BOTTOM,
+                              snackPosition: SnackPosition.TOP,
                               duration: Duration(seconds: 1),
                               backgroundColor: AppColors.primaryRed.withOpacity(
                                 0.9,
@@ -680,7 +686,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                             Get.snackbar(
                               "Selected",
                               "${datum.name}",
-                              snackPosition: SnackPosition.BOTTOM,
+                              snackPosition: SnackPosition.TOP,
                               duration: Duration(seconds: 1),
                               backgroundColor: AppColors.primaryRed.withOpacity(
                                 0.9,
@@ -796,6 +802,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
         Get.snackbar(
           'Incomplete Form',
           'Please fill all fields and upload all required documents',
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -806,6 +813,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       Get.snackbar(
         'Incomplete Form',
         'Please fill all fields correctly',
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -861,6 +869,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       Get.snackbar(
         'Error',
         'Please enter vehicle name',
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
       );
       return;
@@ -870,6 +879,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       Get.snackbar(
         'Error',
         'Please enter vehicle number',
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
       );
       return;
@@ -880,6 +890,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
         'Error',
         'Please select a vehicle type',
         backgroundColor: Colors.red,
+        snackPosition: SnackPosition.TOP,
       );
       return;
     }
@@ -889,12 +900,18 @@ class _DriverRegistrationState extends State<DriverRegistration> {
         'Error',
         'Please select a vehicle sub-type',
         backgroundColor: Colors.red,
+        snackPosition: SnackPosition.TOP,
       );
       return;
     }
 
     if (modelController.text.isEmpty) {
-      Get.snackbar('Error', 'Please enter model', backgroundColor: Colors.red);
+      Get.snackbar(
+        'Error',
+        'Please enter model',
+        backgroundColor: Colors.red,
+        snackPosition: SnackPosition.TOP,
+      );
       return;
     }
 
@@ -924,6 +941,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
         Get.snackbar(
           'Incomplete Form',
           'Please fill all fields and upload all required documents',
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -935,6 +953,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
         'Incomplete Form',
         'Please fill all fields correctly',
         backgroundColor: Colors.red,
+        snackPosition: SnackPosition.TOP,
         colorText: Colors.white,
       );
       return;
@@ -984,6 +1003,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
         'Error',
         'Failed to submit vehicle details: $e',
         backgroundColor: Colors.red,
+        snackPosition: SnackPosition.TOP,
         colorText: Colors.white,
       );
     } finally {
@@ -1015,6 +1035,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
           'Incomplete Form',
           'Please upload all required documents',
           backgroundColor: Colors.red,
+          snackPosition: SnackPosition.TOP,
           colorText: Colors.white,
         );
         return;
@@ -1024,6 +1045,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
         'Incomplete Form',
         'Please fill all fields correctly',
         backgroundColor: Colors.red,
+        snackPosition: SnackPosition.TOP,
         colorText: Colors.white,
       );
       return;
@@ -1092,6 +1114,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
         'Failed to submit personal details: $e',
         backgroundColor: Colors.red,
         colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
         duration: Duration(seconds: 4),
       );
     } finally {
@@ -1122,6 +1145,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
         'Please upload your profile photo',
         backgroundColor: Colors.red,
         colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
       );
       return;
     }
@@ -1165,6 +1189,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
         'Failed to submit profile photo: $e',
         backgroundColor: Colors.red,
         colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
       );
     } finally {
       setState(() {
@@ -2002,8 +2027,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                                                           "Selected",
                                                           "${selectedSubType.name}",
                                                           snackPosition:
-                                                              SnackPosition
-                                                                  .BOTTOM,
+                                                              SnackPosition.TOP,
                                                           duration: Duration(
                                                             seconds: 1,
                                                           ),
@@ -2379,34 +2403,25 @@ class _DriverRegistrationState extends State<DriverRegistration> {
 
                                     SizedBox(height: w * .04),
 
-                                    // Text("hello ${widget.mobileNumber}"),
-                                    // AppFonts.textPoppins(
-                                    //   context,
-                                    //   "Phone Number",
-                                    //   w * 0.04,
-                                    //   FontWeight.w500,
-                                    //   AppColors.black,
-                                    //   TextAlign.left,
-                                    //   TextOverflow.ellipsis,
-                                    // ),
-                                    // SizedBox(height: w * .01),
-                                    // AppFormFields.custTextFormOther(
-                                    //   context: context,
-                                    //   hintText: "e.g. 9865431062",
-                                    //   controller: widget.mobileNumber,
-                                    //   keyboardType: TextInputType.number,
-                                    //   maxLength: 10,
-                                    //   validator: (value) {
-                                    //     if (value == null ||
-                                    //         value.trim().isEmpty) {
-                                    //       return 'Phone Number is required';
-                                    //     }
-                                    //     if (value.length != 10) {
-                                    //       return 'Phone Number must be 10 digits';
-                                    //     }
-                                    //     return null;
-                                    //   },
-                                    // ),
+                                    AppFonts.textPoppins(
+                                      context,
+                                      "Phone Number",
+                                      w * 0.04,
+                                      FontWeight.w500,
+                                      AppColors.black,
+                                      TextAlign.left,
+                                      TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: w * .01),
+                                    AppFormFields.custTextFormOther(
+                                      context: context,
+                                      hintText: "e.g. 9865431062",
+                                      controller: phoneNumberController,
+                                      keyboardType: TextInputType.number,
+                                      maxLength: 10,
+                                      readOnly: true,
+                                      enabled: false,
+                                    ),
                                     SizedBox(height: w * .04),
                                     AppFonts.textPoppins(
                                       context,

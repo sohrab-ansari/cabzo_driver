@@ -424,7 +424,8 @@ class NotificationService {
   ) async {
     try {
       final String orderId = rideData['orderId']?.toString() ?? 'unknown';
-      final String riderName = rideData['riderName']?.toString() ?? 'New Rider';
+      final String riderName =
+          rideData['riderName']?.toString() ?? 'New Riderr';
       final String pickup =
           rideData['pickupAddress']?.toString() ?? 'Pickup Location';
 

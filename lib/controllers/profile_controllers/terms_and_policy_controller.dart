@@ -1,6 +1,3 @@
-
-
-
 import 'package:nzcu_driver/modals/profile_modals/review_rating_response.dart';
 import 'package:nzcu_driver/modals/profile_modals/terms_and_policy_response.dart';
 // import 'package:nzcu_driver/apiServices/services/profile_api_services.dart';
@@ -11,9 +8,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
 class TermsAndPolicyController extends GetxController {
-  Rx<Termsandpolicyresponse?> termspolicyres = Rx<Termsandpolicyresponse?>(null);
-  
- 
+  Rx<Termsandpolicyresponse?> termspolicyres = Rx<Termsandpolicyresponse?>(
+    null,
+  );
+
   RxBool isLoading = false.obs;
   RxString errorMessage = ''.obs;
 
@@ -40,10 +38,10 @@ class TermsAndPolicyController extends GetxController {
 
       if (res.success == true) {
         print("Reviews fetched successfully");
-        
+
         // Update the response
         termspolicyres.value = res;
-        
+
         // Show success message only if there are new reviews
         // if (res.data != null && res.data!.isNotEmpty) {
         //   Fluttertoast.showToast(
@@ -55,13 +53,13 @@ class TermsAndPolicyController extends GetxController {
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch reviews';
         print("Error: ${errorMessage.value}");
-        
+
         // Only show snackbar if there's no existing data
         if (termspolicyres.value == null) {
           Get.snackbar(
             'Error',
             errorMessage.value,
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.TOP,
             backgroundColor: Colors.red,
             colorText: Colors.white,
           );
@@ -70,13 +68,13 @@ class TermsAndPolicyController extends GetxController {
     } catch (e) {
       errorMessage.value = 'An error occurred: ${e.toString()}';
       print("Exception: $e");
-      
+
       // Only show snackbar if there's no existing data
       if (termspolicyres.value == null) {
         Get.snackbar(
           'Error',
           errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -94,7 +92,7 @@ class TermsAndPolicyController extends GetxController {
   // double get averageRating {
   //   final reviews = reviewRatingResponse.value?.data;
   //   if (reviews == null || reviews.isEmpty) return 0.0;
-    
+
   //   double total = 0;
   //   for (var review in reviews) {
   //     total += (review.rating ?? 0).toDouble();

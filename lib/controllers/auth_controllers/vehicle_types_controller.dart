@@ -1,5 +1,3 @@
-
-
 import 'package:nzcu_driver/services/apiservices/auth_api_service.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/modals/auth_modals/get_all_vehicle_categories_response.dart';
@@ -127,7 +125,7 @@ class VehicleTypesController extends GetxController {
           Get.snackbar(
             'Vehicle Data Failed',
             errorMessage.value,
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.TOP,
             backgroundColor: Colors.red,
             colorText: Colors.white,
             duration: const Duration(seconds: 3),
@@ -145,7 +143,7 @@ class VehicleTypesController extends GetxController {
         Get.snackbar(
           'Error',
           'Something went wrong. Please try again.',
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
           duration: const Duration(seconds: 3),

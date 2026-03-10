@@ -13,7 +13,7 @@
 //     Get.snackbar(
 //       title,
 //       subtitle,
-//       snackPosition: SnackPosition.BOTTOM,
+//       snackPosition: SnackPosition.TOP,
 //       backgroundColor: backgroundColor,
 //       colorText: Colors.white,
 //       borderRadius: 10,

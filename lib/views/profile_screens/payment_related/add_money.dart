@@ -594,7 +594,6 @@
 
 //             SizedBox(height: w * .05),
 
-
 //             /* ----------------------------- ADD MONEY BUTTON ----------------------------- */
 //             Padding(
 //               padding: EdgeInsets.symmetric(horizontal: w * .06),
@@ -606,7 +605,7 @@
 //                     Get.snackbar(
 //                       'Error',
 //                       'Please enter an amount',
-//                       snackPosition: SnackPosition.BOTTOM,
+//                       snackPosition: SnackPosition.TOP,
 //                       backgroundColor: Colors.red,
 //                       colorText: Colors.white,
 //                     );
@@ -621,7 +620,7 @@
 //                     Get.snackbar(
 //                       'Error',
 //                       'Minimum amount for this promo is ₹${_selectedPromoCode!.minAmount}',
-//                       snackPosition: SnackPosition.BOTTOM,
+//                       snackPosition: SnackPosition.TOP,
 //                       backgroundColor: Colors.red,
 //                       colorText: Colors.white,
 //                     );
@@ -657,7 +656,6 @@
 //     );
 //   }
 // }
-
 
 import 'package:nzcu_driver/controllers/profile_controllers/add_money_wallet_controller.dart';
 import 'package:nzcu_driver/controllers/promo_code_controller/get_promo_code_controller.dart';
@@ -743,7 +741,8 @@ class _AddMoneyState extends State<AddMoney> {
         print("Selected Promo: ${_selectedPromoCode!.code}");
         print("Original: $amount, Discount: $discount, Final: $finalAmount");
       }
-    } else if (_selectedPromoCode == null && _amountController.text.isNotEmpty) {
+    } else if (_selectedPromoCode == null &&
+        _amountController.text.isNotEmpty) {
       print("No promo code selected");
       print("Amount: ${_amountController.text}");
     }
@@ -803,10 +802,7 @@ class _AddMoneyState extends State<AddMoney> {
       decoration: BoxDecoration(
         color: ColorsList.mainAppColor.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: ColorsList.mainAppColor,
-          width: 1.5,
-        ),
+        border: Border.all(color: ColorsList.mainAppColor, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -841,18 +837,14 @@ class _AddMoneyState extends State<AddMoney> {
                     color: Colors.red.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.close,
-                    size: w * .04,
-                    color: Colors.red,
-                  ),
+                  child: Icon(Icons.close, size: w * .04, color: Colors.red),
                 ),
               ),
             ],
           ),
-          
+
           SizedBox(height: w * .02),
-          
+
           // Discount details
           if (_selectedPromoCode!.discountInPercentage != null)
             AppFonts.textPoppins(
@@ -864,7 +856,7 @@ class _AddMoneyState extends State<AddMoney> {
               TextAlign.start,
               TextOverflow.ellipsis,
             ),
-            
+
           if (_selectedPromoCode!.flatDiscountAmount != null)
             AppFonts.textPoppins(
               context,
@@ -875,12 +867,11 @@ class _AddMoneyState extends State<AddMoney> {
               TextAlign.start,
               TextOverflow.ellipsis,
             ),
-            
+
           SizedBox(height: w * .01),
-          
+
           // Final amount calculation
-          if (_amountController.text.isNotEmpty)
-            _buildDiscountCalculation(w),
+          if (_amountController.text.isNotEmpty) _buildDiscountCalculation(w),
         ],
       ),
     );
@@ -921,9 +912,9 @@ class _AddMoneyState extends State<AddMoney> {
             ),
           ],
         ),
-        
+
         SizedBox(height: w * .008),
-        
+
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -947,9 +938,9 @@ class _AddMoneyState extends State<AddMoney> {
             ),
           ],
         ),
-        
+
         SizedBox(height: w * .008),
-        
+
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -1150,7 +1141,7 @@ class _AddMoneyState extends State<AddMoney> {
       children: [
         // Show selected promo code widget if any
         _buildSelectedPromoCodeWidget(w),
-        
+
         // Show "Available Promo Codes" title only if there's no selected promo
         // or we want to show available ones
         if (_selectedPromoCode == null)
@@ -1161,7 +1152,9 @@ class _AddMoneyState extends State<AddMoney> {
               return Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: w * .05),
-                  child: CircularProgressIndicator(color: ColorsList.mainAppColor),
+                  child: CircularProgressIndicator(
+                    color: ColorsList.mainAppColor,
+                  ),
                 ),
               );
             }
@@ -1172,7 +1165,11 @@ class _AddMoneyState extends State<AddMoney> {
                   padding: EdgeInsets.all(w * .05),
                   child: Column(
                     children: [
-                      Icon(Icons.error_outline, color: Colors.red, size: w * .1),
+                      Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: w * .1,
+                      ),
                       SizedBox(height: w * .03),
                       AppFonts.textPoppins(
                         context,
@@ -1477,7 +1474,7 @@ class _AddMoneyState extends State<AddMoney> {
                     Get.snackbar(
                       'Error',
                       'Please enter an amount',
-                      snackPosition: SnackPosition.BOTTOM,
+                      snackPosition: SnackPosition.TOP,
                       backgroundColor: Colors.red,
                       colorText: Colors.white,
                     );
@@ -1492,7 +1489,7 @@ class _AddMoneyState extends State<AddMoney> {
                     Get.snackbar(
                       'Error',
                       'Minimum amount for this promo is ₹${_selectedPromoCode!.minAmount}',
-                      snackPosition: SnackPosition.BOTTOM,
+                      snackPosition: SnackPosition.TOP,
                       backgroundColor: Colors.red,
                       colorText: Colors.white,
                     );

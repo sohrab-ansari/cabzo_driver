@@ -774,7 +774,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     context,
                     "Wallets",
                     w * 0.04,
-                    FontWeight.w600,
+                    FontWeight.w500,
                     AppColors.black,
                     TextAlign.left,
                     TextOverflow.visible,
@@ -823,16 +823,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         children: [
                           AppFonts.textPoppins(
                             context,
-                            "₹200 minimum balance required to accept or book a ride.",
+                            "Available Balance",
                             w * 0.030,
                             FontWeight.w500,
-                            Colors.black,
+                            Colors.grey,
                             TextAlign.center,
                             TextOverflow.visible,
                           ).animate().fade(duration: 900.ms).scale(),
 
-                          SizedBox(height: w * .02),
-
+                          // SizedBox(height: w * .02),
                           AppFonts.textPoppins(
                             context,
                             "₹${controller.walletresponse.value?.data?.availableBalance?.toStringAsFixed(2) ?? '0.00'}",

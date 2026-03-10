@@ -458,7 +458,7 @@
 //       _rideData = {
 //         'orderId': 'N/A',
 //         'riderId': 'rider_123',
-//         'riderName': 'John Rider',
+//         'riderName': 'John Riderr',
 //         'riderPhone': '+1234567890',
 //         'riderImage': 'https://i.pravatar.cc/100',
 //         'pickupLocation': 'Manikonda Jagir, Hyderabad, Telangana',

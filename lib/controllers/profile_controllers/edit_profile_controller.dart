@@ -80,7 +80,7 @@ class EditProfileController extends GetxController {
         print("Profile updated successfully");
 
         Fluttertoast.showToast(
-          msg: res.message ?? "Profile upssdated successfully",
+          msg: res.message ?? "Profile updated successfully",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.TOP,
         );
@@ -106,7 +106,7 @@ class EditProfileController extends GetxController {
         Get.snackbar(
           'Error',
           errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -117,7 +117,7 @@ class EditProfileController extends GetxController {
       Get.snackbar(
         'Error',
         errorMessage.value,
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -141,7 +141,7 @@ class EditProfileController extends GetxController {
   //     Get.snackbar(
   //       'Error',
   //       'Date of Birth and Gender are required',
-  //       snackPosition: SnackPosition.BOTTOM,
+  //       snackPosition: SnackPosition.TOP,
   //       backgroundColor: Colors.red,
   //       colorText: Colors.white,
   //     );
@@ -193,7 +193,7 @@ class EditProfileController extends GetxController {
   //       Get.snackbar(
   //         'Error',
   //         errorMessage.value,
-  //         snackPosition: SnackPosition.BOTTOM,
+  //         snackPosition: SnackPosition.TOP,
   //         backgroundColor: Colors.red,
   //         colorText: Colors.white,
   //       );
@@ -204,7 +204,7 @@ class EditProfileController extends GetxController {
   //     Get.snackbar(
   //       'Error',
   //       errorMessage.value,
-  //       snackPosition: SnackPosition.BOTTOM,
+  //       snackPosition: SnackPosition.TOP,
   //       backgroundColor: Colors.red,
   //       colorText: Colors.white,
   //     );
@@ -274,7 +274,7 @@ class EditProfileController extends GetxController {
   //       Get.snackbar(
   //         'Error',
   //         errorMessage.value,
-  //         snackPosition: SnackPosition.BOTTOM,
+  //         snackPosition: SnackPosition.TOP,
   //         backgroundColor: Colors.red,
   //         colorText: Colors.white,
   //       );
@@ -285,7 +285,7 @@ class EditProfileController extends GetxController {
   //     Get.snackbar(
   //       'Error',
   //       errorMessage.value,
-  //       snackPosition: SnackPosition.BOTTOM,
+  //       snackPosition: SnackPosition.TOP,
   //       backgroundColor: Colors.red,
   //       colorText: Colors.white,
   //     );

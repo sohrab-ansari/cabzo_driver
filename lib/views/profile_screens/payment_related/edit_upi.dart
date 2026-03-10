@@ -68,7 +68,7 @@ class _EditUpiState extends State<EditUpi> {
           "UPI ID updated successfully",
           backgroundColor: Colors.green,
           colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           duration: const Duration(seconds: 2),
         );
 
@@ -82,7 +82,7 @@ class _EditUpiState extends State<EditUpi> {
           "Failed to update UPI ID: ${e.toString()}",
           backgroundColor: Colors.red,
           colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           duration: const Duration(seconds: 3),
         );
       }
@@ -207,7 +207,7 @@ class _EditUpiState extends State<EditUpi> {
           "UPI ID deleted successfully",
           backgroundColor: Colors.green,
           colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           duration: const Duration(seconds: 2),
         );
 
@@ -221,7 +221,7 @@ class _EditUpiState extends State<EditUpi> {
           "Failed to delete UPI ID: ${e.toString()}",
           backgroundColor: Colors.red,
           colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           duration: const Duration(seconds: 3),
         );
       }

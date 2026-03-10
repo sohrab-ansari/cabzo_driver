@@ -17,12 +17,8 @@ class LoginController extends GetxController {
     try {
       final response = await http.post(
         url,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "phone": phone,
-        }),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"phone": phone}),
       );
 
       print("STATUS CODE: ${response.statusCode}");
@@ -32,14 +28,22 @@ class LoginController extends GetxController {
 
       if (response.statusCode == 200) {
         responseMsg.value = data['message'] ?? "Success";
-        Get.snackbar("Success", responseMsg.value);
+        Get.snackbar(
+          "Success",
+          responseMsg.value,
+          snackPosition: SnackPosition.TOP,
+        );
       } else {
         responseMsg.value = data['message'] ?? "Something went wrong";
-        Get.snackbar("Error", responseMsg.value);
+        Get.snackbar(
+          "Error",
+          responseMsg.value,
+          snackPosition: SnackPosition.TOP,
+        );
       }
     } catch (e) {
       print("ERROR: $e");
-      Get.snackbar("Error", "Server error");
+      Get.snackbar("Error", "Server error", snackPosition: SnackPosition.TOP);
     } finally {
       isLoading.value = false;
     }
@@ -71,31 +75,30 @@ class LoginScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            Obx(() => SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: controller.isLoading.value
-                        ? null
-                        : () {
-                            if (phoneController.text.length == 10) {
-                              controller.registerLogin(
-                                phoneController.text,
-                              );
-                            } else {
-                              Get.snackbar(
-                                "Error",
-                                "Enter valid phone number",
-                              );
-                            }
-                          },
-                    child: controller.isLoading.value
-                        ? const CircularProgressIndicator(
-                            color: Colors.white,
-                          )
-                        : const Text("Login"),
-                  ),
-                )),
+            Obx(
+              () => SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: controller.isLoading.value
+                      ? null
+                      : () {
+                          if (phoneController.text.length == 10) {
+                            controller.registerLogin(phoneController.text);
+                          } else {
+                            Get.snackbar(
+                              "Error",
+                              "Enter valid phone number",
+                              snackPosition: SnackPosition.TOP,
+                            );
+                          }
+                        },
+                  child: controller.isLoading.value
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text("Login"),
+                ),
+              ),
+            ),
           ],
         ),
       ),

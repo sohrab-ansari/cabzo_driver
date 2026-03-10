@@ -127,7 +127,7 @@ class Driver {
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'])
           : null,
-      v: json['__v'],
+      v: (json['__v'] as num?)?.toInt(),
       dlImage: json['DLImage'],
       panImage: json['PANImage'],
       aadharImageBack: json['aadharImageBack'],
@@ -139,7 +139,7 @@ class Driver {
       image: json['image'],
       imageVerificationStatus: json['imageVerificationStatus'],
       preference: json['preference'],
-      platformCommission: json['platformCommission'],
+      platformCommission: (json['platformCommission'] as num?)?.toInt(),
       fleetId: json['fleetId'] != null
           ? FleetId.fromJson(json['fleetId'])
           : null,
@@ -151,7 +151,7 @@ class Driver {
       dateOfBirth: json['dateOfBirth'] != null
           ? DateTime.parse(json['dateOfBirth'])
           : null,
-      totalRating: json['totalRating'],
+      totalRating: (json['totalRating'] as num?)?.toInt(),
       vehicle: json['vehicle'] != null
           ? Vehicle.fromJson(json['vehicle'])
           : null,
@@ -228,17 +228,17 @@ class FleetId {
       phoneOtp: json['phoneOtp'],
       id: json['_id'],
       name: json['name'],
-      phone: json['phone'],
+      phone: (json['phone'] as num?)?.toInt(),
       email: json['email'],
       disable: json['disable'],
-      driverCommision: json['driverCommision'],
+      driverCommision: (json['driverCommision'] as num?)?.toInt(),
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : null,
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'])
           : null,
-      v: json['__v'],
+      v: (json['__v'] as num?)?.toInt(),
     );
   }
 
@@ -343,7 +343,7 @@ class Vehicle {
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'])
           : null,
-      v: json['__v'],
+      v: (json['__v'] as num?)?.toInt(),
     );
   }
 

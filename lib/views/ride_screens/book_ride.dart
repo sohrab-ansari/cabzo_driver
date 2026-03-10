@@ -221,9 +221,7 @@ class _BookRideState extends State<BookRide> {
           //   ),
           // );
 
-
-
-            Fluttertoast.showToast(
+          Fluttertoast.showToast(
             msg: 'Ride booked successfully!',
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.TOP, // 👈 Top position
@@ -637,7 +635,7 @@ class _PlaceSearchSheetState extends State<_PlaceSearchSheet> {
       Get.snackbar(
         'Error',
         'Could not get place details',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );

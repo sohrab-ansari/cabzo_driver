@@ -473,7 +473,7 @@ class _ReceivePaymentModesState extends State<ReceivePaymentModes> {
       Get.snackbar(
         'Error',
         'Invalid order ID',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );

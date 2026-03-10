@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 
 class GetCityByLocationController extends GetxController {
   // Observable response
-  Rx<GetCityByLocationResponse?> faqsCategoriesResponse = 
+  Rx<GetCityByLocationResponse?> faqsCategoriesResponse =
       Rx<GetCityByLocationResponse?>(null);
 
   // Loading and error states
@@ -18,13 +18,10 @@ class GetCityByLocationController extends GetxController {
     super.onInit();
   }
 
-  Future<void> faqscategorimethod(
-
-  {
-      required String lat,
+  Future<void> faqscategorimethod({
+    required String lat,
     required String lng,
-  }
-  ) async {
+  }) async {
     print("faqscategorimethod called");
 
     // Set loading state
@@ -34,28 +31,24 @@ class GetCityByLocationController extends GetxController {
     try {
       // Call API
       final GetCityByLocationResponse res =
-          await ProfileApiServices.get_cit_by_loc_method(lat: lat,lng: lng);
+          await ProfileApiServices.get_cit_by_loc_method(lat: lat, lng: lng);
 
       print("API Response Success: ${res.success}");
       print("API Response Message: ${res.message}");
-    
 
       if (res.success == true) {
         print("FAQs categories fetched successfully");
-        
+
         // Assign the response to the observable
         faqsCategoriesResponse.value = res;
-        
-      
-        
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch FAQs categories';
         print("Error: ${errorMessage.value}");
-        
+
         Get.snackbar(
           'Error',
           errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
@@ -64,11 +57,11 @@ class GetCityByLocationController extends GetxController {
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
       print("Exception in faqscategorimethod: $e");
-      
+
       Get.snackbar(
         'Error',
         errorMessage.value,
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
         duration: const Duration(seconds: 3),

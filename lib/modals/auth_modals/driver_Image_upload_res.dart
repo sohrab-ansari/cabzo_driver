@@ -51,7 +51,7 @@ class Driver {
   bool? disable;
   bool? isProfileCompleted;
 
-  int? rating;
+  double? rating;
   String? createdAt;
   String? updatedAt;
   int? v;
@@ -103,10 +103,10 @@ class Driver {
       disable: json['disable'],
       isProfileCompleted: json['isProfileCompleted'],
 
-      rating: json['rating'],
+      rating: (json['rating'] as num?)?.toDouble(),
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
-      v: json['__v'],
+      v: (json['__v'] as num?)?.toInt(),
     );
   }
 

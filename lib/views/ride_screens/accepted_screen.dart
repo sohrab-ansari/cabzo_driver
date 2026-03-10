@@ -424,7 +424,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
           if (lat != null && lng != null) {
             _rideData!['pickupCoordinates'] = LatLng(lat, lng);
             print('📍 Pickup: from pickup.lat/lng: $lat, $lng');
-          } 
+          }
           // 2. Try map with GeoJSON 'coordinates' list
           else if (pickup['coordinates'] != null) {
             final coords = pickup['coordinates'];
@@ -432,14 +432,19 @@ class _ArrivingClientState extends State<ArrivingClient> {
               final coord0 = coords[0]?.toDouble() ?? 0;
               final coord1 = coords[1]?.toDouble() ?? 0;
               final bool isLatLngFormat =
-                  (coord0 >= 8 && coord0 <= 37) && (coord1 >= 68 && coord1 <= 97);
+                  (coord0 >= 8 && coord0 <= 37) &&
+                  (coord1 >= 68 && coord1 <= 97);
 
               if (isLatLngFormat) {
                 _rideData!['pickupCoordinates'] = LatLng(coord0, coord1);
-                print('📍 Pickup: [lat, lng] format from pickup.coordinates: $coord0, $coord1');
+                print(
+                  '📍 Pickup: [lat, lng] format from pickup.coordinates: $coord0, $coord1',
+                );
               } else {
                 _rideData!['pickupCoordinates'] = LatLng(coord1, coord0);
-                print('📍 Pickup: GeoJSON [lng, lat] from pickup.coordinates: $coord1, $coord0');
+                print(
+                  '📍 Pickup: GeoJSON [lng, lat] from pickup.coordinates: $coord1, $coord0',
+                );
               }
             }
           }
@@ -479,8 +484,10 @@ class _ArrivingClientState extends State<ArrivingClient> {
       }
 
       // ── Drop ───────────────────────────────────────────────────────────────
-      if (widget.rideData?['destination'] != null || widget.rideData?['dropoff'] != null) {
-        final destination = widget.rideData?['destination'] ?? widget.rideData?['dropoff'];
+      if (widget.rideData?['destination'] != null ||
+          widget.rideData?['dropoff'] != null) {
+        final destination =
+            widget.rideData?['destination'] ?? widget.rideData?['dropoff'];
         if (destination is Map) {
           // 1. Try Map with latitude/longitude keys
           final lat = destination['latitude']?.toDouble();
@@ -496,14 +503,19 @@ class _ArrivingClientState extends State<ArrivingClient> {
               final coord0 = coords[0]?.toDouble() ?? 0;
               final coord1 = coords[1]?.toDouble() ?? 0;
               final bool isLatLngFormat =
-                  (coord0 >= 8 && coord0 <= 37) && (coord1 >= 68 && coord1 <= 97);
+                  (coord0 >= 8 && coord0 <= 37) &&
+                  (coord1 >= 68 && coord1 <= 97);
 
               if (isLatLngFormat) {
                 _rideData!['dropoffCoordinates'] = LatLng(coord0, coord1);
-                print('📍 Drop: [lat, lng] format from destination.coordinates: $coord0, $coord1');
+                print(
+                  '📍 Drop: [lat, lng] format from destination.coordinates: $coord0, $coord1',
+                );
               } else {
                 _rideData!['dropoffCoordinates'] = LatLng(coord1, coord0);
-                print('📍 Drop: GeoJSON [lng, lat] from destination.coordinates: $coord1, $coord0');
+                print(
+                  '📍 Drop: GeoJSON [lng, lat] from destination.coordinates: $coord1, $coord0',
+                );
               }
             }
           }
@@ -560,7 +572,6 @@ class _ArrivingClientState extends State<ArrivingClient> {
       _rideData!['dropoffCoordinates'] = const LatLng(18.5204, 73.8567);
     }
   }
-
 
   Future<bool> _requestLocationPermission() async {
     try {
@@ -1462,13 +1473,12 @@ class _ArrivingClientState extends State<ArrivingClient> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: w * .03),
-            const Text(
-              "to pickup location",
-              style: TextStyle(color: Colors.black54),
-            ),
-            SizedBox(height: w * .04),
-
+            // SizedBox(height: w * .03),
+            // const Text(
+            //   "to pickup location",
+            //   style: TextStyle(color: Colors.black54),
+            // ),
+            // SizedBox(height: w * .04),
             if (widget.typeCheck == true) ...[
               _buildClientCard(w),
             ] else ...[

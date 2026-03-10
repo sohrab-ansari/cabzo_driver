@@ -50,7 +50,7 @@ class LoginController extends GetxController {
         Get.snackbar(
           'Success',
           'OTP sent successfully to $phoneNumber',
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
@@ -59,7 +59,7 @@ class LoginController extends GetxController {
         Get.snackbar(
           'Error',
           'Failed to send OTP',
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -69,7 +69,7 @@ class LoginController extends GetxController {
       Get.snackbar(
         'Error',
         'An error occurred: $e',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -107,7 +107,7 @@ class LoginController extends GetxController {
         Get.snackbar(
           'Error',
           otpError.value,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -142,7 +142,7 @@ class LoginController extends GetxController {
       Get.snackbar(
         'Success',
         'OTP verified successfully',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
@@ -155,7 +155,7 @@ class LoginController extends GetxController {
       Get.snackbar(
         'Error',
         otpError.value,
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -214,7 +214,7 @@ class LoginController extends GetxController {
   //       Get.snackbar(
   //         'Success',
   //         'OTP verified successfully',
-  //         snackPosition: SnackPosition.BOTTOM,
+  //         snackPosition: SnackPosition.TOP,
   //         backgroundColor: Colors.green,
   //         colorText: Colors.white,
   //       );
@@ -224,7 +224,7 @@ class LoginController extends GetxController {
   //       Get.snackbar(
   //         'Error',
   //         res.message ?? 'Invalid OTP',
-  //         snackPosition: SnackPosition.BOTTOM,
+  //         snackPosition: SnackPosition.TOP,
   //         backgroundColor: Colors.red,
   //         colorText: Colors.white,
   //       );
@@ -235,7 +235,7 @@ class LoginController extends GetxController {
   //     Get.snackbar(
   //       'Error',
   //       'An error occurred: $e',
-  //       snackPosition: SnackPosition.BOTTOM,
+  //       snackPosition: SnackPosition.TOP,
   //       backgroundColor: Colors.red,
   //       colorText: Colors.white,
   //     );
@@ -286,7 +286,7 @@ class LoginController extends GetxController {
         Get.snackbar(
           'Success',
           'Vehicle created successfully',
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
@@ -297,7 +297,7 @@ class LoginController extends GetxController {
         Get.snackbar(
           'Error',
           res.message ?? 'Failed to create vehicle',
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -308,7 +308,7 @@ class LoginController extends GetxController {
       Get.snackbar(
         'Error',
         'An error occurred: $e',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -368,7 +368,7 @@ class LoginController extends GetxController {
   //       Get.snackbar(
   //         'Success',
   //         'OTP verified successfully',
-  //         snackPosition: SnackPosition.BOTTOM,
+  //         snackPosition: SnackPosition.TOP,
   //         backgroundColor: Colors.green,
   //         colorText: Colors.white,
   //       );
@@ -378,7 +378,7 @@ class LoginController extends GetxController {
   //       Get.snackbar(
   //         'Error',
   //         res.message ?? 'Invalid OTP',
-  //         snackPosition: SnackPosition.BOTTOM,
+  //         snackPosition: SnackPosition.TOP,
   //         backgroundColor: Colors.red,
   //         colorText: Colors.white,
   //       );
@@ -389,7 +389,7 @@ class LoginController extends GetxController {
   //     Get.snackbar(
   //       'Error',
   //       'An error occurred: $e',
-  //       snackPosition: SnackPosition.BOTTOM,
+  //       snackPosition: SnackPosition.TOP,
   //       backgroundColor: Colors.red,
   //       colorText: Colors.white,
   //     );
@@ -462,7 +462,7 @@ class LoginController extends GetxController {
         Get.snackbar(
           'Success',
           'Registration completed successfully!',
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
@@ -473,7 +473,7 @@ class LoginController extends GetxController {
         Get.snackbar(
           'Error',
           res.message ?? 'Registration failed',
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -485,7 +485,7 @@ class LoginController extends GetxController {
       Get.snackbar(
         'Error',
         'An error occurred: $e',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -534,7 +534,7 @@ class LoginController extends GetxController {
         Get.snackbar(
           'Success',
           'Profile photo uploaded successfully!',
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
@@ -552,7 +552,7 @@ class LoginController extends GetxController {
       Get.snackbar(
         'Error',
         'Failed to upload profile photo: $e',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -591,7 +591,7 @@ class LoginController extends GetxController {
   //         Get.snackbar(
   //           'Success',
   //           'Registration completed successfully!',
-  //           snackPosition: SnackPosition.BOTTOM,
+  //           snackPosition: SnackPosition.TOP,
   //           backgroundColor: Colors.green,
   //           colorText: Colors.white,
   //         );
@@ -602,7 +602,7 @@ class LoginController extends GetxController {
   //         Get.snackbar(
   //           'Error',
   //           res.message ?? 'Registration failed',
-  //           snackPosition: SnackPosition.BOTTOM,
+  //           snackPosition: SnackPosition.TOP,
   //           backgroundColor: Colors.red,
   //           colorText: Colors.white,
   //         );
@@ -614,7 +614,7 @@ class LoginController extends GetxController {
   //       Get.snackbar(
   //         'Error',
   //         'An error occurred: $e',
-  //         snackPosition: SnackPosition.BOTTOM,
+  //         snackPosition: SnackPosition.TOP,
   //         backgroundColor: Colors.red,
   //         colorText: Colors.white,
   //       );

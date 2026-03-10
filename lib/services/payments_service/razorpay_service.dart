@@ -1,12 +1,10 @@
-
-
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class RazorpayService {
   late Razorpay _razorpay;
-  
+
   // For handling payment callbacks
   Function(PaymentSuccessResponse)? onPaymentSuccess;
   Function(PaymentFailureResponse)? onPaymentError;
@@ -46,7 +44,7 @@ class RazorpayService {
     // Convert amount to paise (Razorpay expects amount in smallest currency unit)
     // For INR, amount should be in paise
 
-      final numAmount = amount;
+    final numAmount = amount;
     // final numAmount = int.tryParse(amount) ?? 0;
     final amountInPaise = (numAmount * 100).toString();
 
@@ -57,10 +55,7 @@ class RazorpayService {
       'description': description,
       'order_id': orderId,
       'currency': currency,
-      'prefill': prefill ?? {
-        'contact': '',
-        'email': '',
-      },
+      'prefill': prefill ?? {'contact': '', 'email': ''},
       'theme': theme ?? {'color': '#F37254'},
       'notes': notes ?? {},
       'timeout': 300, // 5 minutes timeout
@@ -81,10 +76,10 @@ class RazorpayService {
     print('  Payment ID: ${response.paymentId}');
     print('  Order ID: ${response.orderId}');
     print('  Signature: ${response.signature}');
-    
+
     // Call success callback if provided
     onPaymentSuccess?.call(response);
-    
+
     _showSuccessSnackbar('Payment successful!');
   }
 
@@ -92,9 +87,9 @@ class RazorpayService {
     print('❌ Payment Error:');
     print('  Code: ${response.code}');
     print('  Message: ${response.message}');
-    
+
     String errorMessage = 'Payment failed';
-    
+
     switch (response.code) {
       case 2:
         errorMessage = 'Payment cancelled by user';
@@ -109,19 +104,19 @@ class RazorpayService {
         errorMessage = 'Invalid parameters. Please contact support.';
         break;
     }
-    
+
     // Call error callback if provided
     onPaymentError?.call(response);
-    
+
     _showErrorSnackbar(errorMessage);
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
     print('💰 External Wallet: ${response.walletName}');
-    
+
     // Call external wallet callback if provided
     onExternalWallet?.call(response);
-    
+
     _showInfoSnackbar('Redirected to ${response.walletName}');
   }
 
@@ -129,7 +124,7 @@ class RazorpayService {
     Get.snackbar(
       'Success',
       message,
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
       backgroundColor: Colors.green,
       colorText: Colors.white,
       duration: Duration(seconds: 3),
@@ -140,7 +135,7 @@ class RazorpayService {
     Get.snackbar(
       'Error',
       message,
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
       backgroundColor: Colors.red,
       colorText: Colors.white,
       duration: Duration(seconds: 4),
@@ -151,7 +146,7 @@ class RazorpayService {
     Get.snackbar(
       'Info',
       message,
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
       backgroundColor: Colors.blue,
       colorText: Colors.white,
       duration: Duration(seconds: 3),

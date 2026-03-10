@@ -1,6 +1,3 @@
-
-
-
 import 'dart:convert';
 import 'package:nzcu_driver/controllers/auth_controllers/login.controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
@@ -27,20 +24,12 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   DriverFormController driverFormController = Get.put(DriverFormController());
   TextEditingController phoneController = TextEditingController();
-  
+
   // Form key for validation
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  
-  
 
+  LoginController loginController = Get.put(LoginController());
 
-
-      LoginController loginController = Get.put(LoginController());
-
-
-
-
-  
   // Validation flags
   bool isPhoneValid = false;
   bool showPhoneError = false;
@@ -94,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Validate phone number
     final phoneNumber = phoneController.text.trim();
-    
+
     if (phoneNumber.isEmpty) {
       setState(() {
         showPhoneError = true;
@@ -102,13 +91,13 @@ class _LoginScreenState extends State<LoginScreen> {
       Get.snackbar(
         'Error',
         'Please enter phone number',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
       return;
     }
-    
+
     if (!_validatePhoneNumber(phoneNumber)) {
       setState(() {
         showPhoneError = true;
@@ -116,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Get.snackbar(
         'Error',
         'Please enter a valid 10-digit phone number',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -131,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Get.snackbar(
         'Error',
         'Please accept Terms & Conditions',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -284,83 +273,90 @@ class _LoginScreenState extends State<LoginScreen> {
               // Row with checkbox and text
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: w * .010),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        // CheckBox
-                        Obx(
-                          () => Checkbox(
-                            value: loginController.isChecked.value,
-                            activeColor: const Color(0xFF7C7C8D),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
+                child:
+                    Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                // CheckBox
+                                Obx(
+                                  () => Checkbox(
+                                    value: loginController.isChecked.value,
+                                    activeColor: const Color(0xFF7C7C8D),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    onChanged: (value) {
+                                      loginController.isChecked.value = value!;
+                                      // Hide terms error when checked
+                                      if (value) {
+                                        setState(() {
+                                          showTermsError = false;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+
+                                // Text
+                                AppFonts.textPoppins(
+                                  context,
+                                  "I agree to NZCU ",
+                                  w * 0.032,
+                                  FontWeight.w500,
+                                  AppColors.black.withOpacity(0.7),
+                                  TextAlign.left,
+                                  TextOverflow.visible,
+                                  maxLines: 2,
+                                ),
+
+                                // Terms & Conditions text
+                                InkWell(
+                                  onTap: () {
+                                    CustomNavigator.push(
+                                      context,
+                                      TermsCondition(),
+                                      transition: TransitionType.slideTop,
+                                    );
+                                  },
+                                  child: AppFonts.textPoppins(
+                                    context,
+                                    "Terms & Conditions",
+                                    w * 0.032,
+                                    FontWeight.w400,
+                                    const Color(0xFF439AFE),
+                                    TextAlign.left,
+                                    TextOverflow.visible,
+                                    maxLines: 2,
+                                  ),
+                                ),
+                              ],
                             ),
-                            onChanged: (value) {
-                              loginController.isChecked.value = value!;
-                              // Hide terms error when checked
-                              if (value) {
-                                setState(() {
-                                  showTermsError = false;
-                                });
-                              }
-                            },
-                          ),
-                        ),
 
-                        // Text
-                        AppFonts.textPoppins(
-                          context,
-                          "I agree to NZCU ",
-                          w * 0.032,
-                          FontWeight.w500,
-                          AppColors.black.withOpacity(0.7),
-                          TextAlign.left,
-                          TextOverflow.visible,
-                          maxLines: 2,
+                            // Error message for terms and conditions
+                            if (showTermsError)
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  left: w * 0.05,
+                                  top: w * 0.01,
+                                ),
+                                child: Text(
+                                  'Please accept Terms & Conditions',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontSize: w * 0.03,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        )
+                        .animate()
+                        .fade(duration: 1300.ms, curve: Curves.easeInOut)
+                        .scale(
+                          begin: const Offset(0.95, 0.95),
+                          end: const Offset(1, 1),
                         ),
-
-                        // Terms & Conditions text
-                        InkWell(
-                          onTap: () {
-                            CustomNavigator.push(
-                              context,
-                              TermsCondition(),
-                              transition: TransitionType.slideTop,
-                            );
-                          },
-                          child: AppFonts.textPoppins(
-                            context,
-                            "Terms & Conditions",
-                            w * 0.032,
-                            FontWeight.w400,
-                            const Color(0xFF439AFE),
-                            TextAlign.left,
-                            TextOverflow.visible,
-                            maxLines: 2,
-                          ),
-                        ),
-                      ],
-                    ),
-                    
-                    // Error message for terms and conditions
-                    if (showTermsError)
-                      Padding(
-                        padding: EdgeInsets.only(left: w * 0.05, top: w * 0.01),
-                        child: Text(
-                          'Please accept Terms & Conditions',
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontSize: w * 0.03,
-                          ),
-                        ),
-                      ),
-                  ],
-                ).animate().fade(duration: 1300.ms, curve: Curves.easeInOut).scale(
-                      begin: const Offset(0.95, 0.95),
-                      end: const Offset(1, 1),
-                    ),
               ),
 
               // Space
@@ -420,29 +416,32 @@ class _LoginScreenState extends State<LoginScreen> {
               // Space
               SizedBox(height: w * 0.09),
 
-              
-// Login
-
-       Padding(
+              // Login
+              Padding(
                 padding: EdgeInsets.symmetric(horizontal: w * 0.04),
-                child: Obx(
-                  () => AppButtons.solid2(
-                    context: context,
-                    text: "Login",
-                    onClicked: _handleSendOtp, // Click handler with validations
-                    isButtonEnabled: true, // Button is always enabled
-                    isFullWidth: true,
-                    fontSize: w * 0.045,
-                    height: w * 0.140,
-                    radius: 12.0,
-                    isLoading: loginController.isLoading.value,
-                    textColor: AppColors.black,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ).animate().fade(duration: 1600.ms, curve: Curves.easeInOut).scale(
-                      begin: const Offset(0.95, 0.95),
-                      end: const Offset(1, 1),
-                    ),
+                child:
+                    Obx(
+                          () => AppButtons.solid2(
+                            context: context,
+                            text: "Login",
+                            onClicked:
+                                _handleSendOtp, // Click handler with validations
+                            isButtonEnabled: true, // Button is always enabled
+                            isFullWidth: true,
+                            fontSize: w * 0.045,
+                            height: w * 0.140,
+                            radius: 12.0,
+                            isLoading: loginController.isLoading.value,
+                            textColor: AppColors.black,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        )
+                        .animate()
+                        .fade(duration: 1600.ms, curve: Curves.easeInOut)
+                        .scale(
+                          begin: const Offset(0.95, 0.95),
+                          end: const Offset(1, 1),
+                        ),
               ),
 
               // Send OTP button - Always enabled
@@ -467,7 +466,6 @@ class _LoginScreenState extends State<LoginScreen> {
               //         end: const Offset(1, 1),
               //       ),
               // ),
-
               SizedBox(height: w * .1),
             ],
           ),

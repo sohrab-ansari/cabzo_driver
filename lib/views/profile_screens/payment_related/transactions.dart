@@ -385,12 +385,31 @@ class _TransactionsState extends State<Transactions> {
                       itemCount: transactionsForDate.length,
                       itemBuilder: (context, index) {
                         final transaction = transactionsForDate[index];
+                        final transactionStatus = transaction.status;
                         final transactionDate = transaction.createdAt;
+                        final isPending =
+                            transactionStatus?.toLowerCase() == 'pending';
                         final isDebit =
                             transaction.type?.toLowerCase() == 'debit';
-                        final amountColor = isDebit
-                            ? AppColors.primaryRed2
-                            : Colors.green;
+
+                        // Use amber/orange colors for pending, otherwise normal colors
+                        final Color amountColor;
+                        final Color iconColor;
+                        final Color iconBgColor;
+                        if (isPending) {
+                          amountColor = Colors.orange;
+                          iconColor = Colors.orange;
+                          iconBgColor = Colors.orange.withOpacity(0.1);
+                        } else if (isDebit) {
+                          amountColor = AppColors.primaryRed2;
+                          iconColor = Colors.red;
+                          iconBgColor = Colors.red.withOpacity(0.1);
+                        } else {
+                          amountColor = Colors.green;
+                          iconColor = Colors.green;
+                          iconBgColor = Colors.green.withOpacity(0.1);
+                        }
+
                         final amountPrefix = isDebit ? '-₹' : '+₹';
                         final amount = transaction.amount ?? 0;
 
@@ -400,7 +419,16 @@ class _TransactionsState extends State<Transactions> {
                               Container(
                                     width: w,
                                     decoration: BoxDecoration(
-                                      color: AppColors.white,
+                                      color: isPending
+                                          ? Colors.orange.withOpacity(0.03)
+                                          : AppColors.white,
+                                      border: isPending
+                                          ? Border.all(
+                                              color: Colors.orange
+                                                  .withOpacity(0.3),
+                                              width: 1,
+                                            )
+                                          : null,
                                       boxShadow: [
                                         BoxShadow(
                                           color: Colors.grey.withOpacity(0.2),
@@ -423,31 +451,33 @@ class _TransactionsState extends State<Transactions> {
                                           // Transaction Icon
                                           CircleAvatar(
                                             radius: w * .055,
-                                            backgroundColor: isDebit
-                                                ? Colors.red.withOpacity(0.1)
-                                                : Colors.green.withOpacity(0.1),
-                                            child: Image.asset(
-                                              _getTransactionIcon(
-                                                transaction.type,
-                                                transaction.category,
-                                              ),
-                                              width: w * .055,
-                                              color: isDebit
-                                                  ? Colors.red
-                                                  : Colors.green,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                    return Icon(
-                                                      isDebit
-                                                          ? Icons.arrow_downward
-                                                          : Icons.arrow_upward,
-                                                      color: isDebit
-                                                          ? Colors.red
-                                                          : Colors.green,
-                                                      size: w * .055,
-                                                    );
-                                                  },
-                                            ),
+                                            backgroundColor: iconBgColor,
+                                            child: isPending
+                                                ? Icon(
+                                                    Icons.access_time_rounded,
+                                                    color: iconColor,
+                                                    size: w * .055,
+                                                  )
+                                                : Image.asset(
+                                                    _getTransactionIcon(
+                                                      transaction.type,
+                                                      transaction.category,
+                                                    ),
+                                                    width: w * .055,
+                                                    color: iconColor,
+                                                    errorBuilder: (context,
+                                                        error, stackTrace) {
+                                                      return Icon(
+                                                        isDebit
+                                                            ? Icons
+                                                                .arrow_downward
+                                                            : Icons
+                                                                .arrow_upward,
+                                                        color: iconColor,
+                                                        size: w * .055,
+                                                      );
+                                                    },
+                                                  ),
                                           ),
                                           SizedBox(width: w * .02),
 
@@ -493,14 +523,51 @@ class _TransactionsState extends State<Transactions> {
                                                     maxLines: 1,
                                                   ),
                                                 SizedBox(height: w * 0.01),
-                                                AppFonts.textPoppins(
-                                                  context,
-                                                  _formatDate(transactionDate),
-                                                  w * 0.03,
-                                                  FontWeight.w500,
-                                                  AppColors.mediumGray,
-                                                  TextAlign.left,
-                                                  TextOverflow.ellipsis,
+                                                Row(
+                                                  children: [
+                                                    AppFonts.textPoppins(
+                                                      context,
+                                                      _formatDate(
+                                                          transactionDate),
+                                                      w * 0.03,
+                                                      FontWeight.w500,
+                                                      AppColors.mediumGray,
+                                                      TextAlign.left,
+                                                      TextOverflow.ellipsis,
+                                                    ),
+                                                    if (isPending) ...[
+                                                      SizedBox(
+                                                          width: w * 0.02),
+                                                      Container(
+                                                        padding: EdgeInsets
+                                                            .symmetric(
+                                                          horizontal:
+                                                              w * 0.018,
+                                                          vertical: w * 0.005,
+                                                        ),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors.orange
+                                                              .withOpacity(0.1),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                            w * 0.01,
+                                                          ),
+                                                        ),
+                                                        child:
+                                                            AppFonts.textPoppins(
+                                                          context,
+                                                          'Pending',
+                                                          w * 0.025,
+                                                          FontWeight.w600,
+                                                          Colors.orange,
+                                                          TextAlign.center,
+                                                          TextOverflow.visible,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ],
                                                 ),
                                               ],
                                             ),

@@ -1,5 +1,3 @@
-
-
 import 'package:nzcu_driver/modals/profile_modals/faq_category_responses.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +5,7 @@ import 'package:get/get.dart';
 
 class FaqsCategoriesControler extends GetxController {
   // Observable response
-  Rx<FaqsCategoriesResponse?> faqsCategoriesResponse = 
+  Rx<FaqsCategoriesResponse?> faqsCategoriesResponse =
       Rx<FaqsCategoriesResponse?>(null);
 
   // Loading and error states
@@ -37,25 +35,24 @@ class FaqsCategoriesControler extends GetxController {
 
       if (res.success == true) {
         print("FAQs categories fetched successfully");
-        
+
         // Assign the response to the observable
         faqsCategoriesResponse.value = res;
-        
+
         // Log categories for debugging
         if (res.categories != null) {
           for (var category in res.categories!) {
             print("Category: ${category.name}, Image: ${category.image}");
           }
         }
-        
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch FAQs categories';
         print("Error: ${errorMessage.value}");
-        
+
         Get.snackbar(
           'Error',
           errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
@@ -64,11 +61,11 @@ class FaqsCategoriesControler extends GetxController {
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
       print("Exception in faqscategorimethod: $e");
-      
+
       Get.snackbar(
         'Error',
         errorMessage.value,
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
         duration: const Duration(seconds: 3),

@@ -316,10 +316,10 @@
 // //         senderId = senderIdData['_id']?.toString() ?? '';
 // //         senderName =
 // //             senderIdData['name']?.toString() ??
-// //             (senderType == 'Driver' ? 'Driver' : 'Rider');
+// //             (senderType == 'Driver' ? 'Driver' : 'Riderr');
 // //       } else {
 // //         senderId = senderIdData?.toString() ?? '';
-// //         senderName = senderType == 'Driver' ? 'Driver' : 'Rider';
+// //         senderName = senderType == 'Driver' ? 'Driver' : 'Riderr';
 // //       }
 
 // //       // Determine if the sender is the current driver
@@ -474,11 +474,11 @@
 // //       if (senderIdData is Map<String, dynamic>) {
 // //         // senderId is an object with _id and name
 // //         senderId = senderIdData['_id']?.toString() ?? '';
-// //         senderName = senderIdData['name']?.toString() ?? 'Rider';
+// //         senderName = senderIdData['name']?.toString() ?? 'Riderr';
 // //       } else {
 // //         // senderId is just a string ID
 // //         senderId = senderIdData?.toString() ?? '';
-// //         senderName = senderType == 'Driver' ? 'Driver' : 'Rider';
+// //         senderName = senderType == 'Driver' ? 'Driver' : 'Riderr';
 // //       }
 
 // //       // Get message text
@@ -820,7 +820,7 @@
 // //   @override
 // //   Widget build(BuildContext context) {
 // //     final double w = MediaQuery.of(context).size.width;
-// //     final riderName = widget.rideData?['riderName'] ?? 'Rider';
+// //     final riderName = widget.rideData?['riderName'] ?? 'Riderr';
 // //     final riderImage = widget.rideData?['riderImage'] ?? '';
 
 // //     print("the____my_profile_cameeee ${widget.profileImage}");
@@ -999,7 +999,7 @@
 
 // //   Widget _buildMessageBubble(ChatMessage msg, double w) {
 // //     final bool isMe = msg.isSender;
-// //     final senderName = msg.senderName ?? (isMe ? 'You' : 'Rider');
+// //     final senderName = msg.senderName ?? (isMe ? 'You' : 'Riderr');
 
 // //     return Align(
 // //       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -1522,10 +1522,10 @@
 //         senderId = senderIdData['_id']?.toString() ?? '';
 //         senderName =
 //             senderIdData['name']?.toString() ??
-//             (senderType == 'Driver' ? 'Driver' : 'Rider');
+//             (senderType == 'Driver' ? 'Driver' : 'Riderr');
 //       } else {
 //         senderId = senderIdData?.toString() ?? '';
-//         senderName = senderType == 'Driver' ? 'Driver' : 'Rider';
+//         senderName = senderType == 'Driver' ? 'Driver' : 'Riderr';
 //       }
 
 //       // Determine if the sender is the current driver
@@ -1680,11 +1680,11 @@
 //       if (senderIdData is Map<String, dynamic>) {
 //         // senderId is an object with _id and name
 //         senderId = senderIdData['_id']?.toString() ?? '';
-//         senderName = senderIdData['name']?.toString() ?? 'Rider';
+//         senderName = senderIdData['name']?.toString() ?? 'Riderr';
 //       } else {
 //         // senderId is just a string ID
 //         senderId = senderIdData?.toString() ?? '';
-//         senderName = senderType == 'Driver' ? 'Driver' : 'Rider';
+//         senderName = senderType == 'Driver' ? 'Driver' : 'Riderr';
 //       }
 
 //       // Get message text
@@ -2093,7 +2093,7 @@
 //   @override
 //   Widget build(BuildContext context) {
 //     final double w = MediaQuery.of(context).size.width;
-//     final riderName = widget.rideData?['riderName'] ?? 'Rider';
+//     final riderName = widget.rideData?['riderName'] ?? 'Riderr';
 //     final riderImage = widget.rideData?['riderImage'] ?? '';
 
 //     print("the____my_profile_cameeee ${widget.profileImage}");
@@ -2244,7 +2244,7 @@
 
 //   Widget _buildMessageBubble(ChatMessage msg, double w) {
 //     final bool isMe = msg.isSender;
-//     final senderName = msg.senderName ?? (isMe ? 'You' : 'Rider');
+//     final senderName = msg.senderName ?? (isMe ? 'You' : 'Riderr');
 
 //     return Align(
 //       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -2759,10 +2759,10 @@ class _ChatScreenState extends State<ChatScreen> {
         senderId = senderIdData['_id']?.toString() ?? '';
         senderName =
             senderIdData['name']?.toString() ??
-            (senderType == 'Driver' ? 'Driver' : 'Rider');
+            (senderType == 'Driver' ? 'Driver' : 'Riderr');
       } else {
         senderId = senderIdData?.toString() ?? '';
-        senderName = senderType == 'Driver' ? 'Driver' : 'Rider';
+        senderName = senderType == 'Driver' ? 'Driver' : 'Riderr';
       }
 
       // Determine if the sender is the current driver
@@ -2917,11 +2917,11 @@ class _ChatScreenState extends State<ChatScreen> {
       if (senderIdData is Map<String, dynamic>) {
         // senderId is an object with _id and name
         senderId = senderIdData['_id']?.toString() ?? '';
-        senderName = senderIdData['name']?.toString() ?? 'Rider';
+        senderName = senderIdData['name']?.toString() ?? 'Riderr';
       } else {
         // senderId is just a string ID
         senderId = senderIdData?.toString() ?? '';
-        senderName = senderType == 'Driver' ? 'Driver' : 'Rider';
+        senderName = senderType == 'Driver' ? 'Driver' : 'Riderr';
       }
 
       // Get message text
@@ -3336,7 +3336,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final double w = MediaQuery.of(context).size.width;
-    final riderName = widget.rideData?['riderName'] ?? 'Rider';
+    final riderName = widget.rideData?['riderName'] ?? 'Riderr';
     final riderImage = widget.rideData?['riderImage'] ?? '';
 
     print("the____my_profile_cameeee ${widget.profileImage}");
@@ -3487,7 +3487,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildMessageBubble(ChatMessage msg, double w) {
     final bool isMe = msg.isSender;
-    final senderName = msg.senderName ?? (isMe ? 'You' : 'Rider');
+    final senderName = msg.senderName ?? (isMe ? 'You' : 'Riderr');
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,

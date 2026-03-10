@@ -94,7 +94,7 @@ class TransactionData {
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'])
           : null,
-      v: json['__v'],
+      v: (json['__v'] as num?)?.toInt(),
     );
   }
 
@@ -169,10 +169,10 @@ class Pagination {
 
   factory Pagination.fromJson(Map<String, dynamic> json) {
     return Pagination(
-      total: json['total'],
-      page: json['page'],
-      limit: json['limit'],
-      pages: json['pages'],
+      total: (json['total'] as num?)?.toInt(),
+      page: (json['page'] as num?)?.toInt(),
+      limit: (json['limit'] as num?)?.toInt(),
+      pages: (json['pages'] as num?)?.toInt(),
     );
   }
 

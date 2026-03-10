@@ -20,8 +20,9 @@ class ChatHistoryController extends GetxController {
     errorMessage.value = '';
 
     try {
-      final ChatResponse res =
-          await HomeApiServices.get_chat_messages_data(chatId: chatId);
+      final ChatResponse res = await HomeApiServices.get_chat_messages_data(
+        chatId: chatId,
+      );
 
       chatResponse.value = res;
     } catch (e) {
@@ -30,7 +31,7 @@ class ChatHistoryController extends GetxController {
       Get.snackbar(
         'Error',
         'Failed to load chat',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );

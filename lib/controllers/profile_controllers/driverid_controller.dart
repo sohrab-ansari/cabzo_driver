@@ -17,9 +17,7 @@ import 'package:get/get.dart';
 
 class DriveridController extends GetxController {
   // Change to Rx<HomeModalResponse?> and use .obs
-  Rx<DriverIdResponse?> driveridresponse = Rx<DriverIdResponse?>(
-    null,
-  );
+  Rx<DriverIdResponse?> driveridresponse = Rx<DriverIdResponse?>(null);
 
   // Add loading state
   RxBool isLoading = false.obs;
@@ -30,9 +28,7 @@ class DriveridController extends GetxController {
     super.onInit();
   }
 
-  Future<void> driverid_mdethod(
-   
-  ) async {
+  Future<void> driverid_mdethod() async {
     print("driveridd  called");
 
     // Set loading state
@@ -41,14 +37,11 @@ class DriveridController extends GetxController {
 
     try {
       // Call API
-      final DriverIdResponse res =
-          await HomeApiServices.get_driverid_data(
-          
-          );
+      final DriverIdResponse res = await HomeApiServices.get_driverid_data();
 
       print("API Response: ${res.success}");
 
-       print("API Response2222: ${res.driver}");
+      print("API Response2222: ${res.driver}");
 
       if (res.success == true) {
         print("driverid data fetched successfully");
@@ -68,7 +61,7 @@ class DriveridController extends GetxController {
           Get.snackbar(
             'Error',
             errorMessage.value,
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.TOP,
             backgroundColor: Colors.red,
             colorText: Colors.white,
           );
@@ -82,7 +75,7 @@ class DriveridController extends GetxController {
         Get.snackbar(
           'Error',
           errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );

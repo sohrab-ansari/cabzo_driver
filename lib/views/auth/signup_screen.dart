@@ -66,7 +66,7 @@
 // // // //       Get.snackbar(
 // // // //         'Error',
 // // // //         'Please accept Terms & Conditions',
-// // // //         snackPosition: SnackPosition.BOTTOM,
+// // // //         snackPosition: SnackPosition.TOP,
 // // // //         backgroundColor: Colors.red,
 // // // //         colorText: Colors.white,
 // // // //       );
@@ -78,7 +78,7 @@
 // // // //       Get.snackbar(
 // // // //         'Error',
 // // // //         'Please enter a valid 10-digit phone number',
-// // // //         snackPosition: SnackPosition.BOTTOM,
+// // // //         snackPosition: SnackPosition.TOP,
 // // // //         backgroundColor: Colors.red,
 // // // //         colorText: Colors.white,
 // // // //       );
@@ -463,7 +463,6 @@
 // // // //   }
 // // // // }
 
-
 // // // import 'package:flutter/material.dart';
 // // // import 'package:flutter_animate/flutter_animate.dart';
 // // // import 'package:get/get.dart';
@@ -515,7 +514,7 @@
 // // //     if (mounted) {
 // // //       setState(() {
 // // //         // Check if phone number is valid and terms are accepted
-// // //         final isPhoneValid = phoneController.text.length == 10 && 
+// // //         final isPhoneValid = phoneController.text.length == 10 &&
 // // //                             RegExp(r'^[6-9]\d{9}$').hasMatch(phoneController.text);
 // // //         _isFormValid = isPhoneValid && loginController.isChecked.value;
 // // //       });
@@ -543,7 +542,6 @@
 
 // // //     // Validate phone number format
 // // //     final phoneNumber = phoneController.text.trim();
-   
 
 // // //     // If all validations pass, proceed with sending OTP
 // // //     await _sendOtpAndNavigate(phoneNumber);
@@ -824,11 +822,11 @@
 // // //                     radius: 12.0,
 // // //                     isLoading: loginController.isLoading.value,
 // // //                     // Show different styling based on form validity
-// // //                     backgroundColor: 
+// // //                     backgroundColor:
 // // //                          AppColors.primaryRed, // Use your app's primary color
-                       
-// // //                     textColor: 
-                       
+
+// // //                     textColor:
+
 // // //                          AppColors.darkGray.withOpacity(0.5),
 // // //                     fontWeight: FontWeight.w500,
 // // //                   ),
@@ -888,7 +886,6 @@
 // // //     );
 // // //   }
 // // // }
-
 
 // // import 'package:flutter/material.dart';
 // // import 'package:flutter_animate/flutter_animate.dart';
@@ -1322,7 +1319,7 @@
 //   late final DriverFormController driverFormController;
 //   late final TextEditingController phoneController;
 //   late final LoginController loginController;
-  
+
 //   // Local state for checkbox
 //   bool _isTermsAccepted = false;
 
@@ -1727,7 +1724,7 @@ class _SignupScreenState extends State<SignupScreen> {
   late final DriverFormController driverFormController;
   late final TextEditingController phoneController;
   late final LoginController loginController;
-  
+
   // Local state for checkbox
   bool _isTermsAccepted = false;
   bool _showTermsError = false; // New state to show error
@@ -1770,7 +1767,7 @@ class _SignupScreenState extends State<SignupScreen> {
       setState(() {
         _showTermsError = true;
       });
-      
+
       // Also show snackbar for additional feedback
       CustomSnackbar.showError('Please accept Terms & Conditions');
       return;
@@ -1909,7 +1906,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             if (value.length != 10) {
                               return 'Phone number must be 10 digits';
                             }
-                           
+
                             return null;
                           },
                         )
@@ -1926,131 +1923,134 @@ class _SignupScreenState extends State<SignupScreen> {
               // Terms and Conditions Checkbox with error
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: w * 0.04),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        // Checkbox using local state
-                        Checkbox(
-                          value: _isTermsAccepted,
-                          activeColor: AppColors.primaryRed,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() {
-                                _isTermsAccepted = value;
-                                // Hide error when checkbox is checked
-                                if (value) {
-                                  _showTermsError = false;
-                                }
-                              });
-                            }
-                          },
-                        ),
+                child:
+                    Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                // Checkbox using local state
+                                Checkbox(
+                                  value: _isTermsAccepted,
+                                  activeColor: AppColors.primaryRed,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      setState(() {
+                                        _isTermsAccepted = value;
+                                        // Hide error when checkbox is checked
+                                        if (value) {
+                                          _showTermsError = false;
+                                        }
+                                      });
+                                    }
+                                  },
+                                ),
 
-                        // Terms text
-                        AppFonts.textPoppins(
-                          context,
-                          "I agree to NZCU ",
-                          w * 0.032,
-                          FontWeight.w500,
-                          AppColors.black.withOpacity(0.7),
-                          TextAlign.left,
-                          TextOverflow.visible,
-                          maxLines: 2,
-                        ),
+                                // Terms text
+                                AppFonts.textPoppins(
+                                  context,
+                                  "I agree to NZCU ",
+                                  w * 0.032,
+                                  FontWeight.w500,
+                                  AppColors.black.withOpacity(0.7),
+                                  TextAlign.left,
+                                  TextOverflow.visible,
+                                  maxLines: 2,
+                                ),
 
-                        // Terms link
-                        InkWell(
-                          onTap: () {
-                            CustomNavigator.push(
-                              context,
-                              const TermsCondition(),
-                              transition: TransitionType.slideTop,
-                            );
-                          },
-                          child: AppFonts.textPoppins(
-                            context,
-                            "Terms & Conditions",
-                            w * 0.032,
-                            FontWeight.w400,
-                            const Color(0xFF439AFE),
-                            TextAlign.left,
-                            TextOverflow.visible,
-                            maxLines: 2,
-                          ),
+                                // Terms link
+                                InkWell(
+                                  onTap: () {
+                                    CustomNavigator.push(
+                                      context,
+                                      const TermsCondition(),
+                                      transition: TransitionType.slideTop,
+                                    );
+                                  },
+                                  child: AppFonts.textPoppins(
+                                    context,
+                                    "Terms & Conditions",
+                                    w * 0.032,
+                                    FontWeight.w400,
+                                    const Color(0xFF439AFE),
+                                    TextAlign.left,
+                                    TextOverflow.visible,
+                                    maxLines: 2,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            // Show error message if terms not accepted
+                            if (_showTermsError)
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  left: w * 0.02,
+                                  top: w * 0.01,
+                                ),
+                                child: AppFonts.textPoppins(
+                                  context,
+                                  "Please accept Terms & Conditions",
+                                  w * 0.032,
+                                  FontWeight.w400,
+                                  Colors.red,
+                                  TextAlign.left,
+                                  TextOverflow.visible,
+                                ),
+                              ),
+                          ],
+                        )
+                        .animate()
+                        .fade(duration: 1300.ms, curve: Curves.easeInOut)
+                        .scale(
+                          begin: const Offset(0.95, 0.95),
+                          end: const Offset(1, 1),
                         ),
-                      ],
-                    ),
-                    
-                    // Show error message if terms not accepted
-                    if (_showTermsError)
-                      Padding(
-                        padding: EdgeInsets.only(left: w * 0.02, top: w * 0.01),
-                        child: AppFonts.textPoppins(
-                          context,
-                          "Please accept Terms & Conditions",
-                          w * 0.032,
-                          FontWeight.w400,
-                          Colors.red,
-                          TextAlign.left,
-                          TextOverflow.visible,
-                        ),
-                      ),
-                  ],
-                )
-                    .animate()
-                    .fade(duration: 1300.ms, curve: Curves.easeInOut)
-                    .scale(
-                      begin: const Offset(0.95, 0.95),
-                      end: const Offset(1, 1),
-                    ),
               ),
 
               SizedBox(height: w * 0.05), // Reduced space
-
               // Already have an account section
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: w * 0.04),
                 child: Column(
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AppFonts.textPoppins(
-                          context,
-                          "Already have an account? ",
-                          w * 0.036,
-                          FontWeight.w400,
-                          AppColors.black.withOpacity(0.7),
-                          TextAlign.left,
-                          TextOverflow.visible,
-                        ),
-
-                        // Sign in link
-                        InkWell(
-                          onTap: () {
-                            CustomNavigator.push(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            AppFonts.textPoppins(
                               context,
-                              const LoginScreen(),
-                              transition: TransitionType.slideLeft,
-                            );
-                          },
-                          child: AppFonts.textPoppins(
-                            context,
-                            "Sign in",
-                            w * 0.036,
-                            FontWeight.w400,
-                            const Color(0xFF439AFE),
-                            TextAlign.left,
-                            TextOverflow.visible,
-                          ),
-                        ),
-                      ],
-                    )
+                              "Already have an account? ",
+                              w * 0.036,
+                              FontWeight.w400,
+                              AppColors.black.withOpacity(0.7),
+                              TextAlign.left,
+                              TextOverflow.visible,
+                            ),
+
+                            // Sign in link
+                            InkWell(
+                              onTap: () {
+                                CustomNavigator.push(
+                                  context,
+                                  const LoginScreen(),
+                                  transition: TransitionType.slideLeft,
+                                );
+                              },
+                              child: AppFonts.textPoppins(
+                                context,
+                                "Sign in",
+                                w * 0.036,
+                                FontWeight.w400,
+                                const Color(0xFF439AFE),
+                                TextAlign.left,
+                                TextOverflow.visible,
+                              ),
+                            ),
+                          ],
+                        )
                         .animate()
                         .fade(duration: 1300.ms, curve: Curves.easeInOut)
                         .scale(
@@ -2067,27 +2067,29 @@ class _SignupScreenState extends State<SignupScreen> {
               // Signup Button - ALWAYS ENABLED
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: w * 0.04),
-                child: AppButtons.solid2(
-                  context: context,
-                  text: "Sign Up",
-                  onClicked: _handleSignup,
-                  isButtonEnabled: true, // Always enabled
-                  isFullWidth: true,
-                  fontSize: w * 0.045,
-                  height: w * 0.140,
-                  radius: 12.0,
-                  isLoading: loginController.isLoading.value,
-                  // Always use primary color since button is always enabled
-                  backgroundColor: AppColors.primaryRed,
-                  textColor: AppColors.white, // White text for better contrast
-                  fontWeight: FontWeight.w500,
-                )
-                    .animate()
-                    .fade(duration: 1600.ms, curve: Curves.easeInOut)
-                    .scale(
-                      begin: const Offset(0.95, 0.95),
-                      end: const Offset(1, 1),
-                    ),
+                child:
+                    AppButtons.solid2(
+                          context: context,
+                          text: "Sign Up",
+                          onClicked: _handleSignup,
+                          isButtonEnabled: true, // Always enabled
+                          isFullWidth: true,
+                          fontSize: w * 0.045,
+                          height: w * 0.140,
+                          radius: 12.0,
+                          isLoading: loginController.isLoading.value,
+                          // Always use primary color since button is always enabled
+                          backgroundColor: AppColors.primaryRed,
+                          textColor:
+                              AppColors.white, // White text for better contrast
+                          fontWeight: FontWeight.w500,
+                        )
+                        .animate()
+                        .fade(duration: 1600.ms, curve: Curves.easeInOut)
+                        .scale(
+                          begin: const Offset(0.95, 0.95),
+                          end: const Offset(1, 1),
+                        ),
               ),
               SizedBox(height: w * 0.1),
             ],

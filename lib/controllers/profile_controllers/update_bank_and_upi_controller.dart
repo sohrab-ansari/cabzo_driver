@@ -59,7 +59,7 @@ class UpdateBankAndUpiController extends GetxController {
           Get.snackbar(
             'Error',
             errorMessage.value,
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.TOP,
             backgroundColor: Colors.red,
             colorText: Colors.white,
           );
@@ -73,7 +73,7 @@ class UpdateBankAndUpiController extends GetxController {
         Get.snackbar(
           'Error',
           errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -86,8 +86,6 @@ class UpdateBankAndUpiController extends GetxController {
 
   Future<void> update_bank_method({
     required dynamic accountid,
-
-
 
     required dynamic bankName,
 
@@ -134,7 +132,7 @@ class UpdateBankAndUpiController extends GetxController {
           Get.snackbar(
             'Error',
             errorMessage.value,
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.TOP,
             backgroundColor: Colors.red,
             colorText: Colors.white,
           );
@@ -148,7 +146,7 @@ class UpdateBankAndUpiController extends GetxController {
         Get.snackbar(
           'Error',
           errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -159,82 +157,74 @@ class UpdateBankAndUpiController extends GetxController {
     }
   }
 
+  // In your update_bank_and_upi_controller.dart file
 
+  Future<void> delete_bank_upi_method({required dynamic accountid}) async {
+    print("delete_bank_upi_method called with accountid: $accountid");
 
+    // Set loading state
+    isLoading.value = true;
+    errorMessage.value = '';
 
+    try {
+      // Call API
+      final UpdateBankAndUpiResponse res =
+          await ProfileApiServices.delete_bank_upi_data(
+            accountid: accountid, // Make sure parameter name matches
+          );
 
-// In your update_bank_and_upi_controller.dart file
+      print("API Response success: ${res.success}");
+      print("API Response message: ${res.message}");
 
-Future<void> delete_bank_upi_method({
-  required dynamic accountid,
-}) async {
-  print("delete_bank_upi_method called with accountid: $accountid");
+      if (res.success == true) {
+        print("bank and upi deleted successfully");
 
-  // Set loading state
-  isLoading.value = true;
-  errorMessage.value = '';
+        // Show success toast if you have fluttertoast
+        // Fluttertoast.showToast(
+        //   msg: res.message ?? "Deleted successfully",
+        //   toastLength: Toast.LENGTH_SHORT,
+        //   gravity: ToastGravity.TOP,
+        //   backgroundColor: Colors.green,
+        //   textColor: Colors.white,
+        // );
+      } else {
+        errorMessage.value = res.message ?? 'Failed to delete';
+        print("Error: ${errorMessage.value}");
 
-  try {
-    // Call API
-    final UpdateBankAndUpiResponse res =
-        await ProfileApiServices.delete_bank_upi_data(
-          accountid: accountid,  // Make sure parameter name matches
-        );
+        // Only show snackbar if context is available
+        if (Get.isSnackbarOpen == false) {
+          Get.snackbar(
+            'Error',
+            errorMessage.value,
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
+        }
+      }
+    } catch (e) {
+      errorMessage.value = 'An error occurred: $e';
+      print("Exception in delete_bank_upi_method: $e");
 
-    print("API Response success: ${res.success}");
-    print("API Response message: ${res.message}");
-
-    if (res.success == true) {
-      print("bank and upi deleted successfully");
-      
-      // Show success toast if you have fluttertoast
-      // Fluttertoast.showToast(
-      //   msg: res.message ?? "Deleted successfully",
-      //   toastLength: Toast.LENGTH_SHORT,
-      //   gravity: ToastGravity.TOP,
-      //   backgroundColor: Colors.green,
-      //   textColor: Colors.white,
-      // );
-    } else {
-      errorMessage.value = res.message ?? 'Failed to delete';
-      print("Error: ${errorMessage.value}");
-      
       // Only show snackbar if context is available
       if (Get.isSnackbarOpen == false) {
         Get.snackbar(
           'Error',
           errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
         );
       }
+    } finally {
+      // Reset loading state
+      isLoading.value = false;
     }
-  } catch (e) {
-    errorMessage.value = 'An error occurred: $e';
-    print("Exception in delete_bank_upi_method: $e");
-    
-    // Only show snackbar if context is available
-    if (Get.isSnackbarOpen == false) {
-      Get.snackbar(
-        'Error',
-        errorMessage.value,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-      );
-    }
-  } finally {
-    // Reset loading state
-    isLoading.value = false;
   }
-}
   // Future<void> delete_bank_upi_method({
   //   required dynamic accountid,
-
-
 
   // }) async {
   //   print("driveridd  called");
@@ -247,9 +237,9 @@ Future<void> delete_bank_upi_method({
   //     // Call API
   //     final UpdateBankAndUpiResponse res =
   //         await ProfileApiServices.delete_bank_upi_data(
-          
+
   //           acoountid: accountid,
-       
+
   //         );
 
   //     print("API Response: ${res.success}");
@@ -272,7 +262,7 @@ Future<void> delete_bank_upi_method({
   //         Get.snackbar(
   //           'Error',
   //           errorMessage.value,
-  //           snackPosition: SnackPosition.BOTTOM,
+  //           snackPosition: SnackPosition.TOP,
   //           backgroundColor: Colors.red,
   //           colorText: Colors.white,
   //         );
@@ -286,7 +276,7 @@ Future<void> delete_bank_upi_method({
   //       Get.snackbar(
   //         'Error',
   //         errorMessage.value,
-  //         snackPosition: SnackPosition.BOTTOM,
+  //         snackPosition: SnackPosition.TOP,
   //         backgroundColor: Colors.red,
   //         colorText: Colors.white,
   //       );
@@ -296,5 +286,4 @@ Future<void> delete_bank_upi_method({
   //     isLoading.value = false;
   //   }
   // }
-
 }

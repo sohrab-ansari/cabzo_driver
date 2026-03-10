@@ -131,7 +131,7 @@ class GetBankAccountsResponse {
     return GetBankAccountsResponse(
       success: json['success'],
       message: json['message'],
-      count: json['count'],
+      count: (json['count'] as num?)?.toInt(),
       data: json['data'] != null
           ? List<BankAccount>.from(
               json['data'].map((x) => BankAccount.fromJson(x)),
@@ -195,7 +195,7 @@ class BankAccount {
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'])
           : null,
-      v: json['__v'],
+      v: (json['__v'] as num?)?.toInt(),
     );
   }
 

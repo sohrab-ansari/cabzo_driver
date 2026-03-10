@@ -32,7 +32,7 @@
 
 // //   // Store selected bank account or UPI ID
 // //   String? selectedAccountId;
-// //   String? selectedAccountType; // "BANK" or "UPI"
+// //   String? selectedAccountType; // "BankAccount" or "UPI"
 
 // //   // Amount controller
 // //   final TextEditingController amountController = TextEditingController();
@@ -317,7 +317,7 @@
 // //                       SizedBox(height: w * .02),
 
 // //                       // Bank Accounts List with Selection
-// //                       if (bankAccounts.where((a) => a.type == "BANK").isEmpty)
+// //                       if (bankAccounts.where((a) => a.type == "BankAccount").isEmpty)
 // //                         Padding(
 // //                           padding: EdgeInsets.symmetric(
 // //                             horizontal: w * .07,
@@ -338,7 +338,7 @@
 // //                           physics: NeverScrollableScrollPhysics(),
 // //                           shrinkWrap: true,
 // //                           itemCount: bankAccounts
-// //                               .where((a) => a.type == "BANK")
+// //                               .where((a) => a.type == "BankAccount")
 // //                               .length,
 // //                           separatorBuilder: (context, index) => Divider(
 // //                             color: AppColors.lightGray,
@@ -348,12 +348,12 @@
 // //                           ),
 // //                           itemBuilder: (context, index) {
 // //                             final bankAccountsList = bankAccounts
-// //                                 .where((a) => a.type == "BANK")
+// //                                 .where((a) => a.type == "BankAccount")
 // //                                 .toList();
 // //                             final account = bankAccountsList[index];
 // //                             final isSelected =
 // //                                 selectedAccountId == account.id &&
-// //                                 selectedAccountType == "BANK";
+// //                                 selectedAccountType == "BankAccount";
 
 // //                             return GestureDetector(
 // //                               onTap: () {
@@ -365,7 +365,7 @@
 // //                                   } else {
 // //                                     // Select this bank account and deselect any UPI
 // //                                     selectedAccountId = account.id;
-// //                                     selectedAccountType = "BANK";
+// //                                     selectedAccountType = "BankAccount";
 // //                                   }
 // //                                 });
 // //                               },
@@ -1040,7 +1040,7 @@
 
 //   // Store selected bank account or UPI ID
 //   String? selectedAccountId;
-//   String? selectedAccountType; // "BANK" or "UPI"
+//   String? selectedAccountType; // "BankAccount" or "UPI"
 
 //   // Amount controller
 //   final TextEditingController amountController = TextEditingController();
@@ -1329,7 +1329,7 @@
 //                       SizedBox(height: w * .02),
 
 //                       // Bank Accounts List with Selection
-//                       if (bankAccounts.where((a) => a.type == "BANK").isEmpty)
+//                       if (bankAccounts.where((a) => a.type == "BankAccount").isEmpty)
 //                         Padding(
 //                           padding: EdgeInsets.symmetric(
 //                             horizontal: w * .07,
@@ -1350,7 +1350,7 @@
 //                           physics: NeverScrollableScrollPhysics(),
 //                           shrinkWrap: true,
 //                           itemCount: bankAccounts
-//                               .where((a) => a.type == "BANK")
+//                               .where((a) => a.type == "BankAccount")
 //                               .length,
 //                           separatorBuilder: (context, index) => Divider(
 //                             color: AppColors.lightGray,
@@ -1360,13 +1360,13 @@
 //                           ),
 //                           itemBuilder: (context, index) {
 //                             final bankAccountsList = bankAccounts
-//                                 .where((a) => a.type == "BANK")
+//                                 .where((a) => a.type == "BankAccount")
 //                                 .toList();
 //                             final account = bankAccountsList[index];
 
 //                             final isSelected =
 //                                 selectedAccountId == account.id &&
-//                                 selectedAccountType == "BANK";
+//                                 selectedAccountType == "BankAccount";
 
 //                             return GestureDetector(
 //                               onTap: () {
@@ -1378,7 +1378,7 @@
 //                                   } else {
 //                                     // Select this bank account and deselect any UPI
 //                                     selectedAccountId = account.id;
-//                                     selectedAccountType = "BANK";
+//                                     selectedAccountType = "BankAccount";
 //                                   }
 //                                 });
 //                               },
@@ -3561,6 +3561,7 @@
 import 'package:flutter/services.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/get_bank_accounts_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/payments_withdraw_controller.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/wallet_controller.dart'; // Add this import
 import 'package:nzcu_driver/controllers/profile_controllers/update_bank_and_upi_controller.dart';
 import 'package:nzcu_driver/modals/profile_modals/get_bank_accounts_response.dart';
 import 'package:nzcu_driver/utilities/widgets/app_buttons.dart';
@@ -3593,6 +3594,8 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
   final PaymentsWithdrawController paymentsWithdrawController = Get.put(
     PaymentsWithdrawController(),
   );
+
+  final WalletController walletController = Get.put(WalletController());
 
   // Store selected bank account or UPI ID
   String? selectedAccountId;
@@ -3701,6 +3704,49 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
               vertical: w * .04,
             ),
             children: [
+              // Total Amount Container
+              Column(
+                    children: [
+                      // SizedBox(height: w * .02),
+                      Obx(() {
+                        final String balance =
+                            walletController
+                                .walletresponse
+                                .value
+                                ?.data
+                                ?.availableBalance
+                                ?.toStringAsFixed(2) ??
+                            "0.00";
+
+                        return AppFonts.textPoppins(
+                          context,
+                          "₹$balance",
+                          w * 0.1,
+                          FontWeight.w600,
+                          Color(0xFF27C840),
+                          TextAlign.center,
+                          TextOverflow.visible,
+                        );
+                      }),
+                      AppFonts.textPoppins(
+                        context,
+                        "Total amount to be transferred",
+                        w * 0.030,
+                        FontWeight.w500,
+                        Colors.grey,
+                        TextAlign.center,
+                        TextOverflow.visible,
+                      ),
+                    ],
+                  )
+                  .animate()
+                  .fade(duration: 820.ms, curve: Curves.easeInOut)
+                  .scale(
+                    begin: const Offset(0.95, 0.95),
+                    end: const Offset(1, 1),
+                  ),
+              SizedBox(height: 20),
+
               // Amount Input Field
               Container(
                     width: w,
@@ -3949,44 +3995,23 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
                                   });
                                 }
                               },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
+                              child: Container(
+                                margin: EdgeInsets.symmetric(
                                   horizontal: w * .04,
                                   vertical: w * .01,
                                 ),
+                                padding: EdgeInsets.all(w * 0.03),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? AppColors.primaryRed.withOpacity(0.05) : AppColors.white,
+                                  borderRadius: BorderRadius.circular(w * 0.02),
+                                  border: Border.all(
+                                    color: isSelected ? AppColors.primaryRed : Colors.transparent,
+                                    width: 1.5,
+                                  ),
+                                ),
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    // Radio button for selection
-                                    Container(
-                                      width: w * 0.06,
-                                      height: w * 0.06,
-                                      margin: EdgeInsets.only(top: w * 0.01),
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: isSelected
-                                              ? AppColors.primaryRed
-                                              : AppColors.mediumGray,
-                                          width: 2,
-                                        ),
-                                      ),
-                                      child: isSelected
-                                          ? Center(
-                                              child: Container(
-                                                width: w * 0.03,
-                                                height: w * 0.03,
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: AppColors.primaryRed,
-                                                ),
-                                              ),
-                                            )
-                                          : null,
-                                    ),
-
-                                    SizedBox(width: w * 0.02),
-
                                     // Bank Account Details
                                     Expanded(
                                       child: Column(
@@ -4165,8 +4190,9 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
               SizedBox(height: w * .04),
 
               // UPI Details Section
-              Container(
-                width: w,
+              if (bankAccounts.any((a) => a.type == "UPI"))
+                Container(
+                  width: w,
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   boxShadow: [
@@ -4230,35 +4256,7 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
                         ),
                       ),
                       SizedBox(height: w * .02),
-                      if (bankAccounts.where((a) => a.type == "UPI").isEmpty)
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: w * .07),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              AppFonts.textPoppins(
-                                context,
-                                "No UPI details added",
-                                w * 0.032,
-                                FontWeight.w400,
-                                AppColors.mediumGray,
-                                TextAlign.left,
-                                TextOverflow.ellipsis,
-                              ),
-                              SizedBox(height: w * 0.005),
-                              AppFonts.textPoppins(
-                                context,
-                                "Add your UPI ID for quick transfers",
-                                w * 0.030,
-                                FontWeight.w400,
-                                AppColors.mediumGray,
-                                TextAlign.left,
-                                TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        )
-                      else
+
                         ListView.separated(
                           physics: NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
@@ -4299,48 +4297,23 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
                                   });
                                 }
                               },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
+                              child: Container(
+                                margin: EdgeInsets.symmetric(
                                   horizontal: w * .04,
                                   vertical: w * .01,
                                 ),
+                                padding: EdgeInsets.all(w * 0.03),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? AppColors.primaryRed.withOpacity(0.05) : AppColors.white,
+                                  borderRadius: BorderRadius.circular(w * 0.02),
+                                  border: Border.all(
+                                    color: isSelected ? AppColors.primaryRed : Colors.transparent,
+                                    width: 1.5,
+                                  ),
+                                ),
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Transform.translate(
-                                      offset: Offset(
-                                        0,
-                                        MediaQuery.of(context).size.height *
-                                            0.01,
-                                      ),
-                                      child: Container(
-                                        width: w * 0.06,
-                                        height: w * 0.06,
-                                        margin: EdgeInsets.only(top: w * 0.01),
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: isSelected
-                                                ? AppColors.primaryRed
-                                                : AppColors.mediumGray,
-                                            width: 2,
-                                          ),
-                                        ),
-                                        child: isSelected
-                                            ? Center(
-                                                child: Container(
-                                                  width: w * 0.03,
-                                                  height: w * 0.03,
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    color: AppColors.primaryRed,
-                                                  ),
-                                                ),
-                                              )
-                                            : null,
-                                      ),
-                                    ),
-                                    SizedBox(width: w * 0.02),
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment:

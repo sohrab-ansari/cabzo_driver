@@ -19,7 +19,7 @@
 
 // //     try {
 // //       final response = await apiCall();
-      
+
 // //       // Handle response
 // //       if (response?.success == true) {
 // //         onSuccess(response);
@@ -61,7 +61,7 @@
 // //     Get.snackbar(
 // //       title,
 // //       message,
-// //       snackPosition: SnackPosition.BOTTOM,
+// //       snackPosition: SnackPosition.TOP,
 // //       backgroundColor: Colors.red,
 // //       colorText: Colors.white,
 // //       duration: const Duration(seconds: 3),
@@ -75,7 +75,7 @@
 // //     Get.snackbar(
 // //       'Success',
 // //       message,
-// //       snackPosition: SnackPosition.BOTTOM,
+// //       snackPosition: SnackPosition.TOP,
 // //       backgroundColor: Colors.green,
 // //       colorText: Colors.white,
 // //       duration: const Duration(seconds: 2),
@@ -89,7 +89,7 @@
 // //     Get.snackbar(
 // //       title,
 // //       message,
-// //       snackPosition: SnackPosition.BOTTOM,
+// //       snackPosition: SnackPosition.TOP,
 // //       backgroundColor: color,
 // //       colorText: Colors.white,
 // //       duration: const Duration(seconds: 3),
@@ -98,7 +98,6 @@
 // //     );
 // //   }
 // // }
-
 
 // // utils/api_response_handler.dart
 // import 'package:nzcu_driver/utilities/utils/button_state_manager.dart';
@@ -122,7 +121,7 @@
 
 //     try {
 //       final response = await apiCall();
-      
+
 //       // Handle response
 //       if (response?.success == true) {
 //         onSuccess(response);
@@ -164,7 +163,7 @@
 //     Get.snackbar(
 //       title,
 //       message,
-//       snackPosition: SnackPosition.BOTTOM,
+//       snackPosition: SnackPosition.TOP,
 //       backgroundColor: Colors.red,
 //       colorText: Colors.white,
 //       duration: const Duration(seconds: 3),
@@ -178,7 +177,7 @@
 //     Get.snackbar(
 //       'Success',
 //       message,
-//       snackPosition: SnackPosition.BOTTOM,
+//       snackPosition: SnackPosition.TOP,
 //       backgroundColor: Colors.green,
 //       colorText: Colors.white,
 //       duration: const Duration(seconds: 2),
@@ -189,12 +188,10 @@
 //   }
 // }
 
-
 // utilities/utils/api_response_handler.dart
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nzcu_driver/utilities/utils/button_state_manager.dart';
 import 'package:flutter/material.dart';
-
 
 class ApiResponseHandler {
   // Handle API call with reactive button loading
@@ -212,19 +209,18 @@ class ApiResponseHandler {
 
     try {
       final response = await apiCall();
-      
+
       // Handle response
       if (response?.success == true) {
         onSuccess(response);
         if (successMessage != null && successMessage.isNotEmpty) {
-
           // Fluttertoast.showToast(msg: successMessage,toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.green,textColor: Colors.white,fontSize: 16.0);
           // ToastService.showSuccess(context, successMessage);
         }
       } else {
-        final errorMessage = response?.message ;
+        final errorMessage = response?.message;
 
-                  // Fluttertoast.showToast(msg: errorMessage,toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.red,textColor: Colors.white,fontSize: 16.0);
+        // Fluttertoast.showToast(msg: errorMessage,toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.red,textColor: Colors.white,fontSize: 16.0);
 
         // ToastService.showError(context, errorTitle ?? 'Error', errorMessage);
         onError?.call(errorMessage);
@@ -232,7 +228,7 @@ class ApiResponseHandler {
     } catch (e) {
       final errorMessage = _parseError(e);
 
-                        // Fluttertoast.showToast(msg:   errorTitle ?? 'Error',toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.red,textColor: Colors.white,fontSize: 16.0);
+      // Fluttertoast.showToast(msg:   errorTitle ?? 'Error',toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.red,textColor: Colors.white,fontSize: 16.0);
 
       // ToastService.showError(context, errorTitle ?? 'Error', errorMessage);
       onError?.call(errorMessage);

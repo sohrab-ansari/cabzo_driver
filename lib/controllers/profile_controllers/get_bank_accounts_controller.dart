@@ -53,15 +53,23 @@ class GetBankAccountsController extends GetxController {
 
         driveridresponse.value = res;
       } else {
-        errorMessage.value = res.message ?? 'Failed to fetch home data';
-        print("Error: ${errorMessage.value}");
-        Get.snackbar(
-          'Error',
-          errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        String msg = res.message ?? 'Failed to fetch home data';
+        
+        // Intercept the specific error message to suppress the snackbar and show custom text
+        if (msg.toLowerCase().contains('payment method') || msg.toLowerCase().contains('no payment')) {
+          errorMessage.value = 'Add bank account to deposit money';
+          print("Intercepted error: ${errorMessage.value}");
+        } else {
+          errorMessage.value = msg;
+          print("Error: ${errorMessage.value}");
+          Get.snackbar(
+            'Error',
+            errorMessage.value,
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
@@ -69,7 +77,7 @@ class GetBankAccountsController extends GetxController {
       Get.snackbar(
         'Error',
         errorMessage.value,
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );

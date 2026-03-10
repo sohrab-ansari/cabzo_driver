@@ -269,7 +269,7 @@ class AddMoneyWalletController extends GetxController {
     Get.snackbar(
       'Error',
       message,
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
       backgroundColor: Colors.red,
       colorText: Colors.white,
       duration: Duration(seconds: 4),

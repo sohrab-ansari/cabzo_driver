@@ -117,7 +117,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
         Get.snackbar(
           'Error',
           errorMessage,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -327,7 +327,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
       Get.snackbar(
         'Error',
         'Verification failed: $e',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );

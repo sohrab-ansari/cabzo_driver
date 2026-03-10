@@ -333,7 +333,7 @@ class _EditBankState extends State<EditBank> {
         "Account numbers do not match",
         backgroundColor: Colors.red,
         colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         duration: const Duration(seconds: 3),
       );
       return;
@@ -358,7 +358,7 @@ class _EditBankState extends State<EditBank> {
         "Bank account updated successfully",
         backgroundColor: Colors.green,
         colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         duration: const Duration(seconds: 2),
       );
 
@@ -370,7 +370,7 @@ class _EditBankState extends State<EditBank> {
         "Failed to update bank account: ${e.toString()}",
         backgroundColor: Colors.red,
         colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         duration: const Duration(seconds: 3),
       );
     } finally {

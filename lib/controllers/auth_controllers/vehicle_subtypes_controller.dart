@@ -119,7 +119,7 @@ class VehicleSubtypesController extends GetxController {
           Get.snackbar(
             'Vehicle Sub-types Failed',
             errorMessage.value,
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.TOP,
             backgroundColor: Colors.red,
             colorText: Colors.white,
             duration: const Duration(seconds: 3),
@@ -137,7 +137,7 @@ class VehicleSubtypesController extends GetxController {
         Get.snackbar(
           'Error',
           'Something went wrong. Please try again.',
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
           duration: const Duration(seconds: 3),

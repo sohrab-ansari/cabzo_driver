@@ -36,11 +36,11 @@
 
 //   try {
 //     // Format date from DD/MM/YYYY to YYYY-MM-DD if provided
-   
+
 //     // Call API with all optional parameters
 //     final GetByCategoryResponse res =
 //         await ProfileApiServices.get_faq_categories_data(
-         
+
 //         );
 
 //     print("API Response: ${res.success}");
@@ -48,16 +48,13 @@
 //     if (res.success == true) {
 //       print("faqs categories updated successfully");
 
-    
-
-
 //     } else {
 //       errorMessage.value = res.message ?? 'Failed to update faqs categories';
 //       print("Error: ${errorMessage.value}");
 //       Get.snackbar(
 //         'Error',
 //         errorMessage.value,
-//         snackPosition: SnackPosition.BOTTOM,
+//         snackPosition: SnackPosition.TOP,
 //         backgroundColor: Colors.red,
 //         colorText: Colors.white,
 //       );
@@ -68,7 +65,7 @@
 //     Get.snackbar(
 //       'Error',
 //       errorMessage.value,
-//       snackPosition: SnackPosition.BOTTOM,
+//       snackPosition: SnackPosition.TOP,
 //       backgroundColor: Colors.red,
 //       colorText: Colors.white,
 //     );
@@ -78,11 +75,7 @@
 //   }
 // }
 
-
-
-
 // }
-
 
 import 'package:nzcu_driver/modals/profile_modals/get_by_category_response.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
@@ -91,13 +84,13 @@ import 'package:get/get.dart';
 
 class FaqsGetByCategoriesController extends GetxController {
   // Observable response
-  Rx<GetByCategoryResponse?> faqsByCategoryResponse = 
+  Rx<GetByCategoryResponse?> faqsByCategoryResponse =
       Rx<GetByCategoryResponse?>(null);
 
   // Loading and error states
   RxBool isLoading = false.obs;
   RxString errorMessage = ''.obs;
-  
+
   // Selected category info
   RxString selectedCategoryId = ''.obs;
   RxString selectedCategoryName = ''.obs;
@@ -123,8 +116,8 @@ class FaqsGetByCategoriesController extends GetxController {
       // Call API with category parameter
       final GetByCategoryResponse res =
           await ProfileApiServices.get_faq_categories_data(
-        category: categoryId,
-      );
+            category: categoryId,
+          );
 
       print("API Response Success: ${res.success}");
       print("API Response Message: ${res.message}");
@@ -132,10 +125,10 @@ class FaqsGetByCategoriesController extends GetxController {
 
       if (res.success == true) {
         print("FAQs fetched successfully");
-        
+
         // Assign the response to the observable
         faqsByCategoryResponse.value = res;
-        
+
         // Log questions for debugging
         if (res.questions != null) {
           for (var question in res.questions!) {
@@ -146,11 +139,11 @@ class FaqsGetByCategoriesController extends GetxController {
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch FAQs';
         print("Error: ${errorMessage.value}");
-        
+
         Get.snackbar(
           'Error',
           errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
@@ -159,11 +152,11 @@ class FaqsGetByCategoriesController extends GetxController {
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
       print("Exception in getFaqsByCategory: $e");
-      
+
       Get.snackbar(
         'Error',
         errorMessage.value,
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
         duration: const Duration(seconds: 3),

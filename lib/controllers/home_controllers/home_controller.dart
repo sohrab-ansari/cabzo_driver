@@ -1,5 +1,3 @@
-
-
 import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/modals/home_modals/home_modal_response.dart';
@@ -10,7 +8,7 @@ import 'package:get/get.dart';
 class HomeController extends GetxController {
   // Change to Rx<HomeModalResponse?> and use .obs
   Rx<HomeModalResponse?> homemodalresponse = Rx<HomeModalResponse?>(null);
-  
+
   // Add loading state
   RxBool isLoading = false.obs;
   RxString errorMessage = ''.obs;
@@ -22,17 +20,17 @@ class HomeController extends GetxController {
 
   Future<void> home_data_method() async {
     print("home_data_method called");
-    
+
     // Set loading state
     isLoading.value = true;
     errorMessage.value = '';
-    
+
     try {
       // Call API
       final HomeModalResponse res = await HomeApiServices.get_home_data();
-      
+
       print("API Response: ${res.success}");
-      
+
       if (res.success == true) {
         print("Home data fetched successfully");
         homemodalresponse.value = res;
@@ -42,7 +40,7 @@ class HomeController extends GetxController {
         Get.snackbar(
           'Error',
           errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -53,7 +51,7 @@ class HomeController extends GetxController {
       Get.snackbar(
         'Error',
         errorMessage.value,
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );

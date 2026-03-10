@@ -51,7 +51,7 @@ class MapHelper {
             icon: icon,
             anchor: const Offset(0.5, 0.5),
             infoWindow: InfoWindow(
-              title: rider['name'] ?? 'Rider',
+              title: rider['name'] ?? 'Riderr',
               snippet:
                   '${rider['status'] ?? 'Available'} • ${vehicleType ?? 'Unknown'}',
             ),
@@ -147,7 +147,7 @@ class MapHelper {
       icon: icon,
       anchor: const Offset(0.5, 0.5),
       infoWindow: InfoWindow(
-        title: name ?? 'Rider',
+        title: name ?? 'Riderr',
         snippet: '${status ?? 'Available'} • ${vehicleType ?? 'Unknown'}',
       ),
       zIndex: 1,

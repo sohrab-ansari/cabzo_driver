@@ -743,7 +743,7 @@ class DriverRegisterController extends GetxController {
           "Success",
           response.data['message'] ?? "Vehicle created",
           backgroundColor: Colors.green,
-          colorText: Colors.white,
+          colorText: Colors.white, snackPosition: SnackPosition.TOP
         );
       }
     } on DioException catch (e) {
@@ -754,7 +754,7 @@ class DriverRegisterController extends GetxController {
         "Error",
         message,
         backgroundColor: Colors.red,
-        colorText: Colors.white,
+        colorText: Colors.white, snackPosition: SnackPosition.TOP
       );
     }
   }

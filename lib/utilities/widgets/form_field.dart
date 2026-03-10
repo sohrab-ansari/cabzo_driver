@@ -253,6 +253,7 @@ static Widget custTextFormOther({
   Color? fillColor,
   double? width,
   double? height,
+  bool? enabled,
   List<TextInputFormatter>? inputFormatters, // Added this parameter
 }) {
   double h = MediaQuery.of(context).size.height;
@@ -267,6 +268,7 @@ static Widget custTextFormOther({
       cursorColor: Colors.grey,
       focusNode: focusNode,
       readOnly: readOnly,
+      enabled: enabled,
       validator: validator,
       autofocus: autofocus,
       onTap: onClicked,

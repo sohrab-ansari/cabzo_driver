@@ -1085,26 +1085,26 @@ class SocketManager {
           'longitude': double.parse(pickup['longitude'].toString()),
         };
       }
-    } else if (rideData['startLocation'] != null && 
-               rideData['startLocation']['coordinates'] != null) {
+    } else if (rideData['startLocation'] != null &&
+        rideData['startLocation']['coordinates'] != null) {
       final coords = rideData['startLocation']['coordinates'];
       if (coords is List && coords.length >= 2) {
         // Assume [lat, lng] or [lng, lat] handles below, but here we just need to preserve them
         // usually backend sends [lat, lng] or GeoJSON [lng, lat]
         // The _extractCoordinates handles the order, we'll just store as Map to let the fallback handle it
-        // Or store it nicely. For simplicity, just read [0] and [1] assuming [lat, lng] like before, 
+        // Or store it nicely. For simplicity, just read [0] and [1] assuming [lat, lng] like before,
         // to populate pickupCoords so it gets converted nicely
         pickupCoords = {
           'latitude': double.parse(coords[0].toString()),
           'longitude': double.parse(coords[1].toString()),
         };
       } else if (coords is Map) {
-         if (coords['latitude'] != null && coords['longitude'] != null) {
-           pickupCoords = {
-             'latitude': double.parse(coords['latitude'].toString()),
-             'longitude': double.parse(coords['longitude'].toString()),
-           };
-         }
+        if (coords['latitude'] != null && coords['longitude'] != null) {
+          pickupCoords = {
+            'latitude': double.parse(coords['latitude'].toString()),
+            'longitude': double.parse(coords['longitude'].toString()),
+          };
+        }
       }
     }
 
@@ -1118,8 +1118,8 @@ class SocketManager {
           'longitude': double.parse(destination['longitude'].toString()),
         };
       }
-    } else if (rideData['endLocation'] != null && 
-               rideData['endLocation']['coordinates'] != null) {
+    } else if (rideData['endLocation'] != null &&
+        rideData['endLocation']['coordinates'] != null) {
       final coords = rideData['endLocation']['coordinates'];
       if (coords is List && coords.length >= 2) {
         dropoffCoords = {
@@ -1127,12 +1127,12 @@ class SocketManager {
           'longitude': double.parse(coords[1].toString()),
         };
       } else if (coords is Map) {
-         if (coords['latitude'] != null && coords['longitude'] != null) {
-           dropoffCoords = {
-             'latitude': double.parse(coords['latitude'].toString()),
-             'longitude': double.parse(coords['longitude'].toString()),
-           };
-         }
+        if (coords['latitude'] != null && coords['longitude'] != null) {
+          dropoffCoords = {
+            'latitude': double.parse(coords['latitude'].toString()),
+            'longitude': double.parse(coords['longitude'].toString()),
+          };
+        }
       }
     }
 
@@ -1675,6 +1675,7 @@ class SocketManager {
                   Get.snackbar(
                     'Error',
                     'Failed to accept ride: ${response.message}',
+                    snackPosition: SnackPosition.TOP,
                   );
                 }
               } catch (e) {
@@ -1682,6 +1683,7 @@ class SocketManager {
                 Get.snackbar(
                   'Error',
                   'Connection failed. Please manually check the app.',
+                  snackPosition: SnackPosition.TOP,
                 );
               }
             } else {
@@ -1691,6 +1693,7 @@ class SocketManager {
               Get.snackbar(
                 'Error',
                 'Connection failed. Please accept the ride manually.',
+                snackPosition: SnackPosition.TOP,
               );
             }
             return;
@@ -2000,7 +2003,7 @@ class SocketManager {
             rideData['orderId']?.toString() ??
             '',
         'riderId': rideData['riderId']?.toString() ?? '',
-        'riderName': rideData['riderName']?.toString() ?? 'Rider',
+        'riderName': rideData['riderName']?.toString() ?? 'Riderr',
         'riderPhone': rideData['riderPhone']?.toString() ?? '',
         'riderImage': rideData['riderImage']?.toString() ?? '',
         'pickupAddress':

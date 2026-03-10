@@ -1,6 +1,3 @@
-
-
-
 import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/modals/home_modals/chat_id_response.dart';
@@ -49,7 +46,7 @@ class ChatidController extends GetxController {
         Get.snackbar(
           'Error',
           errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -60,7 +57,7 @@ class ChatidController extends GetxController {
       Get.snackbar(
         'Error',
         'Failed to load chat: $e',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );

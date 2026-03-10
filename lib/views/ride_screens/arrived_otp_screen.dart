@@ -66,9 +66,6 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
   void _showSnackbar(String message, {bool isError = true}) {
     if (mounted && !_isDisposed) {
       try {
-       
-       
-
         Fluttertoast.showToast(
           msg: message,
           toastLength: Toast.LENGTH_SHORT,
@@ -91,7 +88,7 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
 
-    print("========== 🔵 VERIFY OTP API ==========");
+    print("========== 🔵 VERIFY OTP APIss ==========");
     print("📌 Order ID: $orderId");
     print("📌 OTP: $otp");
 
@@ -111,7 +108,7 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
         body: jsonEncode({"orderId": orderId, "rideOtp": otp}),
       );
 
-      print("✅ Status Code: ${response.statusCode}");
+      print("✅ Status Codeee: ${response.statusCode}");
       print("📦 Raw Response: ${response.body}");
 
       // Check if response is HTML error page
@@ -131,23 +128,31 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
         };
       }
 
-      if (response.statusCode != 200) {
-        return {
-          "success": false,
-          "message": "Server error: ${response.statusCode}",
-        };
+      if (response.statusCode == 200 ||
+          response.statusCode == 400 ||
+          response.statusCode == 403) {
+        try {
+          final decoded = jsonDecode(response.body);
+          print("decoded ${decoded}");
+          return {
+            "success": decoded["success"] ?? (response.statusCode == 200),
+            "message":
+                decoded["message"] ??
+                (response.statusCode == 200
+                    ? "OTP verified successfully"
+                    : "Incorrect OTP"),
+            "data": decoded["data"] ?? {},
+          };
+        } catch (_) {
+          // Fall through to default error handler if json parsing fails
+        }
       }
 
-      final decoded = jsonDecode(response.body);
-      return {
-        "success": decoded["success"] ?? false,
-        "message":
-            decoded["message"] ??
-            (decoded["success"] == true
-                ? "OTP verified successfully"
-                : "OTP verification failed"),
-        "data": decoded["data"] ?? {},
-      };
+      if (response.statusCode != 200) {
+        return {"success": false, "message": "${response.body}"};
+      }
+
+      return {"success": false, "message": "Unknown error"};
     } catch (e) {
       print("❌ API Error: $e");
 
