@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
@@ -30,7 +31,7 @@ class OverlayService {
   // SHOW / HIDE
   // ---------------------------------------------------------------------------
 
-  Future<void> showOverlay() async {
+  Future<void> showOverlay({int? width, int? height}) async {
     final alreadyActive = await FlutterOverlayWindow.isActive();
     if (alreadyActive) return;
 
@@ -40,11 +41,18 @@ class OverlayService {
       return;
     }
 
+    // Calculate dynamic size using MediaQuery logic without BuildContext (25% of screen width)
+    final flutterView = ui.PlatformDispatcher.instance.views.first;
+    final logicalWidth =
+        flutterView.physicalSize.width / flutterView.devicePixelRatio;
+    final dynamicSize = (logicalWidth * 0.35)
+        .toInt(); // 39% of screen width e.g., ~150px on typical phones
+
     try {
       await FlutterOverlayWindow.showOverlay(
         enableDrag: true,
-        height: 250,
-        width: 250,
+        height: height ?? dynamicSize,
+        width: width ?? dynamicSize,
         alignment: OverlayAlignment.centerRight,
         visibility: NotificationVisibility.visibilitySecret,
         flag: OverlayFlag.defaultFlag,
@@ -73,7 +81,9 @@ class OverlayService {
 
   void initOverlayListener(Function(String) onTap) {
     _overlayListenerSub?.cancel();
-    _overlayListenerSub = FlutterOverlayWindow.overlayListener.listen((message) {
+    _overlayListenerSub = FlutterOverlayWindow.overlayListener.listen((
+      message,
+    ) {
       print('[OverlayService] Received overlay message: $message');
       if (message == 'bring_to_front') {
         _bringAppToForeground();
