@@ -54,7 +54,21 @@ class NZCUApplication : FlutterApplication() {
             }
             manager.createNotificationChannel(rideChannel)
 
-            // 3. Background service channel (kept for flutter_background_service compatibility)
+            // 3. General / Chat notifications channel
+            val chatChannel = NotificationChannel(
+                SocketForegroundService.CHAT_CHANNEL_ID,
+                "General Notifications",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Standard alerts and chat messages"
+                setShowBadge(true)
+                enableVibration(true)
+                enableLights(true)
+                lockscreenVisibility = android.app.Notification.VISIBILITY_PRIVATE
+            }
+            manager.createNotificationChannel(chatChannel)
+
+            // 4. Background service channel (kept for flutter_background_service compatibility)
             val bgChannel = NotificationChannel(
                 "nzcu_bg_service_channel",
                 "Background Service",

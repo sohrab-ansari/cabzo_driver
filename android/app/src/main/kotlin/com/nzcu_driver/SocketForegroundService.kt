@@ -48,8 +48,10 @@ class SocketForegroundService : Service() {
         // Notification IDs & channels (channels created in NZCUApplication.kt)
         const val STATUS_NOTIFICATION_ID = 1
         const val RIDE_NOTIFICATION_ID = 900
+        const val CHAT_NOTIFICATION_ID = 950
         const val STATUS_CHANNEL_ID = "nzcu_driver_foreground_service"
         const val RIDE_CHANNEL_ID = "ride_request_channel_v9"
+        const val CHAT_CHANNEL_ID = "general_notifications_channel"
 
         // Location update interval (ms)
         private const val LOCATION_INTERVAL_MS = 5000L
@@ -471,6 +473,35 @@ class SocketForegroundService : Service() {
                 Log.i(TAG, "✅ Driver online confirmed by server")
             }
 
+            // ── Chat Events ────────────────────────────────────
+            // These fire when a rider sends a chat message while the app is killed.
+            // The Flutter Dart runtime is dead in this state, so we must show the
+            // notification from here using the native NotificationManager.
+
+            socket?.on("chat:receiveMessage") { args ->
+                Log.i(TAG, "💬 Chat message received (chat:receiveMessage)")
+                if (args.isNotEmpty()) {
+                    try {
+                        val data = args[0] as? JSONObject ?: return@on
+                        showChatNotification(data)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error handling chat:receiveMessage: ${e.message}")
+                    }
+                }
+            }
+
+            socket?.on("chat:message") { args ->
+                Log.i(TAG, "💬 Chat message received (chat:message)")
+                if (args.isNotEmpty()) {
+                    try {
+                        val data = args[0] as? JSONObject ?: return@on
+                        showChatNotification(data)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error handling chat:message: ${e.message}")
+                    }
+                }
+            }
+
             socket?.connect()
 
         } catch (e: Exception) {
@@ -622,6 +653,48 @@ class SocketForegroundService : Service() {
         showRideNotification(orderId, "New Ride Request!", body)
     }
 
+
+    private fun showChatNotification(data: JSONObject) {
+        try {
+            // Extract message content — mirrors ChatNotificationController._showLocalNotification() in Flutter
+            val messageObj = data.optJSONObject("message")
+            val senderName = messageObj
+                ?.optJSONObject("senderId")
+                ?.optString("name", "New Message")
+                ?: "New Message"
+            val messageText = messageObj?.optString("message", "") ?: ""
+
+            // Open app on tap
+            val openAppIntent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            }
+            val pendingIntent = PendingIntent.getActivity(
+                this, 4000, openAppIntent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+            val notification = NotificationCompat.Builder(this, CHAT_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_bg_service_small)
+                .setContentTitle("Chat: $senderName")
+                .setContentText(messageText)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(messageText))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .build()
+
+            val nm = getSystemService(NotificationManager::class.java)
+            // Use a unique ID per chat message (epoch seconds keeps them distinct but prevents flood)
+            val notifId = CHAT_NOTIFICATION_ID + (System.currentTimeMillis() / 1000 % 1000).toInt()
+            nm.notify(notifId, notification)
+
+            Log.i(TAG, "✅ Chat notification shown: \"Chat: $senderName\"")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error showing chat notification: ${e.message}")
+        }
+    }
 
     private fun showRideNotification(orderId: String, title: String, body: String) {
         // Use orderId-based unique request codes + FLAG_CANCEL_CURRENT so each new ride
