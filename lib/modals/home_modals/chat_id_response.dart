@@ -1,4 +1,5 @@
-import 'dart:convert';
+﻿import 'dart:convert';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 // Helper methods for safe parsing
 double _safeParseDouble(dynamic value) {
@@ -36,7 +37,7 @@ class ChatResponse {
         data: json['data'] != null ? Data.fromJson(json['data']) : null,
       );
     } catch (e) {
-      print("Error parsing ChatResponse: $e");
+      AppLogger.d("Error parsing ChatResponse: $e");
       rethrow;
     }
   }
@@ -98,7 +99,7 @@ class Data {
         v: _safeParseInt(json['__v']),
       );
     } catch (e) {
-      print("Error parsing Data: $e");
+      AppLogger.d("Error parsing Data: $e");
       rethrow;
     }
   }
@@ -264,7 +265,7 @@ class Ride {
         rideOtp: json['rideOtp']?.toString(),
       );
     } catch (e) {
-      print("Error parsing Ride: $e");
+      AppLogger.d("Error parsing Ride: $e");
       rethrow;
     }
   }
@@ -332,7 +333,7 @@ class Location {
         coordinates: coordinates,
       );
     } catch (e) {
-      print("Error parsing Location: $e");
+      AppLogger.d("Error parsing Location: $e");
       rethrow;
     }
   }
@@ -480,7 +481,7 @@ class User {
         image: json['image']?.toString(),
       );
     } catch (e) {
-      print("Error parsing User: $e");
+      AppLogger.d("Error parsing User: $e");
       rethrow;
     }
   }

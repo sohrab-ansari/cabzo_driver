@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
 import 'package:nzcu_driver/modals/auth_modals/driver_Image_upload_res.dart';
 import 'package:nzcu_driver/modals/home_modals/home_modal_response.dart';
@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class TransactionController extends GetxController {
   Rx<TransactionsResponse?> transactionsres = Rx<TransactionsResponse?>(null);
@@ -37,7 +38,7 @@ class TransactionController extends GetxController {
 
   /// Fetch first page (initial load / refresh)
   Future<void> transactions_method() async {
-    print("transactions_data_method called");
+    AppLogger.d("transactions_data_method called");
 
     // Reset pagination
     _currentPage = 1;
@@ -51,11 +52,11 @@ class TransactionController extends GetxController {
       final TransactionsResponse res =
           await ProfileApiServices.get_transactions_data(_limit, _currentPage);
 
-      print("API Response: ${res.success}");
-      print("API Response2222: ${res.data}");
+      AppLogger.d("API Response: ${res.success}");
+      AppLogger.d("API Response2222: ${res.data}");
 
       if (res.success == true) {
-        print("transactions data fetched successfully");
+        AppLogger.d("transactions data fetched successfully");
 
         transactionsres.value = res;
         allTransactions.addAll(res.data ?? []);
@@ -67,12 +68,12 @@ class TransactionController extends GetxController {
         }
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch transactions';
-        print("Error: ${errorMessage.value}");
+        AppLogger.d("Error: ${errorMessage.value}");
         CustomToast.showError(errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
-      print("Exception: $e");
+      AppLogger.d("Exception: $e");
       CustomToast.showError(errorMessage.value);
     } finally {
       isLoading.value = false;
@@ -83,7 +84,7 @@ class TransactionController extends GetxController {
   Future<void> loadMoreTransactions() async {
     if (isLoadingMore.value || !hasMorePages) return;
 
-    print("Loading more transactions - page ${_currentPage + 1}");
+    AppLogger.d("Loading more transactions - page ${_currentPage + 1}");
 
     isLoadingMore.value = true;
 
@@ -103,14 +104,14 @@ class TransactionController extends GetxController {
           _currentPage = res.pagination!.page ?? _currentPage + 1;
         }
 
-        print(
+        AppLogger.d(
           "Loaded page $_currentPage / $_totalPages, total items: ${allTransactions.length}",
         );
       } else {
-        print("Error loading more: ${res.message}");
+        AppLogger.d("Error loading more: ${res.message}");
       }
     } catch (e) {
-      print("Exception loading more: $e");
+      AppLogger.d("Exception loading more: $e");
     } finally {
       isLoadingMore.value = false;
     }

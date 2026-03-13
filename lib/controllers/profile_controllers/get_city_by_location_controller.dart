@@ -1,9 +1,10 @@
-import 'package:nzcu_driver/modals/home_modals/get_city_by_location_response.dart';
+﻿import 'package:nzcu_driver/modals/home_modals/get_city_by_location_response.dart';
 import 'package:nzcu_driver/modals/profile_modals/faq_category_responses.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class GetCityByLocationController extends GetxController {
   // Observable response
@@ -23,7 +24,7 @@ class GetCityByLocationController extends GetxController {
     required String lat,
     required String lng,
   }) async {
-    print("faqscategorimethod called");
+    AppLogger.d("faqscategorimethod called");
 
     // Set loading state
     isLoading.value = true;
@@ -34,23 +35,23 @@ class GetCityByLocationController extends GetxController {
       final GetCityByLocationResponse res =
           await ProfileApiServices.get_cit_by_loc_method(lat: lat, lng: lng);
 
-      print("API Response Success: ${res.success}");
-      print("API Response Message: ${res.message}");
+      AppLogger.d("API Response Success: ${res.success}");
+      AppLogger.d("API Response Message: ${res.message}");
 
       if (res.success == true) {
-        print("FAQs categories fetched successfully");
+        AppLogger.d("FAQs categories fetched successfully");
 
         // Assign the response to the observable
         faqsCategoriesResponse.value = res;
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch FAQs categories';
-        print("Error: ${errorMessage.value}");
+        AppLogger.d("Error: ${errorMessage.value}");
 
         CustomToast.showError(errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
-      print("Exception in faqscategorimethod: $e");
+      AppLogger.d("Exception in faqscategorimethod: $e");
 
       CustomToast.showError(errorMessage.value);
     } finally {

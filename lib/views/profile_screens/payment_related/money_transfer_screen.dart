@@ -1,4 +1,4 @@
-// // import 'package:nzcu_driver/controllers/profile_controllers/get_bank_accounts_controller.dart';
+﻿// // import 'package:nzcu_driver/controllers/profile_controllers/get_bank_accounts_controller.dart';
 // // import 'package:nzcu_driver/controllers/profile_controllers/payments_withdraw_controller.dart';
 // // import 'package:nzcu_driver/modals/profile_modals/get_bank_accounts_response.dart';
 // // import 'package:nzcu_driver/utilities/widgets/app_buttons.dart';
@@ -954,19 +954,19 @@
 // //             onPressed: () {
 // //               Navigator.pop(context);
 
-// //               print("=== Transfer Details ===");
-// //               print("Selected Account ID: ${selectedAccount.id}");
-// //               print("Account Type: ${selectedAccount.type}");
-// //               print("Amount: $amount");
-// //               print("Account Holder: ${selectedAccount.accountHolderName}");
+// //               AppLogger.d("=== Transfer Details ===");
+// //               AppLogger.d("Selected Account ID: ${selectedAccount.id}");
+// //               AppLogger.d("Account Type: ${selectedAccount.type}");
+// //               AppLogger.d("Amount: $amount");
+// //               AppLogger.d("Account Holder: ${selectedAccount.accountHolderName}");
 // //               if (selectedAccount.type == "UPI") {
-// //                 print("UPI ID: ${selectedAccount.upiId}");
+// //                 AppLogger.d("UPI ID: ${selectedAccount.upiId}");
 // //               } else {
-// //                 print("Bank Name: ${selectedAccount.bankName}");
-// //                 print("Account Number: ${selectedAccount.accountNumber}");
-// //                 print("IFSC Code: ${selectedAccount.ifscCode}");
+// //                 AppLogger.d("Bank Name: ${selectedAccount.bankName}");
+// //                 AppLogger.d("Account Number: ${selectedAccount.accountNumber}");
+// //                 AppLogger.d("IFSC Code: ${selectedAccount.ifscCode}");
 // //               }
-// //               print("========================");
+// //               AppLogger.d("========================");
 
 // //               paymentsWithdrawController.withdrawal_method(
 // //                 BankAccountId: selectedAccount.id,
@@ -2027,19 +2027,19 @@
 //             onPressed: () {
 //               Navigator.pop(context);
 
-//               print("=== Transfer Details ===");
-//               print("Selected Account ID: ${selectedAccount.id}");
-//               print("Account Type: ${selectedAccount.type}");
-//               print("Amount: $amount");
-//               print("Account Holder: ${selectedAccount.accountHolderName}");
+//               AppLogger.d("=== Transfer Details ===");
+//               AppLogger.d("Selected Account ID: ${selectedAccount.id}");
+//               AppLogger.d("Account Type: ${selectedAccount.type}");
+//               AppLogger.d("Amount: $amount");
+//               AppLogger.d("Account Holder: ${selectedAccount.accountHolderName}");
 //               if (selectedAccount.type == "UPI") {
-//                 print("UPI ID: ${selectedAccount.upiId}");
+//                 AppLogger.d("UPI ID: ${selectedAccount.upiId}");
 //               } else {
-//                 print("Bank Name: ${selectedAccount.bankName}");
-//                 print("Account Number: ${selectedAccount.accountNumber}");
-//                 print("IFSC Code: ${selectedAccount.ifscCode}");
+//                 AppLogger.d("Bank Name: ${selectedAccount.bankName}");
+//                 AppLogger.d("Account Number: ${selectedAccount.accountNumber}");
+//                 AppLogger.d("IFSC Code: ${selectedAccount.ifscCode}");
 //               }
-//               print("========================");
+//               AppLogger.d("========================");
 
 //               paymentsWithdrawController.withdrawal_method(
 //                 BankAccountId: selectedAccount.id,
@@ -2188,10 +2188,10 @@
 //               Navigator.pop(context);
 
 //               // Call your delete API here
-//               print("=== Delete $type ===");
-//               print("Account ID: ${account.id}");
-//               print("Account Holder: ${account.accountHolderName}");
-//               print("Type: $type");
+//               AppLogger.d("=== Delete $type ===");
+//               AppLogger.d("Account ID: ${account.id}");
+//               AppLogger.d("Account Holder: ${account.accountHolderName}");
+//               AppLogger.d("Type: $type");
 
 //               // Show success message
 
@@ -3334,19 +3334,19 @@
 //             onPressed: () {
 //               Navigator.pop(context);
 
-//               print("=== Transfer Details ===");
-//               print("Selected Account ID: ${selectedAccount.id}");
-//               print("Account Type: ${selectedAccount.type}");
-//               print("Amount: $amount");
-//               print("Account Holder: ${selectedAccount.accountHolderName}");
+//               AppLogger.d("=== Transfer Details ===");
+//               AppLogger.d("Selected Account ID: ${selectedAccount.id}");
+//               AppLogger.d("Account Type: ${selectedAccount.type}");
+//               AppLogger.d("Amount: $amount");
+//               AppLogger.d("Account Holder: ${selectedAccount.accountHolderName}");
 //               if (selectedAccount.type == "UPI") {
-//                 print("UPI ID: ${selectedAccount.upiId}");
+//                 AppLogger.d("UPI ID: ${selectedAccount.upiId}");
 //               } else {
-//                 print("Bank Name: ${selectedAccount.bankName}");
-//                 print("Account Number: ${selectedAccount.accountNumber}");
-//                 print("IFSC Code: ${selectedAccount.ifscCode}");
+//                 AppLogger.d("Bank Name: ${selectedAccount.bankName}");
+//                 AppLogger.d("Account Number: ${selectedAccount.accountNumber}");
+//                 AppLogger.d("IFSC Code: ${selectedAccount.ifscCode}");
 //               }
-//               print("========================");
+//               AppLogger.d("========================");
 
 //               paymentsWithdrawController.withdrawal_method(
 //                 BankAccountId: selectedAccount.id,
@@ -3468,7 +3468,7 @@
 //     });
 
 //     try {
-//       print("Deleting UPI with accountid: ${account_id}");
+//       AppLogger.d("Deleting UPI with accountid: ${account_id}");
 
 //       await updateBankAndUpiController.delete_bank_upi_method(
 //         accountid: account_id,
@@ -3479,7 +3479,7 @@
 //         Navigator.pop(context, true);
 //       }
 //     } catch (e) {
-//       print("Error in _deleteUpi: $e");
+//       AppLogger.d("Error in _deleteUpi: $e");
 //       if (mounted) {
 //       }
 //     } finally {
@@ -3513,6 +3513,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/views/profile_screens/payment_related/edit_bank_account.dart';
 import 'package:nzcu_driver/views/profile_screens/payment_related/edit_upi.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class MoneyTransferScreen extends StatefulWidget {
   const MoneyTransferScreen({super.key});
@@ -4798,19 +4799,19 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
             onPressed: () {
               // Navigator.pop(context);
 
-              print("=== Transfer Details ===");
-              print("Selected Account ID: ${selectedAccount.id}");
-              print("Account Type: ${selectedAccount.type}");
-              print("Amount: $amount");
-              print("Account Holder: ${selectedAccount.accountHolderName}");
+              AppLogger.d("=== Transfer Details ===");
+              AppLogger.d("Selected Account ID: ${selectedAccount.id}");
+              AppLogger.d("Account Type: ${selectedAccount.type}");
+              AppLogger.d("Amount: $amount");
+              AppLogger.d("Account Holder: ${selectedAccount.accountHolderName}");
               if (selectedAccount.type == "UPI") {
-                print("UPI ID: ${selectedAccount.upiId}");
+                AppLogger.d("UPI ID: ${selectedAccount.upiId}");
               } else {
-                print("Bank Name: ${selectedAccount.bankName}");
-                print("Account Number: ${selectedAccount.accountNumber}");
-                print("IFSC Code: ${selectedAccount.ifscCode}");
+                AppLogger.d("Bank Name: ${selectedAccount.bankName}");
+                AppLogger.d("Account Number: ${selectedAccount.accountNumber}");
+                AppLogger.d("IFSC Code: ${selectedAccount.ifscCode}");
               }
-              print("========================");
+              AppLogger.d("========================");
 
               paymentsWithdrawController.withdrawal_method(
                 BankAccountId: selectedAccount.id,
@@ -4946,7 +4947,7 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
     });
 
     try {
-      print("Deleting Bank Account with accountid: ${account_id}");
+      AppLogger.d("Deleting Bank Account with accountid: ${account_id}");
 
       await updateBankAndUpiController.delete_bank_upi_method(
         accountid: account_id,
@@ -4974,7 +4975,7 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
         getBankAccountsController.bankdetails_mdethod();
       }
     } catch (e) {
-      print("Error in _deleteBankAccount: $e");
+      AppLogger.d("Error in _deleteBankAccount: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -5097,7 +5098,7 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
     });
 
     try {
-      print("Deleting UPI with accountid: ${account_id}");
+      AppLogger.d("Deleting UPI with accountid: ${account_id}");
 
       await updateBankAndUpiController.delete_bank_upi_method(
         accountid: account_id,
@@ -5125,7 +5126,7 @@ class _MoneyTransferScreenState extends State<MoneyTransferScreen> {
         getBankAccountsController.bankdetails_mdethod();
       }
     } catch (e) {
-      print("Error in _deleteUpi: $e");
+      AppLogger.d("Error in _deleteUpi: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

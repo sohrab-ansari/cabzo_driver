@@ -1,8 +1,9 @@
-import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
+﻿import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/modals/profile_modals/get_bank_accounts_response.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class GetBankAccountsController extends GetxController {
   // Change to Rx<HomeModalResponse?> and use .obs
@@ -20,7 +21,7 @@ class GetBankAccountsController extends GetxController {
   }
 
   Future<void> bankdetails_mdethod() async {
-    print("get bank details  called");
+    AppLogger.d("get bank details  called");
 
     // Set loading state
     isLoading.value = true;
@@ -32,7 +33,7 @@ class GetBankAccountsController extends GetxController {
           await ProfileApiServices.get_bankdetails_data();
 
       if (res.success == true) {
-        print("get bank details  data fetched successfully");
+        AppLogger.d("get bank details  data fetched successfully");
 
         driveridresponse.value = res;
       } else {
@@ -41,16 +42,16 @@ class GetBankAccountsController extends GetxController {
         // Intercept the specific error message to suppress the snackbar and show custom text
         if (msg.toLowerCase().contains('payment method') || msg.toLowerCase().contains('no payment')) {
           errorMessage.value = 'Add bank account to deposit money';
-          print("Intercepted error: ${errorMessage.value}");
+          AppLogger.d("Intercepted error: ${errorMessage.value}");
         } else {
           errorMessage.value = msg;
-          print("Error: ${errorMessage.value}");
+          AppLogger.d("Error: ${errorMessage.value}");
           CustomToast.showError(errorMessage.value);
         }
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
-      print("Exception: $e");
+      AppLogger.d("Exception: $e");
       CustomToast.showError(errorMessage.value);
     } finally {
       // Reset loading state

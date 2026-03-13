@@ -1,4 +1,4 @@
-import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
+﻿import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -9,6 +9,7 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class ArrivedOtpScreen extends StatefulWidget {
   final bool? bookridetypecheck;
@@ -40,8 +41,8 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
     super.initState();
 
     _isDisposed = false;
-    print('🔑 OTP Screen initialized');
-    print('📦 Ride data: ${widget.rideData}');
+    AppLogger.d('🔑 OTP Screen initialized');
+    AppLogger.d('📦 Ride data: ${widget.rideData}');
 
     // Prevent keyboard from auto opening
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -53,13 +54,13 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
 
   @override
   void dispose() {
-    print('🗑️ OTP Screen disposed');
+    AppLogger.d('🗑️ OTP Screen disposed');
     _isDisposed = true;
     super.dispose();
   }
 
   void thetypecheck() {
-    print("hellooootype>>> ${widget.bookridetypecheck}");
+    AppLogger.d("hellooootype>>> ${widget.bookridetypecheck}");
   }
 
   // Verify OTP API call
@@ -70,9 +71,9 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
 
-    print("========== 🔵 VERIFY OTP APIss ==========");
-    print("📌 Order ID: $orderId");
-    print("📌 OTP: $otp");
+    AppLogger.d("========== 🔵 VERIFY OTP APIss ==========");
+    AppLogger.d("📌 Order ID: $orderId");
+    AppLogger.d("📌 OTP: $otp");
 
     final Uri url = Uri.parse(ApiPath.order_verifed_otp);
     try {
@@ -85,13 +86,13 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
         body: jsonEncode({"orderId": orderId, "rideOtp": otp}),
       );
 
-      print("✅ Status Codeee: ${response.statusCode}");
-      print("📦 Raw Response: ${response.body}");
+      AppLogger.d("✅ Status Codeee: ${response.statusCode}");
+      AppLogger.d("📦 Raw Response: ${response.body}");
 
       // Check if response is HTML error page
       if (response.body.trim().startsWith('<!DOCTYPE') ||
           response.body.trim().startsWith('<html')) {
-        print("❌ Server returned HTML error page");
+        AppLogger.d("❌ Server returned HTML error page");
         return {
           "success": false,
           "message": "Server error (${response.statusCode})",
@@ -110,7 +111,7 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
           response.statusCode == 403) {
         try {
           final decoded = jsonDecode(response.body);
-          print("decoded ${decoded}");
+          AppLogger.d("decoded ${decoded}");
           return {
             "success": decoded["success"] ?? (response.statusCode == 200),
             "message":
@@ -131,7 +132,7 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
 
       return {"success": false, "message": "Unknown error"};
     } catch (e) {
-      print("❌ API Error: $e");
+      AppLogger.d("❌ API Error: $e");
 
       String errorMessage;
       if (e.toString().contains("Failed host lookup")) {
@@ -180,7 +181,7 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
         // Navigate after successful verification
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted && !_isDisposed) {
-            print("naviagtionnnnn>>>   ");
+            AppLogger.d("naviagtionnnnn>>>   ");
             stepperController.nextStep();
 
             Navigator.pop(context);
@@ -190,7 +191,7 @@ class _ArrivedOtpScreenState extends State<ArrivedOtpScreen> {
         CustomToast.showError(result["message"] ?? "OTP verification failed");
       }
     } catch (e) {
-      print("❌ Error in _verifyOtp: $e");
+      AppLogger.d("❌ Error in _verifyOtp: $e");
       if (mounted && !_isDisposed) {
         CustomToast.showError("An error occurred. Please try again.");
       } 

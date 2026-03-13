@@ -1,9 +1,10 @@
-
+﻿
 
 import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/modals/home_modals/verify_Otp_Order_response.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class VerifyOtpOrderController extends GetxController {
   Rx<VerifyOtpResponse?> verifyOtpResponse = Rx<VerifyOtpResponse?>(null);
@@ -25,7 +26,7 @@ class VerifyOtpOrderController extends GetxController {
     required String orderId,
     Function(bool success, String message)? onComplete,
   }) async {
-    print("verifyOtpOrder called for order: $orderId");
+    AppLogger.d("verifyOtpOrder called for order: $orderId");
 
     // Store current order ID
     currentOrderId = orderId;
@@ -33,7 +34,7 @@ class VerifyOtpOrderController extends GetxController {
     // Check if order was cancelled
     if (isOrderCancelled.value) {
       final message = "Order was cancelled";
-      print("❌ $message");
+      AppLogger.d("❌ $message");
       onComplete?.call(false, message);
       return;
     }
@@ -50,16 +51,16 @@ class VerifyOtpOrderController extends GetxController {
             orderid: orderId,
           );
 
-      print("API Response success: ${res.success}");
+      AppLogger.d("API Response success: ${res.success}");
 
       if (res.success == true) {
-        print("✅ OTP verified successfully");
+        AppLogger.d("✅ OTP verified successfully");
         verifyOtpResponse.value = res;
 
         // Call success callback
         onComplete?.call(true, res.message ?? "OTP verified successfully");
       } else {
-        print("❌ OTP verification failed");
+        AppLogger.d("❌ OTP verification failed");
         errorMessage.value = res.message ?? 'Failed to verify OTP';
 
         // Call error callback
@@ -67,7 +68,7 @@ class VerifyOtpOrderController extends GetxController {
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
-      print("❌ Exception: $e");
+      AppLogger.d("❌ Exception: $e");
 
       // Call error callback
       onComplete?.call(false, errorMessage.value);
@@ -82,7 +83,7 @@ class VerifyOtpOrderController extends GetxController {
     final rideId = data['rideId']?.toString();
     final message = data['message'] ?? 'Order no longer available';
 
-    print('❌ Order cancelled: $rideId - $message');
+    AppLogger.d('❌ Order cancelled: $rideId - $message');
 
     // Check if this is the current order being verified
     if (rideId == currentOrderId) {

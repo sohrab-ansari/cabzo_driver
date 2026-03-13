@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:nzcu_driver/services/apiservices/socket_manager.dart';
@@ -9,6 +9,7 @@ import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:nzcu_driver/views/ride_screens/receive_payment_modes.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -43,7 +44,7 @@ class _SplashScreenState extends State<SplashScreen> {
       // 1. Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        print('⚠️ [Splash] Location services are disabled');
+        AppLogger.d('⚠️ [Splash] Location services are disabled');
         return;
       }
 
@@ -55,20 +56,20 @@ class _SplashScreenState extends State<SplashScreen> {
 
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
-        print('⚠️ [Splash] Location permission denied');
+        AppLogger.d('⚠️ [Splash] Location permission denied');
         return;
       }
 
-      print('✅ [Splash] Location permission granted');
+      AppLogger.d('✅ [Splash] Location permission granted');
 
       // 3. Request notification permission (non-blocking)
       try {
         final notificationStatus = await Permission.notification.request();
         if (notificationStatus.isGranted) {
-          print('✅ [Splash] Notification permission granted');
+          AppLogger.d('✅ [Splash] Notification permission granted');
         }
       } catch (e) {
-        print('⚠️ [Splash] Notification permission error: $e');
+        AppLogger.d('⚠️ [Splash] Notification permission error: $e');
       }
 
       // 4. Get the current position (initial GPS fix)
@@ -79,7 +80,7 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
       );
 
-      print(
+      AppLogger.d(
         '📍 [Splash] Got initial position: ${position.latitude}, ${position.longitude}',
       );
 
@@ -92,9 +93,9 @@ class _SplashScreenState extends State<SplashScreen> {
       final socketManager = SocketManager();
       socketManager.updateLocation(position.latitude, position.longitude);
 
-      print('✅ [Splash] Location cached and SocketManager updated');
+      AppLogger.d('✅ [Splash] Location cached and SocketManager updated');
     } catch (error) {
-      print('❌ [Splash] Error during location initialization: $error');
+      AppLogger.d('❌ [Splash] Error during location initialization: $error');
     }
   }
 
@@ -103,8 +104,8 @@ class _SplashScreenState extends State<SplashScreen> {
     final String? token = prefs.getString("auth_token");
     final bool wasOnline = prefs.getBool("driver_is_online") ?? false;
 
-    print("splashtokennnn ${token}");
-    print("splash online status: ${wasOnline}");
+    AppLogger.d("splashtokennnn ${token}");
+    AppLogger.d("splash online status: ${wasOnline}");
 
     if (!mounted) return;
 

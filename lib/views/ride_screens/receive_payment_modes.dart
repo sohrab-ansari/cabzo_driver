@@ -1,4 +1,4 @@
-// // import 'package:nzcu_driver/controller/controllers.dart';
+﻿// // import 'package:nzcu_driver/controller/controllers.dart';
 // // import 'package:nzcu_driver/utilities/app_buttons.dart';
 // // import 'package:nzcu_driver/utilities/colors.dart';
 // // import 'package:nzcu_driver/utilities/colors/colors_list.dart';
@@ -218,7 +218,7 @@
 //   Widget build(BuildContext context) {
 //     var orderid = widget.rideData?['orderId']?.toString();
 
-//     print(
+//     AppLogger.d(
 //       "getttt theeeee  orderrrr id parmaaa ${widget.rideData?['orderId']?.toString()}",
 //     );
 //     final w = MediaQuery.of(context).size.width;
@@ -332,7 +332,7 @@
 //                         controllers.selectPaymentOnCash.value = true;
 //                         controllers.selectPaymentOnQr.value = false;
 
-//                         print("hellooooo >>>>>>>>>>>>>>>>>>>>>>>>");
+//                         AppLogger.d("hellooooo >>>>>>>>>>>>>>>>>>>>>>>>");
 
 //                         cashController.cash_method(orderid: orderid,context: context);
 //                         // Future.delayed(const Duration(milliseconds: 300), () {
@@ -406,6 +406,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/views/Homeviewscreens/details.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class ReceivePaymentModes extends StatefulWidget {
   final dynamic rideData;
@@ -423,23 +424,23 @@ class _ReceivePaymentModesState extends State<ReceivePaymentModes> {
   // @override
   // void initState() {
   //   super.initState();
-  //   print("🎯 ReceivePaymentModes initialized");
-  //   print("📦 Ride Data: ${widget.rideData}");
+  //   AppLogger.d("🎯 ReceivePaymentModes initialized");
+  //   AppLogger.d("📦 Ride Data: ${widget.rideData}");
   // }
 
   @override
   void initState() {
     super.initState();
 
-    print("🎯 ReceivePaymentModes initialized");
-    print("📦 Ride Data (Pretty):");
+    AppLogger.d("🎯 ReceivePaymentModes initialized");
+    AppLogger.d("📦 Ride Data (Pretty):");
     prettyPrint(widget.rideData);
   }
 
   void prettyPrint(dynamic data) {
     const encoder = JsonEncoder.withIndent('  ');
     final prettyString = encoder.convert(data);
-    debugPrint(prettyString);
+    AppLogger.d(prettyString);
   }
 
   @override
@@ -475,7 +476,7 @@ class _ReceivePaymentModesState extends State<ReceivePaymentModes> {
       return;
     }
 
-    print("💰 Processing cash payment for order: $orderId");
+    AppLogger.d("💰 Processing cash payment for order: $orderId");
     cashController.processCashPayment(
       orderId: orderId,
       rideData: widget.rideData,

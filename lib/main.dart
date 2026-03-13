@@ -1,4 +1,4 @@
-import 'package:firebase_core/firebase_core.dart';
+﻿import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +16,7 @@ import 'package:nzcu_driver/controllers/chart_id_controller/chat_notification_co
 import 'package:nzcu_driver/utilities/widgets/network_status_overlay.dart';
 import 'package:nzcu_driver/utilities/widgets/location_guard.dart';
 import 'package:nzcu_driver/views/splash/splash_screen.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 
 @pragma('vm:entry-point')
@@ -24,7 +25,7 @@ Future<void> _firebaseBackgroundMessageHandler(RemoteMessage message) async {
   // Background handlers run in a separate Dart isolate where Firebase is NOT initialized
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  print('>>>>>> [Background] Message received: ${message.messageId}');
+  AppLogger.d('>>>>>> [Background] Message received: ${message.messageId}');
 
   // Use the singleton instance------
   await NotificationService.instance.showNotificationInBackground(message);
@@ -33,22 +34,22 @@ Future<void> _firebaseBackgroundMessageHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  print('=' * 60);
-  print('🚀 NZCU DRIVER APP INITIALIZATION');
-  print('=' * 60);
+  AppLogger.d('=' * 60);
+  AppLogger.d('🚀 NZCU DRIVER APP INITIALIZATION');
+  AppLogger.d('=' * 60);
 
   try {
-    print('1️⃣ Initializing Firebase...');
+    AppLogger.d('1️⃣ Initializing Firebase...');
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    print('   ✅ Firebase Core initialized');
+    AppLogger.d('   ✅ Firebase Core initialized');
 
-    print('2️⃣ Registering background message handler...');
+    AppLogger.d('2️⃣ Registering background message handler...');
     FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundMessageHandler);
-    print('   ✅ Background handler registered');
+    AppLogger.d('   ✅ Background handler registered');
 
-    print('3️⃣ Configuring System UI...');
+    AppLogger.d('3️⃣ Configuring System UI...');
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
@@ -57,44 +58,44 @@ void main() async {
         statusBarBrightness: Brightness.light,
       ),
     );
-    print('   ✅ System UI configured');
+    AppLogger.d('   ✅ System UI configured');
 
     // ========================================================================
     // 4. DEPENDENCY INJECTION
     // ========================================================================
-    print('4️⃣ Setting up Dependency Injection...');
+    AppLogger.d('4️⃣ Setting up Dependency Injection...');
     DependencyInjection.init();
-    print('   ✅ Dependency Injection initialized');
+    AppLogger.d('   ✅ Dependency Injection initialized');
 
     // ========================================================================
     // 5. NOTIFICATION SERVICE INITIALIZATION
     // ========================================================================
-    // print('5️⃣ Initializing Notification Service...');
+    // AppLogger.d('5️⃣ Initializing Notification Service...');
     // await NotificationService.instance.initialize();
-    // print('   ✅ Notification service initialized');
+    // AppLogger.d('   ✅ Notification service initialized');
 
     // ========================================================================
     // 6. PRINT SUCCESS MESSAGE
     // ========================================================================
-    print('🎉 All services initialized successfully!');
-    print('=' * 60);
-    print('');
+    AppLogger.d('🎉 All services initialized successfully!');
+    AppLogger.d('=' * 60);
+    AppLogger.d('');
 
     // ========================================================================
     // 8. RIDE NOTIFICATION SERVICE (heads-up ride request alerts)
     // ========================================================================
-    print(
+    AppLogger.d(
       '8️⃣ Using SocketForegroundService for killed-state native notifications.',
     );
 
     // Background socket is now handled natively by SocketForegroundService.kt
-    print('9️⃣ Native socket service configured (starts on go-online)');
+    AppLogger.d('9️⃣ Native socket service configured (starts on go-online)');
   } catch (e, stackTrace) {
-    print('');
-    print('❌ ERROR DURING INITIALIZATION ❌');
-    print('Error: $e');
-    print('Stack trace: $stackTrace');
-    print('');
+    AppLogger.d('');
+    AppLogger.d('❌ ERROR DURING INITIALIZATION ❌');
+    AppLogger.d('Error: $e');
+    AppLogger.d('Stack trace: $stackTrace');
+    AppLogger.d('');
   }
 
   Get.put(NetworkController(), permanent: true);
@@ -118,7 +119,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     OverlayService.instance.initOverlayListener((message) {
-      print('[MyApp] Overlay tap received: $message');
+      AppLogger.d('[MyApp] Overlay tap received: $message');
     });
   }
 
@@ -139,7 +140,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     } else if (state == AppLifecycleState.resumed) {
       OverlayService.instance.hideOverlay();
       if (SocketManager().isOnDuty) {
-        print('📱 App resumed - forcing socket reconnect check');
+        AppLogger.d('📱 App resumed - forcing socket reconnect check');
         SocketManager().forceReconnect();
       }
     }

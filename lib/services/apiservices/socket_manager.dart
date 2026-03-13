@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -16,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class SocketManager {
   // Singleton instance
@@ -25,17 +26,17 @@ class SocketManager {
 
   Future<void> _requestBatteryOptimizations() async {
     try {
-      print('🔋 Requesting to ignore battery optimizations...');
+      AppLogger.d('🔋 Requesting to ignore battery optimizations...');
       final status = await Permission.ignoreBatteryOptimizations.request();
       if (status.isGranted) {
-        print('✅ Battery optimizations ignored - App should stay alive');
+        AppLogger.d('✅ Battery optimizations ignored - App should stay alive');
       } else {
-        print(
+        AppLogger.d(
           '⚠️ Battery optimizations NOT ignored - App might be killed in background',
         );
       }
     } catch (e) {
-      print('❌ Error requesting battery permission: $e');
+      AppLogger.d('❌ Error requesting battery permission: $e');
     }
   }
 
@@ -47,18 +48,18 @@ class SocketManager {
   Future<void> _startNativeService() async {
     try {
       await _platform.invokeMethod('startService');
-      print('🚀 Native Foreground Service Started');
+      AppLogger.d('🚀 Native Foreground Service Started');
     } catch (e) {
-      print("❌ Failed to start native service: $e");
+      AppLogger.d("❌ Failed to start native service: $e");
     }
   }
 
   Future<void> _stopNativeService() async {
     try {
       await _platform.invokeMethod('stopService');
-      print('🛑 Native Foreground Service Stopped');
+      AppLogger.d('🛑 Native Foreground Service Stopped');
     } catch (e) {
-      print("❌ Failed to stop native service: $e");
+      AppLogger.d("❌ Failed to stop native service: $e");
     }
   }
 
@@ -69,7 +70,7 @@ class SocketManager {
         'body': body,
       });
     } catch (e) {
-      print("❌ Failed to update native notification: $e");
+      AppLogger.d("❌ Failed to update native notification: $e");
     }
   }
 
@@ -77,7 +78,7 @@ class SocketManager {
     try {
       await _platform.invokeMethod('setAppState', {'state': state});
     } catch (e) {
-      print("❌ Failed to update native app state: $e");
+      AppLogger.d("❌ Failed to update native app state: $e");
     }
   }
 
@@ -109,7 +110,7 @@ class SocketManager {
       if (pendingTs > 0) {
         final ageMs = DateTime.now().millisecondsSinceEpoch - pendingTs;
         if (ageMs > 60000) {
-          print(
+          AppLogger.d(
             '⏰ [SocketManager] Pending ride is ${ageMs ~/ 1000}s old — discarding (too stale)',
           );
           return;
@@ -124,14 +125,14 @@ class SocketManager {
       // push RideRequestScreen on top of it.
       final pendingAcceptId = prefs.getString('pending_accept_order_id') ?? '';
       if (pendingAcceptId.isNotEmpty) {
-        print(
+        AppLogger.d(
           '🚕 [SocketManager] Accept already tapped — skipping RideRequestScreen '
           '(pending_accept_order_id=$pendingAcceptId)',
         );
         return;
       }
 
-      print('🚕 [SocketManager] Pending ride from killed state detected!');
+      AppLogger.d('🚕 [SocketManager] Pending ride from killed state detected!');
 
       // Parse and MAP ride data (same normalization as live socket - required for Accept/Cancel)
       final Map<String, dynamic> rideDataRaw = json.decode(rideJson);
@@ -144,7 +145,7 @@ class SocketManager {
       // Also ensure isOnDuty is true — driver must have been online when killed.
       isOnDuty = true;
 
-      print(
+      AppLogger.d(
         '🚕 [SocketManager] Navigating to RideRequestScreen (orderId=${rideDataMapped['orderId']})...',
       );
 
@@ -155,7 +156,7 @@ class SocketManager {
         Future.delayed(const Duration(milliseconds: 1500), () {
           // Double-check that accept was not tapped during the delay.
           if (!_hasPendingRideRequest) {
-            print(
+            AppLogger.d(
               '🚕 [SocketManager] Ride cancelled or accepted during delay — skipping navigation',
             );
             return;
@@ -167,7 +168,7 @@ class SocketManager {
       // Also trigger the callback if registered
       onNewRide?.call(rideDataMapped);
     } catch (e) {
-      print('❌ [SocketManager] Error checking pending ride: $e');
+      AppLogger.d('❌ [SocketManager] Error checking pending ride: $e');
       // Clear bad data
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool("pending_ride_from_killed", false);
@@ -274,7 +275,7 @@ class SocketManager {
 
   // ==================== INITIALIZATION ====================
   Future<void> initialize() async {
-    print('🔄 Initializing SocketManager...');
+    AppLogger.d('🔄 Initializing SocketManager...');
     await _loadDriverData();
 
     // Inform native foreground service that Flutter app is now in foreground.
@@ -305,7 +306,7 @@ class SocketManager {
           prefs.getString('pending_decline_order_id') ?? '';
 
       if (pendingAcceptOrderId.isNotEmpty) {
-        print(
+        AppLogger.d(
           '🚕 [SocketManager] Processing pending native ACCEPT for $pendingAcceptOrderId',
         );
         await prefs.remove('pending_accept_order_id');
@@ -316,7 +317,7 @@ class SocketManager {
 
         await acceptRideFromNotification(pendingAcceptOrderId);
       } else if (pendingDeclineOrderId.isNotEmpty) {
-        print(
+        AppLogger.d(
           '🚕 [SocketManager] Processing pending native DECLINE for $pendingDeclineOrderId',
         );
         await prefs.remove('pending_decline_order_id');
@@ -330,21 +331,21 @@ class SocketManager {
           reason: 'Declined from native notification',
         );
         if (!success) {
-          print(
+          AppLogger.d(
             '❌ [SocketManager] Failed to decline pending native ride action',
           );
         }
       }
     } catch (e) {
-      print('❌ [SocketManager] Error processing pending native actions: $e');
+      AppLogger.d('❌ [SocketManager] Error processing pending native actions: $e');
     }
   }
 
   // Future<void> _initAdvancedGeolocation() async {
-  //   print('🛰️ [SocketManager] Initializing Advanced Geolocation...');
+  //   AppLogger.d('🛰️ [SocketManager] Initializing Advanced Geolocation...');
 
   //   bg.BackgroundGeolocation.onLocation((bg.Location location) {
-  //     print(
+  //     AppLogger.d(
   //       '[Advanced Geolocation] Location changed: ${location.coords.latitude}, ${location.coords.longitude}',
   //     );
   //     _currentLatitude = location.coords.latitude;
@@ -375,7 +376,7 @@ class SocketManager {
   // ✅ NEW: Mark app as ready for location requests
   void setAppReady(bool ready) {
     _isAppReady = ready;
-    print(
+    AppLogger.d(
       _isAppReady ? '✅ App ready for location requests' : '⏳ App not ready',
     );
   }
@@ -392,9 +393,9 @@ class SocketManager {
       _vehicleType2 = prefs.getString("vehicle_SubType");
       _vehicleNumber = prefs.getString("vehicle_id");
 
-      print('✅ Vehicle Type ID loaded from prefs: $_vehicleType');
-      print('✅ Vehicle SubType loaded from prefs: $_vehicleType2');
-      print('✅ Vehicle ID loaded from prefs: $_vehicleNumber');
+      AppLogger.d('✅ Vehicle Type ID loaded from prefs: $_vehicleType');
+      AppLogger.d('✅ Vehicle SubType loaded from prefs: $_vehicleType2');
+      AppLogger.d('✅ Vehicle ID loaded from prefs: $_vehicleNumber');
 
       // Load driver basic info from prefs
       _driverName = prefs.getString("driver_name");
@@ -427,15 +428,15 @@ class SocketManager {
         _vehicleImage = driverData['vehicleImage'];
         _fleetId = driverData['fleetId'];
 
-        print('✅ Additional driver data loaded from JSON');
+        AppLogger.d('✅ Additional driver data loaded from JSON');
       }
 
-      print('👤 Driver loaded: $_driverName');
-      print('📱 Phone: $_driverPhone');
-      print('🚗 Vehicle Type ID: $_vehicleType');
-      print('🚗 Vehicle ID: $_vehicleNumber');
+      AppLogger.d('👤 Driver loaded: $_driverName');
+      AppLogger.d('📱 Phone: $_driverPhone');
+      AppLogger.d('🚗 Vehicle Type ID: $_vehicleType');
+      AppLogger.d('🚗 Vehicle ID: $_vehicleNumber');
     } catch (error) {
-      print('❌ Error loading driver data: $error');
+      AppLogger.d('❌ Error loading driver data: $error');
     }
   }
 
@@ -449,10 +450,10 @@ class SocketManager {
     _vehicleNumber = vehicleId;
     _vehicleType2 = vehicleSubType;
 
-    print('🚗 Vehicle data updated:');
-    print('   - Type ID: $vehicleTypeId');
-    print('   - SubType: $vehicleSubType');
-    print('   - Vehicle ID: $vehicleId');
+    AppLogger.d('🚗 Vehicle data updated:');
+    AppLogger.d('   - Type ID: $vehicleTypeId');
+    AppLogger.d('   - SubType: $vehicleSubType');
+    AppLogger.d('   - Vehicle ID: $vehicleId');
 
     // Save to SharedPreferences for persistence
     _saveVehicleDataToPrefs(vehicleId, vehicleTypeId, vehicleSubType);
@@ -468,9 +469,9 @@ class SocketManager {
       await prefs.setString("vehicle_id", vehicleId);
       await prefs.setString("vehicle_type_id", vehicleTypeId);
       await prefs.setString("vehicle_SubType", vehicleSubType);
-      print('💾 Vehicle and SubType data saved to SharedPreferences');
+      AppLogger.d('💾 Vehicle and SubType data saved to SharedPreferences');
     } catch (error) {
-      print('❌ Error saving vehicle data to prefs: $error');
+      AppLogger.d('❌ Error saving vehicle data to prefs: $error');
     }
   }
 
@@ -488,15 +489,15 @@ class SocketManager {
       final vehicleName = prefs.getString("vehicle_name");
       final vehicleNumberPlate = prefs.getString("vehicle_number");
 
-      print('🔄 Vehicle data refreshed:');
-      print('   - Type ID: $_vehicleType');
+      AppLogger.d('🔄 Vehicle data refreshed:');
+      AppLogger.d('   - Type ID: $_vehicleType');
 
-      print("vehicallltype_camee>>> ${_vehicleType2}");
-      print('   - Vehicle ID: $_vehicleNumber');
-      print('   - Name: $vehicleName');
-      print('   - Number Plate: $vehicleNumberPlate');
+      AppLogger.d("vehicallltype_camee>>> ${_vehicleType2}");
+      AppLogger.d('   - Vehicle ID: $_vehicleNumber');
+      AppLogger.d('   - Name: $vehicleName');
+      AppLogger.d('   - Number Plate: $vehicleNumberPlate');
     } catch (error) {
-      print('❌ Error refreshing vehicle data: $error');
+      AppLogger.d('❌ Error refreshing vehicle data: $error');
     }
   }
 
@@ -505,9 +506,9 @@ class SocketManager {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool("driver_is_online", isOnline);
-      print('💾 Online status saved to SharedPreferences: $isOnline');
+      AppLogger.d('💾 Online status saved to SharedPreferences: $isOnline');
     } catch (error) {
-      print('❌ Error saving online status to prefs: $error');
+      AppLogger.d('❌ Error saving online status to prefs: $error');
     }
   }
 
@@ -516,11 +517,11 @@ class SocketManager {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool("is_ride_in_progress", _isRideInProgress);
       await prefs.setString("active_ride_id", _activeRideId ?? "");
-      print(
+      AppLogger.d(
         '💾 [SocketManager] Saved ride state to prefs: isRideInProgress=$_isRideInProgress, activeRideId=$_activeRideId',
       );
     } catch (e) {
-      print('❌ [SocketManager] Error saving ride state: $e');
+      AppLogger.d('❌ [SocketManager] Error saving ride state: $e');
     }
   }
 
@@ -528,7 +529,7 @@ class SocketManager {
     try {
       // Only attempt restoration once per app session
       if (_hasAttemptedRestoration) {
-        print('✅ Restoration already attempted this session, skipping...');
+        AppLogger.d('✅ Restoration already attempted this session, skipping...');
         return;
       }
 
@@ -541,13 +542,13 @@ class SocketManager {
       _isRideInProgress = prefs.getBool("is_ride_in_progress") ?? false;
       _activeRideId = prefs.getString("active_ride_id");
       if (_isRideInProgress) {
-        print('🔄 Restoring active ride state: ID=$_activeRideId');
+        AppLogger.d('🔄 Restoring active ride state: ID=$_activeRideId');
       }
 
       final wasOnline = prefs.getBool("driver_is_online") ?? false;
 
       if (wasOnline) {
-        print('🔄 Restoring online status from prefs...');
+        AppLogger.d('🔄 Restoring online status from prefs...');
         // Wait for socket to be ready before going online
         int retries = 0;
         while (!_isSocketConnected && retries < 10) {
@@ -556,17 +557,17 @@ class SocketManager {
         }
 
         if (_isSocketConnected) {
-          print('✅ Socket connected, restoring online status...');
+          AppLogger.d('✅ Socket connected, restoring online status...');
           await goOnline();
         } else {
-          print(
+          AppLogger.d(
             '⚠️ Socket not connected, but user was online - marking as ready',
           );
           isOnDuty = true;
         }
       } else {
         // Ensure service is stopped if we are offline
-        print(
+        AppLogger.d(
           '✅ [SocketManager] Driver is offline, ensuring service is stopped',
         );
         await _stopNativeService();
@@ -574,7 +575,7 @@ class SocketManager {
 
       isRestorationInProgress = false;
     } catch (error) {
-      print('❌ Error restoring online status: $error');
+      AppLogger.d('❌ Error restoring online status: $error');
       isRestorationInProgress = false;
     }
   }
@@ -584,7 +585,7 @@ class SocketManager {
     try {
       // Check if app is ready for location requests
       if (!_isAppReady) {
-        print('⏳ App not ready yet, using cached location if available');
+        AppLogger.d('⏳ App not ready yet, using cached location if available');
         if (_currentLatitude != 0.0 && _currentLongitude != 0.0) {
           return;
         }
@@ -599,21 +600,21 @@ class SocketManager {
       _currentLongitude = position.longitude;
       _lastLocationUpdate = DateTime.now();
 
-      print('✅ Initial location: $_currentLatitude, $_currentLongitude');
+      AppLogger.d('✅ Initial location: $_currentLatitude, $_currentLongitude');
     } catch (e) {
-      print('⚠️ Quick location failed: $e');
+      AppLogger.d('⚠️ Quick location failed: $e');
       try {
         final lastPosition = await Geolocator.getLastKnownPosition();
         if (lastPosition != null) {
           _currentLatitude = lastPosition.latitude;
           _currentLongitude = lastPosition.longitude;
-          print(
+          AppLogger.d(
             '📍 Using last known location: $_currentLatitude, $_currentLongitude',
           );
         } else {
           _currentLatitude = 23.2508131;
           _currentLongitude = 77.4647936;
-          print(
+          AppLogger.d(
             '📍 Using default location: $_currentLatitude, $_currentLongitude',
           );
         }
@@ -626,11 +627,11 @@ class SocketManager {
 
   void startLocationWatch() {
     if (_positionStreamSubscription != null) {
-      print('ℹ️ Location watch already active');
+      AppLogger.d('ℹ️ Location watch already active');
       return;
     }
 
-    print('📍 Starting continuous location watch');
+    AppLogger.d('📍 Starting continuous location watch');
 
     _positionStreamSubscription =
         Geolocator.getPositionStream(
@@ -649,10 +650,10 @@ class SocketManager {
             //   _sendLocationUpdate();
             // }
 
-            // print('📍 Location updated: $_currentLatitude, $_currentLongitude');
+            // AppLogger.d('📍 Location updated: $_currentLatitude, $_currentLongitude');
           },
           onError: (error) {
-            print('⚠️ Location watch error: $error');
+            AppLogger.d('⚠️ Location watch error: $error');
           },
         );
   }
@@ -661,24 +662,24 @@ class SocketManager {
     if (_positionStreamSubscription != null) {
       _positionStreamSubscription!.cancel();
       _positionStreamSubscription = null;
-      print('⏹️ Stopped location watch');
+      AppLogger.d('⏹️ Stopped location watch');
     }
   }
 
   // ==================== SOCKET CONNECTION ====================
   Future<bool> connectSocket() async {
-    print("🔄 Connecting socket...");
+    AppLogger.d("🔄 Connecting socket...");
 
     try {
       if (_socket != null && _isSocketConnected) {
-        print('✅ Socket already connected');
+        AppLogger.d('✅ Socket already connected');
         return true;
       }
 
       // Disconnect existing socket object but keep online state alive
       _cleanupSocketConnection();
 
-      print('🔌 Creating socket connection...');
+      AppLogger.d('🔌 Creating socket connection...');
 
       // Create socket connection
       _socket = IO.io(
@@ -708,7 +709,7 @@ class SocketManager {
       // Wait for connection
       return await _waitForConnection();
     } catch (error) {
-      print('❌ Socket connection error: $error');
+      AppLogger.d('❌ Socket connection error: $error');
       return false;
     }
   }
@@ -718,7 +719,7 @@ class SocketManager {
 
     final timeout = Timer(const Duration(seconds: 10), () {
       if (!completer.isCompleted) {
-        print('❌ Connection timeout');
+        AppLogger.d('❌ Connection timeout');
         completer.complete(false);
       }
     });
@@ -726,7 +727,7 @@ class SocketManager {
     _socket!.once('connect', (_) {
       timeout.cancel();
       if (!completer.isCompleted) {
-        print('✅ Socket connected!');
+        AppLogger.d('✅ Socket connected!');
         completer.complete(true);
       }
     });
@@ -734,7 +735,7 @@ class SocketManager {
     _socket!.once('connect_error', (error) {
       timeout.cancel();
       if (!completer.isCompleted) {
-        print('❌ Connection error: $error');
+        AppLogger.d('❌ Connection error: $error');
       }
     });
 
@@ -748,7 +749,7 @@ class SocketManager {
     // Debug all events
     _socket!.onAny((event, data) {
       if (_debug) {
-        print(
+        AppLogger.d(
           '[SOCKET RECEIVED] $event: ${data != null ? jsonEncode(data).substring(0, data.toString().length > 100 ? 100 : data.toString().length) : "No data"}',
         );
       }
@@ -756,7 +757,7 @@ class SocketManager {
 
     // CONNECTION EVENTS
     _socket!.onConnect((_) {
-      print('✅ Driver socket connected: ${_socket!.id}');
+      AppLogger.d('✅ Driver socket connected: ${_socket!.id}');
       _isSocketConnected = true;
       _socketId = _socket!.id;
       _socketStatus = 'Connected';
@@ -772,7 +773,7 @@ class SocketManager {
     });
 
     _socket!.onDisconnect((_) {
-      print('❌ Driver socket disconnected');
+      AppLogger.d('❌ Driver socket disconnected');
       _isSocketConnected = false;
       _socketStatus = 'Disconnected';
 
@@ -791,12 +792,12 @@ class SocketManager {
     });
 
     _socket!.onConnectError((data) {
-      print('❌ Socket connection error: $data');
+      AppLogger.d('❌ Socket connection error: $data');
       onSocketError?.call({'error': data.toString(), 'type': 'connect_error'});
     });
 
     _socket!.onReconnect((data) {
-      print('🔄 Socket reconnected after $data attempts');
+      AppLogger.d('🔄 Socket reconnected after $data attempts');
       _isSocketConnected = true;
       _socketStatus = 'Connected';
       _cancelReconnect();
@@ -804,19 +805,19 @@ class SocketManager {
 
       // Re-emit online status and restart location after reconnect
       if (isOnDuty) {
-        print('🔄 [Reconnect] Driver is on duty — re-emitting user:online');
+        AppLogger.d('🔄 [Reconnect] Driver is on duty — re-emitting user:online');
         goOnline();
       }
     });
 
     // DRIVER STATUS EVENTS
     _socket!.on('driver:online_success', (data) {
-      print('✅ Driver online confirmed: $data');
+      AppLogger.d('✅ Driver online confirmed: $data');
       _handleOnlineSuccess(data);
     });
 
     _socket!.on('driver:online_failed', (data) {
-      print('❌ Driver online failed: $data');
+      AppLogger.d('❌ Driver online failed: $data');
       _handleOnlineFailure(data);
     });
 
@@ -825,25 +826,25 @@ class SocketManager {
       final rideData = _mapRideData(data);
 
       // Pretty print the full ride request data
-      print('🚕 NEW RIDE REQUEST RECEIVED:');
-      print('╔═══════════════════════════════════════════════════════════');
-      print('║ RIDE DETAILS:');
-      print('╠═══════════════════════════════════════════════════════════');
+      AppLogger.d('🚕 NEW RIDE REQUEST RECEIVED:');
+      AppLogger.d('╔═══════════════════════════════════════════════════════════');
+      AppLogger.d('║ RIDE DETAILS:');
+      AppLogger.d('╠═══════════════════════════════════════════════════════════');
 
       // Convert rideData to JSON with pretty formatting
       final prettyJson = JsonEncoder.withIndent('  ').convert(rideData);
       prettyJson.split('\n').forEach((line) {
-        print('║ $line');
+        AppLogger.d('║ $line');
       });
 
-      print('╠═══════════════════════════════════════════════════════════');
-      print(
+      AppLogger.d('╠═══════════════════════════════════════════════════════════');
+      AppLogger.d(
         '║ Raw data preview: ${jsonEncode(data).substring(0, min(200, jsonEncode(data).length))}...',
       );
-      print('╚═══════════════════════════════════════════════════════════');
+      AppLogger.d('╚═══════════════════════════════════════════════════════════');
 
       if (!isOnDuty) {
-        print('⚠️ Received ride request but driver is offline');
+        AppLogger.d('⚠️ Received ride request but driver is offline');
         return;
       }
 
@@ -859,7 +860,7 @@ class SocketManager {
       // addPostFrameCallback silently drops when no frame is scheduled.
       Future.microtask(() {
         if (!isOnDuty || !_hasPendingRideRequest) return;
-        print('🚕 Navigating to RideRequestScreen...');
+        AppLogger.d('🚕 Navigating to RideRequestScreen...');
         Get.to(() => RideRequestScreen(rideData: rideData));
       });
 
@@ -873,7 +874,7 @@ class SocketManager {
     // The duplicate empty handler that was here has been removed.
 
     _socket!.on('ride:confirmed', (data) async {
-      print(">>>>>>>>> [SOCKET] Ride Confirmed");
+      AppLogger.d(">>>>>>>>> [SOCKET] Ride Confirmed");
 
       // Convert incoming data to Map
       final rideData = Map<String, dynamic>.from(data);
@@ -892,7 +893,7 @@ class SocketManager {
       // ✅ 3. Store order id
       await prefs.setString('active_order_id', orderId.toString());
 
-      print("✅ Ride Data Stored Successfully");
+      AppLogger.d("✅ Ride Data Stored Successfully");
 
       // =====================================================
       // 🔄 READ AGAIN FROM SHARED PREFERENCES (Verification)
@@ -900,17 +901,17 @@ class SocketManager {
 
       final storedRideString = prefs.getString('active_ride_full_data');
 
-      print("📦 Stored Ride Data From Prefs: $storedRideString");
+      AppLogger.d("📦 Stored Ride Data From Prefs: $storedRideString");
 
       if (storedRideString != null) {
         final storedRideMap =
             jsonDecode(storedRideString) as Map<String, dynamic>;
 
-        print("🚗 Stored Order ID: ${storedRideMap['orderId']}");
-        print(
+        AppLogger.d("🚗 Stored Order ID: ${storedRideMap['orderId']}");
+        AppLogger.d(
           "👤 Stored Profile Image: ${storedRideMap['rider']?['profileImage']}",
         );
-        print("💰 Stored Fare: ${storedRideMap['fare']}");
+        AppLogger.d("💰 Stored Fare: ${storedRideMap['fare']}");
       }
 
       // =====================================================
@@ -936,7 +937,7 @@ class SocketManager {
     });
 
     _socket!.on('ride:status', (data) {
-      print('📊 Ride status update: $data');
+      AppLogger.d('📊 Ride status update: $data');
 
       final orderId = data['orderId'] ?? data['rideId'];
       if (orderId != null) {
@@ -950,7 +951,7 @@ class SocketManager {
             status == 'finished' ||
             status == 'ended' ||
             status == 'cancelled') {
-          print('✅ Ride end status received: $status');
+          AppLogger.d('✅ Ride end status received: $status');
           _completeRide(orderId, isStatusCompleted: status == 'completed');
         }
       }
@@ -959,10 +960,10 @@ class SocketManager {
     });
 
     _socket!.on('ride:orderCancelled', (data) {
-      print("myyyy_cancelledddddd2>>>>>");
+      AppLogger.d("myyyy_cancelledddddd2>>>>>");
 
-      print("my_cancelledddd_full_datatattt ${data}");
-      print('❌ Ride cancelled: $data');
+      AppLogger.d("my_cancelledddd_full_datatattt ${data}");
+      AppLogger.d('❌ Ride cancelled: $data');
 
       // Block any pending ride:newRide microtask from navigating after cancel
       _hasPendingRideRequest = false;
@@ -980,17 +981,17 @@ class SocketManager {
 
         Get.offAll(() => BottomnavmainScreen(isOnDuty: true));
       } else {
-        print('⚠️ No valid rideId found in cancellation data');
+        AppLogger.d('⚠️ No valid rideId found in cancellation data');
       }
     });
 
     _socket!.on('ride:location', (data) {
-      // print('📍 Rider location during ride: $data');
+      // AppLogger.d('📍 Rider location during ride: $data');
       onRideLocationUpdate?.call(data);
     });
 
     _socket!.on('ride:reconnected', (data) async {
-      print('>>>>>>>>>>> Reconnected to active ride: $data');
+      AppLogger.d('>>>>>>>>>>> Reconnected to active ride: $data');
 
       final fullRideData = Map<String, dynamic>.from(data);
       final orderId = fullRideData['orderId']?.toString();
@@ -1011,9 +1012,9 @@ class SocketManager {
           jsonEncode(fullRideData),
         );
         await prefs.setString('active_order_id', orderId.toString());
-        print('💾 Reconnected ride data saved to SharedPreferences');
+        AppLogger.d('💾 Reconnected ride data saved to SharedPreferences');
       } catch (e) {
-        print('⚠️ Error saving reconnected ride data: $e');
+        AppLogger.d('⚠️ Error saving reconnected ride data: $e');
       }
 
       onRideReconnected?.call(fullRideData);
@@ -1023,7 +1024,7 @@ class SocketManager {
     });
 
     // _socket!.on('chat:history', (data) {
-    //   print('>>>>>>>>>>> Chat history: $data');
+    //   AppLogger.d('>>>>>>>>>>> Chat history: $data');
 
     //   // _currentRide = {
     //   //   'orderId': data['orderId'],
@@ -1035,40 +1036,40 @@ class SocketManager {
 
     // CHAT EVENTS
     _socket!.on('chat:join_success', (data) {
-      print('✅ Joined chat room: $data');
+      AppLogger.d('✅ Joined chat room: $data');
       onChatJoin?.call({'success': true, 'data': data});
     });
 
     _socket!.on('chat:join_error', (data) {
-      print('❌ Chat join error: $data');
+      AppLogger.d('❌ Chat join error: $data');
       onChatError?.call(data);
     });
 
     // Listen to both possible event names for maximum compatibility
     _socket!.on('chat:receiveMessage', (data) {
-      print('💬 New chat message received (chat:receiveMessage): $data');
+      AppLogger.d('💬 New chat message received (chat:receiveMessage): $data');
       onChatMessage?.call(data);
       _chatMessageStreamController.add(Map<String, dynamic>.from(data));
     });
 
     _socket!.on('chat:message', (data) {
-      print('💬 New chat message received (chat:message): $data');
+      AppLogger.d('💬 New chat message received (chat:message): $data');
       onChatMessage?.call(data);
       _chatMessageStreamController.add(Map<String, dynamic>.from(data));
     });
 
     _socket!.on('chat:message_sent', (data) {
-      print('✅ Message sent successfully: $data');
+      AppLogger.d('✅ Message sent successfully: $data');
       onChatMessageSent?.call(data);
     });
 
     _socket!.on('chat:typing', (data) {
-      print('✍️ User is typing: $data');
+      AppLogger.d('✍️ User is typing: $data');
       onChatTyping?.call(data);
     });
 
     _socket!.on('chat:error', (data) {
-      print('❌ Chat error: $data');
+      AppLogger.d('❌ Chat error: $data');
       onChatError?.call(data);
     });
   }
@@ -1227,10 +1228,10 @@ class SocketManager {
 
   // ==================== DRIVER ONLINE/OFFLINE ====================
   Future<void> goOnline() async {
-    print('🟢 GOING ONLINE...');
+    AppLogger.d('🟢 GOING ONLINE...');
 
     if (_isProcessingOnline) {
-      print('⏳ Already processing...');
+      AppLogger.d('⏳ Already processing...');
       return;
     }
 
@@ -1242,43 +1243,43 @@ class SocketManager {
     try {
       // If socket is not connected, try to reconnect first
       if (_socket == null || !_isSocketConnected) {
-        print('⚠️ Socket not connected, attempting to reconnect...');
+        AppLogger.d('⚠️ Socket not connected, attempting to reconnect...');
 
         final reconnected = await connectSocket();
 
         if (!reconnected) {
-          print('❌ Failed to reconnect socket');
+          AppLogger.d('❌ Failed to reconnect socket');
           _handleOnlineFailure(
             'Failed to connect to server. Please check your internet connection.',
           );
           return;
         }
 
-        print('✅ Socket reconnected successfully');
+        AppLogger.d('✅ Socket reconnected successfully');
 
         // Wait a bit for socket to stabilize
         await Future.delayed(const Duration(milliseconds: 500));
       }
 
-      print('📍 Using current location: $_currentLatitude, $_currentLongitude');
+      AppLogger.d('📍 Using current location: $_currentLatitude, $_currentLongitude');
 
       // Debug print to show what vehicle data we have
-      print('🚗 Vehicle Type ID: $_vehicleType');
-      print('🚗 Vehicle ID: $_vehicleNumber');
+      AppLogger.d('🚗 Vehicle Type ID: $_vehicleType');
+      AppLogger.d('🚗 Vehicle ID: $_vehicleNumber');
 
       // Check if we have required vehicle data (vehicleSubType is optional)
       if (_vehicleType == null || _vehicleNumber == null) {
-        print('⚠️ Missing vehicle data! Trying to load from prefs...');
+        AppLogger.d('⚠️ Missing vehicle data! Trying to load from prefs...');
         await refreshVehicleData();
 
         if (_vehicleType == null || _vehicleNumber == null) {
-          print('⚠️ Still missing data. Attempting to fetch from API...');
+          AppLogger.d('⚠️ Still missing data. Attempting to fetch from API...');
           try {
             await HomeApiServices.get_driverid_data();
             await refreshVehicleData();
 
             if (_vehicleType == null || _vehicleNumber == null) {
-              print(
+              AppLogger.d(
                 '❌ Still missing vehicle data after API fetch. Cannot go online.',
               );
               _handleOnlineFailure(
@@ -1287,7 +1288,7 @@ class SocketManager {
               return;
             }
           } catch (e) {
-            print("❌ Error fetching driver data during online attempt: $e");
+            AppLogger.d("❌ Error fetching driver data during online attempt: $e");
             _handleOnlineFailure('Failed to fetch vehicle details.');
             return;
           }
@@ -1296,7 +1297,7 @@ class SocketManager {
 
       // Log if vehicleSubType is missing (non-blocking)
       if (_vehicleType2 == null) {
-        print('⚠️ vehicleSubType is null - proceeding without it');
+        AppLogger.d('⚠️ vehicleSubType is null - proceeding without it');
       }
 
       final payload = {
@@ -1310,9 +1311,9 @@ class SocketManager {
         'timestamp': DateTime.now().toIso8601String(),
       };
 
-      print("vehical_type_coming>>>  ${_vehicleType}");
-      print("vehical_subtyp[e_coming>>>  ${_vehicleType2}");
-      print('>>>>>>   Emitting user:online: $payload');
+      AppLogger.d("vehical_type_coming>>>  ${_vehicleType}");
+      AppLogger.d("vehical_subtyp[e_coming>>>  ${_vehicleType2}");
+      AppLogger.d('>>>>>>   Emitting user:online: $payload');
       _socket!.emit('user:online', payload);
 
       // Start location updates
@@ -1320,18 +1321,18 @@ class SocketManager {
       startLocationWatch();
 
       // START NATIVE FOREGROUND SERVICE (keeps app alive in background)
-      print('🚀 [SocketManager] Starting Native Foreground Service...');
+      AppLogger.d('🚀 [SocketManager] Starting Native Foreground Service...');
       await _startNativeService();
 
       // Native SocketForegroundService handles killed-state socket via Kotlin
 
       // START APP KEEP-ALIVE (isolated try-catch)
       // try {
-      //   print('🚀 [SocketManager] Enabling FlutterBackground keep-alive...');
+      //   AppLogger.d('🚀 [SocketManager] Enabling FlutterBackground keep-alive...');
       //   bool hasPermissions = await bg_lib.FlutterBackground.hasPermissions;
 
       //   if (!hasPermissions) {
-      //     print(
+      //     AppLogger.d(
       //       '⚠️ [SocketManager] FlutterBackground missing permissions - attempting to initialize...',
       //     );
       //     const androidConfig = bg_lib.FlutterBackgroundAndroidConfig(
@@ -1352,49 +1353,49 @@ class SocketManager {
       //   if (hasPermissions) {
       //     bool enabled =
       //         await bg_lib.FlutterBackground.enableBackgroundExecution();
-      //     print(
+      //     AppLogger.d(
       //       '✅ [SocketManager] FlutterBackground execution enabled: $enabled',
       //     );
       //   } else {
-      //     print(
+      //     AppLogger.d(
       //       '❌ [SocketManager] FlutterBackground permissions still missing after init attempt',
       //     );
       //   }
       // } catch (bgKeepAliveError) {
-      //   print(
+      //   AppLogger.d(
       //     '⚠️ [SocketManager] FlutterBackground keep-alive failed (non-fatal): $bgKeepAliveError',
       //   );
       // }
 
       // START ADVANCED GEOLOCATION TRACKING
       try {
-        print('🚀 [SocketManager] Starting Native Geolocation Tracking...');
+        AppLogger.d('🚀 [SocketManager] Starting Native Geolocation Tracking...');
         // await bg.BackgroundGeolocation.start();
-        print('✅ [SocketManager] Native Geolocation Tracking started');
+        AppLogger.d('✅ [SocketManager] Native Geolocation Tracking started');
       } catch (geoError) {
-        print(
+        AppLogger.d(
           '⚠️ [SocketManager] Geolocation start failed (non-fatal): $geoError',
         );
       }
 
-      print('🟢 [SocketManager] Driver online request sent successfully');
+      AppLogger.d('🟢 [SocketManager] Driver online request sent successfully');
     } catch (error) {
-      print('❌ Error going online: $error');
+      AppLogger.d('❌ Error going online: $error');
       _handleOnlineFailure('Error: $error');
     }
   }
 
   Future<void> goOffline() async {
-    print('🔴 GOING OFFLINE...');
+    AppLogger.d('🔴 GOING OFFLINE...');
 
     // Stop any looping ride request sounds
     NotificationService.instance.cancelRideNotification();
 
-    print("hellooooo222 ${_isProcessingOnline}");
+    AppLogger.d("hellooooo222 ${_isProcessingOnline}");
     if (_isProcessingOnline) return;
-    print("hellooooo3333 ${_isProcessingOnline}");
+    AppLogger.d("hellooooo3333 ${_isProcessingOnline}");
     // _isProcessingOnline = true;
-    print("hellooooo4444 ${_isProcessingOnline}");
+    AppLogger.d("hellooooo4444 ${_isProcessingOnline}");
 
     // Notify UI to show loading state
     onDriverStatusChange?.call(isOnDuty);
@@ -1402,14 +1403,14 @@ class SocketManager {
     try {
       // Emit offline event before disconnecting
       if (_socket != null && _isSocketConnected) {
-        print('🔴 Emitting offline status...');
+        AppLogger.d('🔴 Emitting offline status...');
 
         final payload = {
           'driverId': _driverId,
           'timestamp': DateTime.now().toIso8601String(),
         };
         _socket!.emit('driver:offline', payload);
-        print('📡 Emitted driver:offline event: $payload');
+        AppLogger.d('📡 Emitted driver:offline event: $payload');
 
         // Wait a bit for the event to be sent before disconnecting
         await Future.delayed(const Duration(milliseconds: 300));
@@ -1422,41 +1423,41 @@ class SocketManager {
       _activeRideId = null;
       _currentRide = null;
       _cancelReconnect();
-      print("hellooooo5555");
+      AppLogger.d("hellooooo5555");
 
       // Save offline status to SharedPreferences
       await _saveOnlineStatusToPrefs(false);
 
       onDriverStatusChange?.call(false);
-      print("hellooooo6666");
+      AppLogger.d("hellooooo6666");
 
       // Disconnect socket (this will also stop location updates)
       _disconnectSocket();
-      print("hellooooo7777");
+      AppLogger.d("hellooooo7777");
 
-      print("hellooooo7777");
+      AppLogger.d("hellooooo7777");
 
       // Native SocketForegroundService is stopped via _stopNativeService() below
 
       // STOP FOREGROUND SERVICE
-      print('🛑 Stopping Native Foreground Service...');
+      AppLogger.d('🛑 Stopping Native Foreground Service...');
       await _stopNativeService();
 
       // STOP APP KEEP-ALIVE
-      print('🛑 [SocketManager] Disabling FlutterBackground keep-alive...');
+      AppLogger.d('🛑 [SocketManager] Disabling FlutterBackground keep-alive...');
       try {
         // await bg_lib.FlutterBackground.disableBackgroundExecution();
       } catch (e) {
-        print('⚠️ Error disabling background execution: $e');
+        AppLogger.d('⚠️ Error disabling background execution: $e');
       }
 
       // STOP ADVANCED GEOLOCATION TRACKING
-      print('🛑 [SocketManager] Stopping Native Geolocation Tracking...');
+      AppLogger.d('🛑 [SocketManager] Stopping Native Geolocation Tracking...');
       // await bg.BackgroundGeolocation.stop();
 
-      print('✅ Driver is now offline and socket disconnected');
+      AppLogger.d('✅ Driver is now offline and socket disconnected');
     } catch (error) {
-      print('❌ Error going offline: $error');
+      AppLogger.d('❌ Error going offline: $error');
       _isProcessingOnline = false;
       // Notify UI to hide loading state
       onDriverStatusChange?.call(isOnDuty);
@@ -1466,7 +1467,7 @@ class SocketManager {
   void _handleOnlineSuccess(dynamic data) {
     if (!_isProcessingOnline) return;
 
-    print('✅ DRIVER ONLINE SUCCESS');
+    AppLogger.d('✅ DRIVER ONLINE SUCCESS');
     isOnDuty = true;
     _isProcessingOnline = false;
 
@@ -1479,7 +1480,7 @@ class SocketManager {
   void _handleOnlineFailure(dynamic data) {
     if (!_isProcessingOnline) return;
 
-    print('❌ DRIVER ONLINE FAILED');
+    AppLogger.d('❌ DRIVER ONLINE FAILED');
     isOnDuty = false;
     _isProcessingOnline = false;
 
@@ -1515,7 +1516,7 @@ class SocketManager {
         },
       };
 
-      print("📍 [RIDE-MODE] my_ride_location_payload>>> $ridePayload");
+      AppLogger.d("📍 [RIDE-MODE] my_ride_location_payload>>> $ridePayload");
       _socket!.emit('ride:location:update', ridePayload);
     } else {
       // 2. ONLY send general status if NO ride is in progress
@@ -1530,13 +1531,13 @@ class SocketManager {
           'timestamp': DateTime.now().toIso8601String(),
         };
 
-        print(
+        AppLogger.d(
           '📍 [DRIVER-MODE] Sending general driver location update: $_currentLatitude, $_currentLongitude',
         );
         _socket!.emit('driver:location:update', driverPayload);
       } else {
         // Extra safety: we are in a ride, but rideId was missing/empty
-        print(
+        AppLogger.d(
           '⚠️ [SAFETY-BLOCK] Suppressing driver:location:update - Ride is in progress but ID is invalid: "$rideId"',
         );
       }
@@ -1546,7 +1547,7 @@ class SocketManager {
   void _startLocationUpdates() {
     _stopLocationUpdates();
 
-    print('🔄 Starting location update broadcasts every 3 seconds');
+    AppLogger.d('🔄 Starting location update broadcasts every 3 seconds');
 
     _locationUpdateTimer = Timer.periodic(
       const Duration(milliseconds: LOCATION_UPDATE_INTERVAL),
@@ -1564,7 +1565,7 @@ class SocketManager {
     if (_locationUpdateTimer != null) {
       _locationUpdateTimer!.cancel();
       _locationUpdateTimer = null;
-      print('⏹️ Stopped location update broadcasts');
+      AppLogger.d('⏹️ Stopped location update broadcasts');
     }
   }
 
@@ -1588,15 +1589,15 @@ class SocketManager {
       final delay = Duration(
         seconds: (initialDelay.inSeconds * (1 << (attempt - 1))).clamp(5, 60),
       );
-      print('🔄 [AutoReconnect] Attempt #$attempt in ${delay.inSeconds}s');
+      AppLogger.d('🔄 [AutoReconnect] Attempt #$attempt in ${delay.inSeconds}s');
 
       _reconnectTimer = Timer(delay, () async {
         if (!isOnDuty || _isSocketConnected) return;
 
-        print('🔌 [AutoReconnect] Trying to reconnect...');
+        AppLogger.d('🔌 [AutoReconnect] Trying to reconnect...');
         final connected = await connectSocket();
         if (connected && isOnDuty) {
-          print('✅ [AutoReconnect] Reconnected — re-emitting user:online');
+          AppLogger.d('✅ [AutoReconnect] Reconnected — re-emitting user:online');
           await goOnline();
         } else if (isOnDuty) {
           // Retry again
@@ -1617,10 +1618,10 @@ class SocketManager {
   // ==================== RIDE METHODS ====================
   Future<void> acceptRideFromNotification(String orderId) async {
     if (_lastRideData != null && _lastRideData!['orderId'] == orderId) {
-      print('🚀 [SocketManager] Accepting ride from memory: $orderId');
+      AppLogger.d('🚀 [SocketManager] Accepting ride from memory: $orderId');
       acceptRide(_lastRideData!);
     } else {
-      print(
+      AppLogger.d(
         '🔍 [SocketManager] Memory check failed for $orderId, checking SharedPreferences...',
       );
       try {
@@ -1631,14 +1632,14 @@ class SocketManager {
           final rideDataMapped = _mapRideData(rideDataRaw);
 
           if (rideDataMapped['orderId'] == orderId) {
-            print(
+            AppLogger.d(
               '🚀 [SocketManager] Accepting ride from SharedPreferences: $orderId',
             );
             _lastRideData = rideDataMapped;
 
             // ✅ Wait for socket to be connected before emitting accept
             if (!_isSocketConnected) {
-              print(
+              AppLogger.d(
                 '⏳ Socket not connected, waiting for connection before accepting ride...',
               );
               int retries = 0;
@@ -1657,7 +1658,7 @@ class SocketManager {
                 );
 
                 if (response.success == true) {
-                  print(
+                  AppLogger.d(
                     "✅ [SocketManager] Ride successfully accepted via API!",
                   );
 
@@ -1670,17 +1671,17 @@ class SocketManager {
                   // Navigate to ArrivingClient
                   _handleRideReconnection(rideDataMapped, 'accepted');
                 } else {
-                  print(
+                  AppLogger.d(
                     "❌ [SocketManager] Failed to accept ride via API: ${response.message}",
                   );
                   CustomToast.showError('Failed to accept ride: ${response.message}');
                 }
               } catch (e) {
-                print("❌ [SocketManager] Error accepting ride from API: $e");
+                AppLogger.d("❌ [SocketManager] Error accepting ride from API: $e");
                 CustomToast.showError('Connection failed. Please manually check the app.');
               }
             } else {
-              print(
+              AppLogger.d(
                 '❌ [SocketManager] Failed to connect socket within timeout. Cannot accept ride.',
               );
               CustomToast.showError('Connection failed. Please accept the ride manually.');
@@ -1689,11 +1690,11 @@ class SocketManager {
           }
         }
       } catch (e) {
-        print(
+        AppLogger.d(
           '❌ [SocketManager] Error reading last ride request from prefs: $e',
         );
       }
-      print(
+      AppLogger.d(
         '⚠️ [SocketManager] Could not find ride data for $orderId. Cannot accept from notification.',
       );
     }
@@ -1701,7 +1702,7 @@ class SocketManager {
 
   bool acceptRide(Map<String, dynamic> rideData) {
     if (_socket == null || !_isSocketConnected) {
-      print('❌ Cannot accept ride - socket not connected');
+      AppLogger.d('❌ Cannot accept ride - socket not connected');
       return false;
     }
 
@@ -1712,7 +1713,7 @@ class SocketManager {
         rideData['rideId'];
 
     if (orderId == null) {
-      print('❌ No order ID found in ride data');
+      AppLogger.d('❌ No order ID found in ride data');
       return false;
     }
 
@@ -1743,9 +1744,9 @@ class SocketManager {
       'vehicleImage': _vehicleImage,
     };
 
-    print('✅ Ride marked as IN PROGRESS (ID: $orderId)');
+    AppLogger.d('✅ Ride marked as IN PROGRESS (ID: $orderId)');
     _saveRideStateToPrefs(); // Persistence for background isolate synchronization
-    print('✅ Emitting ride:accept: $payload');
+    AppLogger.d('✅ Emitting ride:accept: $payload');
     _socket!.emit('ride:accept', payload);
 
     // Keep driver online but mark
@@ -1767,7 +1768,7 @@ class SocketManager {
       'declinedAt': DateTime.now().toIso8601String(),
     };
 
-    print('❌ Declining ride: $payload');
+    AppLogger.d('❌ Declining ride: $payload');
     _socket!.emit('ride:decline', payload);
 
     // Ensure we return to general location updates
@@ -1782,7 +1783,7 @@ class SocketManager {
   void _completeRide(String? rideId, {bool isStatusCompleted = false}) {
     if (rideId != null && rideId.isNotEmpty) {
       if (_activeRideId == rideId) {
-        print('✅ Ride completed (ID: $rideId)');
+        AppLogger.d('✅ Ride completed (ID: $rideId)');
         _activeRideId = null;
         _rideStartTime = null;
         _isRideInProgress = false;
@@ -1802,7 +1803,7 @@ class SocketManager {
         }
       }
     } else {
-      print('⚠️ Invalid rideId provided to _completeRide');
+      AppLogger.d('⚠️ Invalid rideId provided to _completeRide');
     }
   }
 
@@ -1812,11 +1813,11 @@ class SocketManager {
     String orderStatus,
   ) {
     try {
-      print('🔄 Handling ride reconnection with status: $orderStatus');
+      AppLogger.d('🔄 Handling ride reconnection with status: $orderStatus');
 
       // Determine the step based on order status
       final step = _getStepFromOrderStatus(orderStatus);
-      print('📍 Setting active step to: $step for status: $orderStatus');
+      AppLogger.d('📍 Setting active step to: $step for status: $orderStatus');
 
       // Update the stepper controller with the correct step
       final stepperController = Get.find<StepperController>();
@@ -1830,9 +1831,9 @@ class SocketManager {
         );
       });
 
-      print('✅ Navigated to ArrivingClient screen');
+      AppLogger.d('✅ Navigated to ArrivingClient screen');
     } catch (e) {
-      print('❌ Error handling ride reconnection: $e');
+      AppLogger.d('❌ Error handling ride reconnection: $e');
     }
   }
 
@@ -1850,7 +1851,7 @@ class SocketManager {
       case 'in progress':
         return 2; // "Complete" button
       default:
-        print('⚠️ Unknown order status: $orderStatus, defaulting to step 0');
+        AppLogger.d('⚠️ Unknown order status: $orderStatus, defaulting to step 0');
         return 0;
     }
   }
@@ -1858,7 +1859,7 @@ class SocketManager {
   // ==================== CHAT FUNCTIONALITY ====================
   bool joinChatRoom(String orderId, {String userRole = 'driver'}) {
     if (_socket == null || !_isSocketConnected) {
-      print('❌ Cannot join chat - socket not connected');
+      AppLogger.d('❌ Cannot join chat - socket not connected');
       return false;
     }
 
@@ -1870,7 +1871,7 @@ class SocketManager {
       'timestamp': DateTime.now().toIso8601String(),
     };
 
-    print('💬 Joining chat room: $payload');
+    AppLogger.d('💬 Joining chat room: $payload');
     _socket!.emit('chat:join', payload);
     return true;
   }
@@ -1882,7 +1883,7 @@ class SocketManager {
     String? chatId,
   }) {
     if (_socket == null || !_isSocketConnected) {
-      print('❌ Cannot send message - socket not connected');
+      AppLogger.d('❌ Cannot send message - socket not connected');
       return false;
     }
 
@@ -1899,7 +1900,7 @@ class SocketManager {
       'timestamp': DateTime.now().toIso8601String(),
     };
 
-    print('💬 Sending message: $payload');
+    AppLogger.d('💬 Sending message: $payload');
 
     // Emit to both known events for compatibility
     _socket!.emit('chat:sendMessage', payload);
@@ -1932,7 +1933,7 @@ class SocketManager {
       return false;
     }
 
-    print('💬 Requesting chat history for: $orderId');
+    AppLogger.d('💬 Requesting chat history for: $orderId');
     _socket!.emit('chat:getHistory', {'orderId': orderId});
     return true;
   }
@@ -1942,7 +1943,7 @@ class SocketManager {
       return false;
     }
 
-    print('💬 Leaving chat room: $orderId');
+    AppLogger.d('💬 Leaving chat room: $orderId');
     _socket!.emit('chat:leave', {'orderId': orderId});
     return true;
   }
@@ -1951,7 +1952,7 @@ class SocketManager {
     if (_socket != null && _isSocketConnected) {
       final roomName = 'ride:$rideId';
       _socket!.emit('join:room', {'roomName': roomName});
-      print('✅ Joined ride room: $roomName');
+      AppLogger.d('✅ Joined ride room: $roomName');
     }
   }
 
@@ -2015,10 +2016,10 @@ class SocketManager {
       };
 
       await prefs.setString('activeRide', jsonEncode(activeRide));
-      print('💾 Active ride saved to storage: ${activeRide['orderId']}');
+      AppLogger.d('💾 Active ride saved to storage: ${activeRide['orderId']}');
       return true;
     } catch (error) {
-      print('❌ Failed to save active ride: $error');
+      AppLogger.d('❌ Failed to save active ride: $error');
       return false;
     }
   }
@@ -2030,7 +2031,7 @@ class SocketManager {
 
       if (activeRideJson != null) {
         final activeRide = jsonDecode(activeRideJson) as Map<String, dynamic>;
-        print('📂 Found persisted ride: ${activeRide['orderId']}');
+        AppLogger.d('📂 Found persisted ride: ${activeRide['orderId']}');
 
         // Check if ride data is not too old (max 4 hours)
         final savedAt = DateTime.parse(activeRide['savedAt']);
@@ -2038,7 +2039,7 @@ class SocketManager {
         final hoursDiff = now.difference(savedAt).inHours;
 
         if (hoursDiff > 4) {
-          print('⚠️ Persisted ride is too old, clearing');
+          AppLogger.d('⚠️ Persisted ride is too old, clearing');
           await clearPersistedRide();
           return null;
         }
@@ -2048,7 +2049,7 @@ class SocketManager {
 
       return null;
     } catch (error) {
-      print('❌ Failed to get persisted ride: $error');
+      AppLogger.d('❌ Failed to get persisted ride: $error');
       return null;
     }
   }
@@ -2058,10 +2059,10 @@ class SocketManager {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('activeRide');
       await prefs.remove('pending_payment_ride');
-      print('🗑️ Cleared persisted ride data');
+      AppLogger.d('🗑️ Cleared persisted ride data');
       return true;
     } catch (error) {
-      print('❌ Failed to clear persisted ride: $error');
+      AppLogger.d('❌ Failed to clear persisted ride: $error');
       return false;
     }
   }
@@ -2073,10 +2074,10 @@ class SocketManager {
         activeRide['screenToRestore'] = screen;
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('activeRide', jsonEncode(activeRide));
-        print('📝 Updated persisted ride screen to: $screen');
+        AppLogger.d('📝 Updated persisted ride screen to: $screen');
       }
     } catch (error) {
-      print('❌ Failed to update persisted ride screen: $error');
+      AppLogger.d('❌ Failed to update persisted ride screen: $error');
     }
   }
 
@@ -2086,7 +2087,7 @@ class SocketManager {
       _socketListeners[event] = [];
     }
     _socketListeners[event]!.add(callback);
-    print('✅ Added listener for: $event');
+    AppLogger.d('✅ Added listener for: $event');
   }
 
   void removeEventListener(String event, Function(dynamic) callback) {
@@ -2095,7 +2096,7 @@ class SocketManager {
       final index = callbacks.indexOf(callback);
       if (index > -1) {
         callbacks.removeAt(index);
-        print('❌ Removed listener for: $event');
+        AppLogger.d('❌ Removed listener for: $event');
       }
     }
   }
@@ -2107,7 +2108,7 @@ class SocketManager {
         try {
           callback(data);
         } catch (error) {
-          print('❌ Error in $event listener: $error');
+          AppLogger.d('❌ Error in $event listener: $error');
         }
       }
     }
@@ -2117,7 +2118,7 @@ class SocketManager {
   void _disconnectSocket() {
     // Don't disconnect if ride is in progress
     if (_isRideInProgress && _activeRideId != null) {
-      print(
+      AppLogger.d(
         '⚠️ Cannot disconnect - RIDE IN PROGRESS (ID: $_activeRideId)! Socket will remain connected.',
       );
       return;
@@ -2135,7 +2136,7 @@ class SocketManager {
     onConnectionStatusChange?.call(false);
     onDriverStatusChange?.call(false);
 
-    print('🔌 Driver socket disconnected and driver is offline');
+    AppLogger.d('🔌 Driver socket disconnected and driver is offline');
   }
 
   /// Disposes of the internal socket physics without altering
@@ -2153,15 +2154,15 @@ class SocketManager {
   Future<void> forceReconnect() async {
     if (!isOnDuty) return;
 
-    print('⚡ [SocketManager] Forcing immediate socket reconnection...');
+    AppLogger.d('⚡ [SocketManager] Forcing immediate socket reconnection...');
     _cancelReconnect(); // Cancel backoff timers
 
     final connected = await connectSocket();
     if (connected && isOnDuty) {
-      print('✅ [SocketManager] Force reconnect successful - re-emitting user:online');
+      AppLogger.d('✅ [SocketManager] Force reconnect successful - re-emitting user:online');
       await goOnline();
     } else {
-      print('⚠️ [SocketManager] Force reconnect failed. Falling back to retry loop.');
+      AppLogger.d('⚠️ [SocketManager] Force reconnect failed. Falling back to retry loop.');
       if (isOnDuty) {
         _scheduleReconnect();
       }
@@ -2205,23 +2206,23 @@ class SocketManager {
 
   // Debug function
   void debugSocket() {
-    print('🔍 === DRIVER SOCKET DEBUG ===');
-    print('Connected: $_isSocketConnected');
-    print('Socket ID: $_socketId');
-    print('Driver ID: $_driverId');
-    print('On Duty: $isOnDuty');
-    print('Current Ride: $_currentRide');
-    print('Ride In Progress: $_isRideInProgress');
-    print('Active Ride ID: $_activeRideId');
-    print('Location: $_currentLatitude, $_currentLongitude');
-    print('Vehicle Type: $_vehicleType');
-    print('Vehicle ID: $_vehicleNumber');
-    print('==============================');
+    AppLogger.d('🔍 === DRIVER SOCKET DEBUG ===');
+    AppLogger.d('Connected: $_isSocketConnected');
+    AppLogger.d('Socket ID: $_socketId');
+    AppLogger.d('Driver ID: $_driverId');
+    AppLogger.d('On Duty: $isOnDuty');
+    AppLogger.d('Current Ride: $_currentRide');
+    AppLogger.d('Ride In Progress: $_isRideInProgress');
+    AppLogger.d('Active Ride ID: $_activeRideId');
+    AppLogger.d('Location: $_currentLatitude, $_currentLongitude');
+    AppLogger.d('Vehicle Type: $_vehicleType');
+    AppLogger.d('Vehicle ID: $_vehicleNumber');
+    AppLogger.d('==============================');
   }
 
   // Cleanup - Only call this on actual logout/app termination, NOT on screen navigation
   void dispose() {
-    print('🔌 Disposing SocketManager (full cleanup)');
+    AppLogger.d('🔌 Disposing SocketManager (full cleanup)');
     _disconnectSocket();
     _stopLocationUpdates();
     stopLocationWatch();
@@ -2233,7 +2234,7 @@ class SocketManager {
   // ==================== LOGOUT ====================
   Future<void> logout() async {
     try {
-      print('🚪 Logging out driver...');
+      AppLogger.d('🚪 Logging out driver...');
 
       // Go offline first
       await goOffline();
@@ -2255,9 +2256,9 @@ class SocketManager {
       _currentRide = null;
       _isRideInProgress = false;
 
-      print('✅ All data cleared on logout');
+      AppLogger.d('✅ All data cleared on logout');
     } catch (error) {
-      print('❌ Error during logout: $error');
+      AppLogger.d('❌ Error during logout: $error');
     }
   }
 

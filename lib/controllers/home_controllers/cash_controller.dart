@@ -1,9 +1,10 @@
-import 'package:get/get.dart';
+﻿import 'package:get/get.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/modals/home_modals/order_complete_cash_response.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:nzcu_driver/views/payment_modes_screen.dart/cash_payment_screen.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class CashController extends GetxController {
   // Rx variables for state management
@@ -18,7 +19,7 @@ class CashController extends GetxController {
     required String orderId,
     dynamic rideData,
   }) async {
-    print("🔄 Processing cash payment for order: $orderId");
+    AppLogger.d("🔄 Processing cash payment for order: $orderId");
 
     // Reset states
     isLoading.value = true;
@@ -34,7 +35,7 @@ class CashController extends GetxController {
       cashResponse.value = response;
 
       if (response.success == true) {
-        print("✅ Cash payment successful");
+        AppLogger.d("✅ Cash payment successful");
 
         // Navigate to cash payment success screen
         Get.offAll(
@@ -45,14 +46,14 @@ class CashController extends GetxController {
         // Payment failed
         errorMessage.value =
             response.message ?? 'Payment failed. Please try again.';
-        print("❌ Payment failed: ${errorMessage.value}");
+        AppLogger.d("❌ Payment failed: ${errorMessage.value}");
 
         CustomToast.showError(errorMessage.value);
       }
     } catch (e) {
       // Handle exceptions
       errorMessage.value = 'An error occurred: $e';
-      print("❌ Exception in processCashPayment: $e");
+      AppLogger.d("❌ Exception in processCashPayment: $e");
       CustomToast.showError('Something went wrong. Please try again.');
     } finally {
       // Always reset loading state

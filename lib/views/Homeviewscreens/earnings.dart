@@ -1,4 +1,4 @@
-// import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
+﻿// import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 // import 'package:nzcu_driver/utilities/widgets/app_buttons.dart';
 // import 'package:nzcu_driver/utilities/colors/colors.dart';
 // import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
@@ -48,7 +48,7 @@
 //     earningsReportFuture = EarningsService.getEarningReport(period);
 //     rideHistoryFuture = EarningsService.getRideHistory();
 
-//     print("my___eraning_report_came ${rideHistoryFuture}");
+//     AppLogger.d("my___eraning_report_came ${rideHistoryFuture}");
 //     setState(() {});
 //   }
 
@@ -506,7 +506,7 @@
 //                         itemBuilder: (context, index) {
 //                           final trip = trips[index];
 
-//                           print("my___eraning_report_came ${trip}");
+//                           AppLogger.d("my___eraning_report_came ${trip}");
 
 //                           final endLocation = trip['endLocation']?['address']
 //                               ?.toString();
@@ -515,7 +515,7 @@
 //                           // )[0] ??
 //                           // "Unknown location";
 
-//                           print("myyyy_end_addreess ${endLocation}");
+//                           AppLogger.d("myyyy_end_addreess ${endLocation}");
 //                           final amount = trip['totalFare']?.toString() ?? "0";
 //                           final time =
 //                               trip['createdAt']?.toString().split('T')[1] ??
@@ -1157,6 +1157,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:get/instance_manager.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class Earnings extends StatefulWidget {
   const Earnings({super.key});
@@ -1210,7 +1211,7 @@ class _EarningsState extends State<Earnings> {
     earningsReportFuture = EarningsService.getEarningReport(period);
     rideHistoryFuture = EarningsService.getRideHistory();
 
-    print("my___eraning_report_came ${rideHistoryFuture}");
+    AppLogger.d("my___eraning_report_came ${rideHistoryFuture}");
     setState(() {});
 
     // Optionally await if you need to ensure data is loaded before continuing
@@ -1635,7 +1636,7 @@ class _EarningsState extends State<Earnings> {
                                         historySnapshot.data ?? [],
                                       );
 
-                                  print(
+                                  AppLogger.d(
                                     "helloooo_my_data ${historySnapshot.data}",
                                   );
                                 }
@@ -1740,7 +1741,7 @@ class _EarningsState extends State<Earnings> {
                           itemBuilder: (context, index) {
                             final trip = trips[index];
 
-                            print("my___eraning_report_came ${trip}");
+                            AppLogger.d("my___eraning_report_came ${trip}");
 
                             final endLocation = trip['endLocation']?['address']
                                 ?.toString();
@@ -1749,7 +1750,7 @@ class _EarningsState extends State<Earnings> {
                             // )[0] ??
                             // "Unknown location";
 
-                            print("myyyy_end_addreess ${endLocation}");
+                            AppLogger.d("myyyy_end_addreess ${endLocation}");
                             final amount = trip['totalFare']?.toString() ?? "0";
                             final time =
                                 trip['createdAt']?.toString().split('T')[1] ??

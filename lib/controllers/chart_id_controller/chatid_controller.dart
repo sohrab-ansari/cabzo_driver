@@ -1,7 +1,8 @@
-import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
+﻿import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
 import 'package:nzcu_driver/modals/home_modals/chat_id_response.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class ChatidController extends GetxController {
   // Change to Rx<HomeModalResponse?> and use .obs
@@ -17,7 +18,7 @@ class ChatidController extends GetxController {
   }
 
   Future<void> getchartidmethod({required dynamic orderid}) async {
-    print("home_data_method called");
+    AppLogger.d("home_data_method called");
 
     // Set loading state
     isLoading.value = true;
@@ -29,24 +30,24 @@ class ChatidController extends GetxController {
         orderid: orderid,
       );
 
-      print("API Response: ${res.success}");
+      AppLogger.d("API Response: ${res.success}");
 
       if (res.success == true) {
-        print("charttt_iddd  fetched successfully");
+        AppLogger.d("charttt_iddd  fetched successfully");
         chartresposne.value = res;
 
-        print("charttt_iddd>>>>  ${chartresposne.value}");
+        AppLogger.d("charttt_iddd>>>>  ${chartresposne.value}");
 
-        print("charttt_iddd respsoneee ${res}");
+        AppLogger.d("charttt_iddd respsoneee ${res}");
       } else {
-        print("myupdate_order_data22222222  faileddd111");
+        AppLogger.d("myupdate_order_data22222222  faileddd111");
         errorMessage.value = 'Failed to fetch chart data';
-        print("Error: ${errorMessage.value}");
+        AppLogger.d("Error: ${errorMessage.value}");
         CustomToast.showError(errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
-      print("charttt_iddd   exception: $e");
+      AppLogger.d("charttt_iddd   exception: $e");
       CustomToast.showError('Failed to load chat');
     } finally {
       // Reset loading state

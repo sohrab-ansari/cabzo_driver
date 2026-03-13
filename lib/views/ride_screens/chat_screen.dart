@@ -1,4 +1,4 @@
-// // import 'dart:async';
+﻿// // import 'dart:async';
 // // import 'dart:convert';
 // // import 'dart:io';
 
@@ -54,7 +54,7 @@
 // //   void initState() {
 // //     super.initState();
 // //     _mounted = true;
-// //     print('💬 ChatScreen initState');
+// //     AppLogger.d('💬 ChatScreen initState');
 
 // //     WidgetsBinding.instance.addPostFrameCallback((_) async {
 // //       await _loadDriverInfo();
@@ -84,15 +84,15 @@
 // //             driverData['name'] ?? driverData['driverName'] ?? 'Driver';
 // //       }
 
-// //       print('👤 Driver info loaded: $_driverName (ID: $_driverId)');
+// //       AppLogger.d('👤 Driver info loaded: $_driverName (ID: $_driverId)');
 // //     } catch (e) {
-// //       print('❌ Error loading driver info: $e');
+// //       AppLogger.d('❌ Error loading driver info: $e');
 // //     }
 // //   }
 
 // //   @override
 // //   void dispose() {
-// //     print('💬 ChatScreen dispose');
+// //     AppLogger.d('💬 ChatScreen dispose');
 // //     _mounted = false;
 
 // //     // Cancel any pending timeout timer
@@ -110,7 +110,7 @@
 // //         try {
 // //           _socketManager!.leaveChatRoom(orderId);
 // //         } catch (e) {
-// //           print("Error leaving chat room: $e");
+// //           AppLogger.d("Error leaving chat room: $e");
 // //         }
 // //       }
 // //     }
@@ -126,7 +126,7 @@
 // //     });
 
 // //     try {
-// //       print('💬 Initializing chat...');
+// //       AppLogger.d('💬 Initializing chat...');
 
 // //       // Get the chat ID from controller
 // //       await _getchartidmethod();
@@ -138,7 +138,7 @@
 // //       final chatId = chartidController.chartresposne.value?.data?.id;
 // //       if (chatId != null) {
 // //         _chatId = chatId;
-// //         print("✅ Chat ID obtained: $_chatId");
+// //         AppLogger.d("✅ Chat ID obtained: $_chatId");
 
 // //         // Get chat history from API
 // //         await _fetchChatHistory();
@@ -146,9 +146,9 @@
 // //         // Get the socket manager instance
 // //         try {
 // //           _socketManager = Get.find<SocketManager>();
-// //           print("✅ SocketManager found in GetX");
+// //           AppLogger.d("✅ SocketManager found in GetX");
 // //         } catch (e) {
-// //           print("⚠️ SocketManager not found, creating new instance");
+// //           AppLogger.d("⚠️ SocketManager not found, creating new instance");
 // //           _socketManager = SocketManager();
 // //           Get.put(_socketManager!, permanent: true);
 // //         }
@@ -159,7 +159,7 @@
 // //         // Join the chat room
 // //         _joinChatRoom();
 // //       } else {
-// //         print("⚠️ No chat ID available");
+// //         AppLogger.d("⚠️ No chat ID available");
 // //         if (_mounted) {
 // //           ScaffoldMessenger.of(Get.context!).showSnackBar(
 // //             const SnackBar(
@@ -170,7 +170,7 @@
 // //         }
 // //       }
 // //     } catch (e) {
-// //       print("❌ Error initializing chat: $e");
+// //       AppLogger.d("❌ Error initializing chat: $e");
 // //       if (_mounted) {
 // //         ScaffoldMessenger.of(Get.context!).showSnackBar(
 // //           SnackBar(
@@ -192,13 +192,13 @@
 // //     try {
 // //       final orderId = widget.rideData?['orderId']?.toString();
 // //       if (orderId != null) {
-// //         print('💬 Getting chart ID for order: $orderId');
+// //         AppLogger.d('💬 Getting chart ID for order: $orderId');
 // //         await chartidController.getchartidmethod(orderid: orderId);
 // //       } else {
 // //         throw Exception('No order ID in ride data');
 // //       }
 // //     } catch (e) {
-// //       print('❌ Error in _getchartidmethod: $e');
+// //       AppLogger.d('❌ Error in _getchartidmethod: $e');
 // //       rethrow;
 // //     }
 // //   }
@@ -206,7 +206,7 @@
 // //   // Method to fetch chat history from API
 // //   Future<void> _fetchChatHistory() async {
 // //     if (_chatId == null) {
-// //       print('❌ No chat ID available for fetching history');
+// //       AppLogger.d('❌ No chat ID available for fetching history');
 // //       return;
 // //     }
 
@@ -217,12 +217,12 @@
 // //     });
 
 // //     try {
-// //       print('📡 Fetching chat history for chatId: $_chatId');
+// //       AppLogger.d('📡 Fetching chat history for chatId: $_chatId');
 
 // //       final prefs = await SharedPreferences.getInstance();
 // //       final String? token = prefs.getString("auth_token");
 
-// //       print("token____chart screen  >> $token");
+// //       AppLogger.d("token____chart screen  >> $token");
 
 // //       if (token == null) {
 // //         throw Exception('No authentication token found');
@@ -231,7 +231,7 @@
 // //       // final url = '$_baseUrl/api/v1/chat/messages/$_chatId';
 
 // //       final url = '${ApiPath.baseUri}/chat/messages/$_chatId';
-// //       print('🌐 API URL: $url');
+// //       AppLogger.d('🌐 API URL: $url');
 
 // //       final response = await http.get(
 // //         Uri.parse(url),
@@ -241,8 +241,8 @@
 // //         },
 // //       );
 
-// //       print('📥 Response status: ${response.statusCode}');
-// //       print('📥 Response body: ${response.body}');
+// //       AppLogger.d('📥 Response status: ${response.statusCode}');
+// //       AppLogger.d('📥 Response body: ${response.body}');
 
 // //       if (response.statusCode == 200) {
 // //         final Map<String, dynamic> responseData = json.decode(response.body);
@@ -261,7 +261,7 @@
 // //           // Sort messages by timestamp
 // //           _messages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
-// //           print('✅ Loaded ${_messages.length} messages from API');
+// //           AppLogger.d('✅ Loaded ${_messages.length} messages from API');
 
 // //           if (_mounted) {
 // //             setState(() {});
@@ -274,7 +274,7 @@
 // //         throw Exception('HTTP ${response.statusCode}: ${response.body}');
 // //       }
 // //     } catch (e) {
-// //       print('❌ Error fetching chat history: $e');
+// //       AppLogger.d('❌ Error fetching chat history: $e');
 // //       // if (_mounted) {
 // //       //   ScaffoldMessenger.of(Get.context!).showSnackBar(
 // //       //     SnackBar(
@@ -355,10 +355,10 @@
 // //         });
 // //       }
 
-// //       print('📝 Added message from API: "$messageText" from $senderName');
+// //       AppLogger.d('📝 Added message from API: "$messageText" from $senderName');
 // //     } catch (e) {
-// //       print('❌ Error adding message from API: $e');
-// //       print('❌ Message data: $messageData');
+// //       AppLogger.d('❌ Error adding message from API: $e');
+// //       AppLogger.d('❌ Message data: $messageData');
 // //     }
 // //   }
 
@@ -380,18 +380,18 @@
 
 // //     // Chat messages
 // //     _socketManager!.onChatMessage = (data) {
-// //       print("💬 New chat message received via socket: ${data.keys}");
+// //       AppLogger.d("💬 New chat message received via socket: ${data.keys}");
 // //       _handleIncomingMessage(data);
 // //     };
 
 // //     // Chat join success
 // //     _socketManager!.onChatJoin = (data) {
-// //       print("✅ Joined chat successfully: $data");
+// //       AppLogger.d("✅ Joined chat successfully: $data");
 // //     };
 
 // //     // Chat error
 // //     _socketManager!.onChatError = (data) {
-// //       print("❌ Chat error: $data");
+// //       AppLogger.d("❌ Chat error: $data");
 // //       if (_mounted) {
 // //         setState(() {
 // //           _isSending = false; // Reset sending flag on error
@@ -407,7 +407,7 @@
 
 // //     // Message sent confirmation
 // //     _socketManager!.onChatMessageSent = (data) {
-// //       print("✅ Message sent successfully via socket: $data");
+// //       AppLogger.d("✅ Message sent successfully via socket: $data");
 
 // //       // Cancel any pending timeout timer
 // //       _sendTimeoutTimer?.cancel();
@@ -427,7 +427,7 @@
 
 // //     final orderId = widget.rideData?['orderId']?.toString();
 // //     if (orderId != null) {
-// //       print('💬 Joining chat room for order: $orderId');
+// //       AppLogger.d('💬 Joining chat room for order: $orderId');
 // //       _socketManager!.joinChatRoom(orderId, userRole: 'driver');
 // //     }
 // //   }
@@ -436,13 +436,13 @@
 // //     if (!_mounted) return;
 
 // //     try {
-// //       print('💬 Processing incoming socket message: ${data.keys}');
+// //       AppLogger.d('💬 Processing incoming socket message: ${data.keys}');
 
 // //       // Extract the nested message object
 // //       final Map<String, dynamic>? messageData = data['message'];
 
 // //       if (messageData == null) {
-// //         print('⚠️ No message data found in socket response');
+// //         AppLogger.d('⚠️ No message data found in socket response');
 // //         // Try direct fields
 // //         final messageText =
 // //             data['text']?.toString() ?? data['message']?.toString();
@@ -463,7 +463,7 @@
 // //         return;
 // //       }
 
-// //       print('💬 Extracted message data: ${messageData.keys}');
+// //       AppLogger.d('💬 Extracted message data: ${messageData.keys}');
 
 // //       // Extract sender info - handle both object and string formats
 // //       dynamic senderIdData = messageData['senderId'];
@@ -485,7 +485,7 @@
 // //       final messageText = messageData['message']?.toString() ?? '';
 
 // //       if (messageText.isEmpty) {
-// //         print('⚠️ Empty message text received');
+// //         AppLogger.d('⚠️ Empty message text received');
 // //         return;
 // //       }
 
@@ -500,8 +500,8 @@
 // //         senderName: senderName,
 // //       );
 // //     } catch (e) {
-// //       print("❌ Error handling incoming socket message: $e");
-// //       print("❌ Full data received: $data");
+// //       AppLogger.d("❌ Error handling incoming socket message: $e");
+// //       AppLogger.d("❌ Full data received: $data");
 
 // //       // Fallback: try to extract message text directly
 // //       try {
@@ -515,10 +515,10 @@
 // //             timestamp: DateTime.now().toIso8601String(),
 // //             messageId: UniqueKey().toString(),
 // //           );
-// //           print('✅ Created fallback message: $messageText');
+// //           AppLogger.d('✅ Created fallback message: $messageText');
 // //         }
 // //       } catch (fallbackError) {
-// //         print("❌ Even fallback failed: $fallbackError");
+// //         AppLogger.d("❌ Even fallback failed: $fallbackError");
 // //       }
 // //     }
 // //   }
@@ -555,13 +555,13 @@
 // //     // Check if message already exists to prevent duplicates
 // //     final bool messageExists = _messages.any((msg) => msg.id == messageId);
 // //     if (messageExists) {
-// //       print('⚠️ Message already exists: $messageId');
+// //       AppLogger.d('⚠️ Message already exists: $messageId');
 // //       return;
 // //     }
 
 // //     // DEDUPLICATION LOGIC: Check if this is a real message that should replace a temp message
 // //     if (!messageId.startsWith('temp_') && isSender) {
-// //       print('🔍 Attempting deduplication for: "$text"');
+// //       AppLogger.d('🔍 Attempting deduplication for: "$text"');
 
 // //       // Find a temp message with the same text
 // //       final int tempIndex = _messages.indexWhere((msg) {
@@ -573,7 +573,7 @@
 // //       });
 
 // //       if (tempIndex != -1) {
-// //         print(
+// //         AppLogger.d(
 // //           '♻️ Replacing temp message ${_messages[tempIndex].id} with real message $messageId',
 // //         );
 // //         if (_mounted) {
@@ -598,7 +598,7 @@
 // //         }
 // //         return; // Exit as we've replaced the message
 // //       } else {
-// //         print(
+// //         AppLogger.d(
 // //           '⚠️ No matching temp message found for deduplication. Adding as new.',
 // //         );
 // //       }
@@ -619,7 +619,7 @@
 // //       messageType: messageType,
 // //     );
 
-// //     print(
+// //     AppLogger.d(
 // //       '✅ Created chat message: "$text" from ${senderName ?? senderRole} (isSender: $isSender)',
 // //     );
 
@@ -650,17 +650,17 @@
 
 // //   void _sendMessage() {
 // //     if (_isSending) {
-// //       print('⚠️ Message is already being sent, please wait...');
+// //       AppLogger.d('⚠️ Message is already being sent, please wait...');
 // //       return;
 // //     }
 
 // //     final text = _messageController.text.trim();
 
-// //     print("hellooooo>>  ${text}");
+// //     AppLogger.d("hellooooo>>  ${text}");
 // //     if (text.isEmpty) return;
 
 // //     if (_socketManager == null) {
-// //       print("❌ Socket manager not available");
+// //       AppLogger.d("❌ Socket manager not available");
 // //       ScaffoldMessenger.of(context).showSnackBar(
 // //         const SnackBar(
 // //           content: Text('Not connected to chat server'),
@@ -675,13 +675,13 @@
 
 // //     final riderId = widget.rideData?['rider']?['id']?.toString();
 
-// //     print("Rider ID >>> $riderId");
+// //     AppLogger.d("Rider ID >>> $riderId");
 // //     // final riderId = "6998426f660912de596ca55d";
 
-// //     print("rideeeid >>>> fulll_ride_data  ${widget.rideData}");
-// //     print("orderrrrriddd>>>> after___close_myy_app ${orderId}");
+// //     AppLogger.d("rideeeid >>>> fulll_ride_data  ${widget.rideData}");
+// //     AppLogger.d("orderrrrriddd>>>> after___close_myy_app ${orderId}");
 
-// //     print("rideeeid >>>> after___close_myy_app ${riderId}");
+// //     AppLogger.d("rideeeid >>>> after___close_myy_app ${riderId}");
 
 // //     if (orderId != null && riderId != null && _driverId != null) {
 // //       // Set sending flag to prevent double sending
@@ -712,7 +712,7 @@
 
 // //       _isSending = false;
 // //       if (!success) {
-// //         print('❌ Socket sendChatMessage returned false');
+// //         AppLogger.d('❌ Socket sendChatMessage returned false');
 
 // //         // Remove the temporary message if sending failed
 // //         if (_mounted) {
@@ -738,7 +738,7 @@
 // //       _sendTimeoutTimer?.cancel();
 // //       _sendTimeoutTimer = Timer(const Duration(seconds: 10), () {
 // //         if (_mounted && _isSending) {
-// //           print('⏰ Timeout: Resetting _isSending flag');
+// //           AppLogger.d('⏰ Timeout: Resetting _isSending flag');
 // //           setState(() {
 // //             _isSending = false;
 // //           });
@@ -775,7 +775,7 @@
 // //         }
 // //       });
 // //     } else {
-// //       print(
+// //       AppLogger.d(
 // //         "❌ Missing required data. OrderId: $orderId, RiderId: $riderId, DriverId: $_driverId",
 // //       );
 // //       if (_mounted) {
@@ -823,9 +823,9 @@
 // //     final riderName = widget.rideData?['riderName'] ?? 'Riderr';
 // //     final riderImage = widget.rideData?['riderImage'] ?? '';
 
-// //     print("the____my_profile_cameeee ${widget.profileImage}");
+// //     AppLogger.d("the____my_profile_cameeee ${widget.profileImage}");
 
-// //     print("the____my_profile_cameeee___nameeee ${widget.driverName}");
+// //     AppLogger.d("the____my_profile_cameeee___nameeee ${widget.driverName}");
 
 // //     return Scaffold(
 // //       backgroundColor: const Color(0xFFF5F6FA),
@@ -1260,7 +1260,7 @@
 //   void initState() {
 //     super.initState();
 //     _mounted = true;
-//     print('💬 ChatScreen initState');
+//     AppLogger.d('💬 ChatScreen initState');
 
 //     WidgetsBinding.instance.addPostFrameCallback((_) async {
 //       await _loadDriverInfo();
@@ -1290,15 +1290,15 @@
 //             driverData['name'] ?? driverData['driverName'] ?? 'Driver';
 //       }
 
-//       print('👤 Driver info loaded: $_driverName (ID: $_driverId)');
+//       AppLogger.d('👤 Driver info loaded: $_driverName (ID: $_driverId)');
 //     } catch (e) {
-//       print('❌ Error loading driver info: $e');
+//       AppLogger.d('❌ Error loading driver info: $e');
 //     }
 //   }
 
 //   @override
 //   void dispose() {
-//     print('💬 ChatScreen dispose');
+//     AppLogger.d('💬 ChatScreen dispose');
 //     _mounted = false;
 
 //     // Cancel any pending timeout timer
@@ -1316,7 +1316,7 @@
 //         try {
 //           _socketManager!.leaveChatRoom(orderId);
 //         } catch (e) {
-//           print("Error leaving chat room: $e");
+//           AppLogger.d("Error leaving chat room: $e");
 //         }
 //       }
 //     }
@@ -1332,7 +1332,7 @@
 //     });
 
 //     try {
-//       print('💬 Initializing chat...');
+//       AppLogger.d('💬 Initializing chat...');
 
 //       // Get the chat ID from controller
 //       await _getchartidmethod();
@@ -1344,7 +1344,7 @@
 //       final chatId = chartidController.chartresposne.value?.data?.id;
 //       if (chatId != null) {
 //         _chatId = chatId;
-//         print("✅ Chat ID obtained: $_chatId");
+//         AppLogger.d("✅ Chat ID obtained: $_chatId");
 
 //         // Get chat history from API
 //         await _fetchChatHistory();
@@ -1352,9 +1352,9 @@
 //         // Get the socket manager instance
 //         try {
 //           _socketManager = Get.find<SocketManager>();
-//           print("✅ SocketManager found in GetX");
+//           AppLogger.d("✅ SocketManager found in GetX");
 //         } catch (e) {
-//           print("⚠️ SocketManager not found, creating new instance");
+//           AppLogger.d("⚠️ SocketManager not found, creating new instance");
 //           _socketManager = SocketManager();
 //           Get.put(_socketManager!, permanent: true);
 //         }
@@ -1365,7 +1365,7 @@
 //         // Join the chat room
 //         _joinChatRoom();
 //       } else {
-//         print("⚠️ No chat ID available");
+//         AppLogger.d("⚠️ No chat ID available");
 //         if (_mounted) {
 //           ScaffoldMessenger.of(Get.context!).showSnackBar(
 //             const SnackBar(
@@ -1376,7 +1376,7 @@
 //         }
 //       }
 //     } catch (e) {
-//       print("❌ Error initializing chat: $e");
+//       AppLogger.d("❌ Error initializing chat: $e");
 //       if (_mounted) {
 //         ScaffoldMessenger.of(Get.context!).showSnackBar(
 //           SnackBar(
@@ -1398,13 +1398,13 @@
 //     try {
 //       final orderId = widget.rideData?['orderId']?.toString();
 //       if (orderId != null) {
-//         print('💬 Getting chart ID for order: $orderId');
+//         AppLogger.d('💬 Getting chart ID for order: $orderId');
 //         await chartidController.getchartidmethod(orderid: orderId);
 //       } else {
 //         throw Exception('No order ID in ride data');
 //       }
 //     } catch (e) {
-//       print('❌ Error in _getchartidmethod: $e');
+//       AppLogger.d('❌ Error in _getchartidmethod: $e');
 //       rethrow;
 //     }
 //   }
@@ -1412,7 +1412,7 @@
 //   // Method to fetch chat history from API
 //   Future<void> _fetchChatHistory() async {
 //     if (_chatId == null) {
-//       print('❌ No chat ID available for fetching history');
+//       AppLogger.d('❌ No chat ID available for fetching history');
 //       return;
 //     }
 
@@ -1423,12 +1423,12 @@
 //     });
 
 //     try {
-//       print('📡 Fetching chat history for chatId: $_chatId');
+//       AppLogger.d('📡 Fetching chat history for chatId: $_chatId');
 
 //       final prefs = await SharedPreferences.getInstance();
 //       final String? token = prefs.getString("auth_token");
 
-//       print("token____chart screen  >> $token");
+//       AppLogger.d("token____chart screen  >> $token");
 
 //       if (token == null) {
 //         throw Exception('No authentication token found');
@@ -1437,7 +1437,7 @@
 //       // final url = '$_baseUrl/api/v1/chat/messages/$_chatId';
 
 //       final url = '${ApiPath.baseUri}/chat/messages/$_chatId';
-//       print('🌐 API URL: $url');
+//       AppLogger.d('🌐 API URL: $url');
 
 //       final response = await http.get(
 //         Uri.parse(url),
@@ -1447,8 +1447,8 @@
 //         },
 //       );
 
-//       print('📥 Response status: ${response.statusCode}');
-//       print('📥 Response body: ${response.body}');
+//       AppLogger.d('📥 Response status: ${response.statusCode}');
+//       AppLogger.d('📥 Response body: ${response.body}');
 
 //       if (response.statusCode == 200) {
 //         final Map<String, dynamic> responseData = json.decode(response.body);
@@ -1467,7 +1467,7 @@
 //           // Sort messages by timestamp
 //           _messages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
-//           print('✅ Loaded ${_messages.length} messages from API');
+//           AppLogger.d('✅ Loaded ${_messages.length} messages from API');
 
 //           if (_mounted) {
 //             setState(() {});
@@ -1480,7 +1480,7 @@
 //         throw Exception('HTTP ${response.statusCode}: ${response.body}');
 //       }
 //     } catch (e) {
-//       print('❌ Error fetching chat history: $e');
+//       AppLogger.d('❌ Error fetching chat history: $e');
 //       // if (_mounted) {
 //       //   ScaffoldMessenger.of(Get.context!).showSnackBar(
 //       //     SnackBar(
@@ -1561,10 +1561,10 @@
 //         });
 //       }
 
-//       print('📝 Added message from API: "$messageText" from $senderName');
+//       AppLogger.d('📝 Added message from API: "$messageText" from $senderName');
 //     } catch (e) {
-//       print('❌ Error adding message from API: $e');
-//       print('❌ Message data: $messageData');
+//       AppLogger.d('❌ Error adding message from API: $e');
+//       AppLogger.d('❌ Message data: $messageData');
 //     }
 //   }
 
@@ -1586,18 +1586,18 @@
 
 //     // Chat messages
 //     _socketManager!.onChatMessage = (data) {
-//       print("💬 New chat message received via socket: ${data.keys}");
+//       AppLogger.d("💬 New chat message received via socket: ${data.keys}");
 //       _handleIncomingMessage(data);
 //     };
 
 //     // Chat join success
 //     _socketManager!.onChatJoin = (data) {
-//       print("✅ Joined chat successfully: $data");
+//       AppLogger.d("✅ Joined chat successfully: $data");
 //     };
 
 //     // Chat error
 //     _socketManager!.onChatError = (data) {
-//       print("❌ Chat error: $data");
+//       AppLogger.d("❌ Chat error: $data");
 //       if (_mounted) {
 //         setState(() {
 //           _isSending = false; // Reset sending flag on error
@@ -1613,7 +1613,7 @@
 
 //     // Message sent confirmation
 //     _socketManager!.onChatMessageSent = (data) {
-//       print("✅ Message sent successfully via socket: $data");
+//       AppLogger.d("✅ Message sent successfully via socket: $data");
 
 //       // Cancel any pending timeout timer
 //       _sendTimeoutTimer?.cancel();
@@ -1633,7 +1633,7 @@
 
 //     final orderId = widget.rideData?['orderId']?.toString();
 //     if (orderId != null) {
-//       print('💬 Joining chat room for order: $orderId');
+//       AppLogger.d('💬 Joining chat room for order: $orderId');
 //       _socketManager!.joinChatRoom(orderId, userRole: 'driver');
 //     }
 //   }
@@ -1642,13 +1642,13 @@
 //     if (!_mounted) return;
 
 //     try {
-//       print('💬 Processing incoming socket message: ${data.keys}');
+//       AppLogger.d('💬 Processing incoming socket message: ${data.keys}');
 
 //       // Extract the nested message object
 //       final Map<String, dynamic>? messageData = data['message'];
 
 //       if (messageData == null) {
-//         print('⚠️ No message data found in socket response');
+//         AppLogger.d('⚠️ No message data found in socket response');
 //         // Try direct fields
 //         final messageText =
 //             data['text']?.toString() ?? data['message']?.toString();
@@ -1669,7 +1669,7 @@
 //         return;
 //       }
 
-//       print('💬 Extracted message data: ${messageData.keys}');
+//       AppLogger.d('💬 Extracted message data: ${messageData.keys}');
 
 //       // Extract sender info - handle both object and string formats
 //       dynamic senderIdData = messageData['senderId'];
@@ -1691,7 +1691,7 @@
 //       final messageText = messageData['message']?.toString() ?? '';
 
 //       if (messageText.isEmpty) {
-//         print('⚠️ Empty message text received');
+//         AppLogger.d('⚠️ Empty message text received');
 //         return;
 //       }
 
@@ -1706,8 +1706,8 @@
 //         senderName: senderName,
 //       );
 //     } catch (e) {
-//       print("❌ Error handling incoming socket message: $e");
-//       print("❌ Full data received: $data");
+//       AppLogger.d("❌ Error handling incoming socket message: $e");
+//       AppLogger.d("❌ Full data received: $data");
 
 //       // Fallback: try to extract message text directly
 //       try {
@@ -1721,10 +1721,10 @@
 //             timestamp: DateTime.now().toIso8601String(),
 //             messageId: UniqueKey().toString(),
 //           );
-//           print('✅ Created fallback message: $messageText');
+//           AppLogger.d('✅ Created fallback message: $messageText');
 //         }
 //       } catch (fallbackError) {
-//         print("❌ Even fallback failed: $fallbackError");
+//         AppLogger.d("❌ Even fallback failed: $fallbackError");
 //       }
 //     }
 //   }
@@ -1761,13 +1761,13 @@
 //     // Check if message already exists to prevent duplicates
 //     final bool messageExists = _messages.any((msg) => msg.id == messageId);
 //     if (messageExists) {
-//       print('⚠️ Message already exists: $messageId');
+//       AppLogger.d('⚠️ Message already exists: $messageId');
 //       return;
 //     }
 
 //     // DEDUPLICATION LOGIC: Check if this is a real message that should replace a temp message
 //     if (!messageId.startsWith('temp_') && isSender) {
-//       print('🔍 Attempting deduplication for: "$text"');
+//       AppLogger.d('🔍 Attempting deduplication for: "$text"');
 
 //       // Find a temp message with the same text
 //       final int tempIndex = _messages.indexWhere((msg) {
@@ -1779,7 +1779,7 @@
 //       });
 
 //       if (tempIndex != -1) {
-//         print(
+//         AppLogger.d(
 //           '♻️ Replacing temp message ${_messages[tempIndex].id} with real message $messageId',
 //         );
 //         if (_mounted) {
@@ -1804,7 +1804,7 @@
 //         }
 //         return; // Exit as we've replaced the message
 //       } else {
-//         print(
+//         AppLogger.d(
 //           '⚠️ No matching temp message found for deduplication. Adding as new.',
 //         );
 //       }
@@ -1825,7 +1825,7 @@
 //       messageType: messageType,
 //     );
 
-//     print(
+//     AppLogger.d(
 //       '✅ Created chat message: "$text" from ${senderName ?? senderRole} (isSender: $isSender)',
 //     );
 
@@ -1856,17 +1856,17 @@
 
 //   void _sendMessage() {
 //     if (_isSending) {
-//       print('⚠️ Message is already being sent, please wait...');
+//       AppLogger.d('⚠️ Message is already being sent, please wait...');
 //       return;
 //     }
 
 //     final text = _messageController.text.trim();
 
-//     print("hellooooo>>  ${text}");
+//     AppLogger.d("hellooooo>>  ${text}");
 //     if (text.isEmpty) return;
 
 //     if (_socketManager == null) {
-//       print("❌ Socket manager not available");
+//       AppLogger.d("❌ Socket manager not available");
 //       ScaffoldMessenger.of(context).showSnackBar(
 //         const SnackBar(
 //           content: Text('Not connected to chat server'),
@@ -1881,13 +1881,13 @@
 
 //     final riderId = widget.rideData?['rider']?['id']?.toString();
 
-//     print("Rider ID >>> $riderId");
+//     AppLogger.d("Rider ID >>> $riderId");
 //     // final riderId = "6998426f660912de596ca55d";
 
-//     print("rideeeid >>>> fulll_ride_data  ${widget.rideData}");
-//     print("orderrrrriddd>>>> after___close_myy_app ${orderId}");
+//     AppLogger.d("rideeeid >>>> fulll_ride_data  ${widget.rideData}");
+//     AppLogger.d("orderrrrriddd>>>> after___close_myy_app ${orderId}");
 
-//     print("rideeeid >>>> after___close_myy_app ${riderId}");
+//     AppLogger.d("rideeeid >>>> after___close_myy_app ${riderId}");
 
 //     if (orderId != null && riderId != null && _driverId != null) {
 //       // Set sending flag to prevent double sending
@@ -1918,7 +1918,7 @@
 
 //       _isSending = false;
 //       if (!success) {
-//         print('❌ Socket sendChatMessage returned false');
+//         AppLogger.d('❌ Socket sendChatMessage returned false');
 
 //         // Remove the temporary message if sending failed
 //         if (_mounted) {
@@ -1944,7 +1944,7 @@
 //       _sendTimeoutTimer?.cancel();
 //       _sendTimeoutTimer = Timer(const Duration(seconds: 10), () {
 //         if (_mounted && _isSending) {
-//           print('⏰ Timeout: Resetting _isSending flag');
+//           AppLogger.d('⏰ Timeout: Resetting _isSending flag');
 //           setState(() {
 //             _isSending = false;
 //           });
@@ -1981,7 +1981,7 @@
 //         }
 //       });
 //     } else {
-//       print(
+//       AppLogger.d(
 //         "❌ Missing required data. OrderId: $orderId, RiderId: $riderId, DriverId: $_driverId",
 //       );
 //       if (_mounted) {
@@ -2063,7 +2063,7 @@
 
 //                 // Error builder in case image fails to load
 //                 errorBuilder: (context, error, stackTrace) {
-//                   print('❌ Image failed to load: $error');
+//                   AppLogger.d('❌ Image failed to load: $error');
 //                   return Container(
 //                     width: w * 0.1,
 //                     height: w * 0.1,
@@ -2096,8 +2096,8 @@
 //     final riderName = widget.rideData?['riderName'] ?? 'Riderr';
 //     final riderImage = widget.rideData?['riderImage'] ?? '';
 
-//     print("the____my_profile_cameeee ${widget.profileImage}");
-//     print("the____my_profile_cameeee___nameeee ${widget.driverName}");
+//     AppLogger.d("the____my_profile_cameeee ${widget.profileImage}");
+//     AppLogger.d("the____my_profile_cameeee___nameeee ${widget.driverName}");
 
 //     return Scaffold(
 //       backgroundColor: const Color(0xFFF5F6FA),
@@ -2464,6 +2464,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class ChatScreen extends StatefulWidget {
   final Map<String, dynamic>? rideData;
@@ -2506,7 +2507,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _mounted = true;
-    print('💬 ChatScreen initState');
+    AppLogger.d('💬 ChatScreen initState');
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       chatNotificationController.setChatScreenActive(true);
@@ -2537,15 +2538,15 @@ class _ChatScreenState extends State<ChatScreen> {
             driverData['name'] ?? driverData['driverName'] ?? 'Driver';
       }
 
-      print('👤 Driver info loaded: $_driverName (ID: $_driverId)');
+      AppLogger.d('👤 Driver info loaded: $_driverName (ID: $_driverId)');
     } catch (e) {
-      print('❌ Error loading driver info: $e');
+      AppLogger.d('❌ Error loading driver info: $e');
     }
   }
 
   @override
   void dispose() {
-    print('💬 ChatScreen dispose');
+    AppLogger.d('💬 ChatScreen dispose');
     _mounted = false;
 
     // Cancel any pending timeout timer
@@ -2564,7 +2565,7 @@ class _ChatScreenState extends State<ChatScreen> {
         try {
           _socketManager!.leaveChatRoom(orderId);
         } catch (e) {
-          print("Error leaving chat room: $e");
+          AppLogger.d("Error leaving chat room: $e");
         }
       }
     }
@@ -2580,7 +2581,7 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     try {
-      print('💬 Initializing chat...');
+      AppLogger.d('💬 Initializing chat...');
 
       // Get the chat ID from controller
       await _getchartidmethod();
@@ -2592,7 +2593,7 @@ class _ChatScreenState extends State<ChatScreen> {
       final chatId = chartidController.chartresposne.value?.data?.id;
       if (chatId != null) {
         _chatId = chatId;
-        print("✅ Chat ID obtained: $_chatId");
+        AppLogger.d("✅ Chat ID obtained: $_chatId");
 
         // Get chat history from API
         await _fetchChatHistory();
@@ -2600,9 +2601,9 @@ class _ChatScreenState extends State<ChatScreen> {
         // Get the socket manager instance
         try {
           _socketManager = Get.find<SocketManager>();
-          print("✅ SocketManager found in GetX");
+          AppLogger.d("✅ SocketManager found in GetX");
         } catch (e) {
-          print("⚠️ SocketManager not found, creating new instance");
+          AppLogger.d("⚠️ SocketManager not found, creating new instance");
           _socketManager = SocketManager();
           Get.put(_socketManager!, permanent: true);
         }
@@ -2613,7 +2614,7 @@ class _ChatScreenState extends State<ChatScreen> {
         // Join the chat room
         _joinChatRoom();
       } else {
-        print("⚠️ No chat ID available");
+        AppLogger.d("⚠️ No chat ID available");
         if (_mounted) {
           ScaffoldMessenger.of(Get.context!).showSnackBar(
             const SnackBar(
@@ -2624,7 +2625,7 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       }
     } catch (e) {
-      print("❌ Error initializing chat: $e");
+      AppLogger.d("❌ Error initializing chat: $e");
       if (_mounted) {
         ScaffoldMessenger.of(Get.context!).showSnackBar(
           SnackBar(
@@ -2646,13 +2647,13 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       final orderId = widget.rideData?['orderId']?.toString();
       if (orderId != null) {
-        print('💬 Getting chart ID for order: $orderId');
+        AppLogger.d('💬 Getting chart ID for order: $orderId');
         await chartidController.getchartidmethod(orderid: orderId);
       } else {
         throw Exception('No order ID in ride data');
       }
     } catch (e) {
-      print('❌ Error in _getchartidmethod: $e');
+      AppLogger.d('❌ Error in _getchartidmethod: $e');
       rethrow;
     }
   }
@@ -2660,7 +2661,7 @@ class _ChatScreenState extends State<ChatScreen> {
   // Method to fetch chat history from API
   Future<void> _fetchChatHistory() async {
     if (_chatId == null) {
-      print('❌ No chat ID available for fetching history');
+      AppLogger.d('❌ No chat ID available for fetching history');
       return;
     }
 
@@ -2671,19 +2672,19 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     try {
-      print('📡 Fetching chat history for chatId: $_chatId');
+      AppLogger.d('📡 Fetching chat history for chatId: $_chatId');
 
       final prefs = await SharedPreferences.getInstance();
       final String? token = prefs.getString("auth_token");
 
-      print("token____chart screen  >> $token");
+      AppLogger.d("token____chart screen  >> $token");
 
       if (token == null) {
         throw Exception('No authentication token found');
       }
 
       final url = '${ApiPath.baseUri}/chat/messages/$_chatId';
-      print('🌐 API URL: $url');
+      AppLogger.d('🌐 API URL: $url');
 
       final response = await http.get(
         Uri.parse(url),
@@ -2693,8 +2694,8 @@ class _ChatScreenState extends State<ChatScreen> {
         },
       );
 
-      print('📥 Response status: ${response.statusCode}');
-      print('📥 Response body: ${response.body}');
+      AppLogger.d('📥 Response status: ${response.statusCode}');
+      AppLogger.d('📥 Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
@@ -2713,7 +2714,7 @@ class _ChatScreenState extends State<ChatScreen> {
           // Sort messages by timestamp
           _messages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
-          print('✅ Loaded ${_messages.length} messages from API');
+          AppLogger.d('✅ Loaded ${_messages.length} messages from API');
 
           if (_mounted) {
             setState(() {});
@@ -2726,7 +2727,7 @@ class _ChatScreenState extends State<ChatScreen> {
         throw Exception('HTTP ${response.statusCode}: ${response.body}');
       }
     } catch (e) {
-      print('❌ Error fetching chat history: $e');
+      AppLogger.d('❌ Error fetching chat history: $e');
     } finally {
       if (_mounted) {
         setState(() {
@@ -2798,10 +2799,10 @@ class _ChatScreenState extends State<ChatScreen> {
         });
       }
 
-      print('📝 Added message from API: "$messageText" from $senderName');
+      AppLogger.d('📝 Added message from API: "$messageText" from $senderName');
     } catch (e) {
-      print('❌ Error adding message from API: $e');
-      print('❌ Message data: $messageData');
+      AppLogger.d('❌ Error adding message from API: $e');
+      AppLogger.d('❌ Message data: $messageData');
     }
   }
 
@@ -2823,18 +2824,18 @@ class _ChatScreenState extends State<ChatScreen> {
 
     // Chat messages
     _socketManager!.onChatMessage = (data) {
-      print("💬 New chat message received via socket: ${data.keys}");
+      AppLogger.d("💬 New chat message received via socket: ${data.keys}");
       _handleIncomingMessage(data);
     };
 
     // Chat join success
     _socketManager!.onChatJoin = (data) {
-      print("✅ Joined chat successfully: $data");
+      AppLogger.d("✅ Joined chat successfully: $data");
     };
 
     // Chat error
     _socketManager!.onChatError = (data) {
-      print("❌ Chat error: $data");
+      AppLogger.d("❌ Chat error: $data");
       if (_mounted) {
         setState(() {
           _isSending = false; // Reset sending flag on error
@@ -2850,7 +2851,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     // Message sent confirmation
     _socketManager!.onChatMessageSent = (data) {
-      print("✅ Message sent successfully via socket: $data");
+      AppLogger.d("✅ Message sent successfully via socket: $data");
 
       // Cancel any pending timeout timer
       _sendTimeoutTimer?.cancel();
@@ -2870,7 +2871,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     final orderId = widget.rideData?['orderId']?.toString();
     if (orderId != null) {
-      print('💬 Joining chat room for order: $orderId');
+      AppLogger.d('💬 Joining chat room for order: $orderId');
       _socketManager!.joinChatRoom(orderId, userRole: 'driver');
     }
   }
@@ -2879,13 +2880,13 @@ class _ChatScreenState extends State<ChatScreen> {
     if (!_mounted) return;
 
     try {
-      print('💬 Processing incoming socket message: ${data.keys}');
+      AppLogger.d('💬 Processing incoming socket message: ${data.keys}');
 
       // Extract the nested message object
       final Map<String, dynamic>? messageData = data['message'];
 
       if (messageData == null) {
-        print('⚠️ No message data found in socket response');
+        AppLogger.d('⚠️ No message data found in socket response');
         // Try direct fields
         final messageText =
             data['text']?.toString() ?? data['message']?.toString();
@@ -2906,7 +2907,7 @@ class _ChatScreenState extends State<ChatScreen> {
         return;
       }
 
-      print('💬 Extracted message data: ${messageData.keys}');
+      AppLogger.d('💬 Extracted message data: ${messageData.keys}');
 
       // Extract sender info - handle both object and string formats
       dynamic senderIdData = messageData['senderId'];
@@ -2928,7 +2929,7 @@ class _ChatScreenState extends State<ChatScreen> {
       final messageText = messageData['message']?.toString() ?? '';
 
       if (messageText.isEmpty) {
-        print('⚠️ Empty message text received');
+        AppLogger.d('⚠️ Empty message text received');
         return;
       }
 
@@ -2943,8 +2944,8 @@ class _ChatScreenState extends State<ChatScreen> {
         senderName: senderName,
       );
     } catch (e) {
-      print("❌ Error handling incoming socket message: $e");
-      print("❌ Full data received: $data");
+      AppLogger.d("❌ Error handling incoming socket message: $e");
+      AppLogger.d("❌ Full data received: $data");
 
       // Fallback: try to extract message text directly
       try {
@@ -2958,10 +2959,10 @@ class _ChatScreenState extends State<ChatScreen> {
             timestamp: DateTime.now().toIso8601String(),
             messageId: UniqueKey().toString(),
           );
-          print('✅ Created fallback message: $messageText');
+          AppLogger.d('✅ Created fallback message: $messageText');
         }
       } catch (fallbackError) {
-        print("❌ Even fallback failed: $fallbackError");
+        AppLogger.d("❌ Even fallback failed: $fallbackError");
       }
     }
   }
@@ -2998,13 +2999,13 @@ class _ChatScreenState extends State<ChatScreen> {
     // Check if message already exists to prevent duplicates
     final bool messageExists = _messages.any((msg) => msg.id == messageId);
     if (messageExists) {
-      print('⚠️ Message already exists: $messageId');
+      AppLogger.d('⚠️ Message already exists: $messageId');
       return;
     }
 
     // DEDUPLICATION LOGIC: Check if this is a real message that should replace a temp message
     if (!messageId.startsWith('temp_') && isSender) {
-      print('🔍 Attempting deduplication for: "$text"');
+      AppLogger.d('🔍 Attempting deduplication for: "$text"');
 
       // Find a temp message with the same text
       final int tempIndex = _messages.indexWhere((msg) {
@@ -3016,7 +3017,7 @@ class _ChatScreenState extends State<ChatScreen> {
       });
 
       if (tempIndex != -1) {
-        print(
+        AppLogger.d(
           '♻️ Replacing temp message ${_messages[tempIndex].id} with real message $messageId',
         );
         if (_mounted) {
@@ -3041,7 +3042,7 @@ class _ChatScreenState extends State<ChatScreen> {
         }
         return; // Exit as we've replaced the message
       } else {
-        print(
+        AppLogger.d(
           '⚠️ No matching temp message found for deduplication. Adding as new.',
         );
       }
@@ -3062,7 +3063,7 @@ class _ChatScreenState extends State<ChatScreen> {
       messageType: messageType,
     );
 
-    print(
+    AppLogger.d(
       '✅ Created chat message: "$text" from ${senderName ?? senderRole} (isSender: $isSender)',
     );
 
@@ -3093,17 +3094,17 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _sendMessage() {
     if (_isSending) {
-      print('⚠️ Message is already being sent, please wait...');
+      AppLogger.d('⚠️ Message is already being sent, please wait...');
       return;
     }
 
     final text = _messageController.text.trim();
 
-    print("hellooooo>>  ${text}");
+    AppLogger.d("hellooooo>>  ${text}");
     if (text.isEmpty) return;
 
     if (_socketManager == null) {
-      print("❌ Socket manager not available");
+      AppLogger.d("❌ Socket manager not available");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Not connected to chat server'),
@@ -3116,14 +3117,14 @@ class _ChatScreenState extends State<ChatScreen> {
     final orderId = widget.rideData?['orderId']?.toString();
     // final riderId = widget.rideData?['rider']?['id']?.toString();
 
-    // print("Rider ID >>> $riderId");
-    print("rideeeid >>>> fulll_ride_data  ${widget.rideData}");
-    print("orderrrrriddd>>>> after___close_myy_app ${orderId}");
-    // print("rideeeid >>>> after___close_myy_app ${riderId}");
+    // AppLogger.d("Rider ID >>> $riderId");
+    AppLogger.d("rideeeid >>>> fulll_ride_data  ${widget.rideData}");
+    AppLogger.d("orderrrrriddd>>>> after___close_myy_app ${orderId}");
+    // AppLogger.d("rideeeid >>>> after___close_myy_app ${riderId}");
 
-    //  print("rideeeid >>>> fulll_ride_data  ${widget.rideData['riderId']}");
+    //  AppLogger.d("rideeeid >>>> fulll_ride_data  ${widget.rideData['riderId']}");
 
-    print("rideeeidkkk >>>> ${widget.rideData?['riderId']}");
+    AppLogger.d("rideeeidkkk >>>> ${widget.rideData?['riderId']}");
 
     String? riderId;
 
@@ -3133,18 +3134,18 @@ class _ChatScreenState extends State<ChatScreen> {
       riderId = widget.rideData?['rider']?['id'];
     }
 
-    print("myyyy_rideeeee_iddd_iss>>>> storingg>>> $riderId");
+    AppLogger.d("myyyy_rideeeee_iddd_iss>>>> storingg>>> $riderId");
     // if (widget.rideData?['riderId'] != null) {
     //   final riderId = widget.rideData?['riderId'];
 
-    //   print("myyyy_rideeeee_iddd_iss>>>> ${riderId}");
+    //   AppLogger.d("myyyy_rideeeee_iddd_iss>>>> ${riderId}");
     // } else {
     //   final riderId = widget.rideData?['rider']?['id'];
     // }
 
     // final riderId = widget.rideData?['riderId'];
 
-    print("myyyy_rideeeee_iddd_iss>>>> ${riderId}");
+    AppLogger.d("myyyy_rideeeee_iddd_iss>>>> ${riderId}");
 
     if (orderId != null && riderId != null && _driverId != null) {
       // Set sending flag to prevent double sending
@@ -3165,7 +3166,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
       _isSending = false;
       if (!success) {
-        print('❌ Socket sendChatMessage returned false');
+        AppLogger.d('❌ Socket sendChatMessage returned false');
 
         // Remove the temporary message if sending failed
         if (_mounted) {
@@ -3191,7 +3192,7 @@ class _ChatScreenState extends State<ChatScreen> {
       _sendTimeoutTimer?.cancel();
       _sendTimeoutTimer = Timer(const Duration(seconds: 10), () {
         if (_mounted && _isSending) {
-          print('⏰ Timeout: Resetting _isSending flag');
+          AppLogger.d('⏰ Timeout: Resetting _isSending flag');
           setState(() {
             _isSending = false;
           });
@@ -3228,7 +3229,7 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       });
     } else {
-      print(
+      AppLogger.d(
         "❌ Missing required data. OrderId: $orderId, RiderId: $riderId, DriverId: $_driverId",
       );
       if (_mounted) {
@@ -3310,7 +3311,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 // Error builder in case image fails to load
                 errorBuilder: (context, error, stackTrace) {
-                  print('❌ Image failed to load: $error');
+                  AppLogger.d('❌ Image failed to load: $error');
                   return Container(
                     width: w * 0.1,
                     height: w * 0.1,
@@ -3339,8 +3340,8 @@ class _ChatScreenState extends State<ChatScreen> {
     final riderName = widget.rideData?['riderName'] ?? 'Riderr';
     final riderImage = widget.rideData?['riderImage'] ?? '';
 
-    print("the____my_profile_cameeee ${widget.profileImage}");
-    print("the____my_profile_cameeee___nameeee ${widget.driverName}");
+    AppLogger.d("the____my_profile_cameeee ${widget.profileImage}");
+    AppLogger.d("the____my_profile_cameeee___nameeee ${widget.driverName}");
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),

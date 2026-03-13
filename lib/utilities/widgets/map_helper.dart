@@ -1,8 +1,9 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 /// Complete helper class for showing riders/drivers on Google Maps
 class MapHelper {
@@ -59,7 +60,7 @@ class MapHelper {
           ),
         );
       } catch (e) {
-        print('⚠️ MapHelper: Invalid rider data: $e');
+        AppLogger.d('⚠️ MapHelper: Invalid rider data: $e');
         continue;
       }
     }
@@ -90,7 +91,7 @@ class MapHelper {
 
       return BitmapDescriptor.fromBytes(byteData.buffer.asUint8List());
     } catch (e) {
-      print('⚠️ MapHelper: Failed to load icon: $e');
+      AppLogger.d('⚠️ MapHelper: Failed to load icon: $e');
       return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
     }
   }
@@ -122,7 +123,7 @@ class MapHelper {
         );
         icons[entry.key] = icon;
       } catch (e) {
-        print('⚠️ Failed to load icon for ${entry.key}: $e');
+        AppLogger.d('⚠️ Failed to load icon for ${entry.key}: $e');
         icons[entry.key] = BitmapDescriptor.defaultMarkerWithHue(
           BitmapDescriptor.hueYellow,
         );

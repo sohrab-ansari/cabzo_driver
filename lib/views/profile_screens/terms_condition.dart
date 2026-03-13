@@ -1,10 +1,11 @@
-import 'package:nzcu_driver/controllers/profile_controllers/terms_and_policy_controller.dart';
+﻿import 'package:nzcu_driver/controllers/profile_controllers/terms_and_policy_controller.dart';
 import 'package:nzcu_driver/utilities/colors/colors_list.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_text.dart';
 import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class TermsCondition extends StatefulWidget {
   const TermsCondition({super.key});
@@ -106,7 +107,7 @@ class _TermsConditionState extends State<TermsCondition> {
                 "li": Style(margin: Margins.only(bottom: w * .02)),
               },
               onLinkTap: (url, _, __) {
-                debugPrint("Clicked link: $url");
+                AppLogger.d("Clicked link: $url");
               },
             ),
           ),

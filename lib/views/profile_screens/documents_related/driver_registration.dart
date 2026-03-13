@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
@@ -26,6 +26,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class DriverRegistration extends StatefulWidget {
   dynamic mobileNumber;
@@ -116,7 +117,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
 
     // Ensure submission flag is reset when screen loads
     _isSubmitting = false;
-    print(
+    AppLogger.d(
       "🔄 Initialized driver registration screen, _isSubmitting: $_isSubmitting",
     );
     super.initState();
@@ -129,14 +130,14 @@ class _DriverRegistrationState extends State<DriverRegistration> {
 
     // Debug current state
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      print("🚀 Initializing Driver Registration Screen");
-      print(
+      AppLogger.d("🚀 Initializing Driver Registration Screen");
+      AppLogger.d(
         "📊 Vehicle Types Error Message: ${vehicleTypesController.errorMessage.value}",
       );
-      print(
+      AppLogger.d(
         "📊 Vehicle Types Loading: ${vehicleTypesController.isLoading.value}",
       );
-      print(
+      AppLogger.d(
         "📊 Vehicle Types Has Data: ${vehicleTypesController.allVehicleTypes.isNotEmpty}",
       );
     });
@@ -147,13 +148,13 @@ class _DriverRegistrationState extends State<DriverRegistration> {
     // Debug listener for vehicle types
     ever(vehicleTypesController.cashResponse, (response) {
       if (response != null) {
-        print("✅ Vehicle types loaded:");
-        print("- Success: ${response.success}");
-        print("- Message: ${response.message}");
-        print("- Total vehicles: ${response.data?.length ?? 0}");
+        AppLogger.d("✅ Vehicle types loaded:");
+        AppLogger.d("- Success: ${response.success}");
+        AppLogger.d("- Message: ${response.message}");
+        AppLogger.d("- Total vehicles: ${response.data?.length ?? 0}");
         if (response.data != null && response.data!.isNotEmpty) {
           response.data!.forEach((vehicle) {
-            print("  - ${vehicle.name} (ID: ${vehicle.id})");
+            AppLogger.d("  - ${vehicle.name} (ID: ${vehicle.id})");
           });
         }
       }
@@ -162,13 +163,13 @@ class _DriverRegistrationState extends State<DriverRegistration> {
     // Debug listener for vehicle sub-types
     ever(vehicleSubtypesController.cashResponse, (response) {
       if (response != null) {
-        print("✅ Vehicle sub-types loaded:");
-        print("- Success: ${response.success}");
-        print("- Message: ${response.message}");
-        print("- Total sub-types: ${response.data?.length ?? 0}");
+        AppLogger.d("✅ Vehicle sub-types loaded:");
+        AppLogger.d("- Success: ${response.success}");
+        AppLogger.d("- Message: ${response.message}");
+        AppLogger.d("- Total sub-types: ${response.data?.length ?? 0}");
         if (response.data != null && response.data!.isNotEmpty) {
           response.data!.forEach((subType) {
-            print("  - ${subType.name} (ID: ${subType.id})");
+            AppLogger.d("  - ${subType.name} (ID: ${subType.id})");
           });
         }
       }
@@ -419,7 +420,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                             });
 
                             // Show selection
-                            print(
+                            AppLogger.d(
                               "Selected vehicle sub-type: ${datum.name} (ID: ${datum.id})",
                             );
 
@@ -671,7 +672,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                             });
 
                             // Show selection
-                            print(
+                            AppLogger.d(
                               "Selected vehicle type: ${datum.name} (ID: ${datum.id})",
                             );
 
@@ -791,19 +792,19 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       return;
     }
 
-    print("myyy_vehicallll_number ${vehicleNumberController.text}");
+    AppLogger.d("myyy_vehicallll_number ${vehicleNumberController.text}");
 
     // Debug all fields
-    print("=== VEHICLE DETAILS DEBUG ===");
-    print("Vehicle Name: ${vehicleNameController.text}");
-    print("Vehicle Number: ${vehicleNumberController.text}");
-    print("Vehicle Type (ID): ${vehicleTypeController.text}");
-    print("Vehicle Sub-Type (ID): ${vehicleSubTypeController.text}");
-    print("Model: ${modelController.text}");
-    print("Year: ${yearController.text}");
-    print("Color: ${colorController.text}");
-    print("Plate Number: ${plateNumberController.text}");
-    print("=============================");
+    AppLogger.d("=== VEHICLE DETAILS DEBUG ===");
+    AppLogger.d("Vehicle Name: ${vehicleNameController.text}");
+    AppLogger.d("Vehicle Number: ${vehicleNumberController.text}");
+    AppLogger.d("Vehicle Type (ID): ${vehicleTypeController.text}");
+    AppLogger.d("Vehicle Sub-Type (ID): ${vehicleSubTypeController.text}");
+    AppLogger.d("Model: ${modelController.text}");
+    AppLogger.d("Year: ${yearController.text}");
+    AppLogger.d("Color: ${colorController.text}");
+    AppLogger.d("Plate Number: ${plateNumberController.text}");
+    AppLogger.d("=============================");
 
     // Find and print the selected vehicle name
     final vehicleData = vehicleTypesController.cashResponse.value;
@@ -815,7 +816,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       );
       if (selectedVehicle.name != null) {
         selectedVehicleName = selectedVehicle.name;
-        print("Selected Vehicle Name: $selectedVehicleName");
+        AppLogger.d("Selected Vehicle Name: $selectedVehicleName");
       }
     }
 
@@ -829,7 +830,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       );
       if (selectedSubType.name != null) {
         selectedSubTypeName = selectedSubType.name;
-        print("Selected Vehicle Sub-Type Name: $selectedSubTypeName");
+        AppLogger.d("Selected Vehicle Sub-Type Name: $selectedSubTypeName");
       }
     }
 
@@ -898,7 +899,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
     });
 
     try {
-      print(
+      AppLogger.d(
         "the____idddisssss_sub_carigoriee_id ${vehicleSubTypeController.text}",
       );
       await loginController.createVehicleMethod(
@@ -918,10 +919,10 @@ class _DriverRegistrationState extends State<DriverRegistration> {
         vehicleNumberImage: _licencePlateImage,
       );
 
-      print("✅ Vehicle details submitted successfully");
-      print("✅ Vehicle Number submitted: ${vehicleNumberController.text}");
-      print("✅ Vehicle Type ID submitted: ${vehicleTypeController.text}");
-      print(
+      AppLogger.d("✅ Vehicle details submitted successfully");
+      AppLogger.d("✅ Vehicle Number submitted: ${vehicleNumberController.text}");
+      AppLogger.d("✅ Vehicle Type ID submitted: ${vehicleTypeController.text}");
+      AppLogger.d(
         "✅ Vehicle Sub-Type ID submitted: ${vehicleSubTypeController.text}",
       );
 
@@ -932,7 +933,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       // Scroll to top
       _scrollToTop();
     } catch (e) {
-      print("❌ Error submitting vehicle details: $e");
+      AppLogger.d("❌ Error submitting vehicle details: $e");
       CustomToast.showError('Failed to submit vehicle details: $e');
     } finally {
       setState(() {
@@ -967,22 +968,22 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       return;
     }
 
-    print("✅ All validations passed, starting submission...");
+    AppLogger.d("✅ All validations passed, starting submission...");
 
-    print("✅ All validations passed, starting submission...");
-    print("Files to upload:");
-    print("- DL Image: ${_driverLicenseImage?.path}");
-    print("- Aadhar Front: ${_aadharFrontImage?.path}");
-    print("- Aadhar Back: ${_aadharBackImage?.path}");
-    print("- PAN Image: ${_panCardImage?.path}");
+    AppLogger.d("✅ All validations passed, starting submission...");
+    AppLogger.d("Files to upload:");
+    AppLogger.d("- DL Image: ${_driverLicenseImage?.path}");
+    AppLogger.d("- Aadhar Front: ${_aadharFrontImage?.path}");
+    AppLogger.d("- Aadhar Back: ${_aadharBackImage?.path}");
+    AppLogger.d("- PAN Image: ${_panCardImage?.path}");
 
     setState(() {
       _isSubmitting = true;
-      print("📝 Set _isSubmitting to TRUE");
+      AppLogger.d("📝 Set _isSubmitting to TRUE");
     });
 
     try {
-      print("📤 Calling createRegisterMethod...");
+      AppLogger.d("📤 Calling createRegisterMethod...");
       // Call the API method with File objects directly
       await loginController.createRegisterMethod(
         name: nameController.text,
@@ -1014,7 +1015,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
             : null,
       );
 
-      print("✅ Personal details submitted successfully");
+      AppLogger.d("✅ Personal details submitted successfully");
 
       // Move to next step
       driverFormController.activeStep.value = 2;
@@ -1023,20 +1024,20 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       // Scroll to top
       _scrollToTop();
     } catch (e, stackTrace) {
-      print("❌ Error in submission: $e");
-      print("Stack trace: $stackTrace");
+      AppLogger.d("❌ Error in submission: $e");
+      AppLogger.d("Stack trace: $stackTrace");
       CustomToast.showError('Failed to submit personal details: $e');
     } finally {
       if (mounted) {
         setState(() {
           _isSubmitting = false;
-          print("📝 Set _isSubmitting to FALSE");
+          AppLogger.d("📝 Set _isSubmitting to FALSE");
         });
       } else {
         _isSubmitting = false;
-        print("📝 Set _isSubmitting to FALSE (widget not mounted)");
+        AppLogger.d("📝 Set _isSubmitting to FALSE (widget not mounted)");
       }
-      print("🏁 Submission process completed");
+      AppLogger.d("🏁 Submission process completed");
     }
   }
 
@@ -1057,8 +1058,8 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       _isSubmitting = true;
     });
 
-    print("\n📸 ===== SUBMIT PROFILE PHOTO =====");
-    print("Image Path: ${_profilePhotoImage?.path}");
+    AppLogger.d("\n📸 ===== SUBMIT PROFILE PHOTO =====");
+    AppLogger.d("Image Path: ${_profilePhotoImage?.path}");
 
     try {
       // Call the image upload API and wait for it to complete
@@ -1067,7 +1068,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
         context: context,
       );
 
-      print("✅ Profile photo uploaded successfully");
+      AppLogger.d("✅ Profile photo uploaded successfully");
 
       // Show success message
       
@@ -1080,13 +1081,13 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       //   transition: TransitionType.fade,
       // );
     } catch (e) {
-      print("❌ Failed to upload profile photo: $e");
+      AppLogger.d("❌ Failed to upload profile photo: $e");
       CustomToast.showError('Failed to submit profile photo: $e');
     } finally {
       setState(() {
         _isSubmitting = false;
       });
-      print("\n🏁 PROFILE PHOTO SUBMISSION COMPLETED");
+      AppLogger.d("\n🏁 PROFILE PHOTO SUBMISSION COMPLETED");
     }
   }
 
@@ -1896,20 +1897,20 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                                                                 );
 
                                                         // Show selection
-                                                        print(
+                                                        AppLogger.d(
                                                           "Selected vehicle sub-type: ${selectedSubType.name} (ID: $newValue)",
                                                         );
                                                         if (selectedSubType
                                                                 .minimumPrice !=
                                                             null) {
-                                                          print(
+                                                          AppLogger.d(
                                                             "Minimum Price: ${selectedSubType.minimumPrice}",
                                                           );
                                                         }
                                                         if (selectedSubType
                                                                 .baseFare !=
                                                             null) {
-                                                          print(
+                                                          AppLogger.d(
                                                             "Base Fare: ${selectedSubType.baseFare}",
                                                           );
                                                         }

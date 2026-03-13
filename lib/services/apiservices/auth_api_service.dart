@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
@@ -14,6 +14,7 @@ import 'package:get/get.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class AuthApiService {
   static final ApiPath apiPath = Get.put(ApiPath());
@@ -23,9 +24,9 @@ class AuthApiService {
 
     final Map<String, dynamic> requestBody = {"phone": phone};
 
-    print("========== SEND OTP API ==========");
-    print("URL : $url");
-    print("Request Body : ${jsonEncode(requestBody)}");
+    AppLogger.d("========== SEND OTP API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Request Body : ${jsonEncode(requestBody)}");
 
     try {
       final http.Response response = await http.post(
@@ -34,24 +35,24 @@ class AuthApiService {
         body: jsonEncode(requestBody),
       );
 
-      print("Status Code : ${response.statusCode}");
-      print("Response Body : ${response.body}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("Response Body : ${response.body}");
 
-      print("Response Body222 : ${response.body}");
+      AppLogger.d("Response Body222 : ${response.body}");
       final Map<String, dynamic> data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
 
-        print("Parsed Response : $data");
+        AppLogger.d("Parsed Response : $data");
         return data["success"] == true;
       } else {
         CustomToast.showError(data['error'] ?? "Something went wrong");
-        print("❌ Server error: ${data['error']}");
+        AppLogger.d("❌ Server error: ${data['error']}");
         return false;
       }
     } catch (e) {
-      print("❌ Exception in Send OTP : $e");
+      AppLogger.d("❌ Exception in Send OTP : $e");
       return false;
     }
   }
@@ -67,7 +68,7 @@ class AuthApiService {
 
     final deviceInfo = DeviceInfoPlugin();
     final androidInfo = await deviceInfo.androidInfo;
-    print(
+    AppLogger.d(
       'fcmm___token_from_shared_preferences: ${prefs.getString('fcmToken')}',
     );
 
@@ -80,7 +81,7 @@ class AuthApiService {
       "deviceId": androidInfo.id,
     };
 
-    print("otppppp_veriffyyyy___ ${requestBody}");
+    AppLogger.d("otppppp_veriffyyyy___ ${requestBody}");
 
     try {
       final http.Response response = await http.post(
@@ -91,9 +92,9 @@ class AuthApiService {
 
       final Map<String, dynamic> data = jsonDecode(response.body);
 
-      print("Status Code : ${response.statusCode}");
-      print("Response Message : ${data['message']}");
-      print("Full Driver Object : ${data['driver']}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("Response Message : ${data['message']}");
+      AppLogger.d("Full Driver Object : ${data['driver']}");
 
       // Check if the response indicates failure
       if (data['success'] == false) {
@@ -105,7 +106,7 @@ class AuthApiService {
           errorMessage = data['errors'].toString();
         }
 
-        print("Error occurred: $errorMessage");
+        AppLogger.d("Error occurred: $errorMessage");
 
         CustomToast.showError(errorMessage);
 
@@ -113,16 +114,16 @@ class AuthApiService {
       }
 
       final String? driverId = data['driver']?['id']?.toString();
-      print("Driver ID : $driverId");
+      AppLogger.d("Driver ID : $driverId");
 
       final OtpverifyRes otpResponse = OtpverifyRes.fromJson(data);
 
-      print(
+      AppLogger.d(
         "isprofileee_verifyyyyy_check ${otpResponse.driver!.isProfileCompleted}",
       );
 
       if (otpResponse.driver!.isProfileCompleted == true) {
-        print(
+        AppLogger.d(
           "✅ OTP verified and profile is complete. Saving token and driver ID.",
         );
 
@@ -144,7 +145,7 @@ class AuthApiService {
         // Show success toast (optional)
         CustomToast.showSuccess("OTP verified successfully!");
       } else {
-        print("else__data_storedd");
+        AppLogger.d("else__data_storedd");
         if (otpResponse.token != null &&
             otpResponse.token!.isNotEmpty &&
             driverId != null &&
@@ -153,8 +154,8 @@ class AuthApiService {
           await prefs.setString("auth_token2", otpResponse.token!);
           await prefs.setString("driver_userid2", driverId);
 
-          print("getting storeddd token2 ${prefs.getString("auth_token2")}");
-          print("getting storeddd token2 ${prefs.getString("driver_userid2")}");
+          AppLogger.d("getting storeddd token2 ${prefs.getString("auth_token2")}");
+          AppLogger.d("getting storeddd token2 ${prefs.getString("driver_userid2")}");
 
           if (otpResponse.driver?.name != null &&
               otpResponse.driver!.name!.isNotEmpty) {
@@ -164,7 +165,7 @@ class AuthApiService {
       }
       return otpResponse;
     } catch (e) {
-      print("OTP verify API failed");
+      AppLogger.d("OTP verify API failed");
 
       final prefs = await SharedPreferences.getInstance();
       String? accountStatus = prefs.getString("account_status");
@@ -189,10 +190,10 @@ class AuthApiService {
       final decoded = jsonDecode(responseBody);
       const encoder = JsonEncoder.withIndent('  '); // 2 space indent
       final prettyString = encoder.convert(decoded);
-      print(prettyString);
+      AppLogger.d(prettyString);
     } catch (e) {
-      print("Invalid JSON: $e");
-      print(responseBody); // fallback normal print
+      AppLogger.d("Invalid JSON: $e");
+      AppLogger.d(responseBody); // fallback normal print
     }
   }
 
@@ -212,22 +213,22 @@ class AuthApiService {
     File? vehicleNumberImage,
   }) async {
     // Print all received parameters
-    print("\n📋 VEHICLE CREATION PARAMETERS:");
-    print("├─ vehicleName: $vehicleName");
-    print("├─ vehicleNumber: $vehicleNumber");
-    print("├─ vehicleColor: $vehicleColor");
-    print("├─ vehicleType: $vehicleType");
-    print("├─ vehicleStatus: $vehicleStatus");
-    print("├─ vehicleModel: $vehicleModel");
-    print(
+    AppLogger.d("\n📋 VEHICLE CREATION PARAMETERS:");
+    AppLogger.d("├─ vehicleName: $vehicleName");
+    AppLogger.d("├─ vehicleNumber: $vehicleNumber");
+    AppLogger.d("├─ vehicleColor: $vehicleColor");
+    AppLogger.d("├─ vehicleType: $vehicleType");
+    AppLogger.d("├─ vehicleStatus: $vehicleStatus");
+    AppLogger.d("├─ vehicleModel: $vehicleModel");
+    AppLogger.d(
       "├─ vehicleCapacity: $vehicleCapacity (type: ${vehicleCapacity.runtimeType})",
     );
-    print("├─ driverId: $driverId");
-    print("├─ vehicleSubType: $vehicleSubType");
-    print("├─ vehicleYear: $vehicleYear");
-    print("├─ rcImage: ${rcImage?.path ?? 'NULL'}");
-    print("├─ vehicleInsuraneImage: ${vehicleInsuraneImage?.path ?? 'NULL'}");
-    print("└─ vehicleNumberImage: ${vehicleNumberImage?.path ?? 'NULL'}");
+    AppLogger.d("├─ driverId: $driverId");
+    AppLogger.d("├─ vehicleSubType: $vehicleSubType");
+    AppLogger.d("├─ vehicleYear: $vehicleYear");
+    AppLogger.d("├─ rcImage: ${rcImage?.path ?? 'NULL'}");
+    AppLogger.d("├─ vehicleInsuraneImage: ${vehicleInsuraneImage?.path ?? 'NULL'}");
+    AppLogger.d("└─ vehicleNumberImage: ${vehicleNumberImage?.path ?? 'NULL'}");
 
     final Uri url = Uri.parse(ApiPath.createVehicle);
 
@@ -236,8 +237,8 @@ class AuthApiService {
     final String? token = prefs.getString("auth_token2");
     final String? userId = prefs.getString("driver_userid2");
 
-    print("Token: $token");
-    print("User ID from SharedPreferences: $userId");
+    AppLogger.d("Token: $token");
+    AppLogger.d("User ID from SharedPreferences: $userId");
 
     try {
       // Create multipart request
@@ -274,8 +275,8 @@ class AuthApiService {
 
       request.fields['driverId'] = actualDriverId;
 
-      print("Text fields added to request");
-      print("Using driverId: $actualDriverId");
+      AppLogger.d("Text fields added to request");
+      AppLogger.d("Using driverId: $actualDriverId");
 
       // Helper function to extract filename from path
       String getFileNameFromPath(String path) {
@@ -286,7 +287,7 @@ class AuthApiService {
       // Add RC image if exists
       if (rcImage != null && await rcImage.exists()) {
         final fileName = getFileNameFromPath(rcImage.path);
-        print("Adding RC image: $fileName");
+        AppLogger.d("Adding RC image: $fileName");
 
         request.files.add(
           await http.MultipartFile.fromPath(
@@ -295,15 +296,15 @@ class AuthApiService {
             filename: fileName,
           ),
         );
-        print("✓ Added RC image as: $fileName");
+        AppLogger.d("✓ Added RC image as: $fileName");
       } else {
-        print("RC Image is null or doesn't exist");
+        AppLogger.d("RC Image is null or doesn't exist");
       }
 
       // Add Vehicle Insurance image if exists
       if (vehicleInsuraneImage != null && await vehicleInsuraneImage.exists()) {
         final fileName = getFileNameFromPath(vehicleInsuraneImage.path);
-        print("Adding Vehicle Insurance image: $fileName");
+        AppLogger.d("Adding Vehicle Insurance image: $fileName");
 
         request.files.add(
           await http.MultipartFile.fromPath(
@@ -312,15 +313,15 @@ class AuthApiService {
             filename: fileName,
           ),
         );
-        print("✓ Added Insurance image as: $fileName");
+        AppLogger.d("✓ Added Insurance image as: $fileName");
       } else {
-        print("Vehicle Insurance Image is null or doesn't exist");
+        AppLogger.d("Vehicle Insurance Image is null or doesn't exist");
       }
 
       // Add Vehicle Number image if exists
       if (vehicleNumberImage != null && await vehicleNumberImage.exists()) {
         final fileName = getFileNameFromPath(vehicleNumberImage.path);
-        print("Adding Vehicle Number image: $fileName");
+        AppLogger.d("Adding Vehicle Number image: $fileName");
 
         request.files.add(
           await http.MultipartFile.fromPath(
@@ -329,41 +330,41 @@ class AuthApiService {
             filename: fileName,
           ),
         );
-        print("✓ Added Number Plate image as: $fileName");
+        AppLogger.d("✓ Added Number Plate image as: $fileName");
       } else {
-        print("Vehicle Number Image is null or doesn't exist");
+        AppLogger.d("Vehicle Number Image is null or doesn't exist");
       }
 
-      print("\n========== CREATE VEHICLE API ==========");
-      print("URL: $url");
-      print("Request Fields: ${request.fields}");
-      print("Number of Files: ${request.files.length}");
+      AppLogger.d("\n========== CREATE VEHICLE API ==========");
+      AppLogger.d("URL: $url");
+      AppLogger.d("Request Fields: ${request.fields}");
+      AppLogger.d("Number of Files: ${request.files.length}");
 
       // List all files with their field names and filenames
       for (var i = 0; i < request.files.length; i++) {
         var file = request.files[i];
-        print("File $i: field='${file.field}', filename='${file.filename}'");
+        AppLogger.d("File $i: field='${file.field}', filename='${file.filename}'");
       }
 
       // Send request
-      print("\n🚀 Sending request...");
+      AppLogger.d("\n🚀 Sending request...");
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
 
-      print("\n📥 Response Received:");
-      print("Status Code: ${response.statusCode}");
+      AppLogger.d("\n📥 Response Received:");
+      AppLogger.d("Status Code: ${response.statusCode}");
 
       // Check if response is HTML (error) or JSON
       if (responseBody.trim().startsWith('<!DOCTYPE') ||
           responseBody.trim().startsWith('<html>') ||
           response.statusCode >= 400) {
-        print("❌ Server returned error");
-        print("Response Body: $responseBody");
+        AppLogger.d("❌ Server returned error");
+        AppLogger.d("Response Body: $responseBody");
 
         // Fluttertoast.
 
-        print("❌ Server returned error");
-        print("Response Body: $responseBody");
+        AppLogger.d("❌ Server returned error");
+        AppLogger.d("Response Body: $responseBody");
 
         try {
           final decoded = jsonDecode(responseBody);
@@ -390,7 +391,7 @@ class AuthApiService {
       }
 
       try {
-        print("Response Body: $responseBody");
+        AppLogger.d("Response Body: $responseBody");
         final Map<String, dynamic> data = jsonDecode(responseBody);
         final CreateVehicleRes createVehicleRes = CreateVehicleRes.fromJson(
           data,
@@ -401,10 +402,10 @@ class AuthApiService {
         final data1 = jsonDecode(responseBody);
 
         const encoder = JsonEncoder.withIndent('  ');
-        print(encoder.convert(data1));
+        AppLogger.d(encoder.convert(data1));
 
         if (createVehicleRes.success == true) {
-          print("Vehicle created successfully!");
+          AppLogger.d("Vehicle created successfully!");
 
 
           final DriverFormController driverFormController =
@@ -412,14 +413,14 @@ class AuthApiService {
           // driverFormController.activeStep.value = 0;
           driverFormController.activeStep.value = 1;
         } else {
-          print("Vehicle creation failed: ${createVehicleRes.message}");
+          AppLogger.d("Vehicle creation failed: ${createVehicleRes.message}");
         }
 
         return createVehicleRes;
       } catch (e) {
 
-        print("Failed to parse JSON response: $e");
-        print("Raw response: ${responseBody}");
+        AppLogger.d("Failed to parse JSON response: $e");
+        AppLogger.d("Raw response: ${responseBody}");
 
         return CreateVehicleRes(
           success: false,
@@ -427,8 +428,8 @@ class AuthApiService {
         );
       }
     } catch (e) {
-      print("Exception in Create Vehicle API: $e");
-      print("Stack trace: ${e.toString()}");
+      AppLogger.d("Exception in Create Vehicle API: $e");
+      AppLogger.d("Stack trace: ${e.toString()}");
       return CreateVehicleRes(success: false, message: "Connection error: $e");
     }
   }
@@ -450,21 +451,21 @@ class AuthApiService {
     String? address2,
   }) async {
     // Print all received parameters
-    print("\n📋 RECEIVED PARAMETERS:");
-    print("├─ name: $name");
-    print("├─ email: $email");
-    print("├─ phone: $phone");
-    print("├─ dob: $dob");
-    print("├─ dlImage: ${dlImage?.path ?? 'NULL'}");
-    print("├─ aadharFront: ${aadharFront?.path ?? 'NULL'}");
-    print("├─ aadharBack: ${aadharBack?.path ?? 'NULL'}");
-    print("├─ panImage: ${panImage?.path ?? 'NULL'}");
-    print("├─ alternateContact1: $alternateContact1");
-    print("├─ relation1: $relation1");
-    print("├─ address1: $address1");
-    print("├─ alternateContact2: $alternateContact2");
-    print("└─ relation2: $relation2");
-    print("  └─ address2: $address2");
+    AppLogger.d("\n📋 RECEIVED PARAMETERS:");
+    AppLogger.d("├─ name: $name");
+    AppLogger.d("├─ email: $email");
+    AppLogger.d("├─ phone: $phone");
+    AppLogger.d("├─ dob: $dob");
+    AppLogger.d("├─ dlImage: ${dlImage?.path ?? 'NULL'}");
+    AppLogger.d("├─ aadharFront: ${aadharFront?.path ?? 'NULL'}");
+    AppLogger.d("├─ aadharBack: ${aadharBack?.path ?? 'NULL'}");
+    AppLogger.d("├─ panImage: ${panImage?.path ?? 'NULL'}");
+    AppLogger.d("├─ alternateContact1: $alternateContact1");
+    AppLogger.d("├─ relation1: $relation1");
+    AppLogger.d("├─ address1: $address1");
+    AppLogger.d("├─ alternateContact2: $alternateContact2");
+    AppLogger.d("└─ relation2: $relation2");
+    AppLogger.d("  └─ address2: $address2");
 
     final Uri url = Uri.parse(ApiPath.createPersonalDetails);
 
@@ -472,7 +473,7 @@ class AuthApiService {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token2");
 
-    print("Token: $token");
+    AppLogger.d("Token: $token");
 
     try {
       // Create multipart request
@@ -495,11 +496,11 @@ class AuthApiService {
       request.fields['relation2'] = relation2 ?? "";
       request.fields['address2'] = address2 ?? "";
 
-      print("Text fields added to request");
+      AppLogger.d("Text fields added to request");
 
       // Add DL image if exists
       if (dlImage != null && await dlImage.exists()) {
-        print("Adding DL image: ${dlImage.path}");
+        AppLogger.d("Adding DL image: ${dlImage.path}");
         request.files.add(
           await http.MultipartFile.fromPath(
             'dlImage',
@@ -508,12 +509,12 @@ class AuthApiService {
           ),
         );
       } else {
-        print("DL Image is null or doesn't exist");
+        AppLogger.d("DL Image is null or doesn't exist");
       }
 
       // Add Aadhar Front if exists
       if (aadharFront != null && await aadharFront.exists()) {
-        print("Adding Aadhar Front image: ${aadharFront.path}");
+        AppLogger.d("Adding Aadhar Front image: ${aadharFront.path}");
         request.files.add(
           await http.MultipartFile.fromPath(
             'aadharFront',
@@ -523,12 +524,12 @@ class AuthApiService {
           ),
         );
       } else {
-        print("Aadhar Front is null or doesn't exist");
+        AppLogger.d("Aadhar Front is null or doesn't exist");
       }
 
       // Add Aadhar Back if exists
       if (aadharBack != null && await aadharBack.exists()) {
-        print("Adding Aadhar Back image: ${aadharBack.path}");
+        AppLogger.d("Adding Aadhar Back image: ${aadharBack.path}");
         request.files.add(
           await http.MultipartFile.fromPath(
             'aadharBack',
@@ -538,12 +539,12 @@ class AuthApiService {
           ),
         );
       } else {
-        print("Aadhar Back is null or doesn't exist");
+        AppLogger.d("Aadhar Back is null or doesn't exist");
       }
 
       // Add PAN image if exists
       if (panImage != null && await panImage.exists()) {
-        print("Adding PAN image: ${panImage.path}");
+        AppLogger.d("Adding PAN image: ${panImage.path}");
         request.files.add(
           await http.MultipartFile.fromPath(
             'panImage',
@@ -552,20 +553,20 @@ class AuthApiService {
           ),
         );
       } else {
-        print("PAN Image is null or doesn't exist");
+        AppLogger.d("PAN Image is null or doesn't exist");
       }
 
-      print("========== CREATE REGISTER API ==========");
-      print("URL: $url");
-      print("Request Fields: ${request.fields}");
-      print("Number of Files: ${request.files.length}");
+      AppLogger.d("========== CREATE REGISTER API ==========");
+      AppLogger.d("URL: $url");
+      AppLogger.d("Request Fields: ${request.fields}");
+      AppLogger.d("Number of Files: ${request.files.length}");
 
       // Send request
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
 
-      print("Status Code: ${response.statusCode}");
-      print("Response Body: $responseBody");
+      AppLogger.d("Status Code: ${response.statusCode}");
+      AppLogger.d("Response Body: $responseBody");
 
       final Map<String, dynamic> data = jsonDecode(responseBody);
       final RegisterProfileRes registerProfileRes = RegisterProfileRes.fromJson(
@@ -575,7 +576,7 @@ class AuthApiService {
       final data1 = jsonDecode(responseBody);
 
       const encoder = JsonEncoder.withIndent('  ');
-      print(encoder.convert(data1));
+      AppLogger.d(encoder.convert(data1));
 
       // Save driver user ID to SharedPreferences
       // Check if response is successful, has data, and ID is not null
@@ -584,12 +585,12 @@ class AuthApiService {
           registerProfileRes.data!.id != null) {
         // Use ! to assert non-null or provide default value
         await prefs.setString("driver_userid", registerProfileRes.data!.id!);
-        print(
+        AppLogger.d(
           "✅ Driver user ID saved to SharedPreferences: ${registerProfileRes.data!.id}",
         );
       } else {
-        print("theee_errorrr_hererrrr ${data['message']}");
-        print(
+        AppLogger.d("theee_errorrr_hererrrr ${data['message']}");
+        AppLogger.d(
           "⚠️  Could not save driver_userid - ID is null or response not successful",
         );
 
@@ -599,7 +600,7 @@ class AuthApiService {
 
       return registerProfileRes;
     } catch (e) {
-      print("❌ Exception in Create Register: $e");
+      AppLogger.d("❌ Exception in Create Register: $e");
       return RegisterProfileRes(
         success: false,
         message: "Connection error: $e",
@@ -639,7 +640,7 @@ class AuthApiService {
           final data1 = jsonDecode(body);
 
           const encoder = JsonEncoder.withIndent('  ');
-          print(encoder.convert(data1));
+          AppLogger.d(encoder.convert(data1));
           CustomToast.showSuccess(res.message ?? "Something went wrong");
         }
 
@@ -670,9 +671,9 @@ class AuthApiService {
       "${ApiPath.baseUri}/getAllVehicleCategories?limit=$limit&page=$page",
     );
 
-    print("========== 🔵 CASH PAYMENT API ==========");
-    print("URL : $url");
-    print("Token : $token");
+    AppLogger.d("========== 🔵 CASH PAYMENT API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
 
     try {
       final http.Response response = await http.get(
@@ -683,7 +684,7 @@ class AuthApiService {
         },
       );
 
-      print("✅ Status Code : ${response.statusCode}");
+      AppLogger.d("✅ Status Code : ${response.statusCode}");
 
       // Check if response is valid JSON
       if (response.body.trim().isEmpty) {
@@ -703,8 +704,8 @@ class AuthApiService {
       try {
         decodedJson = jsonDecode(response.body);
       } catch (jsonError) {
-        print("JSON Parse Error: $jsonError");
-        print("Raw Response: ${response.body}");
+        AppLogger.d("JSON Parse Error: $jsonError");
+        AppLogger.d("Raw Response: ${response.body}");
         throw FormatException("Invalid JSON response from server");
       }
 
@@ -712,20 +713,20 @@ class AuthApiService {
       final prettyJson = const JsonEncoder.withIndent(
         '  ',
       ).convert(decodedJson);
-      print("📦 FULL RESPONSE (Pretty Print) 👇");
-      print(prettyJson);
+      AppLogger.d("📦 FULL RESPONSE (Pretty Print) 👇");
+      AppLogger.d(prettyJson);
 
       // Parse the response
       final GetAllVehicleCategoriesResponse getAllVehicleCategoriesResponse =
           GetAllVehicleCategoriesResponse.fromJson(decodedJson);
 
-      print("🎯 Parsed Model Object 👇");
-      print(getAllVehicleCategoriesResponse);
+      AppLogger.d("🎯 Parsed Model Object 👇");
+      AppLogger.d(getAllVehicleCategoriesResponse);
 
       return getAllVehicleCategoriesResponse;
     } catch (e) {
-      print("❌ Exception in cash_update_data");
-      print(e.toString());
+      AppLogger.d("❌ Exception in cash_update_data");
+      AppLogger.d(e.toString());
 
       // Return a proper error response
       return GetAllVehicleCategoriesResponse(
@@ -753,9 +754,9 @@ class AuthApiService {
       "${ApiPath.baseUri}/getAllVehicleSubCategories?vehicleCategoryId=${vehicalCategoryId}&limit=$limit&page=$page",
     );
 
-    print("========== 🔵 CASH PAYMENT API ==========");
-    print("URL : $url");
-    print("Token : $token");
+    AppLogger.d("========== 🔵 CASH PAYMENT API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
 
     try {
       final http.Response response = await http.get(
@@ -766,7 +767,7 @@ class AuthApiService {
         },
       );
 
-      print("✅ Status Code : ${response.statusCode}");
+      AppLogger.d("✅ Status Code : ${response.statusCode}");
 
       // Check if response is valid JSON
       if (response.body.trim().isEmpty) {
@@ -781,21 +782,21 @@ class AuthApiService {
         );
       }
 
-      print("hellooo3");
+      AppLogger.d("hellooo3");
 
       // Try to parse JSON
       dynamic decodedJson;
       try {
-        print("hellooo2");
-        print(
+        AppLogger.d("hellooo2");
+        AppLogger.d(
           "myyyyy_fulll_body_Resposneeee>>>> sub_vehicaldattaaa ${decodedJson}",
         );
         decodedJson = jsonDecode(response.body);
       } catch (jsonError) {
-        print("hellooo4");
+        AppLogger.d("hellooo4");
 
-        print("JSON Parse Error: $jsonError");
-        print("Raw Response: ${response.body}");
+        AppLogger.d("JSON Parse Error: $jsonError");
+        AppLogger.d("Raw Response: ${response.body}");
         throw FormatException("Invalid JSON response from server");
       }
 
@@ -803,24 +804,24 @@ class AuthApiService {
       final prettyJson = const JsonEncoder.withIndent(
         '  ',
       ).convert(decodedJson);
-      print("📦 FULL RESPONSE (Pretty Print) 👇");
-      print(prettyJson);
+      AppLogger.d("📦 FULL RESPONSE (Pretty Print) 👇");
+      AppLogger.d(prettyJson);
 
-      print("hellooo6");
+      AppLogger.d("hellooo6");
 
       // Parse the response
       final GetAllsubVehicleCategoriesResponse getAllVehicleCategoriesResponse =
           GetAllsubVehicleCategoriesResponse.fromJson(decodedJson);
 
-      print("🎯 Parsed Model Object 👇");
-      print(getAllVehicleCategoriesResponse);
+      AppLogger.d("🎯 Parsed Model Object 👇");
+      AppLogger.d(getAllVehicleCategoriesResponse);
 
       return getAllVehicleCategoriesResponse;
     } catch (e) {
-      print("hellooo5");
+      AppLogger.d("hellooo5");
 
-      print("❌ Exception in cash_update_data");
-      print(e.toString());
+      AppLogger.d("❌ Exception in cash_update_data");
+      AppLogger.d(e.toString());
 
       // Return a proper error response
       return GetAllsubVehicleCategoriesResponse(

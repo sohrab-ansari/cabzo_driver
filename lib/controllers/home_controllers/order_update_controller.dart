@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
@@ -7,6 +7,7 @@ import 'package:nzcu_driver/utilities/utils/api_response_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class OrderUpdateController extends GetxController {
   final StepperController stepperController = Get.find<StepperController>();
@@ -97,7 +98,7 @@ class OrderUpdateController extends GetxController {
     }
 
     if (stepControl == "Completed") {
-      print("reeesetting_the_steps_after_done");
+      AppLogger.d("reeesetting_the_steps_after_done");
       stepperController.resetSteps();
     }
 
@@ -140,9 +141,9 @@ class OrderUpdateController extends GetxController {
                 }
               });
               prefs.setString('pending_payment_ride', encodedRide);
-              print("✅ Saved pending_payment_ride successfully");
+              AppLogger.d("✅ Saved pending_payment_ride successfully");
             } catch (e) {
-              print("❌ Error encoding pending_payment_ride: $e");
+              AppLogger.d("❌ Error encoding pending_payment_ride: $e");
             }
           });
         }
@@ -183,7 +184,7 @@ class OrderUpdateController extends GetxController {
   // }
 
   void _handleError(String error, String buttonId, BuildContext context) {
-    print('Order update error on button $buttonId: $error');
+    AppLogger.d('Order update error on button $buttonId: $error');
   }
 
   void clearNavigation() {

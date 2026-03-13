@@ -1,4 +1,5 @@
-import 'dart:convert';
+﻿import 'dart:convert';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class GetAllsubVehicleCategoriesResponse {
   bool? success;
@@ -133,10 +134,10 @@ void main() {
   Map<String, dynamic> jsonMap = jsonDecode(jsonString);
   GetAllsubVehicleCategoriesResponse response = GetAllsubVehicleCategoriesResponse.fromJson(jsonMap);
   
-  print('Success: ${response.success}');
-  print('First item name: ${response.data?[0].name}');
+  AppLogger.d('Success: ${response.success}');
+  AppLogger.d('First item name: ${response.data?[0].name}');
   
   // Convert object back to JSON
   Map<String, dynamic> backToJson = response.toJson();
-  print('Back to JSON: ${jsonEncode(backToJson)}');
+  AppLogger.d('Back to JSON: ${jsonEncode(backToJson)}');
 }

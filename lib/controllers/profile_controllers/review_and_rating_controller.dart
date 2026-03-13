@@ -1,7 +1,8 @@
-import 'package:nzcu_driver/modals/profile_modals/review_rating_response.dart';
+﻿import 'package:nzcu_driver/modals/profile_modals/review_rating_response.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class ReviewAndRatingController extends GetxController {
   Rx<ReviewRatingResponse?> reviewRatingResponse = Rx<ReviewRatingResponse?>(
@@ -12,7 +13,7 @@ class ReviewAndRatingController extends GetxController {
   RxString errorMessage = ''.obs;
 
   Future<void> ratings_method() async {
-    print("Fetching reviews...");
+    AppLogger.d("Fetching reviews...");
 
     // Set loading state
     isLoading.value = true;
@@ -23,18 +24,18 @@ class ReviewAndRatingController extends GetxController {
       final ReviewRatingResponse res =
           await ProfileApiServices.get_review_rating_data();
 
-      print("API Response Success: ${res.success}");
-      print("API Response Data Count: ${res.data?.length ?? 0}");
+      AppLogger.d("API Response Success: ${res.success}");
+      AppLogger.d("API Response Data Count: ${res.data?.length ?? 0}");
 
       if (res.success == true) {
-        print("Reviews fetched successfully");
+        AppLogger.d("Reviews fetched successfully");
 
         // Update the response
         reviewRatingResponse.value = res;
 
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch reviews';
-        print("Error: ${errorMessage.value}");
+        AppLogger.d("Error: ${errorMessage.value}");
 
         // Only show snackbar if there's no existing data
         if (reviewRatingResponse.value == null) {
@@ -43,7 +44,7 @@ class ReviewAndRatingController extends GetxController {
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: ${e.toString()}';
-      print("Exception: $e");
+      AppLogger.d("Exception: $e");
 
       // Only show snackbar if there's no existing data
       if (reviewRatingResponse.value == null) {

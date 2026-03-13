@@ -1,4 +1,4 @@
-import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
+﻿import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
@@ -6,6 +6,7 @@ import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class CashPaymentScreen extends StatefulWidget {
   final Map<String, dynamic>? rideData;
@@ -34,7 +35,7 @@ class _CashPaymentScreenState extends State<CashPaymentScreen> {
     });
 resetStepper();
 
-    print("myyyy_full_ride_datat ${widget.rideData}");
+    AppLogger.d("myyyy_full_ride_datat ${widget.rideData}");
   }
 
 

@@ -1,4 +1,4 @@
-import 'package:nzcu_driver/controllers/profile_controllers/bank_account_add_controller.dart';
+﻿import 'package:nzcu_driver/controllers/profile_controllers/bank_account_add_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/update_bank_and_upi_controller.dart';
 import 'package:nzcu_driver/utilities/widgets/app_buttons.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
@@ -11,6 +11,7 @@ import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class EditUpi extends StatefulWidget {
   final dynamic account;
@@ -182,7 +183,7 @@ class _EditUpiState extends State<EditUpi> {
     });
 
     try {
-      print("Deleting UPI with accountid: ${widget.account_id}");
+      AppLogger.d("Deleting UPI with accountid: ${widget.account_id}");
 
       await updateBankAndUpiController.delete_bank_upi_method(
         accountid: widget.account_id,
@@ -194,7 +195,7 @@ class _EditUpiState extends State<EditUpi> {
         Navigator.pop(context, true);
       }
     } catch (e) {
-      print("Error in _deleteUpi: $e");
+      AppLogger.d("Error in _deleteUpi: $e");
       if (mounted) {
         CustomToast.showError("Failed to delete UPI ID: ${e.toString()}");
       }

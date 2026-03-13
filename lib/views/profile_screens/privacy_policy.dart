@@ -1,4 +1,4 @@
-// import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+﻿// import 'package:nzcu_driver/utilities/colors/colors_list.dart';
 // import 'package:nzcu_driver/utilities/custom_text.dart';
 // import 'package:nzcu_driver/utilities/navigator.dart';
 // import 'package:flutter/material.dart';
@@ -168,6 +168,7 @@ import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class PrivacyPolicy extends StatefulWidget {
   const PrivacyPolicy({super.key});
@@ -276,7 +277,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
                 "li": Style(margin: Margins.only(bottom: w * .02)),
               },
               onLinkTap: (url, _, __) {
-                debugPrint("Clicked link: $url");
+                AppLogger.d("Clicked link: $url");
               },
             ),
           ),

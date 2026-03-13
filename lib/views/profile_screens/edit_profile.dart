@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/driverid_controller.dart';
@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -52,7 +53,7 @@ class _EditProfileState extends State<EditProfile> {
         });
       }
     } catch (e) {
-      debugPrint('Image picking failed: $e');
+      AppLogger.d('Image picking failed: $e');
       CustomToast.showWarning('Failed to pick imageage');
     }
   }
@@ -156,7 +157,7 @@ class _EditProfileState extends State<EditProfile> {
         });
       }
     } catch (e) {
-      debugPrint('Error loading profile data: $e');
+      AppLogger.d('Error loading profile data: $e');
     } finally {
       setState(() {
         _isLoading = false;

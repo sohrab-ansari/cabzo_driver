@@ -1,6 +1,7 @@
-import 'package:get/get.dart';
+﻿import 'package:get/get.dart';
 import 'package:nzcu_driver/services/apiservices/socket_manager.dart';
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class ChatNotificationController extends GetxController {
   static ChatNotificationController get instance => Get.find();
@@ -23,12 +24,12 @@ class ChatNotificationController extends GetxController {
 
   void handleIncomingMessage(Map<String, dynamic> data) {
     if (isChatScreenActive) {
-      print("💬 Chat screen is active, not incrementing count.");
+      AppLogger.d("💬 Chat screen is active, not incrementing count.");
       return;
     }
 
     unreadCount.value++;
-    print("💬 Unread chat count: ${unreadCount.value}");
+    AppLogger.d("💬 Unread chat count: ${unreadCount.value}");
 
     // Show local notification
     _showLocalNotification(data);
@@ -48,13 +49,13 @@ class ChatNotificationController extends GetxController {
         payload: data,
       );
     } catch (e) {
-      print("❌ Error showing chat notification: $e");
+      AppLogger.d("❌ Error showing chat notification: $e");
     }
   }
 
   void resetCount() {
     unreadCount.value = 0;
-    print("💬 Unread chat count reset.");
+    AppLogger.d("💬 Unread chat count reset.");
   }
 
   void setChatScreenActive(bool active, {String? chatId}) {
@@ -63,6 +64,6 @@ class ChatNotificationController extends GetxController {
     if (active) {
       resetCount();
     }
-    print("💬 Chat screen active state: $active");
+    AppLogger.d("💬 Chat screen active state: $active");
   }
 }

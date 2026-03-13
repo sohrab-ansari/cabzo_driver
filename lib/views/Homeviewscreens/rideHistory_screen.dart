@@ -1,4 +1,4 @@
-// // // // import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
+﻿// // // // import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 // // // // import 'package:nzcu_driver/controllers/rides_controllers/rieds_history_controller.dart';
 // // // // import 'package:nzcu_driver/modals/home_modals/ride_history_response.dart';
 // // // // import 'package:nzcu_driver/utilities/colors/colors.dart';
@@ -2152,7 +2152,7 @@
 //         }
 //       } catch (timeError) {
 //         // If all parsing fails, return the original string
-//         print('Error parsing date/time: $dateTimeStr');
+//         AppLogger.d('Error parsing date/time: $dateTimeStr');
 //       }
 
 //       return {
@@ -2754,6 +2754,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class RidehistoryScreen extends StatefulWidget {
   const RidehistoryScreen({super.key});
@@ -2821,7 +2822,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
         'time': DateFormat('h:mm a').format(localDateTime),
       };
     } catch (e) {
-      print('Error formatting date: $e');
+      AppLogger.d('Error formatting date: $e');
       return {
         'full': dateTime.toString(),
         'date': '',

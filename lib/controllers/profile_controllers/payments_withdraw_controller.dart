@@ -1,8 +1,9 @@
-import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
+﻿import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/wallet_controller.dart';
 import 'package:nzcu_driver/modals/profile_modals/payments_withdraw_response.dart';
 import 'package:nzcu_driver/views/profile_screens/payment_screen.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class PaymentsWithdrawController extends GetxController {
   Rx<PaymentsWithdrawResponse?> transactionsres = Rx<PaymentsWithdrawResponse?>(
@@ -16,7 +17,7 @@ class PaymentsWithdrawController extends GetxController {
 
     required String? BankAccountId,
   }) async {
-    print("add bankaccount called");
+    AppLogger.d("add bankaccount called");
 
     // Validate inputs
     if (amount.isEmpty) {
@@ -35,13 +36,13 @@ class PaymentsWithdrawController extends GetxController {
             amount: amount,
           );
 
-      print("API Response success: ${res.success}");
-      print("API Response message: ${res.message}");
-      print("API Response data: ${res.data}");
+      AppLogger.d("API Response success: ${res.success}");
+      AppLogger.d("API Response message: ${res.message}");
+      AppLogger.d("API Response data: ${res.data}");
 
       // Check both possible success indicators
       if (res.success == true) {
-        print("✅ Bank account added successfully!");
+        AppLogger.d("✅ Bank account added successfully!");
 
         // IMPORTANT: Refresh home data after profile update
         try {
@@ -53,9 +54,9 @@ class PaymentsWithdrawController extends GetxController {
 
           walletController.wallet_method();
 
-          print("Wallet data refreshed after profile update");
+          AppLogger.d("Wallet data refreshed after profile update");
         } catch (e) {
-          print("Failed to refresh home data: $e");
+          AppLogger.d("Failed to refresh home data: $e");
         }
 
         transactionsres.value = res;
@@ -69,11 +70,11 @@ class PaymentsWithdrawController extends GetxController {
         walletController.wallet_method();
       } else {
         errorMessage.value = res.message ?? 'Failed to add bank account';
-        print("❌ Error: ${errorMessage.value}");
+        AppLogger.d("❌ Error: ${errorMessage.value}");
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
-      print("❌ Exception: $e");
+      AppLogger.d("❌ Exception: $e");
     } finally {
       // Reset loading state
       isLoading.value = false;

@@ -1,4 +1,4 @@
-// import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+﻿// import 'package:nzcu_driver/utilities/colors/colors_list.dart';
 // import 'package:nzcu_driver/utilities/widgets/custom_text.dart';
 // import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 // import 'package:nzcu_driver/views/profile_screens/faqs_details_screen.dart';
@@ -304,6 +304,7 @@ import 'package:nzcu_driver/utilities/colors/colors_list.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_text.dart';
 import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:nzcu_driver/views/profile_screens/faqs_details_screen.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class FAQs extends StatefulWidget {
   final String? categoryId;
@@ -324,9 +325,9 @@ class _FAQsState extends State<FAQs> {
   void initState() {
     super.initState();
 
-    print("myy_category_id : ${widget.categoryId}");
+    AppLogger.d("myy_category_id : ${widget.categoryId}");
 
-    print("myy_category_name : ${widget.categoryName}");
+    AppLogger.d("myy_category_name : ${widget.categoryName}");
     // Fetch FAQs when screen opens
     if (widget.categoryId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {

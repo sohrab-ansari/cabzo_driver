@@ -1,4 +1,4 @@
-import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
+﻿import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/controllers/auth_controllers/vehicle_form_controller.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/colors/colors_list.dart';
@@ -9,6 +9,7 @@ import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:nzcu_driver/views/profile_screens/documents_related/driver_registration.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class Documents extends StatefulWidget {
   const Documents({super.key});
@@ -195,7 +196,7 @@ class _DocumentsState extends State<Documents> {
                       child: InkWell(
                         onTap: () {
 
-                          print("i_am_tapping>>>>");
+                          AppLogger.d("i_am_tapping>>>>");
                           int targetStep;
                           if (driverFormController.activeStep.value == 0) {
 

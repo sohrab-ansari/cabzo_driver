@@ -1,7 +1,8 @@
-import 'package:http/http.dart' as http;
+﻿import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class EarningsService {
   // Get earning report based on period (today, weekly, monthly)
@@ -14,7 +15,7 @@ class EarningsService {
         throw Exception("Auth token not found");
       }
 
-      print("helloooo>>>>>  ${period}");
+      AppLogger.d("helloooo>>>>>  ${period}");
 
       final url = "${ApiPath.baseUri}/driver/earningReport?period=$period";
 
@@ -27,8 +28,8 @@ class EarningsService {
       );
 
       if (response.statusCode == 200) {
-        print("myyyy_datattt_hererr ${response}");
-        print("myyyy_datattt_hererr2 ${response.body}");
+        AppLogger.d("myyyy_datattt_hererr ${response}");
+        AppLogger.d("myyyy_datattt_hererr2 ${response.body}");
         final jsonData = jsonDecode(response.body);
         return jsonData['data'] ?? {};
       } else {
@@ -37,7 +38,7 @@ class EarningsService {
         );
       }
     } catch (e) {
-      print("Error fetching earnings report: $e");
+      AppLogger.d("Error fetching earnings report: $e");
       rethrow;
     }
   }
@@ -69,7 +70,7 @@ class EarningsService {
         throw Exception('Failed to load ride history: ${response.statusCode}');
       }
     } catch (e) {
-      print("Error fetching ride history: $e");
+      AppLogger.d("Error fetching ride history: $e");
       rethrow;
     }
   }

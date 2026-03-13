@@ -1,4 +1,4 @@
-// import 'dart:io';
+﻿// import 'dart:io';
 
 // import 'package:nzcu_driver/modals/profile_modals/faq_category_responses.dart';
 // import 'package:nzcu_driver/modals/profile_modals/get_by_category_response.dart';
@@ -28,7 +28,7 @@
 //   }
 
 //   Future<void> faqscategorimethod() async {
-//   print("faqscategorimethod called");
+//   AppLogger.d("faqscategorimethod called");
 
 //   // Set loading state
 //   isLoading.value = true;
@@ -43,18 +43,18 @@
 
 //         );
 
-//     print("API Response: ${res.success}");
+//     AppLogger.d("API Response: ${res.success}");
 
 //     if (res.success == true) {
-//       print("faqs categories updated successfully");
+//       AppLogger.d("faqs categories updated successfully");
 
 //     } else {
 //       errorMessage.value = res.message ?? 'Failed to update faqs categories';
-//       print("Error: ${errorMessage.value}");
+//       AppLogger.d("Error: ${errorMessage.value}");
 //     }
 //   } catch (e) {
 //     errorMessage.value = 'An error occurred: $e';
-//     print("Exception: $e");
+//     AppLogger.d("Exception: $e");
 //   } finally {
 //     // Reset loading state
 //     isLoading.value = false;
@@ -68,6 +68,7 @@ import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class FaqsGetByCategoriesController extends GetxController {
   // Observable response
@@ -91,7 +92,7 @@ class FaqsGetByCategoriesController extends GetxController {
     required String categoryId,
     required String categoryName,
   }) async {
-    print("getFaqsByCategory called for category: $categoryName");
+    AppLogger.d("getFaqsByCategory called for category: $categoryName");
 
     // Set loading state
     isLoading.value = true;
@@ -106,12 +107,12 @@ class FaqsGetByCategoriesController extends GetxController {
             category: categoryId,
           );
 
-      print("API Response Success: ${res.success}");
-      print("API Response Message: ${res.message}");
-      print("Questions count: ${res.count ?? 0}");
+      AppLogger.d("API Response Success: ${res.success}");
+      AppLogger.d("API Response Message: ${res.message}");
+      AppLogger.d("Questions count: ${res.count ?? 0}");
 
       if (res.success == true) {
-        print("FAQs fetched successfully");
+        AppLogger.d("FAQs fetched successfully");
 
         // Assign the response to the observable
         faqsByCategoryResponse.value = res;
@@ -119,19 +120,19 @@ class FaqsGetByCategoriesController extends GetxController {
         // Log questions for debugging
         if (res.questions != null) {
           for (var question in res.questions!) {
-            print("Question: ${question.question}");
-            print("Answer: ${question.answer}");
+            AppLogger.d("Question: ${question.question}");
+            AppLogger.d("Answer: ${question.answer}");
           }
         }
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch FAQs';
-        print("Error: ${errorMessage.value}");
+        AppLogger.d("Error: ${errorMessage.value}");
 
         CustomToast.showError(errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
-      print("Exception in getFaqsByCategory: $e");
+      AppLogger.d("Exception in getFaqsByCategory: $e");
 
       CustomToast.showError(errorMessage.value);
     } finally {

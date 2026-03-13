@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 import 'package:nzcu_driver/services/apiservices/auth_api_service.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
@@ -11,6 +11,7 @@ import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:nzcu_driver/views/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class LoginController extends GetxController {
   // Reactive variables
@@ -59,8 +60,8 @@ class LoginController extends GetxController {
   }
 
   Future<void> verifyOtp({String? otp, String? phoneNumber}) async {
-    print("my_Sended_number_came $phoneNumber");
-    print("my_Sended_number_came_otp $otp");
+    AppLogger.d("my_Sended_number_came $phoneNumber");
+    AppLogger.d("my_Sended_number_came_otp $otp");
 
     // 🔐 OTP validation
     if (otp == null || otp.isEmpty || otp.length != 4) {
@@ -201,21 +202,21 @@ class LoginController extends GetxController {
     try {
       isLoading.value = true;
 
-      print("===== CREATE REGISTER METHOD ======");
-      print("name: $name");
-      print("email: $email");
-      print("phone: $phone");
-      print("dob: $dob");
-      print("dlImage exists: ${dlImage != null}");
-      print("aadharFront exists: ${aadharFront != null}");
-      print("aadharBack exists: ${aadharBack != null}");
-      print("panImage exists: ${panImage != null}");
-      print("alternateContact1: $alternateContact1");
-      print("relation1: $relation1");
-      print("address1: $address1");
-      print("alternateContact2: $alternateContact2");
-      print("relation2: $relation2");
-      print("address2: $address2");
+      AppLogger.d("===== CREATE REGISTER METHOD ======");
+      AppLogger.d("name: $name");
+      AppLogger.d("email: $email");
+      AppLogger.d("phone: $phone");
+      AppLogger.d("dob: $dob");
+      AppLogger.d("dlImage exists: ${dlImage != null}");
+      AppLogger.d("aadharFront exists: ${aadharFront != null}");
+      AppLogger.d("aadharBack exists: ${aadharBack != null}");
+      AppLogger.d("panImage exists: ${panImage != null}");
+      AppLogger.d("alternateContact1: $alternateContact1");
+      AppLogger.d("relation1: $relation1");
+      AppLogger.d("address1: $address1");
+      AppLogger.d("alternateContact2: $alternateContact2");
+      AppLogger.d("relation2: $relation2");
+      AppLogger.d("address2: $address2");
 
       // Call API with File objects
       final RegisterProfileRes res = await AuthApiService.createRegister_Api(
@@ -235,12 +236,12 @@ class LoginController extends GetxController {
         address2: address2,
       );
 
-      print("API Response - Success: ${res.success}");
-      print("API Response - Message: ${res.message}");
+      AppLogger.d("API Response - Success: ${res.success}");
+      AppLogger.d("API Response - Message: ${res.message}");
 
       if (res.success == true) {
         isOtpVerified.value = true;
-        print("Registration successful!");
+        AppLogger.d("Registration successful!");
         driverFormController.activeStep.value = 3;
         CustomToast.showSuccess('Registration completed successfully!');
       } else {
@@ -252,7 +253,7 @@ class LoginController extends GetxController {
     } catch (e) {
       isOtpVerified.value = false;
       otpError.value = 'An error occurred. Please try again.';
-      print("Error in createRegisterMethod: $e");
+      AppLogger.d("Error in createRegisterMethod: $e");
       CustomToast.showError('An error occurred: $e');
     } finally {
       isLoading.value = false;
@@ -264,10 +265,10 @@ class LoginController extends GetxController {
     BuildContext? context,
   }) async {
     try {
-      print("\n📸 ===== UPLOAD NEW IMAGE METHOD =====");
+      AppLogger.d("\n📸 ===== UPLOAD NEW IMAGE METHOD =====");
       isLoading.value = true;
 
-      print("└─ Image Path: ${image.path}");
+      AppLogger.d("└─ Image Path: ${image.path}");
 
       // Call API with File objects
       final DriverImageUploadRes res =
@@ -277,13 +278,13 @@ class LoginController extends GetxController {
             userType: "Driver",
           );
 
-      print("\n📨 IMAGE UPLOAD RESPONSE:");
-      print("├─ Success: ${res.success}");
-      print("├─ Message: ${res.message}");
-      // print("└─ Data: ${res.data}");
+      AppLogger.d("\n📨 IMAGE UPLOAD RESPONSE:");
+      AppLogger.d("├─ Success: ${res.success}");
+      AppLogger.d("├─ Message: ${res.message}");
+      // AppLogger.d("└─ Data: ${res.data}");
 
       if (res.success == true) {
-        print("\n✅ IMAGE UPLOAD SUCCESSFUL!");
+        AppLogger.d("\n✅ IMAGE UPLOAD SUCCESSFUL!");
 
         CustomNavigator.removeUntil(
           context!,
@@ -299,14 +300,14 @@ class LoginController extends GetxController {
         throw Exception(res.message ?? 'Image upload failed');
       }
     } catch (e) {
-      print("\n❌ ERROR IN IMAGE UPLOAD:");
-      print("├─ Error: $e");
+      AppLogger.d("\n❌ ERROR IN IMAGE UPLOAD:");
+      AppLogger.d("├─ Error: $e");
       CustomToast.showError('Failed to upload profile photo: $e');
 
       rethrow; // Re-throw to handle in calling method
     } finally {
       isLoading.value = false;
-      print("\n🏁 IMAGE UPLOAD COMPLETED");
+      AppLogger.d("\n🏁 IMAGE UPLOAD COMPLETED");
     }
   }
   // Reset state

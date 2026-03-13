@@ -1,4 +1,4 @@
-// // // import 'package:nzcu_driver/services/baseurl/api_path.dart';
+﻿// // // import 'package:nzcu_driver/services/baseurl/api_path.dart';
 // // // import 'package:nzcu_driver/controllers/profile_controllers/review_and_rating_controller.dart';
 // // // import 'package:nzcu_driver/utilities/widgets/app_buttons.dart';
 // // // import 'package:nzcu_driver/utilities/colors/colors.dart';
@@ -811,7 +811,7 @@
 //       driverName = prefs.getString("driver_name") ?? "";
 //       profileImage = prefs.getString("driver_image") ?? "";
 //     });
-//     print("Driver Name from SharedPreferences: $driverName");
+//     AppLogger.d("Driver Name from SharedPreferences: $driverName");
 //   }
 
 //   // Helper method to get rating text
@@ -1197,6 +1197,7 @@ import 'package:nzcu_driver/utilities/widgets/app_buttons.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
 import 'package:nzcu_driver/utilities/widgets/navigator.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class Review extends StatefulWidget {
   const Review({super.key});
@@ -1229,8 +1230,8 @@ class _ReviewState extends State<Review> {
       driverName = prefs.getString("driver_name") ?? "";
       profileImage = prefs.getString("driver_image") ?? "";
     });
-    print("Driver Name from SharedPreferences: $driverName");
-    print("Driver Image from SharedPreferences: $profileImage");
+    AppLogger.d("Driver Name from SharedPreferences: $driverName");
+    AppLogger.d("Driver Image from SharedPreferences: $profileImage");
   }
 
   // Helper method to get rating text

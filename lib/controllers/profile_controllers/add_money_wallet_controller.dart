@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 // import 'package:nzcu_driver/apiServices/services/payments/razorpay_service.dart';
 import 'package:nzcu_driver/services/payments_service/razorpay_service.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nzcu_driver/modals/profile_modals/add_money_wallet_response.dart';
 // import 'package:nzcu_driver/services/razorpay_service.dart';
 import 'package:http/http.dart' as http;
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class AddMoneyWalletController extends GetxController {
   // State management
@@ -54,7 +55,7 @@ class AddMoneyWalletController extends GetxController {
     required dynamic amount,
     dynamic promoCodeId,
   }) async {
-    print("💰 add_wallet_method called with amount: $amount");
+    AppLogger.d("💰 add_wallet_method called with amount: $amount");
 
     // Validate amount
     if (amount.toString().isEmpty) {
@@ -81,12 +82,12 @@ class AddMoneyWalletController extends GetxController {
             promoCodeId: promoCodeId ?? '',
           );
 
-      print("🎯 Order Creation Response: ${res.success}");
-      print("📦 Order Data: ${res.data?.toJson()}");
+      AppLogger.d("🎯 Order Creation Response: ${res.success}");
+      AppLogger.d("📦 Order Data: ${res.data?.toJson()}");
 
-      print(">>>>>>>>> Order Data: ${res.data?.toJson()}");
+      AppLogger.d(">>>>>>>>> Order Data: ${res.data?.toJson()}");
 
-      print(">>>>>>>>>amount Order Data: ${res.data!.amount}");
+      AppLogger.d(">>>>>>>>>amount Order Data: ${res.data!.amount}");
 
       if (res.success == true && res.data != null) {
         // Store order data for verification
@@ -100,7 +101,7 @@ class AddMoneyWalletController extends GetxController {
         final userPhone = prefs.getString("user_phone") ?? '';
         final userName = prefs.getString("user_name") ?? '';
 
-        print("👤 User Prefill - Email: $userEmail, Phone: $userPhone");
+        AppLogger.d("👤 User Prefill - Email: $userEmail, Phone: $userPhone");
 
         // Step 3: Open Razorpay checkout
         isLoading.value = false;
@@ -124,7 +125,7 @@ class AddMoneyWalletController extends GetxController {
         _showError(res.message ?? 'Failed to create payment order');
       }
     } catch (e) {
-      print('❌ Exception in add_wallet_method: $e');
+      AppLogger.d('❌ Exception in add_wallet_method: $e');
       _showError('An error occurred: ${e.toString()}');
     } finally {
       isLoading.value = false;
@@ -132,10 +133,10 @@ class AddMoneyWalletController extends GetxController {
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    print('✅ Payment Success Callback:');
-    print('  Payment ID: ${response.paymentId}');
-    print('  Order ID: ${response.orderId}');
-    print('  Signature: ${response.signature}');
+    AppLogger.d('✅ Payment Success Callback:');
+    AppLogger.d('  Payment ID: ${response.paymentId}');
+    AppLogger.d('  Order ID: ${response.orderId}');
+    AppLogger.d('  Signature: ${response.signature}');
 
     // Verify payment with backend
     _verifyPayment(
@@ -146,7 +147,7 @@ class AddMoneyWalletController extends GetxController {
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
-    print('❌ Payment Error Callback: ${response.code} - ${response.message}');
+    AppLogger.d('❌ Payment Error Callback: ${response.code} - ${response.message}');
     isPaymentProcessing.value = false;
 
     // Don't show snackbar here - RazorpayService already shows it
@@ -157,7 +158,7 @@ class AddMoneyWalletController extends GetxController {
     required String razorpayOrderId,
     required String razorpaySignature,
   }) async {
-    print('🔐 Verifying payment...');
+    AppLogger.d('🔐 Verifying payment...');
 
     isLoading.value = true;
     isPaymentProcessing.value = false;
@@ -171,7 +172,7 @@ class AddMoneyWalletController extends GetxController {
       );
 
       if (successcheck == true) {
-        print('agsdgshgfjds____Payment verified successfully');
+        AppLogger.d('agsdgshgfjds____Payment verified successfully');
 
         CustomToast.showSuccess("Payment successful!");
 
@@ -188,7 +189,7 @@ class AddMoneyWalletController extends GetxController {
         CustomToast.showError("Payment verification failed");
       }
     } catch (e) {
-      print('❌ Verification Error: $e');
+      AppLogger.d('❌ Verification Error: $e');
       _showError('Payment verification error: ${e.toString()}');
     } finally {
       isLoading.value = false;
@@ -222,8 +223,8 @@ class AddMoneyWalletController extends GetxController {
         }),
       );
 
-      print("🔐 Verification Status: ${response.statusCode}");
-      print("🔐 Verification Body: ${response.body}");
+      AppLogger.d("🔐 Verification Status: ${response.statusCode}");
+      AppLogger.d("🔐 Verification Body: ${response.body}");
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
@@ -235,7 +236,7 @@ class AddMoneyWalletController extends GetxController {
         );
       }
     } catch (e) {
-      print('❌ Verification API Error: $e');
+      AppLogger.d('❌ Verification API Error: $e');
       return AddMoneyWalletResponse(
         success: false,
         message: 'Connection error: $e',
@@ -245,7 +246,7 @@ class AddMoneyWalletController extends GetxController {
 
   void _showError(String message) {
     errorMessage.value = message;
-    print("❌ Error: $message");
+    AppLogger.d("❌ Error: $message");
 
     CustomToast.showError(message);
   }

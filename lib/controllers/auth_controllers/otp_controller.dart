@@ -1,6 +1,7 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/controllers/auth_controllers/login.controller.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class OtpController extends GetxController {
 
@@ -24,7 +25,7 @@ class OtpController extends GetxController {
     
     loginController.sendOtp(phoneNumber);
     // Yaha resend API call ya logic lagana
-    print("Resend OTP clicked!");
+    AppLogger.d("Resend OTP clicked!");
     startTimer();
   }
 

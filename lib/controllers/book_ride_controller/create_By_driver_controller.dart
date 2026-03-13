@@ -1,9 +1,10 @@
-// import 'package:nzcu_driver/api_services/profile_api_services.dart';
+﻿// import 'package:nzcu_driver/api_services/profile_api_services.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/modals/auth_modals/create_by_driver_respose.dart';
 // import 'package:nzcu_driver/views/payment_modes_screen/cash_payment_screen.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class CreateByDriverController extends GetxController {
   // Rx variables for state management
@@ -45,17 +46,17 @@ class CreateByDriverController extends GetxController {
       cashResponse.value = response;
 
       if (response.success == true) {
-        print("✅ Ride created successfully");
+        AppLogger.d("✅ Ride created successfully");
       } else {
         // Creation failed - store error message for UI to display
         errorMessage.value =
             response.message ?? 'Failed to create ride. Please try again.';
-        print("❌ Ride creation failed: ${errorMessage.value}");
+        AppLogger.d("❌ Ride creation failed: ${errorMessage.value}");
       }
     } catch (e) {
       // Handle exceptions
       errorMessage.value = 'An error occurred: $e';
-      print("❌ Exception in processCashPayment: $e");
+      AppLogger.d("❌ Exception in processCashPayment: $e");
     } finally {
       // Always reset loading state
       isLoading.value = false;

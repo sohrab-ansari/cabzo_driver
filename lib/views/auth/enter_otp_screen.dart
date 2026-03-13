@@ -1,4 +1,4 @@
-import 'package:nzcu_driver/controllers/auth_controllers/login.controller.dart';
+﻿import 'package:nzcu_driver/controllers/auth_controllers/login.controller.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:nzcu_driver/views/auth/login_screen.dart';
@@ -16,6 +16,7 @@ import 'package:nzcu_driver/services/apiservices/auth_api_service.dart';
 import 'package:nzcu_driver/modals/auth_modals/Otp_verify_res.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class EnterOtpScreen extends StatefulWidget {
   final dynamic typecheck;
@@ -117,13 +118,13 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
         return;
       }
 
-      print("✅ OTP Verified Successfully");
+      AppLogger.d("✅ OTP Verified Successfully");
 
       // Update LoginController state for consistency
       loginController.isOtpVerified.value = true;
 
       if (res.driver == null) {
-        print("❌ Driver data is null in response");
+        AppLogger.d("❌ Driver data is null in response");
         if (mounted) {
           setState(() {
             isLoading = false;
@@ -149,17 +150,17 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
             res.driver?.isProfileCompleted.toString().toLowerCase() == 'true';
       }
 
-      print("🔍 Status Check:");
-      print("  - Image: $imageStatus");
-      print("  - Profile: $profileStatus");
-      print("  - Vehicle: $vehicleStatus");
-      print("  - Complete Verified: $completeVerified");
-      print("  - Profile Completed: $isProfileCompleted");
+      AppLogger.d("🔍 Status Check:");
+      AppLogger.d("  - Image: $imageStatus");
+      AppLogger.d("  - Profile: $profileStatus");
+      AppLogger.d("  - Vehicle: $vehicleStatus");
+      AppLogger.d("  - Complete Verified: $completeVerified");
+      AppLogger.d("  - Profile Completed: $isProfileCompleted");
 
-      print(">>>>>> imageStatus: $imageStatus");
-      print(">>>>> profileStatus: $profileStatus");
-      print(">>>>>> vehicleStatus: $vehicleStatus");
-      print(">>>>>> completeVerified: $completeVerified");
+      AppLogger.d(">>>>>> imageStatus: $imageStatus");
+      AppLogger.d(">>>>> profileStatus: $profileStatus");
+      AppLogger.d(">>>>>> vehicleStatus: $vehicleStatus");
+      AppLogger.d(">>>>>> completeVerified: $completeVerified");
 
       // CASE 6: All Verified -> Home
       if (imageStatus == "verified" &&
@@ -167,7 +168,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
           vehicleStatus == "verified" &&
           completeVerified == "verified" &&
           isProfileCompleted) {
-        print("🚀 All Verified - Navigating to Home");
+        AppLogger.d("🚀 All Verified - Navigating to Home");
         CustomNavigator.removeUntil(
           context,
           BottomnavmainScreen(),
@@ -178,7 +179,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
 
       // CASE 1: Profile Completed & Verified (Alternative check)
       if (isProfileCompleted && completeVerified == "verified") {
-        print("🚀 Profile Complete & Verified - Navigating to Home");
+        AppLogger.d("🚀 Profile Complete & Verified - Navigating to Home");
         CustomNavigator.push(
           context,
           BottomnavmainScreen(),
@@ -196,7 +197,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
       if (imageStatus == "draft" &&
           profileStatus == "draft" &&
           vehicleStatus == "draft") {
-        print("📝 All Draft - Navigating to Registration");
+        AppLogger.d("📝 All Draft - Navigating to Registration");
         driverFormController.activeStep.value = 0; // Ensure start
         CustomNavigator.removeUntil(
           context,
@@ -206,16 +207,16 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
         return;
       }
 
-      print(">>>>>> imageStatus: $imageStatus");
-      print(">>>>> profileStatus: $profileStatus");
-      print(">>>>>> vehicleStatus: $vehicleStatus");
-      print(">>>>>> completeVerified: $completeVerified");
+      AppLogger.d(">>>>>> imageStatus: $imageStatus");
+      AppLogger.d(">>>>> profileStatus: $profileStatus");
+      AppLogger.d(">>>>>> vehicleStatus: $vehicleStatus");
+      AppLogger.d(">>>>>> completeVerified: $completeVerified");
       // CASE 5: All Pending -> Wait (Toast)
       if (imageStatus == "pending" &&
           profileStatus == "pending" &&
           vehicleStatus == "pending" &&
           completeVerified == "pending") {
-        print("⏳ All Pending - Showing toast");
+        AppLogger.d("⏳ All Pending - Showing toast");
 
         // ✅ Save in SharedPreferences
         final prefs = await SharedPreferences.getInstance();
@@ -233,7 +234,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
 
       // CASE 4: Profile Pending -> Step 3
       if (profileStatus == "pending") {
-        print("� Profile Pending - Setting step 3");
+        AppLogger.d("� Profile Pending - Setting step 3");
         driverFormController.activeStep.value = 2;
         CustomNavigator.push(
           context,
@@ -245,7 +246,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
 
       // CASE 3: Vehicle Pending -> Step 2
       if (vehicleStatus == "pending") {
-        print("� Vehicle Pending - Setting step 2");
+        AppLogger.d("� Vehicle Pending - Setting step 2");
         driverFormController.activeStep.value = 1;
         CustomNavigator.push(
           context,
@@ -257,7 +258,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
 
       // Image Pending -> Toast (Lower priority than Vehicle/Profile pending steps)
       if (imageStatus == "pending") {
-        print("🖼️ Image Pending - Showing toast");
+        AppLogger.d("🖼️ Image Pending - Showing toast");
         CustomToast.showInfo("Please wait, admin will approve your account.");
         if (mounted) {
           setState(() {
@@ -268,15 +269,15 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
       }
 
       // Fallback
-      print("⚠️ No specific case matched - defaulting to Registration");
+      AppLogger.d("⚠️ No specific case matched - defaulting to Registration");
       CustomNavigator.push(
         context,
         DriverRegistration(mobileNumber: widget.phoneNumber),
         transition: TransitionType.slideLeft,
       );
     } catch (e) {
-      print("errorrr>>>>>2222 ");
-      print("❌ Error in verifyOtp2: $e");
+      AppLogger.d("errorrr>>>>>2222 ");
+      AppLogger.d("❌ Error in verifyOtp2: $e");
       if (mounted) {
         setState(() {
           errorMessage = 'An error occurred. Please try again.';

@@ -1,8 +1,9 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class OverlayService {
   OverlayService._();
@@ -37,7 +38,7 @@ class OverlayService {
 
     final hasP = await hasPermission();
     if (!hasP) {
-      print('[OverlayService] No overlay permission - skipping');
+      AppLogger.d('[OverlayService] No overlay permission - skipping');
       return;
     }
 
@@ -57,9 +58,9 @@ class OverlayService {
         visibility: NotificationVisibility.visibilitySecret,
         flag: OverlayFlag.defaultFlag,
       );
-      print('[OverlayService] Overlay shown');
+      AppLogger.d('[OverlayService] Overlay shown');
     } catch (e) {
-      print('[OverlayService] Failed to show overlay: $e');
+      AppLogger.d('[OverlayService] Failed to show overlay: $e');
     }
   }
 
@@ -69,9 +70,9 @@ class OverlayService {
       if (!isActive) return;
 
       await FlutterOverlayWindow.closeOverlay();
-      print('[OverlayService] Overlay hidden');
+      AppLogger.d('[OverlayService] Overlay hidden');
     } catch (e) {
-      print('[OverlayService] Failed to hide overlay: $e');
+      AppLogger.d('[OverlayService] Failed to hide overlay: $e');
     }
   }
 
@@ -84,7 +85,7 @@ class OverlayService {
     _overlayListenerSub = FlutterOverlayWindow.overlayListener.listen((
       message,
     ) {
-      print('[OverlayService] Received overlay message: $message');
+      AppLogger.d('[OverlayService] Received overlay message: $message');
       if (message == 'bring_to_front') {
         _bringAppToForeground();
         onTap(message);
@@ -103,9 +104,9 @@ class OverlayService {
   Future<void> _bringAppToForeground() async {
     try {
       await _channel.invokeMethod('bringToFront');
-      print('[OverlayService] App brought to foreground');
+      AppLogger.d('[OverlayService] App brought to foreground');
     } catch (e) {
-      print('[OverlayService] Failed to bring app to front: $e');
+      AppLogger.d('[OverlayService] Failed to bring app to front: $e');
     }
   }
 }

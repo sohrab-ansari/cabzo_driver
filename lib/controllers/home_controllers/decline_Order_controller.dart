@@ -1,7 +1,8 @@
-import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
+﻿import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
 import 'package:nzcu_driver/modals/home_modals/order_complete_cash_response.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class DeclineOrderController extends GetxController {
   // Change to Rx<HomeModalResponse?> and use .obs
@@ -21,7 +22,7 @@ class DeclineOrderController extends GetxController {
     required dynamic orderstatus,
     required dynamic orderid,
   }) async {
-    print("home_data_method called");
+    AppLogger.d("home_data_method called");
 
     // Set loading state
     isLoading.value = true;
@@ -35,24 +36,24 @@ class DeclineOrderController extends GetxController {
             orderid: orderid,
           );
 
-      print("API Response: ${res.success}");
+      AppLogger.d("API Response: ${res.success}");
 
       if (res.success == true) {
-        print("update orderget fetched successfully");
+        AppLogger.d("update orderget fetched successfully");
         cashcompletecashresposne.value = res;
 
-        print("myupdate_order_data111  ${cashcompletecashresposne.value}");
+        AppLogger.d("myupdate_order_data111  ${cashcompletecashresposne.value}");
 
-        print("myupdate_order_data22222222  ${res}");
+        AppLogger.d("myupdate_order_data22222222  ${res}");
       } else {
-        print("myupdate_order_data22222222  faileddd111");
+        AppLogger.d("myupdate_order_data22222222  faileddd111");
         errorMessage.value = res.message ?? 'Failed to fetch home data';
-        print("Error: ${errorMessage.value}");
+        AppLogger.d("Error: ${errorMessage.value}");
         CustomToast.showError(errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
-      print("Exception: $e");
+      AppLogger.d("Exception: $e");
       CustomToast.showError(errorMessage.value);
     } finally {
       // Reset loading state

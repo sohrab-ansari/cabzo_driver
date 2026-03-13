@@ -1,10 +1,11 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:android_intent_plus/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class OverlayBubble extends StatefulWidget {
   const OverlayBubble({super.key});
@@ -40,7 +41,7 @@ class _OverlayBubbleState extends State<OverlayBubble> {
       elevation: 0,
       child: GestureDetector(
         onTap: () async {
-          print('🔥 [OVERLAY_BUBBLE] Bubble Tapped!');
+          AppLogger.d('🔥 [OVERLAY_BUBBLE] Bubble Tapped!');
           final intent = AndroidIntent(
             action: 'android.intent.action.MAIN',
             category: 'android.intent.category.LAUNCHER',
@@ -52,7 +53,7 @@ class _OverlayBubbleState extends State<OverlayBubble> {
               Flag.FLAG_ACTIVITY_SINGLE_TOP,
             ],
           );
-          print('🔥 [OVERLAY_BUBBLE] Launching AndroidIntent natively...');
+          AppLogger.d('🔥 [OVERLAY_BUBBLE] Launching AndroidIntent natively...');
           await intent.launch();
           await Future.delayed(const Duration(milliseconds: 300));
           await FlutterOverlayWindow.closeOverlay();

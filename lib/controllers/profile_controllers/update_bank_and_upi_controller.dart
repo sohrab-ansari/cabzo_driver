@@ -1,7 +1,8 @@
-import 'package:nzcu_driver/modals/profile_modals/update_bank_and_upi_response.dart';
+﻿import 'package:nzcu_driver/modals/profile_modals/update_bank_and_upi_response.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class UpdateBankAndUpiController extends GetxController {
   // Change to Rx<HomeModalResponse?> and use .obs
@@ -17,7 +18,7 @@ class UpdateBankAndUpiController extends GetxController {
 
     required dynamic upiId,
   }) async {
-    print("driveridd  called");
+    AppLogger.d("driveridd  called");
 
     // Set loading state
     isLoading.value = true;
@@ -32,13 +33,13 @@ class UpdateBankAndUpiController extends GetxController {
             upiId: upiId,
           );
 
-      print("API Response: ${res.success}");
+      AppLogger.d("API Response: ${res.success}");
 
       if (res.success == true) {
-        print("upiiii  data fetched successfully");
+        AppLogger.d("upiiii  data fetched successfully");
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch home data';
-        print("Error: ${errorMessage.value}");
+        AppLogger.d("Error: ${errorMessage.value}");
         // Only show snackbar if context is available
         if (Get.isSnackbarOpen == false) {
           CustomToast.showError(errorMessage.value);
@@ -46,7 +47,7 @@ class UpdateBankAndUpiController extends GetxController {
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
-      print("Exception: $e");
+      AppLogger.d("Exception: $e");
       // Only show snackbar if context is available
       if (Get.isSnackbarOpen == false) {
         CustomToast.showError(errorMessage.value);
@@ -68,7 +69,7 @@ class UpdateBankAndUpiController extends GetxController {
 
     required dynamic accountHolderName,
   }) async {
-    print("driveridd  called");
+    AppLogger.d("driveridd  called");
 
     // Set loading state
     isLoading.value = true;
@@ -85,18 +86,18 @@ class UpdateBankAndUpiController extends GetxController {
             ifscCode: ifscCode,
           );
 
-      print("API Response: ${res.success}");
+      AppLogger.d("API Response: ${res.success}");
 
       if (res.success == true) {
-        print("bank update data fetched successfully");
+        AppLogger.d("bank update data fetched successfully");
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch home data';
-        print("Error: ${errorMessage.value}");
+        AppLogger.d("Error: ${errorMessage.value}");
         CustomToast.showError(errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
-      print("Exception: $e"); 
+      AppLogger.d("Exception: $e"); 
       // Only show snackbar if context is available
       CustomToast.showError(errorMessage.value);
     } finally {
@@ -106,7 +107,7 @@ class UpdateBankAndUpiController extends GetxController {
   }
 
   Future<void> delete_bank_upi_method({required dynamic accountid}) async {
-    print("delete_bank_upi_method called with accountid: $accountid");
+    AppLogger.d("delete_bank_upi_method called with accountid: $accountid");
 
     // Set loading state
     isLoading.value = true;
@@ -119,21 +120,21 @@ class UpdateBankAndUpiController extends GetxController {
             accountid: accountid, // Make sure parameter name matches
           );
 
-      print("API Response success: ${res.success}");
-      print("API Response message: ${res.message}");
+      AppLogger.d("API Response success: ${res.success}");
+      AppLogger.d("API Response message: ${res.message}");
 
       if (res.success == true) {
-        print("bank and upi deleted successfully");
+        AppLogger.d("bank and upi deleted successfully");
       } else {
         errorMessage.value = res.message ?? 'Failed to delete';
-        print("Error: ${errorMessage.value}");
+        AppLogger.d("Error: ${errorMessage.value}");
 
         // Only show snackbar if context is available
         CustomToast.showError(errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
-      print("Exception in delete_bank_upi_method: $e");
+      AppLogger.d("Exception in delete_bank_upi_method: $e");
 
       // Only show snackbar if context is available
       CustomToast.showError(errorMessage.value);

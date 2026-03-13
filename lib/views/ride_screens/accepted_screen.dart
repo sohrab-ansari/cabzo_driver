@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:nzcu_driver/controllers/chart_id_controller/chatid_controller.dart';
@@ -27,6 +27,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/services.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class ArrivingClient extends StatefulWidget {
   final bool? typeCheck;
@@ -102,7 +103,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
     image_get_from_shared();
 
     _isScreenActive = true;
-    print('🚗 ArrivingClient initState called');
+    AppLogger.d('🚗 ArrivingClient initState called');
 
     // Set up navigation listener
     _setupNavigationListener();
@@ -112,7 +113,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
       await _initializeAll();
     });
 
-    print("hellooooo_stepss_screen  ${stepperController.activeStep}");
+    AppLogger.d("hellooooo_stepss_screen  ${stepperController.activeStep}");
   }
 
   dynamic profileImage = "";
@@ -124,7 +125,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
         profileImage = prefs.getString('active_ride_profile_image') ?? "";
       });
     }
-    print("profileImage>>>> : $profileImage");
+    AppLogger.d("profileImage>>>> : $profileImage");
   }
 
   void _setupNavigationListener() {
@@ -138,7 +139,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
           clearAll: orderUpdateController.clearAll,
         );
 
-        print("Navigation command: ${command}");
+        AppLogger.d("Navigation command: ${command}");
         _handleNavigation(command);
         orderUpdateController.clearNavigation();
       }
@@ -154,11 +155,11 @@ class _ArrivingClientState extends State<ArrivingClient> {
   }
 
   void myridedataprint() {
-    print("my_datat_print ${widget.rideData}");
+    AppLogger.d("my_datat_print ${widget.rideData}");
   }
 
   void _onStepChanged(int step) {
-    print('🔄 Stepper step changed to: $step');
+    AppLogger.d('🔄 Stepper step changed to: $step');
     if (step == 2) {
       // Trip started - switch to driver → drop polyline
       _routeCoordinates.clear();
@@ -180,9 +181,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
     if (orderId != null) {
       try {
         await chartidController.getchartidmethod(orderid: orderId);
-        print('✅ Chart ID method called for order: $orderId');
+        AppLogger.d('✅ Chart ID method called for order: $orderId');
       } catch (e) {
-        print('❌ Error getting chart ID: $e');
+        AppLogger.d('❌ Error getting chart ID: $e');
       }
     }
   }
@@ -190,15 +191,15 @@ class _ArrivingClientState extends State<ArrivingClient> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    print('🔄 ArrivingClient didChangeDependencies called');
+    AppLogger.d('🔄 ArrivingClient didChangeDependencies called');
 
     if (_isScreenActive) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!_isInitialized) {
-          print('📍 First time initialization');
+          AppLogger.d('📍 First time initialization');
           await _initializeAll();
         } else {
-          print('🔄 Refreshing screen on return');
+          AppLogger.d('🔄 Refreshing screen on return');
           await _refreshOnReturn();
         }
       });
@@ -207,7 +208,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
   @override
   void dispose() {
-    print('🗑️ ArrivingClient dispose called');
+    AppLogger.d('🗑️ ArrivingClient dispose called');
     _isScreenActive = false;
 
     // Cancel all timers and subscriptions first
@@ -231,7 +232,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
         ButtonStateManager.clearState('complete_button');
       } catch (e) {
         // Silently catch errors during disposal
-        print('⚠️ Error clearing button states: $e');
+        AppLogger.d('⚠️ Error clearing button states: $e');
       }
     });
 
@@ -260,12 +261,12 @@ class _ArrivingClientState extends State<ArrivingClient> {
   }
 
   Future<void> _pauseLocationTracking() async {
-    print('⏸️ Pausing location tracking');
+    AppLogger.d('⏸️ Pausing location tracking');
     _positionStreamSubscription?.pause();
   }
 
   Future<void> _resumeLocationTracking() async {
-    print('▶️ Resuming location tracking');
+    AppLogger.d('▶️ Resuming location tracking');
     if (_positionStreamSubscription != null && _isScreenActive) {
       _positionStreamSubscription?.resume();
     } else if (_isScreenActive) {
@@ -275,12 +276,12 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
   Future<void> _initializeAll() async {
     if (_isInitialized) {
-      print('✅ Already initialized, skipping...');
+      AppLogger.d('✅ Already initialized, skipping...');
       return;
     }
 
     try {
-      print('🔄 Initializing ArrivingClient...');
+      AppLogger.d('🔄 Initializing ArrivingClient...');
 
       _extractAndStoreRideData();
       await _loadCustomMarkers();
@@ -289,9 +290,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
       _setMarkers();
 
       _isInitialized = true;
-      print('✅ ArrivingClient initialized successfully');
+      AppLogger.d('✅ ArrivingClient initialized successfully');
     } catch (e) {
-      print('❌ Error initializing: $e');
+      AppLogger.d('❌ Error initializing: $e');
       if (mounted) {
         setState(() {
           _locationError = true;
@@ -301,7 +302,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
   }
 
   Future<void> _refreshOnReturn() async {
-    print('🔄 Refreshing on return...');
+    AppLogger.d('🔄 Refreshing on return...');
     if (!mounted || !_isScreenActive) return;
 
     // Hide keyboard if visible
@@ -329,14 +330,14 @@ class _ArrivingClientState extends State<ArrivingClient> {
       _updatePolylines();
       _fitMapToAllMarkers();
 
-      print('✅ Screen refresh complete');
+      AppLogger.d('✅ Screen refresh complete');
     }
   }
 
   void _forceRefreshMap() {
     if (!mounted || !_isScreenActive) return;
 
-    print('🔄 Force refreshing map...');
+    AppLogger.d('🔄 Force refreshing map...');
 
     setState(() {
       markers.clear();
@@ -356,7 +357,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
   }
 
   void _extractAndStoreRideData() {
-    print("📦 Ride Data Received: ${widget.rideData}");
+    AppLogger.d("📦 Ride Data Received: ${widget.rideData}");
 
     // Extract rider data - handle both nested 'rider' object and flat structure
     final riderData = widget.rideData?['rider'];
@@ -414,8 +415,8 @@ class _ArrivingClientState extends State<ArrivingClient> {
     };
 
     _extractCoordinates();
-    print('✅ Ride data extracted successfully');
-    print('📋 Final extracted data: $_rideData');
+    AppLogger.d('✅ Ride data extracted successfully');
+    AppLogger.d('📋 Final extracted data: $_rideData');
   }
 
   void _extractCoordinates() {
@@ -429,7 +430,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
           final lng = pickup['longitude']?.toDouble();
           if (lat != null && lng != null) {
             _rideData!['pickupCoordinates'] = LatLng(lat, lng);
-            print('📍 Pickup: from pickup.lat/lng: $lat, $lng');
+            AppLogger.d('📍 Pickup: from pickup.lat/lng: $lat, $lng');
           }
           // 2. Try map with GeoJSON 'coordinates' list
           else if (pickup['coordinates'] != null) {
@@ -443,12 +444,12 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
               if (isLatLngFormat) {
                 _rideData!['pickupCoordinates'] = LatLng(coord0, coord1);
-                print(
+                AppLogger.d(
                   '📍 Pickup: [lat, lng] format from pickup.coordinates: $coord0, $coord1',
                 );
               } else {
                 _rideData!['pickupCoordinates'] = LatLng(coord1, coord0);
-                print(
+                AppLogger.d(
                   '📍 Pickup: GeoJSON [lng, lat] from pickup.coordinates: $coord1, $coord0',
                 );
               }
@@ -472,11 +473,11 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
           if (isLatLngFormat) {
             _rideData!['pickupCoordinates'] = LatLng(coord0, coord1);
-            print('📍 Pickup: [lat, lng] format: $coord0, $coord1');
+            AppLogger.d('📍 Pickup: [lat, lng] format: $coord0, $coord1');
           } else {
             // GeoJSON format: [longitude, latitude]
             _rideData!['pickupCoordinates'] = LatLng(coord1, coord0);
-            print('📍 Pickup: GeoJSON [lng, lat] format: $coord1, $coord0');
+            AppLogger.d('📍 Pickup: GeoJSON [lng, lat] format: $coord1, $coord0');
           }
         } else if (coords is Map) {
           // Safety net: coordinates stored as {latitude, longitude} Map
@@ -484,7 +485,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
           final lng = coords['longitude']?.toDouble();
           if (lat != null && lng != null) {
             _rideData!['pickupCoordinates'] = LatLng(lat, lng);
-            print('📍 Pickup: coords Map format: $lat, $lng');
+            AppLogger.d('📍 Pickup: coords Map format: $lat, $lng');
           }
         }
       }
@@ -500,7 +501,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
           final lng = destination['longitude']?.toDouble();
           if (lat != null && lng != null) {
             _rideData!['dropoffCoordinates'] = LatLng(lat, lng);
-            print('📍 Drop: from destination.lat/lng: $lat, $lng');
+            AppLogger.d('📍 Drop: from destination.lat/lng: $lat, $lng');
           }
           // 2. Try map with GeoJSON 'coordinates' list
           else if (destination['coordinates'] != null) {
@@ -514,12 +515,12 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
               if (isLatLngFormat) {
                 _rideData!['dropoffCoordinates'] = LatLng(coord0, coord1);
-                print(
+                AppLogger.d(
                   '📍 Drop: [lat, lng] format from destination.coordinates: $coord0, $coord1',
                 );
               } else {
                 _rideData!['dropoffCoordinates'] = LatLng(coord1, coord0);
-                print(
+                AppLogger.d(
                   '📍 Drop: GeoJSON [lng, lat] from destination.coordinates: $coord1, $coord0',
                 );
               }
@@ -542,11 +543,11 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
           if (isLatLngFormat) {
             _rideData!['dropoffCoordinates'] = LatLng(coord0, coord1);
-            print('📍 Drop: [lat, lng] format: $coord0, $coord1');
+            AppLogger.d('📍 Drop: [lat, lng] format: $coord0, $coord1');
           } else {
             // GeoJSON format: [longitude, latitude]
             _rideData!['dropoffCoordinates'] = LatLng(coord1, coord0);
-            print('📍 Drop: GeoJSON [lng, lat] format: $coord1, $coord0');
+            AppLogger.d('📍 Drop: GeoJSON [lng, lat] format: $coord1, $coord0');
           }
         } else if (coords is Map) {
           // Safety net: coordinates stored as {latitude, longitude} Map
@@ -554,26 +555,26 @@ class _ArrivingClientState extends State<ArrivingClient> {
           final lng = coords['longitude']?.toDouble();
           if (lat != null && lng != null) {
             _rideData!['dropoffCoordinates'] = LatLng(lat, lng);
-            print('📍 Drop: coords Map format: $lat, $lng');
+            AppLogger.d('📍 Drop: coords Map format: $lat, $lng');
           }
         }
       }
 
       // ── Fallbacks (logged as warnings) ────────────────────────────────────
       if (_rideData!['pickupCoordinates'] == null) {
-        print('⚠️ Pickup coordinates not found in any field — using fallback');
+        AppLogger.d('⚠️ Pickup coordinates not found in any field — using fallback');
         _rideData!['pickupCoordinates'] = const LatLng(23.2599, 77.4126);
       }
 
       if (_rideData!['dropoffCoordinates'] == null) {
-        print('⚠️ Drop coordinates not found in any field — using fallback');
+        AppLogger.d('⚠️ Drop coordinates not found in any field — using fallback');
         _rideData!['dropoffCoordinates'] = const LatLng(18.5204, 73.8567);
       }
 
-      print('📍 Pickup coordinates: ${_rideData!['pickupCoordinates']}');
-      print('📍 Drop coordinates: ${_rideData!['dropoffCoordinates']}');
+      AppLogger.d('📍 Pickup coordinates: ${_rideData!['pickupCoordinates']}');
+      AppLogger.d('📍 Drop coordinates: ${_rideData!['dropoffCoordinates']}');
     } catch (e) {
-      print("❌ Error extracting coordinates: $e");
+      AppLogger.d("❌ Error extracting coordinates: $e");
       _rideData!['pickupCoordinates'] = const LatLng(23.2599, 77.4126);
       _rideData!['dropoffCoordinates'] = const LatLng(18.5204, 73.8567);
     }
@@ -618,7 +619,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
         _bikeMarkerIcon = BitmapDescriptor.fromBytes(
           bikeBytes.buffer.asUint8List(),
         );
-        print('✅ Bike marker icon loaded');
+        AppLogger.d('✅ Bike marker icon loaded');
       }
 
       _pickupMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(
@@ -629,7 +630,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
         BitmapDescriptor.hueRed,
       );
     } catch (e) {
-      print('❌ Error loading markers: $e');
+      AppLogger.d('❌ Error loading markers: $e');
       _bikeMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(
         BitmapDescriptor.hueBlue,
       );
@@ -644,7 +645,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
   Future<void> _startLocationTracking() async {
     if (!await _requestLocationPermission()) {
-      print('❌ Location permission denied');
+      AppLogger.d('❌ Location permission denied');
       return;
     }
 
@@ -668,7 +669,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
         _locationError = false;
       });
 
-      print('📍 Initial location: ${position.latitude}, ${position.longitude}');
+      AppLogger.d('📍 Initial location: ${position.latitude}, ${position.longitude}');
 
       if (_rideData?['pickupCoordinates'] != null) {
         final pickupCoords = _rideData!['pickupCoordinates'] as LatLng;
@@ -680,7 +681,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
         );
       }
     } catch (e) {
-      print('❌ Error getting initial position: $e');
+      AppLogger.d('❌ Error getting initial position: $e');
       if (_isScreenActive && mounted) {
         setState(() => _locationError = true);
       }
@@ -717,7 +718,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
             _animateMarkerTo(newLocation);
           },
           onError: (error) {
-            print('❌ Location stream error: $error');
+            AppLogger.d('❌ Location stream error: $error');
             if (_isScreenActive && mounted) {
               setState(() => _locationError = true);
             }
@@ -775,7 +776,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
       if (angleDiff.abs() > 130) {
         // Driver made a U-turn — clear stale polyline immediately so the
         // V-shape disappears, then re-fetch fresh route.
-        print('🔄 U-turn detected (${angleDiff.abs().toStringAsFixed(0)}°) — clearing polyline');
+        AppLogger.d('🔄 U-turn detected (${angleDiff.abs().toStringAsFixed(0)}°) — clearing polyline');
         _immediateReFetchRoute();
       }
     }
@@ -1061,7 +1062,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
         '&key=$GOOGLE_API_KEY',
       );
 
-      print(
+      AppLogger.d(
         '🛣️ Re-fetching route from driver to ${isPickup ? "pickup" : "drop"}...',
       );
       final response = await http.get(url);
@@ -1082,12 +1083,12 @@ class _ArrivingClientState extends State<ArrivingClient> {
               }
             });
             _updatePolylines();
-            print('✅ Route re-fetched (${newCoordinates.length} points)');
+            AppLogger.d('✅ Route re-fetched (${newCoordinates.length} points)');
           }
         }
       }
     } catch (e) {
-      print('❌ Error re-fetching route: $e');
+      AppLogger.d('❌ Error re-fetching route: $e');
     } finally {
       _isFetchingDirections = false;
     }
@@ -1221,7 +1222,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
     // Need at least 2 distinct points to make a valid bounds rectangle.
     // If GPS isn't ready yet, retry after the first location fix arrives.
     if (allPoints.length < 2) {
-      print('⏳ _fitMapToAllMarkers: waiting for GPS — only ${allPoints.length} point(s)');
+      AppLogger.d('⏳ _fitMapToAllMarkers: waiting for GPS — only ${allPoints.length} point(s)');
       return; // _setMarkers() will retry until _initialFitDone is true
     }
 
@@ -1241,7 +1242,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
           );
           _initialFitDone = true;
         } catch (e) {
-          print('❌ Error animating camera: $e');
+          AppLogger.d('❌ Error animating camera: $e');
         }
       }
     });
@@ -1336,13 +1337,13 @@ class _ArrivingClientState extends State<ArrivingClient> {
       return _decodePolyline(route['overview_polyline']['points']);
     }
 
-    print('📍 Detailed polyline has ${allPoints.length} points');
+    AppLogger.d('📍 Detailed polyline has ${allPoints.length} points');
     return allPoints;
   }
 
   Future<void> _getDirections() async {
     if (_rideData?['pickupCoordinates'] == null) {
-      print('⚠️ Cannot get directions: pickup coordinates missing');
+      AppLogger.d('⚠️ Cannot get directions: pickup coordinates missing');
       return;
     }
 
@@ -1357,7 +1358,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
           '&key=$GOOGLE_API_KEY',
         );
 
-        print('🛣️ Fetching route from driver to pickup...');
+        AppLogger.d('🛣️ Fetching route from driver to pickup...');
         final response = await http.get(url);
 
         if (response.statusCode == 200) {
@@ -1366,14 +1367,14 @@ class _ArrivingClientState extends State<ArrivingClient> {
           if (data['routes'] != null && data['routes'].isNotEmpty) {
             final route = data['routes'][0];
             _routeCoordinates = _getDetailedPolylineFromSteps(route);
-            print(
+            AppLogger.d(
               '🛣️ Route Driver → Pickup calculated (${_routeCoordinates.length} points)',
             );
           } else {
-            print('⚠️ No routes found from driver to pickup');
+            AppLogger.d('⚠️ No routes found from driver to pickup');
           }
         } else {
-          print('⚠️ Directions API error: ${response.statusCode}');
+          AppLogger.d('⚠️ Directions API error: ${response.statusCode}');
         }
       }
 
@@ -1381,7 +1382,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
         _updatePolylines();
       }
     } catch (e) {
-      print('❌ Error fetching directions: $e');
+      AppLogger.d('❌ Error fetching directions: $e');
     }
   }
 
@@ -1432,7 +1433,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
     return GoogleMap(
       onMapCreated: (GoogleMapController controller) {
         _mapController = controller;
-        print('✅ Google Map created');
+        AppLogger.d('✅ Google Map created');
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (_isScreenActive && mounted) {
@@ -1458,18 +1459,18 @@ class _ArrivingClientState extends State<ArrivingClient> {
   }
 
   Future<void> _navigateToOtpScreen() async {
-    print('🔄 Navigating to OTP screen...');
+    AppLogger.d('🔄 Navigating to OTP screen...');
 
     // Check if we have valid ride data
     if (_rideData == null) {
-      print('❌ Cannot navigate to OTP: No ride data available');
+      AppLogger.d('❌ Cannot navigate to OTP: No ride data available');
       CustomToast.showError('Cannot navigate: No ride data');
       return;
     }
 
     final orderId = _rideData!['orderId'];
     if (orderId == null || orderId == 'N/A') {
-      print('❌ Cannot navigate to OTP: Invalid order ID');
+      AppLogger.d('❌ Cannot navigate to OTP: Invalid order ID');
       CustomToast.showError('Invalid order ID');
       return;
     }
@@ -1477,7 +1478,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
     // Pause location tracking
     await _pauseLocationTracking();
 
-    print("📤 Sending ride data to OTP screen: $_rideData");
+    AppLogger.d("📤 Sending ride data to OTP screen: $_rideData");
 
     // Navigate to OTP screen using GetX
     try {
@@ -1487,9 +1488,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
         duration: const Duration(milliseconds: 300),
       );
 
-      print('↩️ Returned from OTP screen');
+      AppLogger.d('↩️ Returned from OTP screen');
     } catch (e) {
-      print('❌ Error navigating to OTP screen: $e');
+      AppLogger.d('❌ Error navigating to OTP screen: $e');
       if (_isScreenActive && mounted) {
         CustomToast.showError('Failed to navigate to OTP');
         await _resumeLocationTracking(); // Resume tracking on error
@@ -1499,7 +1500,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
   
 
   void _handleNavigation(NavigationCommand command) {
-    print("Navigation command: ${command}");
+    AppLogger.d("Navigation command: ${command}");
     if (!mounted || !_isScreenActive) return;
 
     switch (command.route) {
@@ -1517,7 +1518,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
       case 'arriving_client': // Already on arriving client screen
         break;
       default:
-        print('⚠️ Unknown navigation route: ${command.route}');
+        AppLogger.d('⚠️ Unknown navigation route: ${command.route}');
         break;
     }
   }
@@ -1786,7 +1787,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
                   clipBehavior: Clip.none,
                   children: [
                     _circleImage("assets/images/mess.png", () async {
-                      print(
+                      AppLogger.d(
                         "📱 Chat button tapped with ride data: ${widget.rideData}",
                       );
 

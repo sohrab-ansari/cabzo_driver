@@ -1,8 +1,9 @@
-import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
+﻿import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/modals/profile_modals/get_promo_code_data.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class GetPromoCodeController extends GetxController {
   Rx<Getpromocodedata?> cashResponse = Rx<Getpromocodedata?>(null);
@@ -22,16 +23,16 @@ class GetPromoCodeController extends GetxController {
       cashResponse.value = response;
 
       if (response.success == true) {
-        print("promo code data successful");
+        AppLogger.d("promo code data successful");
       } else {
         errorMessage.value = response.message ?? 'promo code Please try again.';
-        print("❌ getPromoCode failed: ${errorMessage.value}");
+        AppLogger.d("❌ getPromoCode failed: ${errorMessage.value}");
 
         CustomToast.showError(errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
-      print("❌ Exception in promo code d: $e");
+      AppLogger.d("❌ Exception in promo code d: $e");
 
       CustomToast.showError('Something went wrong. Please try again.');
     } finally {

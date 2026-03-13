@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 import 'package:nzcu_driver/controllers/home_controllers/driver_toggle_duty_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
@@ -25,6 +25,7 @@ import 'package:nzcu_driver/services/apiservices/socket_manager.dart'
     hide LatLng;
 import 'package:nzcu_driver/services/background_service.dart';
 import 'package:nzcu_driver/services/overlay_service.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool? isOnDuty;
@@ -130,11 +131,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
       profileimage = prefs.getString("driver_image");
     });
-    print("Driver Name from SharedPreferences: $driverName");
+    AppLogger.d("Driver Name from SharedPreferences: $driverName");
   }
 
   void handleonline() {
-    print(
+    AppLogger.d(
       "online status in home screen is ::::::::::::::::::::::::::: ${widget.isOnDuty}, SocketManager is: ${socketManager.isOnDuty}",
     );
 
@@ -148,16 +149,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     } else if (widget.isOnDuty == false && socketManager.isOnDuty) {
       // Avoid forcing offline if user manually went online and switched tabs
       // The socketManager is the single source of truth for online status.
-      print(
+      AppLogger.d(
         "ℹ️ Ignoring widget.isOnDuty=false to preserve true SocketManager state",
       );
     }
 
     if (socketManager.isOnDuty) {
-      print("✅ Driver is ONLINE");
+      AppLogger.d("✅ Driver is ONLINE");
       _updateDriverMarker();
     } else {
-      print("🔴 Driver is OFFLINE");
+      AppLogger.d("🔴 Driver is OFFLINE");
     }
   }
 
@@ -195,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _setupSocketCallbacks() {
     socketManager.onNewRide = (rideData) {
-      print("hellooooooooooooooooooo>>>>>>>>>>>>>>>>  11111111111111111111");
+      AppLogger.d("hellooooooooooooooooooo>>>>>>>>>>>>>>>>  11111111111111111111");
 
       _processRideRequest(rideData);
     };
@@ -251,12 +252,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           );
         }
 
-        print(
+        AppLogger.d(
           '📍 Location updated: ${position.latitude}, ${position.longitude}',
         );
       },
       onError: (error) {
-        print('⚠️ Location error: $error');
+        AppLogger.d('⚠️ Location error: $error');
       },
     );
   }
@@ -329,7 +330,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _processRideRequest(Map<String, dynamic> rideData) {
     if (!mounted) return;
-    print('🚕 Processing ride request... in home screen..');
+    AppLogger.d('🚕 Processing ride request... in home screen..');
 
     // Navigator.push(
     //   context,
@@ -377,7 +378,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     if (state == AppLifecycleState.paused) {
       // App is going to background (minimized)
-      print('⏸️ [HomeScreen] App moved to BACKGROUND');
+      AppLogger.d('⏸️ [HomeScreen] App moved to BACKGROUND');
       BackgroundService.notifyAppState('Background');
 
       // If driver is online, ensure background service is running
@@ -386,7 +387,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
     } else if (state == AppLifecycleState.resumed) {
       // App is coming back to foreground
-      print('▶️ [HomeScreen] App moved to FOREGROUND');
+      AppLogger.d('▶️ [HomeScreen] App moved to FOREGROUND');
       BackgroundService.notifyAppState('Foreground');
       BackgroundService.sendHeartbeat();
 
@@ -401,7 +402,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// Ensure foreground task is running when app goes to background
   Future<void> _ensureBackgroundServiceRunning() async {
     if (socketManager.isOnDuty) {
-      print(
+      AppLogger.d(
         '🚀 [HomeScreen] Ensuring online status (Native Service handled by SocketManager)...',
       );
       // socketManager.goOnline(); // Optional: idempotent call
@@ -417,9 +418,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       final bgRideInProgress = prefs.getBool("is_ride_in_progress") ?? false;
       final bgActiveRideId = prefs.getString("active_ride_id") ?? "";
 
-      print('🔄 [HomeScreen] Syncing from background:');
-      print('   - Ride in progress: $bgRideInProgress');
-      print('   - Active ride ID: $bgActiveRideId');
+      AppLogger.d('🔄 [HomeScreen] Syncing from background:');
+      AppLogger.d('   - Ride in progress: $bgRideInProgress');
+      AppLogger.d('   - Active ride ID: $bgActiveRideId');
 
       // Refresh vehicle data (may have been updated)
       await socketManager.refreshVehicleData();
@@ -433,7 +434,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
         // Ensure socket is still connected (reconnect if needed)
         if (!socketManager.isSocketConnected) {
-          print(
+          AppLogger.d(
             '🔌 [HomeScreen] Socket disconnected while in bg, reconnecting...',
           );
           await socketManager.connectSocket();
@@ -450,7 +451,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         setState(() {});
       }
     } catch (e) {
-      print('⚠️ [HomeScreen] Error syncing from background: $e');
+      AppLogger.d('⚠️ [HomeScreen] Error syncing from background: $e');
     }
   }
 
@@ -471,9 +472,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         width: 150,
         height: 150,
       );
-      print('✅ Custom bike marker icon loaded');
+      AppLogger.d('✅ Custom bike marker icon loaded');
     } catch (e) {
-      print('❌ Error loading custom bike marker: $e');
+      AppLogger.d('❌ Error loading custom bike marker: $e');
       _bikeMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(
         BitmapDescriptor.hueBlue,
       );
@@ -483,9 +484,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Future<void> _loadVehicleIcons() async {
     try {
       _vehicleIcons = await MapHelper.loadVehicleIcons(iconSize: 70);
-      print('✅ Vehicle icons loaded');
+      AppLogger.d('✅ Vehicle icons loaded');
     } catch (e) {
-      print('❌ Error loading vehicle icons: $e');
+      AppLogger.d('❌ Error loading vehicle icons: $e');
     }
   }
 
@@ -493,8 +494,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
 
-    print("hellllllll discoonect22 ${socketManager.isSocketConnected}");
-    print("hellllllll discoonect33333 ${widget.isFirstLaunch}");
+    AppLogger.d("hellllllll discoonect22 ${socketManager.isSocketConnected}");
+    AppLogger.d("hellllllll discoonect33333 ${widget.isFirstLaunch}");
     // Show loading screen only while basic initialization (icons/permissions) is happening
     if (_isEffectiveFirstLaunch) {
       return _buildLoadingScreen();
@@ -817,7 +818,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               //  KYCNoticeCardWidget(isKycCompleted: true,
 
               // onContinuePressed: (){
-              //   print("Continue Pressed");
+              //   AppLogger.d("Continue Pressed");
 
               // },
               // ),
@@ -1194,7 +1195,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       final earnings = homeData?.todayStats?.earnings;
       final rides = homeData?.todayStats?.rides;
 
-      print("myyyy_dattatt  ${earnings?.total}");
+      AppLogger.d("myyyy_dattatt  ${earnings?.total}");
       // Format currency
       String formatCurrency(double? amount) {
         return '₹${(amount ?? 0).toStringAsFixed(0)}';

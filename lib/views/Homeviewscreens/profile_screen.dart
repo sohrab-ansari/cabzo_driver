@@ -1,4 +1,4 @@
-import 'package:nzcu_driver/modals/home_modals/ride_history_response.dart';
+﻿import 'package:nzcu_driver/modals/home_modals/ride_history_response.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/colors/colors_list.dart';
@@ -21,6 +21,7 @@ import 'package:nzcu_driver/views/profile_screens/terms_condition.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -84,9 +85,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       driverphone = prefs.getString("driver_mobile");
       profileimage = prefs.getString("driver_image");
     });
-    print("Driver__Name from SharedPreferences: $driverName");
-    print("Driver__Phone from SharedPreferences: $driverphone");
-    print("Driver__Image from SharedPreferences: $profileimage");
+    AppLogger.d("Driver__Name from SharedPreferences: $driverName");
+    AppLogger.d("Driver__Phone from SharedPreferences: $driverphone");
+    AppLogger.d("Driver__Image from SharedPreferences: $profileimage");
   }
 
   @override

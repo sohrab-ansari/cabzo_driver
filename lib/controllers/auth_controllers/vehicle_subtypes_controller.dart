@@ -1,10 +1,11 @@
-import 'package:nzcu_driver/services/apiservices/auth_api_service.dart';
+﻿import 'package:nzcu_driver/services/apiservices/auth_api_service.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/modals/auth_modals/get_all_sub_vehicle_categories_response.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class VehicleSubtypesController extends GetxController {
   // Rx variables for state management
@@ -83,7 +84,7 @@ class VehicleSubtypesController extends GetxController {
       cashResponse.value = response;
 
       if (response.success == true) {
-        print("✅ Vehicle sub-types fetched successfully - Page: $fetchPage");
+        AppLogger.d("✅ Vehicle sub-types fetched successfully - Page: $fetchPage");
 
         // Update pagination info from response
         if (response.pagination != null) {
@@ -92,7 +93,7 @@ class VehicleSubtypesController extends GetxController {
           totalItems.value = response.pagination!.total ?? 0;
           hasMorePages.value = currentPage.value < totalPages.value;
 
-          print(
+          AppLogger.d(
             "📊 Pagination - Page: ${currentPage.value}/${totalPages.value}, Total: ${totalItems.value}, HasMore: ${hasMorePages.value}",
           );
         }
@@ -106,14 +107,14 @@ class VehicleSubtypesController extends GetxController {
             // Replace list for fresh fetch
             allVehicleSubTypes.assignAll(response.data!);
           }
-          print("📦 Total sub-types in list: ${allVehicleSubTypes.length}");
+          AppLogger.d("📦 Total sub-types in list: ${allVehicleSubTypes.length}");
         }
       } else {
         // Fetch failed
         errorMessage.value =
             response.message ??
             'Vehicle sub-types fetch failed. Please try again.';
-        print("❌ Vehicle sub-types failed: ${errorMessage.value}");
+        AppLogger.d("❌ Vehicle sub-types failed: ${errorMessage.value}");
 
         // Show error snackbar only for initial load
         if (!isLoadMore) {
@@ -123,7 +124,7 @@ class VehicleSubtypesController extends GetxController {
     } catch (e) {
       // Handle exceptions
       errorMessage.value = 'An error occurred: $e';
-      print("❌ Exception in vehicle sub-types fetch: $e");
+      AppLogger.d("❌ Exception in vehicle sub-types fetch: $e");
 
       // Show error snackbar only for initial load
       if (!isLoadMore) {

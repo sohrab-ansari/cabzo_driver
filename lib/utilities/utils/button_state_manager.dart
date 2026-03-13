@@ -1,5 +1,6 @@
-
+﻿
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class ButtonStateManager {
   static final RxMap<String, RxBool> _loadingStates = <String, RxBool>{}.obs;
@@ -31,7 +32,7 @@ class ButtonStateManager {
         }
       } catch (e) {
         // Silently catch any errors during disposal
-        print('⚠️ Error clearing button state for $buttonId: $e');
+        AppLogger.d('⚠️ Error clearing button state for $buttonId: $e');
       }
     });
   }
@@ -42,7 +43,7 @@ class ButtonStateManager {
       try {
         _loadingStates.clear();
       } catch (e) {
-        print('⚠️ Error clearing all button states: $e');
+        AppLogger.d('⚠️ Error clearing all button states: $e');
       }
     });
   }

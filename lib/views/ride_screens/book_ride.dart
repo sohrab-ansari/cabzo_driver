@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:nzcu_driver/services/apiservices/places_api_service.dart';
 import 'package:nzcu_driver/controllers/book_ride_controller/create_By_driver_controller.dart';
 import 'package:nzcu_driver/modals/home_modals/place_prediction.dart';
@@ -14,6 +14,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
 import 'package:nzcu_driver/views/ride_screens/map_location_picker.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class BookRide extends StatefulWidget {
   const BookRide({super.key});
@@ -112,7 +113,7 @@ class _BookRideState extends State<BookRide> {
         pickupError = null;
       });
     } catch (e) {
-      print("❌ Error fetching location: $e");
+      AppLogger.d("❌ Error fetching location: $e");
       setState(() {
         isLoadingLocation = false;
         pickupError = "Could not fetch location";

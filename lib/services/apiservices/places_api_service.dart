@@ -1,6 +1,7 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:nzcu_driver/modals/home_modals/place_prediction.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class PlacesApiService {
   // Same API key as in AndroidManifest.xml
@@ -16,7 +17,7 @@ class PlacesApiService {
         '$_baseUrl/autocomplete/json?input=$query&key=$_apiKey&components=country:in',
       );
 
-      print('🔍 Places Autocomplete: $query');
+      AppLogger.d('🔍 Places Autocomplete: $query');
 
       final response = await http.get(url);
 
@@ -28,18 +29,18 @@ class PlacesApiService {
               .map((p) => PlacePrediction.fromJson(p))
               .toList();
 
-          print('✅ Found ${predictions.length} places');
+          AppLogger.d('✅ Found ${predictions.length} places');
           return predictions;
         } else {
-          print('⚠️ Places API status: ${data['status']}');
+          AppLogger.d('⚠️ Places API status: ${data['status']}');
           return [];
         }
       } else {
-        print('❌ Places API error: ${response.statusCode}');
+        AppLogger.d('❌ Places API error: ${response.statusCode}');
         return [];
       }
     } catch (e) {
-      print('❌ Places API exception: $e');
+      AppLogger.d('❌ Places API exception: $e');
       return [];
     }
   }
@@ -51,7 +52,7 @@ class PlacesApiService {
         '$_baseUrl/details/json?place_id=$placeId&fields=geometry,formatted_address,name&key=$_apiKey',
       );
 
-      print('📍 Getting place details for: $placeId');
+      AppLogger.d('📍 Getting place details for: $placeId');
 
       final response = await http.get(url);
 
@@ -60,20 +61,20 @@ class PlacesApiService {
 
         if (data['status'] == 'OK') {
           final details = PlaceDetails.fromJson(data);
-          print(
+          AppLogger.d(
             '✅ Place details: ${details.address} (${details.lat}, ${details.lng})',
           );
           return details;
         } else {
-          print('⚠️ Place Details API status: ${data['status']}');
+          AppLogger.d('⚠️ Place Details API status: ${data['status']}');
           return null;
         }
       } else {
-        print('❌ Place Details API error: ${response.statusCode}');
+        AppLogger.d('❌ Place Details API error: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      print('❌ Place Details API exception: $e');
+      AppLogger.d('❌ Place Details API exception: $e');
       return null;
     }
   }
@@ -88,7 +89,7 @@ class PlacesApiService {
         'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=$_apiKey',
       );
 
-      print('📍 Reverse geocoding: ($lat, $lng)');
+      AppLogger.d('📍 Reverse geocoding: ($lat, $lng)');
 
       final response = await http.get(url);
 
@@ -97,18 +98,18 @@ class PlacesApiService {
 
         if (data['status'] == 'OK' && (data['results'] as List).isNotEmpty) {
           final address = data['results'][0]['formatted_address'] as String;
-          print('✅ Address: $address');
+          AppLogger.d('✅ Address: $address');
           return address;
         } else {
-          print('⚠️ Geocoding status: ${data['status']}');
+          AppLogger.d('⚠️ Geocoding status: ${data['status']}');
           return null;
         }
       } else {
-        print('❌ Geocoding error: ${response.statusCode}');
+        AppLogger.d('❌ Geocoding error: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      print('❌ Geocoding exception: $e');
+      AppLogger.d('❌ Geocoding exception: $e');
       return null;
     }
   }

@@ -1,8 +1,9 @@
-
+﻿
 
 
 import 'package:get/get.dart';
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class NotificationServiceController extends GetxController {
   // ============================================================================
@@ -22,7 +23,7 @@ class NotificationServiceController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    print('📱 [NotificationServiceController] Initializing...');
+    AppLogger.d('📱 [NotificationServiceController] Initializing...');
     _initializeNotifications();
   }
 
@@ -46,11 +47,11 @@ class NotificationServiceController extends GetxController {
       isInitialized.value = true;
       isPermissionGranted.value = fcmToken.value != null;
 
-      print('✅ [NotificationServiceController] Initialization complete');
-      print('   FCM Token: ${fcmToken.value}');
-      print('   Device ID: ${deviceId.value}');
+      AppLogger.d('✅ [NotificationServiceController] Initialization complete');
+      AppLogger.d('   FCM Token: ${fcmToken.value}');
+      AppLogger.d('   Device ID: ${deviceId.value}');
     } catch (e) {
-      print('❌ [NotificationServiceController] Initialization failed: $e');
+      AppLogger.d('❌ [NotificationServiceController] Initialization failed: $e');
     } finally {
       isLoading.value = false;
     }
@@ -70,7 +71,7 @@ class NotificationServiceController extends GetxController {
   Future<void> _checkInitialMessage() async {
     final message = await NotificationService.instance.getInitialMessage();
     if (message != null) {
-      print('🚀 [NotificationServiceController] App opened from notification');
+      AppLogger.d('🚀 [NotificationServiceController] App opened from notification');
       _handleNotificationData(message.data);
     }
   }
@@ -92,9 +93,9 @@ class NotificationServiceController extends GetxController {
       // Load new token
       await _loadStoredData();
 
-      print('🔄 [NotificationServiceController] Token refreshed: ${fcmToken.value}');
+      AppLogger.d('🔄 [NotificationServiceController] Token refreshed: ${fcmToken.value}');
     } catch (e) {
-      print('❌ [NotificationServiceController] Token refresh failed: $e');
+      AppLogger.d('❌ [NotificationServiceController] Token refresh failed: $e');
     } finally {
       isLoading.value = false;
     }
@@ -122,7 +123,7 @@ class NotificationServiceController extends GetxController {
     await NotificationService.instance.deleteToken();
     fcmToken.value = null;
     isInitialized.value = false;
-    print('🗑️ [NotificationServiceController] Notification data cleared');
+    AppLogger.d('🗑️ [NotificationServiceController] Notification data cleared');
   }
 
   // ============================================================================
@@ -134,9 +135,9 @@ class NotificationServiceController extends GetxController {
     final String? orderId =
         data['orderId']?.toString() ?? data['order_id']?.toString();
 
-    print('🧭 [NotificationServiceController] Handling notification navigation');
-    print('   Screen: $screen');
-    print('   OrderId: $orderId');
+    AppLogger.d('🧭 [NotificationServiceController] Handling notification navigation');
+    AppLogger.d('   Screen: $screen');
+    AppLogger.d('   OrderId: $orderId');
 
     // TODO: Implement your navigation logic
   }

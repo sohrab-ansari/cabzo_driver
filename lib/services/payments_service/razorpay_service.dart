@@ -1,7 +1,8 @@
-import 'package:razorpay_flutter/razorpay_flutter.dart';
+﻿import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class RazorpayService {
   late Razorpay _razorpay;
@@ -62,21 +63,21 @@ class RazorpayService {
       'timeout': 300, // 5 minutes timeout
     };
 
-    print('🚀 Opening Razorpay with options: $options');
+    AppLogger.d('🚀 Opening Razorpay with options: $options');
 
     try {
       _razorpay.open(options);
     } on Exception catch (e) {
-      print('❌ Razorpay Exception: $e');
+      AppLogger.d('❌ Razorpay Exception: $e');
       _showErrorSnackbar('Failed to open payment gateway');
     }
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    print('✅ Payment Success:');
-    print('  Payment ID: ${response.paymentId}');
-    print('  Order ID: ${response.orderId}');
-    print('  Signature: ${response.signature}');
+    AppLogger.d('✅ Payment Success:');
+    AppLogger.d('  Payment ID: ${response.paymentId}');
+    AppLogger.d('  Order ID: ${response.orderId}');
+    AppLogger.d('  Signature: ${response.signature}');
 
     // Call success callback if provided
     onPaymentSuccess?.call(response);
@@ -85,9 +86,9 @@ class RazorpayService {
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
-    print('❌ Payment Error:');
-    print('  Code: ${response.code}');
-    print('  Message: ${response.message}');
+    AppLogger.d('❌ Payment Error:');
+    AppLogger.d('  Code: ${response.code}');
+    AppLogger.d('  Message: ${response.message}');
 
     String errorMessage = 'Payment failed';
 
@@ -113,7 +114,7 @@ class RazorpayService {
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
-    print('💰 External Wallet: ${response.walletName}');
+    AppLogger.d('💰 External Wallet: ${response.walletName}');
 
     // Call external wallet callback if provided
     onExternalWallet?.call(response);

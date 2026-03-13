@@ -1,4 +1,4 @@
-import 'package:flutter_animate/flutter_animate.dart';
+﻿import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
@@ -12,6 +12,7 @@ import 'package:nzcu_driver/views/profile_screens/payment_related/money_transfer
 import 'package:nzcu_driver/views/profile_screens/payment_related/transactions.dart';
 import 'package:flutter/material.dart';
 import 'package:nzcu_driver/views/profile_screens/payment_related/wallet.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -169,7 +170,7 @@ class _WalletScreenState extends State<WalletScreen> {
                                         ),
                                         GestureDetector(
                                           onTap: () {
-                                            print("i_was_tapped");
+                                            AppLogger.d("i_was_tapped");
                                             CustomNavigator.push(
                                               context,
                                               AddMoney(),
@@ -244,7 +245,7 @@ class _WalletScreenState extends State<WalletScreen> {
             //           GestureDetector(
             //             onTap: () {
 
-            //               print("i_was_tapped");
+            //               AppLogger.d("i_was_tapped");
             //               CustomNavigator.push(
             //                                   context,
             //                                   AddMoney(),

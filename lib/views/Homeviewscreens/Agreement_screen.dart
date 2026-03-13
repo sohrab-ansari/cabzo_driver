@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Added for SystemChrome
@@ -9,6 +9,7 @@ import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:open_file/open_file.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class AgreementScreen extends StatefulWidget {
   const AgreementScreen({Key? key}) : super(key: key);
@@ -54,7 +55,7 @@ class _AgreementScreenState extends State<AgreementScreen> {
   }
 
   Future<void> _fetchCompanyData() async {
-    print('📄 Fetching company data...');
+    AppLogger.d('📄 Fetching company data...');
 
     setState(() {
       _isLoading = true;
@@ -86,7 +87,7 @@ class _AgreementScreenState extends State<AgreementScreen> {
                 'https://sgp1.digitaloceanspaces.com/satyakabir-bucket/';
             final fullUrl = storageBaseUrl + agreementPath;
 
-            print('📄 Agreement URL: $fullUrl');
+            AppLogger.d('📄 Agreement URL: $fullUrl');
 
             setState(() {
               _agreementUrl = fullUrl;
@@ -124,7 +125,7 @@ class _AgreementScreenState extends State<AgreementScreen> {
     if (_agreementUrl == null) return;
 
     try {
-      print('📄 Downloading PDF for viewing...');
+      AppLogger.d('📄 Downloading PDF for viewing...');
 
       final response = await http.get(Uri.parse(_agreementUrl!));
 
@@ -135,7 +136,7 @@ class _AgreementScreenState extends State<AgreementScreen> {
 
         await file.writeAsBytes(bytes);
 
-        print('📄 PDF saved to: ${file.path}');
+        AppLogger.d('📄 PDF saved to: ${file.path}');
 
         setState(() {
           _localFilePath = file.path;
@@ -215,7 +216,7 @@ class _AgreementScreenState extends State<AgreementScreen> {
         _downloading = true;
       });
 
-      print('📄 Downloading PDF to device...');
+      AppLogger.d('📄 Downloading PDF to device...');
 
       final response = await http.get(Uri.parse(_agreementUrl!));
 
@@ -245,16 +246,16 @@ class _AgreementScreenState extends State<AgreementScreen> {
 
           await file.writeAsBytes(bytes);
 
-          print('📄 PDF saved to: $filePath');
+          AppLogger.d('📄 PDF saved to: $filePath');
 
           CustomToast.showSuccess('PDF downloaded successfully!');
 
           // Try to open the file
           try {
             final result = await OpenFile.open(filePath);
-            print('Open file result: ${result.type} - ${result.message}');
+            AppLogger.d('Open file result: ${result.type} - ${result.message}');
           } catch (e) {
-            print('Error opening file: $e');
+            AppLogger.d('Error opening file: $e');
           }
         }
       }
@@ -272,7 +273,7 @@ class _AgreementScreenState extends State<AgreementScreen> {
 
     try {
       final result = await OpenFile.open(_agreementUrl!);
-      print('Open PDF result: ${result.type} - ${result.message}');
+      AppLogger.d('Open PDF result: ${result.type} - ${result.message}');
     } catch (e) {
       CustomToast.showError('Could not open PDF: $e');
     }
@@ -374,13 +375,13 @@ class _AgreementScreenState extends State<AgreementScreen> {
               });
             },
             onError: (error) {
-              print('PDF Error: $error');
+              AppLogger.d('PDF Error: $error');
               setState(() {
                 _errorMessage = 'Failed to load PDF';
               });
             },
             onPageError: (page, error) {
-              print('Page $page Error: $error');
+              AppLogger.d('Page $page Error: $error');
             },
             onViewCreated: (PDFViewController controller) {
               _pdfViewController = controller;

@@ -1,7 +1,8 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/services/apiservices/socket_manager.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class NetworkController extends GetxController {
   // Reactive variable for online status
@@ -31,7 +32,7 @@ class NetworkController extends GetxController {
       final results = await _connectivity.checkConnectivity();
       _updateConnectionStatus(results);
     } catch (e) {
-      print('❌ NetworkController: Error checking connectivity: $e');
+      AppLogger.d('❌ NetworkController: Error checking connectivity: $e');
     }
   }
 
@@ -46,13 +47,13 @@ class NetworkController extends GetxController {
     // In a real app we might ping google.com, but for this specific issue
     bool previousConnection = isOnline.value;
     isOnline.value = hasConnection;
-    print(
+    AppLogger.d(
       '🌐 NetworkController: Connection status changed. Online: $hasConnection ($results)',
     );
 
     // If we just regained connection and driver is supposed to be online
     if (!previousConnection && hasConnection) {
-      print('🌐 NetworkController: Internet restored. Forcing socket reconnect if on duty.');
+      AppLogger.d('🌐 NetworkController: Internet restored. Forcing socket reconnect if on duty.');
       
       // Delay slightly to ensure network is fully stable
       Future.delayed(const Duration(seconds: 2), () {
@@ -61,7 +62,7 @@ class NetworkController extends GetxController {
           // Since it's a singleton, we can just call it if it's imported.
           SocketManager().forceReconnect();
         } catch (e) {
-          print('Error triggering reconnect: $e');
+          AppLogger.d('Error triggering reconnect: $e');
         }
       });
     }

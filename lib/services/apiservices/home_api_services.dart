@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -13,6 +13,7 @@ import 'package:nzcu_driver/modals/home_modals/update_order_response.dart';
 import 'package:nzcu_driver/modals/home_modals/verify_Otp_Order_response.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class HomeApiServices {
   static Future<HomeModalResponse> get_home_data() async {
@@ -23,11 +24,11 @@ class HomeApiServices {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
 
-    print("========== CREATE VEHICLE API ==========");
-    print("URL : $url");
-    print("Token : $token");
-    // print("Request Body : ${jsonEncode(requestBody)}");
-    print("my_tokennnn ${token}");
+    AppLogger.d("========== CREATE VEHICLE API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
+    // AppLogger.d("Request Body : ${jsonEncode(requestBody)}");
+    AppLogger.d("my_tokennnn ${token}");
 
     try {
       final http.Response response = await http.get(
@@ -39,20 +40,20 @@ class HomeApiServices {
         // body: jsonEncode(requestBody),
       );
 
-      print("Status Code : ${response.statusCode}");
-      print("Response Body : ${response.body}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("Response Body : ${response.body}");
 
       final Map<String, dynamic> data = jsonDecode(response.body);
       final HomeModalResponse homeModalResponse = HomeModalResponse.fromJson(
         data,
       );
 
-      print("Response Body222222222 : ${homeModalResponse.driver!.id}");
+      AppLogger.d("Response Body222222222 : ${homeModalResponse.driver!.id}");
 
       if (homeModalResponse.success == true &&
           homeModalResponse.driver != null &&
           homeModalResponse.driver!.id != null) {
-        print("Response Body222222222kkkk : ${homeModalResponse.driver!.id}");
+        AppLogger.d("Response Body222222222kkkk : ${homeModalResponse.driver!.id}");
         // Use ! to assert non-null or provide default value
         await prefs.setString(
           "driver_userid",
@@ -64,18 +65,18 @@ class HomeApiServices {
           homeModalResponse.driver!.name.toString(),
         );
 
-        print("Response Body222222222jjjj : ${homeModalResponse.driver!.id}");
-        // print(
+        AppLogger.d("Response Body222222222jjjj : ${homeModalResponse.driver!.id}");
+        // AppLogger.d(
         //   "✅ Driver user ID saved to SharedPreferences: ${registerProfileRes.data!.id}",
         // );
       } else {
-        print(
+        AppLogger.d(
           "⚠️  Could not save driver_userid - ID is null or response not successful",
         );
       }
       return homeModalResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle1 : $e");
+      AppLogger.d("❌ Exception in Create Vehicle1 : $e");
       return HomeModalResponse(success: false, message: "Connection error: $e");
     }
   }
@@ -92,11 +93,11 @@ class HomeApiServices {
     // );
 
     final Uri url = Uri.parse("${ApiPath.baseUri}/driver/toggleDuty/$userId");
-    print("========== CREATE VEHICLE API ==========");
-    print("URL : $url");
-    print("Token : $token");
-    // print("Request Body : ${jsonEncode(requestBody)}");
-    print("my_tokennnn ${token}");
+    AppLogger.d("========== CREATE VEHICLE API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
+    // AppLogger.d("Request Body : ${jsonEncode(requestBody)}");
+    AppLogger.d("my_tokennnn ${token}");
 
     try {
       final http.Response response = await http.patch(
@@ -108,20 +109,20 @@ class HomeApiServices {
         // body: jsonEncode(requestBody),
       );
 
-      print("Status Code : ${response.statusCode}");
-      print("Response Body : ${response.body}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("Response Body : ${response.body}");
 
       final Map<String, dynamic> data = jsonDecode(response.body);
       final Drivertoggledutyresponse drivertoggledutyresponse =
           Drivertoggledutyresponse.fromJson(data);
 
-      print("my_driver_tokennnn_toggle_respose ${data}");
-      print("Response Body222222222 : ${drivertoggledutyresponse.driver!.id}");
+      AppLogger.d("my_driver_tokennnn_toggle_respose ${data}");
+      AppLogger.d("Response Body222222222 : ${drivertoggledutyresponse.driver!.id}");
 
       if (drivertoggledutyresponse.success == true &&
           drivertoggledutyresponse.driver != null &&
           drivertoggledutyresponse.driver!.id != null) {
-        print(
+        AppLogger.d(
           "Response Body222222222kkkk : ${drivertoggledutyresponse.driver!.id}",
         );
         // Use ! to assert non-null or provide default value
@@ -135,20 +136,20 @@ class HomeApiServices {
           drivertoggledutyresponse.driver!.name.toString(),
         );
 
-        print(
+        AppLogger.d(
           "Response Body222222222jjjj : ${drivertoggledutyresponse.driver!.id}",
         );
-        // print(
+        // AppLogger.d(
         //   "✅ Driver user ID saved to SharedPreferences: ${registerProfileRes.data!.id}",
         // );
       } else {
-        print(
+        AppLogger.d(
           "⚠️  Could not save driver_userid - ID is null or response not successful",
         );
       }
       return drivertoggledutyresponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle1 : $e");
+      AppLogger.d("❌ Exception in Create Vehicle1 : $e");
       return Drivertoggledutyresponse(
         success: false,
         message: "Connection error: $e",
@@ -162,17 +163,17 @@ class HomeApiServices {
     final String? token = prefs.getString("auth_token");
     final String? userId = prefs.getString("driver_userid");
 
-    print("herrrerrere_the_driverrrriddd_calling>>>>");
-    print("theeeee____ useriddddd ${userId}");
+    AppLogger.d("herrrerrere_the_driverrrriddd_calling>>>>");
+    AppLogger.d("theeeee____ useriddddd ${userId}");
 
     final Uri url = Uri.parse(
       "${ApiPath.baseUri}/driver/getDriverProfile/${userId}",
     );
 
-    print("========== CREATE VEHICLE API ==========");
-    print("URL : $url");
-    print("Token : $token");
-    print("my_tokennnn ${token}");
+    AppLogger.d("========== CREATE VEHICLE API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
+    AppLogger.d("my_tokennnn ${token}");
 
     try {
       final http.Response response = await http.get(
@@ -183,13 +184,13 @@ class HomeApiServices {
         },
       );
 
-      print("Status Code : ${response.statusCode}");
-      print("drievrrrrrid>>>>>>> resss >>>> Response Body : ${response.body}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("drievrrrrrid>>>>>>> resss >>>> Response Body : ${response.body}");
 
       final Map<String, dynamic> data = jsonDecode(response.body);
       final DriverIdResponse driverIdResponse = DriverIdResponse.fromJson(data);
 
-      print(
+      AppLogger.d(
         "vehicleSubType>>>>> comingggg >>>>> ${driverIdResponse.driver?.vehicle?.vehicleSubType}",
       );
 
@@ -220,13 +221,13 @@ class HomeApiServices {
         // Store vehicle ID
         if (vehicle.id != null && vehicle.id!.isNotEmpty) {
           await prefs.setString("vehicle_id", vehicle.id!);
-          print("✅ Vehicle ID stored: ${vehicle.id}");
+          AppLogger.d("✅ Vehicle ID stored: ${vehicle.id}");
         }
 
         // Store vehicle type ID
         if (vehicle.vehicleType != null && vehicle.vehicleType!.isNotEmpty) {
           await prefs.setString("vehicle_type_id", vehicle.vehicleType!);
-          print("✅ Vehicle Type ID stored: ${vehicle.vehicleType}");
+          AppLogger.d("✅ Vehicle Type ID stored: ${vehicle.vehicleType}");
         }
 
         // Optionally store other vehicle info if needed
@@ -236,12 +237,12 @@ class HomeApiServices {
         await prefs.setString("vehicle_model", vehicle.vehicleModel ?? "");
         // await prefs.setInt("vehicle_capacity", vehicle.vehicleCapacity ?? 0);
       } else {
-        print("⚠️ No vehicle data available");
+        AppLogger.d("⚠️ No vehicle data available");
       }
 
       return driverIdResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle5 : $e");
+      AppLogger.d("❌ Exception in Create Vehicle5 : $e");
       return DriverIdResponse(success: false, message: "Connection error: $e");
     }
   }
@@ -265,7 +266,7 @@ class HomeApiServices {
 
       final Uri url = Uri.parse("${ApiPath.baseUri}/order/update/$orderid");
 
-      print("🔄 Order Update API: $orderid -> $orderstatus");
+      AppLogger.d("🔄 Order Update API: $orderid -> $orderstatus");
 
       final response = await http
           .patch(
@@ -278,9 +279,9 @@ class HomeApiServices {
           )
           .timeout(apiTimeout);
 
-      print("✅ Response Status: ${response.statusCode}");
+      AppLogger.d("✅ Response Status: ${response.statusCode}");
 
-      print("myyyy_fulllll_respsoneeeee ${response.body}");
+      AppLogger.d("myyyy_fulllll_respsoneeeee ${response.body}");
 
       final Map<String, dynamic> decodedJson = jsonDecode(response.body);
 
@@ -295,7 +296,7 @@ class HomeApiServices {
         ).convert(decodedJson);
 
         for (var i = 0; i < prettyJson.length; i += 800) {
-          debugPrint(
+          AppLogger.d(
             prettyJson.substring(
               i,
               i + 800 > prettyJson.length ? prettyJson.length : i + 800,
@@ -303,7 +304,7 @@ class HomeApiServices {
           );
         }
 
-        print("herrrrrrrrrrrrrrrrrrrrrr ${prettyJson}");
+        AppLogger.d("herrrrrrrrrrrrrrrrrrrrrr ${prettyJson}");
 
         return Updateorderresposne.fromJson(decodedJson);
       } else if (response.statusCode == 401) {
@@ -328,7 +329,7 @@ class HomeApiServices {
         message: "Request timeout. Please check your connection.",
       );
     } catch (e) {
-      print("❌ API Error: $e");
+      AppLogger.d("❌ API Error: $e");
       return Updateorderresposne(
         success: false,
         message: "Connection error. Please check your internet.",
@@ -341,11 +342,11 @@ class HomeApiServices {
     final String? token = prefs.getString("auth_token");
     final String? userId = prefs.getString("driver_userid");
 
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> User ID : $userId");
-    print(
+    AppLogger.d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> User ID : $userId");
+    AppLogger.d(
       ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID  form chartid : $orderid",
     );
-    // print(">>>>>>>>>>>>>>>>>>>>>>>>>>>> Order Status : $orderstatus");
+    // AppLogger.d(">>>>>>>>>>>>>>>>>>>>>>>>>>>> Order Status : $orderstatus");
 
     // final Uri url = Uri.parse(
     //   "${ApiPath.baseUri}/order/update/$orderid",
@@ -355,9 +356,9 @@ class HomeApiServices {
 
     final Uri url = Uri.parse("${ApiPath.baseUri}/chat/ride/$orderid");
 
-    print("========== 🔵 ORDER UPDATE API ==========");
-    print("URL : $url");
-    print("Token : $token");
+    AppLogger.d("========== 🔵 ORDER UPDATE API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
 
     try {
       final http.Response response = await http.get(
@@ -368,7 +369,7 @@ class HomeApiServices {
         },
       );
 
-      print("✅ Status Code : ${response.statusCode}");
+      AppLogger.d("✅ Status Code : ${response.statusCode}");
 
       /// 🔥 PRETTY PRINT FULL RESPONSE
       final decodedJson = jsonDecode(response.body);
@@ -376,20 +377,20 @@ class HomeApiServices {
         '  ',
       ).convert(decodedJson);
 
-      print("charttt_iddd>>>>>> 📦 FULL RESPONSE (Pretty Print) 👇");
-      print(prettyJson);
+      AppLogger.d("charttt_iddd>>>>>> 📦 FULL RESPONSE (Pretty Print) 👇");
+      AppLogger.d(prettyJson);
 
       final ChatResponse getchatidresposne = ChatResponse.fromJson(decodedJson);
 
-      print("🎯 Parsed Model Object 👇");
-      print(getchatidresposne);
+      AppLogger.d("🎯 Parsed Model Object 👇");
+      AppLogger.d(getchatidresposne);
 
-      print("myyyyy_chart_iddd  ${getchatidresposne}");
+      AppLogger.d("myyyyy_chart_iddd  ${getchatidresposne}");
 
       return getchatidresposne;
     } catch (e) {
-      print("❌ Exception in  charttt_iddd");
-      print(e);
+      AppLogger.d("❌ Exception in  charttt_iddd");
+      AppLogger.d(e);
 
       return ChatResponse(success: false);
     }
@@ -403,9 +404,9 @@ class HomeApiServices {
     final String? token = prefs.getString("auth_token");
     final String? userId = prefs.getString("driver_userid");
 
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> User ID : $userId");
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID : $orderid");
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>> enteredOtp Status : $enteredOtp");
+    AppLogger.d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> User ID : $userId");
+    AppLogger.d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID : $orderid");
+    AppLogger.d(">>>>>>>>>>>>>>>>>>>>>>>>>>>> enteredOtp Status : $enteredOtp");
 
     // final Uri url = Uri.parse(
     //   "${ApiPath.baseUri}/order/update/$orderid",
@@ -413,9 +414,9 @@ class HomeApiServices {
 
     final Uri url = Uri.parse("${ApiPath.order_verify_otp}");
 
-    print("========== 🔵 ORDER UPDATE API ==========");
-    print("URL : $url");
-    print("Token : $token");
+    AppLogger.d("========== 🔵 ORDER UPDATE API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
 
     try {
       final http.Response response = await http.patch(
@@ -427,7 +428,7 @@ class HomeApiServices {
         body: jsonEncode({"orderId": orderid, "rideOtp": enteredOtp}),
       );
 
-      print("✅ Status Code : ${response.statusCode}");
+      AppLogger.d("✅ Status Code : ${response.statusCode}");
 
       /// 🔥 PRETTY PRINT FULL RESPONSE
       final decodedJson = jsonDecode(response.body);
@@ -435,20 +436,20 @@ class HomeApiServices {
         '  ',
       ).convert(decodedJson);
 
-      print("📦 FULL RESPONSE (Pretty Print) 👇");
-      print(prettyJson);
+      AppLogger.d("📦 FULL RESPONSE (Pretty Print) 👇");
+      AppLogger.d(prettyJson);
 
       final VerifyOtpResponse verifyOtpResponse = VerifyOtpResponse.fromJson(
         decodedJson,
       );
 
-      print("🎯 Parsed Model Object 👇");
-      print(verifyOtpResponse);
+      AppLogger.d("🎯 Parsed Model Object 👇");
+      AppLogger.d(verifyOtpResponse);
 
       return verifyOtpResponse;
     } catch (e) {
-      print("❌ Exception in order_update_data");
-      print(e);
+      AppLogger.d("❌ Exception in order_update_data");
+      AppLogger.d(e);
 
       return VerifyOtpResponse(success: false, message: "Connection error: $e");
     }
@@ -462,9 +463,9 @@ class HomeApiServices {
     final String? token = prefs.getString("auth_token");
     final String? userId = prefs.getString("driver_userid");
 
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> User ID : $userId");
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID : $orderid");
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>> Order Status : $orderstatus");
+    AppLogger.d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> User ID : $userId");
+    AppLogger.d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID : $orderid");
+    AppLogger.d(">>>>>>>>>>>>>>>>>>>>>>>>>>>> Order Status : $orderstatus");
 
     final Uri url = Uri.parse("${ApiPath.baseUri}/order/decline/$orderid");
 
@@ -472,9 +473,9 @@ class HomeApiServices {
 
     // order/decline/$orderId
 
-    print("========== 🔵 ORDER UPDATE API ==========");
-    print("URL : $url");
-    print("Token : $token");
+    AppLogger.d("========== 🔵 ORDER UPDATE API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
 
     try {
       final http.Response response = await http.patch(
@@ -486,7 +487,7 @@ class HomeApiServices {
         body: jsonEncode({"orderId": orderid}),
       );
 
-      print("✅ Status Code : ${response.statusCode}");
+      AppLogger.d("✅ Status Code : ${response.statusCode}");
 
       /// 🔥 PRETTY PRINT FULL RESPONSE
       final decodedJson = jsonDecode(response.body);
@@ -494,19 +495,19 @@ class HomeApiServices {
         '  ',
       ).convert(decodedJson);
 
-      print("📦 FULL RESPONSE (Pretty Print) 👇");
-      print(prettyJson);
+      AppLogger.d("📦 FULL RESPONSE (Pretty Print) 👇");
+      AppLogger.d(prettyJson);
 
       final Ordercompletecashresponse ordercompletecashresponse =
           Ordercompletecashresponse.fromJson(decodedJson);
 
-      print("🎯 Parsed Model Object 👇");
-      print(ordercompletecashresponse);
+      AppLogger.d("🎯 Parsed Model Object 👇");
+      AppLogger.d(ordercompletecashresponse);
 
       return ordercompletecashresponse;
     } catch (e) {
-      print("❌ Exception in order_update_data");
-      print(e);
+      AppLogger.d("❌ Exception in order_update_data");
+      AppLogger.d(e);
 
       return Ordercompletecashresponse(
         success: false,
@@ -523,7 +524,7 @@ class HomeApiServices {
     //     "${ApiPath.baseUri}/order/driver/history?status=${userId}",
     //   );
 
-    print("myyyyyy>>>>status ${status}");
+    AppLogger.d("myyyyyy>>>>status ${status}");
     final Uri url = Uri.parse(
       "${ApiPath.baseUri}/order/driver/history?status=${status}",
     );
@@ -532,11 +533,11 @@ class HomeApiServices {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
 
-    print("========== CREATE VEHICLE API ==========");
-    print("URL : $url");
-    print("Token : $token");
-    // print("Request Body : ${jsonEncode(requestBody)}");
-    print("my_tokennnn ${token}");
+    AppLogger.d("========== CREATE VEHICLE API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
+    // AppLogger.d("Request Body : ${jsonEncode(requestBody)}");
+    AppLogger.d("my_tokennnn ${token}");
 
     try {
       final http.Response response = await http.get(
@@ -551,8 +552,8 @@ class HomeApiServices {
         // body: jsonEncode(requestBody),
       );
 
-      print("Status Code : ${response.statusCode}");
-      print("Response Body : ${response.body}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("Response Body : ${response.body}");
 
       final Map<String, dynamic> data = jsonDecode(response.body);
       final RideHistoryResponse walletResponse = RideHistoryResponse.fromJson(
@@ -561,7 +562,7 @@ class HomeApiServices {
 
       return walletResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle10 : $e");
+      AppLogger.d("❌ Exception in Create Vehicle10 : $e");
       return RideHistoryResponse(
         success: false,
         message: "Connection error: $e",
@@ -577,9 +578,9 @@ class HomeApiServices {
 
     final Uri url = Uri.parse("${ApiPath.baseUri}/chat/$chatId/messages");
 
-    print("========== 🔵 GET CHAT MESSAGES API ==========");
-    print("URL : $url");
-    print("Token : $token");
+    AppLogger.d("========== 🔵 GET CHAT MESSAGES API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
 
     try {
       final http.Response response = await http.get(
@@ -590,12 +591,12 @@ class HomeApiServices {
         },
       );
 
-      print("✅ Status Code : ${response.statusCode}");
+      AppLogger.d("✅ Status Code : ${response.statusCode}");
 
       final decodedJson = jsonDecode(response.body);
 
-      print("📦 FULL RESPONSE 👇");
-      print(const JsonEncoder.withIndent('  ').convert(decodedJson));
+      AppLogger.d("📦 FULL RESPONSE 👇");
+      AppLogger.d(const JsonEncoder.withIndent('  ').convert(decodedJson));
 
       if (response.statusCode == 200) {
         return ChatResponse.fromJson(decodedJson);
@@ -603,7 +604,7 @@ class HomeApiServices {
         throw Exception(decodedJson['message'] ?? 'Something went wrong');
       }
     } catch (e) {
-      print("❌ Exception in get_chat_messages_data");
+      AppLogger.d("❌ Exception in get_chat_messages_data");
       throw Exception(e);
     }
   }

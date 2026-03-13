@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:get/get_core/src/get_main.dart';
@@ -25,6 +25,7 @@ import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class ProfileApiServices {
   static Future<GetCityByLocationResponse> get_cit_by_loc_method({
@@ -39,9 +40,9 @@ class ProfileApiServices {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
 
-    print("========== GET FAQS CATEGORIES API ==========");
-    print("URL : $url");
-    print("Token : $token");
+    AppLogger.d("========== GET FAQS CATEGORIES API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
 
     try {
       final http.Response response = await http.get(
@@ -52,8 +53,8 @@ class ProfileApiServices {
         },
       );
 
-      print("Status Code : ${response.statusCode}");
-      print("Response Body  get city by id>>>>>> data : ${response.body}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("Response Body  get city by id>>>>>> data : ${response.body}");
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
@@ -68,7 +69,7 @@ class ProfileApiServices {
         );
       }
     } catch (e) {
-      print("❌ Exception in get city by id>>>>>> data : $e");
+      AppLogger.d("❌ Exception in get city by id>>>>>> data : $e");
       return GetCityByLocationResponse(
         success: false,
         message: "Connection error: $e",
@@ -83,9 +84,9 @@ class ProfileApiServices {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
 
-    print("========== GET FAQS CATEGORIES API ==========");
-    print("URL : $url");
-    print("Token : $token");
+    AppLogger.d("========== GET FAQS CATEGORIES API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
 
     try {
       final http.Response response = await http.get(
@@ -96,8 +97,8 @@ class ProfileApiServices {
         },
       );
 
-      print("Status Code : ${response.statusCode}");
-      print("Response Body : ${response.body}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("Response Body : ${response.body}");
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
@@ -112,7 +113,7 @@ class ProfileApiServices {
         );
       }
     } catch (e) {
-      print("❌ Exception in get_all_categories_data: $e");
+      AppLogger.d("❌ Exception in get_all_categories_data: $e");
       return FaqsCategoriesResponse(
         success: false,
         message: "Connection error: $e",
@@ -133,10 +134,10 @@ class ProfileApiServices {
 
     final String? token = prefs.getString("auth_token");
 
-    print("========== GET FAQS BY CATEGORY API ==========");
-    print("URL : $url");
-    print("Category: $category");
-    print("Token : $token");
+    AppLogger.d("========== GET FAQS BY CATEGORY API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Category: $category");
+    AppLogger.d("Token : $token");
 
     try {
       final http.Response response = await http.get(
@@ -147,8 +148,8 @@ class ProfileApiServices {
         },
       );
 
-      print("Status Code : ${response.statusCode}");
-      print("faqqss_get_Response Body : ${response.body}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("faqqss_get_Response Body : ${response.body}");
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
@@ -162,7 +163,7 @@ class ProfileApiServices {
         );
       }
     } catch (e) {
-      print("❌ Exception in get_faq_categories_data: $e");
+      AppLogger.d("❌ Exception in get_faq_categories_data: $e");
       return GetByCategoryResponse(
         success: false,
         message: "Connection error: $e",
@@ -182,17 +183,17 @@ class ProfileApiServices {
     final String? userId = prefs.getString("driver_userid");
     final String? token = prefs.getString("auth_token");
 
-    print("my_tokennnnn ${token}");
+    AppLogger.d("my_tokennnnn ${token}");
     final Uri url = Uri.parse(
       "${ApiPath.baseUri}/driver/update?userId=$userId&userType=$userType",
     );
 
-    print("URL => $url");
-    print("Name => $name");
-    print("Email => $email");
-    print("dateOfBirth ===== => $dateOfBirth");
-    print("gender =====> $gender");
-    print("Image provided: ${image != null ? 'Yes' : 'No'}");
+    AppLogger.d("URL => $url");
+    AppLogger.d("Name => $name");
+    AppLogger.d("Email => $email");
+    AppLogger.d("dateOfBirth ===== => $dateOfBirth");
+    AppLogger.d("gender =====> $gender");
+    AppLogger.d("Image provided: ${image != null ? 'Yes' : 'No'}");
 
     try {
       final request = http.MultipartRequest('PUT', url);
@@ -225,20 +226,20 @@ class ProfileApiServices {
         request.files.add(
           await http.MultipartFile.fromPath('image', image.path),
         );
-        print("Image attached: ${image.path}");
+        AppLogger.d("Image attached: ${image.path}");
       } else {
-        print("No image provided - skipping image upload");
+        AppLogger.d("No image provided - skipping image upload");
       }
 
       final response = await request.send();
       final statusCode = response.statusCode;
       final body = await response.stream.bytesToString();
 
-      print("Status Code: $statusCode");
-      print("Response Body: $body");
+      AppLogger.d("Status Code: $statusCode");
+      AppLogger.d("Response Body: $body");
 
       if (statusCode == 200) {
-        print("hekllooooo");
+        AppLogger.d("hekllooooo");
 
         // Parse the response
         Map<String, dynamic> responseData = json.decode(body);
@@ -249,26 +250,26 @@ class ProfileApiServices {
           String driverName = responseData['driver']['name'] ?? '';
           if (driverName.isNotEmpty) {
             await prefs.setString('driver_name', driverName);
-            print("Driver name updated in SharedPreferences: $driverName");
+            AppLogger.d("Driver name updated in SharedPreferences: $driverName");
           }
         } else if (name != null && name.isNotEmpty) {
           // Fallback: use the name that was sent in the request
           await prefs.setString('driver_name', name);
-          print("Driver name updated with request name: $name");
+          AppLogger.d("Driver name updated with request name: $name");
         }
 
         Get.offAll(BottomnavmainScreen(initialIndex: 3));
         return DriverImageUploadRes.fromJson(responseData);
       } else {
-        print("hekllooooo222");
+        AppLogger.d("hekllooooo222");
         return DriverImageUploadRes(
           success: false,
           message: "Unexpected response format",
         );
       }
     } catch (e) {
-      print("hekllooooo3333");
-      print("API Error: $e");
+      AppLogger.d("hekllooooo3333");
+      AppLogger.d("API Error: $e");
       return DriverImageUploadRes(success: false, message: e.toString());
     }
   }
@@ -280,11 +281,11 @@ class ProfileApiServices {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
 
-    print("========== CREATE VEHICLE API ==========");
-    print("URL : $url");
-    print("Token : $token");
-    // print("Request Body : ${jsonEncode(requestBody)}");
-    print("my_tokennnn ${token}");
+    AppLogger.d("========== CREATE VEHICLE API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
+    // AppLogger.d("Request Body : ${jsonEncode(requestBody)}");
+    AppLogger.d("my_tokennnn ${token}");
 
     try {
       final http.Response response = await http.get(
@@ -296,15 +297,15 @@ class ProfileApiServices {
         // body: jsonEncode(requestBody),
       );
 
-      print("Status Code : ${response.statusCode}");
-      print("Response Body : ${response.body}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("Response Body : ${response.body}");
 
       final Map<String, dynamic> data = jsonDecode(response.body);
       final WalletResponse walletResponse = WalletResponse.fromJson(data);
 
       return walletResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle4 : $e");
+      AppLogger.d("❌ Exception in Create Vehicle4 : $e");
       return WalletResponse(success: false, message: "Connection error: $e");
     }
   }
@@ -324,11 +325,11 @@ class ProfileApiServices {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
 
-    print("========== CREATE VEHICLE API ==========");
-    print("URL : $url");
-    print("Token : $token");
-    // print("Request Body : ${jsonEncode(requestBody)}");
-    print("my_tokennnn ${token}");
+    AppLogger.d("========== CREATE VEHICLE API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
+    // AppLogger.d("Request Body : ${jsonEncode(requestBody)}");
+    AppLogger.d("my_tokennnn ${token}");
 
     try {
       final http.Response response = await http.get(
@@ -340,8 +341,8 @@ class ProfileApiServices {
         // body: jsonEncode(requestBody),
       );
 
-      print("Status Code : ${response.statusCode}");
-      print("Response Body : ${response.body}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("Response Body : ${response.body}");
 
       final Map<String, dynamic> data = jsonDecode(response.body);
       final TransactionsResponse walletResponse = TransactionsResponse.fromJson(
@@ -350,7 +351,7 @@ class ProfileApiServices {
 
       return walletResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle2 : $e");
+      AppLogger.d("❌ Exception in Create Vehicle2 : $e");
       return TransactionsResponse(
         success: false,
         message: "Connection error: $e",
@@ -366,11 +367,11 @@ class ProfileApiServices {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
 
-    print("========== CREATE VEHICLE API ==========");
-    print("URL : $url");
-    print("Token : $token");
-    // print("Request Body : ${jsonEncode(requestBody)}");
-    print("my_tokennnn ${token}");
+    AppLogger.d("========== CREATE VEHICLE API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
+    // AppLogger.d("Request Body : ${jsonEncode(requestBody)}");
+    AppLogger.d("my_tokennnn ${token}");
 
     try {
       final http.Response response = await http.get(
@@ -382,8 +383,8 @@ class ProfileApiServices {
         // body: jsonEncode(requestBody),
       );
 
-      print("Status Code : ${response.statusCode}");
-      print("Response Body : ${response.body}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("Response Body : ${response.body}");
 
       final Map<String, dynamic> data = jsonDecode(response.body);
       final TransactionsResponse walletResponse = TransactionsResponse.fromJson(
@@ -392,7 +393,7 @@ class ProfileApiServices {
 
       return walletResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle3 : $e");
+      AppLogger.d("❌ Exception in Create Vehicle3 : $e");
       return TransactionsResponse(
         success: false,
         message: "Connection error: $e",
@@ -418,7 +419,7 @@ class ProfileApiServices {
         return BankAccountAddResp(success: false, message: "User ID not found");
       }
 
-      print("Sending driverId: $userId");
+      AppLogger.d("Sending driverId: $userId");
 
       // Build the request body dynamically
       Map<String, dynamic> requestBody = {
@@ -449,8 +450,8 @@ class ProfileApiServices {
         body: jsonEncode(requestBody),
       );
 
-      print("Status Code: ${response.statusCode}");
-      print("Response: ${response.body}");
+      AppLogger.d("Status Code: ${response.statusCode}");
+      AppLogger.d("Response: ${response.body}");
 
       // ✅ FIX: Parse response regardless of status code
       final responseData = jsonDecode(response.body);
@@ -475,7 +476,7 @@ class ProfileApiServices {
         );
       }
     } catch (e) {
-      print("Error in addBankAccountData: $e");
+      AppLogger.d("Error in addBankAccountData: $e");
       return BankAccountAddResp(
         success: false,
         message: "Network error: ${e.toString()}",
@@ -499,9 +500,9 @@ class ProfileApiServices {
         );
       }
 
-      print("Sending driverId: $userId");
-      print("Bank_account_id: $BankAccountId");
-      print("amount_i_am_Sending: $amount");
+      AppLogger.d("Sending driverId: $userId");
+      AppLogger.d("Bank_account_id: $BankAccountId");
+      AppLogger.d("amount_i_am_Sending: $amount");
 
       // FIXED: Changed API endpoint to withdrawal endpoint
       final response = await http.post(
@@ -514,21 +515,21 @@ class ProfileApiServices {
         body: jsonEncode({"amount": amount, "BankAccountId": BankAccountId}),
       );
 
-      print("Status Code: ${response.statusCode}");
-      print("Response: ${response.body}");
+      AppLogger.d("Status Code: ${response.statusCode}");
+      AppLogger.d("Response: ${response.body}");
 
       final responseData = jsonDecode(response.body);
 
       // ✅ If response has success field, parse normally
       if (responseData.containsKey('success')) {
-        print("helloooo111");
+        AppLogger.d("helloooo111");
 
-        print("came_or_not");
+        AppLogger.d("came_or_not");
         if (responseData['success'] == true) {
-          print("came_or_no222t");
+          AppLogger.d("came_or_no222t");
           CustomToast.showSuccess("Withdrawal Successful");
         } else {
-          print("helloooo111 failedd data");
+          AppLogger.d("helloooo111 failedd data");
           CustomToast.showError("Insufficient Balance");
           Get.back();
         }
@@ -537,7 +538,7 @@ class ProfileApiServices {
       }
       // ✅ For successful status codes but unexpected format
       else if (response.statusCode == 200 || response.statusCode == 201) {
-        print("helloooo1112222");
+        AppLogger.d("helloooo1112222");
 
         return PaymentsWithdrawResponse(
           success: true,
@@ -551,7 +552,7 @@ class ProfileApiServices {
       }
       // ✅ For error responses
       else {
-        print("helloooo111333");
+        AppLogger.d("helloooo111333");
 
         return PaymentsWithdrawResponse(
           success: false,
@@ -559,9 +560,9 @@ class ProfileApiServices {
         );
       }
     } catch (e) {
-      print("helloooo1114444");
+      AppLogger.d("helloooo1114444");
 
-      print("Error in money_transfer: $e");
+      AppLogger.d("Error in money_transfer: $e");
       // ✅ FIXED: Return correct type
       return PaymentsWithdrawResponse(
         success: false,
@@ -580,17 +581,17 @@ class ProfileApiServices {
 
     final String? userId = prefs.getString("driver_userid");
 
-    print("theeeee____ useriddddd ${userId}");
+    AppLogger.d("theeeee____ useriddddd ${userId}");
 
-    print("theeeee____ amount gott ${amount}");
+    AppLogger.d("theeeee____ amount gott ${amount}");
 
     final Uri url = Uri.parse(ApiPath.addwalletapi);
 
-    print("========== CREATE VEHICLE API ==========");
-    print("URL : $url");
-    print("Token : $token");
-    // print("Request Body : ${jsonEncode(requestBody)}");
-    print("my_tokennnn ${token}");
+    AppLogger.d("========== CREATE VEHICLE API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
+    // AppLogger.d("Request Body : ${jsonEncode(requestBody)}");
+    AppLogger.d("my_tokennnn ${token}");
 
     try {
       final response = await http.post(
@@ -607,8 +608,8 @@ class ProfileApiServices {
           "promoCodeId": promoCodeId,
         }),
       );
-      print("Status Code : ${response.statusCode}");
-      print("total__Response Body : ${response.body}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("total__Response Body : ${response.body}");
 
       final Map<String, dynamic> data = jsonDecode(response.body);
 
@@ -619,7 +620,7 @@ class ProfileApiServices {
 
       return walletResponse;
     } catch (e) {
-      print("❌ Exception in promo code craete : $e");
+      AppLogger.d("❌ Exception in promo code craete : $e");
       return AddMoneyWalletResponse(
         success: false,
         message: "Connection error: $e",
@@ -638,18 +639,18 @@ class ProfileApiServices {
 
     final String? userId = prefs.getString("driver_userid");
 
-    print("theeeee____ razorpayOrderId ${razorpayOrderId}");
+    AppLogger.d("theeeee____ razorpayOrderId ${razorpayOrderId}");
 
-    print("theeeee____ razorpayPaymentId ${razorpayPaymentId}");
+    AppLogger.d("theeeee____ razorpayPaymentId ${razorpayPaymentId}");
 
-    print("theeeee____ razorpaySignature ${razorpaySignature}");
+    AppLogger.d("theeeee____ razorpaySignature ${razorpaySignature}");
     final Uri url = Uri.parse(ApiPath.addwalletapi);
 
-    print("========== CREATE VEHICLE API ==========");
-    print("URL : $url");
-    print("Token : $token");
-    // print("Request Body : ${jsonEncode(requestBody)}");
-    print("my_tokennnn ${token}");
+    AppLogger.d("========== CREATE VEHICLE API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
+    // AppLogger.d("Request Body : ${jsonEncode(requestBody)}");
+    AppLogger.d("my_tokennnn ${token}");
 
     try {
       final response = await http.post(
@@ -666,15 +667,15 @@ class ProfileApiServices {
           "razorpay_signature": razorpaySignature,
         }),
       );
-      print("Status Code : ${response.statusCode}");
-      print("total__Response Body : ${response.body}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("total__Response Body : ${response.body}");
       final Map<String, dynamic> data = jsonDecode(response.body);
 
       CustomToast.showSuccess(data['message'] ?? "Something went wrong");
 
       return true;
     } catch (e) {
-      print("❌ Exception in Create Vehicle6 : $e");
+      AppLogger.d("❌ Exception in Create Vehicle6 : $e");
 
       return false;
       // return AddMoneyWalletResponse(success: false, message: "Connection error: $e");
@@ -688,17 +689,17 @@ class ProfileApiServices {
 
     final String? userId = prefs.getString("driver_userid");
 
-    print("theeeee____ useriddddd ${userId}");
+    AppLogger.d("theeeee____ useriddddd ${userId}");
 
     final Uri url = Uri.parse(
       "${ApiPath.baseUri}/bank-accounts/driverId/${userId}",
     );
 
-    print("========== CREATE VEHICLE API ==========");
-    print("URL : $url");
-    print("Token : $token");
-    // print("Request Body : ${jsonEncode(requestBody)}");
-    print("my_tokennnn ${token}");
+    AppLogger.d("========== CREATE VEHICLE API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
+    // AppLogger.d("Request Body : ${jsonEncode(requestBody)}");
+    AppLogger.d("my_tokennnn ${token}");
 
     try {
       final http.Response response = await http.get(
@@ -710,8 +711,8 @@ class ProfileApiServices {
         // body: jsonEncode(requestBody),
       );
 
-      print("Status Code : ${response.statusCode}");
-      print("Response Body : ${response.body}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("Response Body : ${response.body}");
 
       final Map<String, dynamic> data = jsonDecode(response.body);
       final GetBankAccountsResponse walletResponse =
@@ -719,7 +720,7 @@ class ProfileApiServices {
 
       return walletResponse;
     } catch (e) {
-      print("❌ Excesssssssssssption in drivverrrrrr idd : $e");
+      AppLogger.d("❌ Excesssssssssssption in drivverrrrrr idd : $e");
       return GetBankAccountsResponse(
         success: false,
         message: "Connection error: $e",
@@ -737,18 +738,18 @@ class ProfileApiServices {
     final String? token = prefs.getString("auth_token");
     final String? userId = prefs.getString("driver_userid");
 
-    print("herrrerrere_the_driverrrriddd_calling>>>>");
-    print("theeeee____ accountidddddd ${acoountid}");
+    AppLogger.d("herrrerrere_the_driverrrriddd_calling>>>>");
+    AppLogger.d("theeeee____ accountidddddd ${acoountid}");
 
-    print("theeeee____ upiId ${upiId}");
+    AppLogger.d("theeeee____ upiId ${upiId}");
     final Uri url = Uri.parse(
       "${ApiPath.baseUri}/bank-accounts/update/${acoountid}",
     );
 
-    print("========== CREATE VEHICLE API ==========");
-    print("URL : $url");
-    print("Token : $token");
-    print("my_tokennnn ${token}");
+    AppLogger.d("========== CREATE VEHICLE API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
+    AppLogger.d("my_tokennnn ${token}");
 
     try {
       final http.Response response = await http.put(
@@ -766,8 +767,8 @@ class ProfileApiServices {
         }),
       );
 
-      print("Status Code : ${response.statusCode}");
-      print(
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d(
         "update upiiiii respsoneeee>>>>>>> resss >>>> Response Body : ${response.body}",
       );
 
@@ -777,7 +778,7 @@ class ProfileApiServices {
 
       return driverIdResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle5 : $e");
+      AppLogger.d("❌ Exception in Create Vehicle5 : $e");
       return UpdateBankAndUpiResponse(
         success: false,
         message: "Connection error: $e",
@@ -801,23 +802,23 @@ class ProfileApiServices {
     final String? token = prefs.getString("auth_token");
     final String? userId = prefs.getString("driver_userid");
 
-    print("herrrerrere_the_driverrrriddd_calling>>>>");
-    print("theeeee____ accountidddddd ${acoountid}");
+    AppLogger.d("herrrerrere_the_driverrrriddd_calling>>>>");
+    AppLogger.d("theeeee____ accountidddddd ${acoountid}");
 
-    //  print("theeeee____ type ${type}");
-    print("theeeee____ bankName ${bankName}");
+    //  AppLogger.d("theeeee____ type ${type}");
+    AppLogger.d("theeeee____ bankName ${bankName}");
 
-    print("theeeee____ accountNumber ${accountNumber}");
-    print("theeeee____ ifscCode ${ifscCode}");
-    print("theeeee____ accountHolderName ${accountHolderName}");
+    AppLogger.d("theeeee____ accountNumber ${accountNumber}");
+    AppLogger.d("theeeee____ ifscCode ${ifscCode}");
+    AppLogger.d("theeeee____ accountHolderName ${accountHolderName}");
     final Uri url = Uri.parse(
       "${ApiPath.baseUri}/bank-accounts/update/${acoountid}",
     );
 
-    print("========== CREATE VEHICLE API ==========");
-    print("URL : $url");
-    print("Token : $token");
-    print("my_tokennnn ${token}");
+    AppLogger.d("========== CREATE VEHICLE API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
+    AppLogger.d("my_tokennnn ${token}");
 
     try {
       final http.Response response = await http.put(
@@ -838,8 +839,8 @@ class ProfileApiServices {
         }),
       );
 
-      print("Status Code : ${response.statusCode}");
-      print("drievrrrrrid>>>>>>> resss >>>> Response Body : ${response.body}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("drievrrrrrid>>>>>>> resss >>>> Response Body : ${response.body}");
 
       final Map<String, dynamic> data = jsonDecode(response.body);
       final UpdateBankAndUpiResponse driverIdResponse =
@@ -847,7 +848,7 @@ class ProfileApiServices {
 
       return driverIdResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle5 : $e");
+      AppLogger.d("❌ Exception in Create Vehicle5 : $e");
       return UpdateBankAndUpiResponse(
         success: false,
         message: "Connection error: $e",
@@ -865,18 +866,18 @@ class ProfileApiServices {
     final String? token = prefs.getString("auth_token");
     final String? userId = prefs.getString("driver_userid");
 
-    print("herrrerrere_the_driverrrriddd_calling>>>>");
-    print("theeeee____ accountid: $accountid"); // Fixed print
-    print("userId: $userId");
-    print("token exists: ${token != null}");
+    AppLogger.d("herrrerrere_the_driverrrriddd_calling>>>>");
+    AppLogger.d("theeeee____ accountid: $accountid"); // Fixed print
+    AppLogger.d("userId: $userId");
+    AppLogger.d("token exists: ${token != null}");
 
     final Uri url = Uri.parse(
       "${ApiPath.baseUri}/bank-accounts/delete/$accountid", // Use fixed parameter
     );
 
-    print("========== DELETE BANK/UPI API ==========");
-    print("URL: $url");
-    print(
+    AppLogger.d("========== DELETE BANK/UPI API ==========");
+    AppLogger.d("URL: $url");
+    AppLogger.d(
       "Token: ${token != null ? token!.substring(0, token.length > 10 ? 10 : token.length) + '...' : 'null'}",
     );
 
@@ -889,8 +890,8 @@ class ProfileApiServices {
         },
       );
 
-      print("Status Code: ${response.statusCode}");
-      print("Response Body: ${response.body}");
+      AppLogger.d("Status Code: ${response.statusCode}");
+      AppLogger.d("Response Body: ${response.body}");
 
       final Map<String, dynamic> data = jsonDecode(response.body);
       final UpdateBankAndUpiResponse driverIdResponse =
@@ -898,7 +899,7 @@ class ProfileApiServices {
 
       return driverIdResponse;
     } catch (e) {
-      print("❌ Exception in delete_bank_upi_data: $e");
+      AppLogger.d("❌ Exception in delete_bank_upi_data: $e");
       return UpdateBankAndUpiResponse(
         success: false,
         message: "Connection error: $e",
@@ -914,14 +915,14 @@ class ProfileApiServices {
 
     final String? userId = prefs.getString("driver_userid");
 
-    print("theeeee____ useriddddd ${userId}");
+    AppLogger.d("theeeee____ useriddddd ${userId}");
 
     final Uri url = Uri.parse("${ApiPath.ratings_api}");
-    print("========== CREATE VEHICLE API ==========");
-    print("URL : $url");
-    print("Token : $token");
-    // print("Request Body : ${jsonEncode(requestBody)}");
-    print("my_tokennnn ${token}");
+    AppLogger.d("========== CREATE VEHICLE API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
+    // AppLogger.d("Request Body : ${jsonEncode(requestBody)}");
+    AppLogger.d("my_tokennnn ${token}");
 
     try {
       final http.Response response = await http.get(
@@ -933,8 +934,8 @@ class ProfileApiServices {
         // body: jsonEncode(requestBody),
       );
 
-      print("Status Code : ${response.statusCode}");
-      print("Response Body : ${response.body}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("Response Body : ${response.body}");
 
       final Map<String, dynamic> data = jsonDecode(response.body);
       final ReviewRatingResponse walletResponse = ReviewRatingResponse.fromJson(
@@ -943,7 +944,7 @@ class ProfileApiServices {
 
       return walletResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle9 : $e");
+      AppLogger.d("❌ Exception in Create Vehicle9 : $e");
       return ReviewRatingResponse(
         success: false,
         message: "Connection error: $e",
@@ -958,14 +959,14 @@ class ProfileApiServices {
 
     final String? userId = prefs.getString("driver_userid");
 
-    print("theeeee____ useriddddd ${userId}");
+    AppLogger.d("theeeee____ useriddddd ${userId}");
 
     final Uri url = Uri.parse("${ApiPath.privacy_terms_api}");
-    print("========== CREATE VEHICLE API ==========");
-    print("URL : $url");
-    print("Token : $token");
-    // print("Request Body : ${jsonEncode(requestBody)}");
-    print("my_tokennnn ${token}");
+    AppLogger.d("========== CREATE VEHICLE API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
+    // AppLogger.d("Request Body : ${jsonEncode(requestBody)}");
+    AppLogger.d("my_tokennnn ${token}");
 
     try {
       final http.Response response = await http.get(
@@ -977,8 +978,8 @@ class ProfileApiServices {
         // body: jsonEncode(requestBody),
       );
 
-      print("Status Code : ${response.statusCode}");
-      print("Response Body : ${response.body}");
+      AppLogger.d("Status Code : ${response.statusCode}");
+      AppLogger.d("Response Body : ${response.body}");
 
       final Map<String, dynamic> data = jsonDecode(response.body);
       final Termsandpolicyresponse walletResponse =
@@ -986,7 +987,7 @@ class ProfileApiServices {
 
       return walletResponse;
     } catch (e) {
-      print("❌ Exception in Create Vehicle8 : $e");
+      AppLogger.d("❌ Exception in Create Vehicle8 : $e");
       return Termsandpolicyresponse(
         success: false,
         message: "Connection error: $e",
@@ -1000,13 +1001,13 @@ class ProfileApiServices {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
 
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID : $orderid");
+    AppLogger.d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Order ID : $orderid");
 
     final Uri url = Uri.parse("${ApiPath.baseUri}/payments/cash");
 
-    print("========== 🔵 CASH PAYMENT API ==========");
-    print("URL : $url");
-    print("Token : $token");
+    AppLogger.d("========== 🔵 CASH PAYMENT API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
 
     try {
       final http.Response response = await http.post(
@@ -1018,15 +1019,15 @@ class ProfileApiServices {
         body: jsonEncode({"orderId": orderid}),
       );
 
-      print("✅ Status Code : ${response.statusCode}");
+      AppLogger.d("✅ Status Code : ${response.statusCode}");
 
       // Try to parse JSON
       dynamic decodedJson;
       try {
         decodedJson = jsonDecode(response.body);
       } catch (jsonError) {
-        print("JSON Parse Error: $jsonError");
-        print("Raw Response: ${response.body}");
+        AppLogger.d("JSON Parse Error: $jsonError");
+        AppLogger.d("Raw Response: ${response.body}");
         throw FormatException("Invalid JSON response from server");
       }
 
@@ -1034,20 +1035,20 @@ class ProfileApiServices {
       final prettyJson = const JsonEncoder.withIndent(
         '  ',
       ).convert(decodedJson);
-      print("📦 FULL RESPONSE (Pretty Print) 👇");
-      print(prettyJson);
+      AppLogger.d("📦 FULL RESPONSE (Pretty Print) 👇");
+      AppLogger.d(prettyJson);
 
       // Parse the response
       final Ordercompletecashresponse ordercompletecashresponse =
           Ordercompletecashresponse.fromJson(decodedJson);
 
-      print("🎯 Parsed Model Object 👇");
-      print(ordercompletecashresponse);
+      AppLogger.d("🎯 Parsed Model Object 👇");
+      AppLogger.d(ordercompletecashresponse);
 
       return ordercompletecashresponse;
     } catch (e) {
-      print("❌ Exception in cash_update_data");
-      print(e.toString());
+      AppLogger.d("❌ Exception in cash_update_data");
+      AppLogger.d(e.toString());
 
       // Return a proper error response
       return Ordercompletecashresponse(
@@ -1072,9 +1073,9 @@ class ProfileApiServices {
 
     final Uri url = Uri.parse("${ApiPath.baseUri}/order/createByDriver");
 
-    print("========== 🔵 CREATE BY DRIVER API ==========");
-    print("URL : $url");
-    print("Token : $token");
+    AppLogger.d("========== 🔵 CREATE BY DRIVER API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
 
     /// 🔥 Payload exactly as backend expects
     final Map<String, dynamic> payload = {
@@ -1092,8 +1093,8 @@ class ProfileApiServices {
       "phone": phone,
     };
 
-    print("📤 REQUEST BODY 👇");
-    print(const JsonEncoder.withIndent('  ').convert(payload));
+    AppLogger.d("📤 REQUEST BODY 👇");
+    AppLogger.d(const JsonEncoder.withIndent('  ').convert(payload));
 
     try {
       final http.Response response = await http.post(
@@ -1105,17 +1106,17 @@ class ProfileApiServices {
         body: jsonEncode(payload),
       );
 
-      print("✅ Status Code : ${response.statusCode}");
+      AppLogger.d("✅ Status Code : ${response.statusCode}");
 
       final decodedJson = jsonDecode(response.body);
 
-      print("📦 RESPONSE 👇");
-      print(const JsonEncoder.withIndent('  ').convert(decodedJson));
+      AppLogger.d("📦 RESPONSE 👇");
+      AppLogger.d(const JsonEncoder.withIndent('  ').convert(decodedJson));
 
       return CreateByDriverResponse.fromJson(decodedJson);
     } catch (e) {
-      print("❌ Exception in createByDriverData");
-      print(e.toString());
+      AppLogger.d("❌ Exception in createByDriverData");
+      AppLogger.d(e.toString());
 
       return CreateByDriverResponse(
         success: false,
@@ -1132,9 +1133,9 @@ class ProfileApiServices {
       "${ApiPath.baseUri}/notification/userNotifications",
     );
 
-    print("========== 🔵 CASH PAYMENT API ==========");
-    print("URL : $url");
-    print("Token : $token");
+    AppLogger.d("========== 🔵 CASH PAYMENT API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
 
     try {
       final http.Response response = await http.get(
@@ -1146,9 +1147,9 @@ class ProfileApiServices {
         // body: jsonEncode({"orderId": orderid}),
       );
 
-      print("✅ Status Code : ${response.statusCode}");
+      AppLogger.d("✅ Status Code : ${response.statusCode}");
 
-      print("thee_response_notification_bodyyyyyy ${response.body}");
+      AppLogger.d("thee_response_notification_bodyyyyyy ${response.body}");
       // Check if response is valid JSON
       if (response.body.trim().isEmpty) {
         throw FormatException("Empty response from server");
@@ -1167,8 +1168,8 @@ class ProfileApiServices {
       try {
         decodedJson = jsonDecode(response.body);
       } catch (jsonError) {
-        print("JSON Parse Error: $jsonError");
-        print("Raw Response: ${response.body}");
+        AppLogger.d("JSON Parse Error: $jsonError");
+        AppLogger.d("Raw Response: ${response.body}");
         throw FormatException("Invalid JSON response from server");
       }
 
@@ -1176,20 +1177,20 @@ class ProfileApiServices {
       final prettyJson = const JsonEncoder.withIndent(
         '  ',
       ).convert(decodedJson);
-      print("📦 FULL RESPONSE (Pretty Print) 👇");
-      print(prettyJson);
+      AppLogger.d("📦 FULL RESPONSE (Pretty Print) 👇");
+      AppLogger.d(prettyJson);
 
       // Parse the response
       final NotificationResponse notificationResponse =
           NotificationResponse.fromJson(decodedJson);
 
-      print("🎯 Parsed Model Object 👇");
-      print(notificationResponse);
+      AppLogger.d("🎯 Parsed Model Object 👇");
+      AppLogger.d(notificationResponse);
 
       return notificationResponse;
     } catch (e) {
-      print("❌ Exception in get_notification_data");
-      print(e.toString());
+      AppLogger.d("❌ Exception in get_notification_data");
+      AppLogger.d(e.toString());
 
       // Return a proper error response
       return NotificationResponse(
@@ -1205,9 +1206,9 @@ class ProfileApiServices {
 
     final Uri url = Uri.parse("${ApiPath.baseUri}/promocodes/eligible");
 
-    print("========== 🔵 CASH PAYMENT API ==========");
-    print("URL : $url");
-    print("Token : $token");
+    AppLogger.d("========== 🔵 CASH PAYMENT API ==========");
+    AppLogger.d("URL : $url");
+    AppLogger.d("Token : $token");
 
     try {
       final http.Response response = await http.get(
@@ -1219,9 +1220,9 @@ class ProfileApiServices {
         // body: jsonEncode({"orderId": orderid}),
       );
 
-      print("✅ Status Code : ${response.statusCode}");
+      AppLogger.d("✅ Status Code : ${response.statusCode}");
 
-      print("thee_response_promocode_bodyyyyyy ${response.body}");
+      AppLogger.d("thee_response_promocode_bodyyyyyy ${response.body}");
       // Check if response is valid JSON
       if (response.body.trim().isEmpty) {
         throw FormatException("Empty response from server");
@@ -1240,8 +1241,8 @@ class ProfileApiServices {
       try {
         decodedJson = jsonDecode(response.body);
       } catch (jsonError) {
-        print("JSON Parse Error: $jsonError");
-        print("Raw Response: ${response.body}");
+        AppLogger.d("JSON Parse Error: $jsonError");
+        AppLogger.d("Raw Response: ${response.body}");
         throw FormatException("Invalid JSON response from server");
       }
 
@@ -1249,21 +1250,21 @@ class ProfileApiServices {
       final prettyJson = const JsonEncoder.withIndent(
         '  ',
       ).convert(decodedJson);
-      print("📦 FULL RESPONSE (Pretty Print) 👇");
-      print(prettyJson);
+      AppLogger.d("📦 FULL RESPONSE (Pretty Print) 👇");
+      AppLogger.d(prettyJson);
 
       // Parse the response
       final Getpromocodedata getpromocodedata = Getpromocodedata.fromJson(
         decodedJson,
       );
 
-      print("🎯 Parsed Model Object 👇");
-      print(getpromocodedata);
+      AppLogger.d("🎯 Parsed Model Object 👇");
+      AppLogger.d(getpromocodedata);
 
       return getpromocodedata;
     } catch (e) {
-      print("❌ Exception in get_promocode_data");
-      print(e.toString());
+      AppLogger.d("❌ Exception in get_promocode_data");
+      AppLogger.d(e.toString());
 
       // Return a proper error response
       return Getpromocodedata(

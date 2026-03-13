@@ -1,4 +1,4 @@
-import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
+﻿import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
@@ -23,6 +23,7 @@ import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class RideRequestScreen extends StatefulWidget {
   final Map<String, dynamic> rideData;
@@ -180,7 +181,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       // Start location listening
       _listenToLocation();
     } catch (e) {
-      print('❌ Error initializing: $e');
+      AppLogger.d('❌ Error initializing: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -188,7 +189,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
   @override
   void dispose() {
-    print('🗑️ RideRequestScreen dispose called');
+    AppLogger.d('🗑️ RideRequestScreen dispose called');
 
     // Cancel all timers and subscriptions first
     _countdownTimer?.cancel();
@@ -210,7 +211,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         ButtonStateManager.clearState('custom_cancel_button');
       } catch (e) {
         // Silently catch errors during disposal
-        print('⚠️ Error clearing button states: $e');
+        AppLogger.d('⚠️ Error clearing button states: $e');
       }
     });
 
@@ -255,9 +256,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         width: 150,
         height: 150,
       );
-      print('✅ Bike marker icon loaded');
+      AppLogger.d('✅ Bike marker icon loaded');
     } catch (e) {
-      print('❌ Error loading bike marker: $e');
+      AppLogger.d('❌ Error loading bike marker: $e');
       _bikeMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(
         BitmapDescriptor.hueBlue,
       );
@@ -338,7 +339,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   }
 
   void _extractAndStoreRideData() {
-    print("my_rideeee_datatatt ${widget.rideData}");
+    AppLogger.d("my_rideeee_datatatt ${widget.rideData}");
     try {
       // Store all data locally
       _rideData = {
@@ -402,11 +403,11 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
       // Removed simulated driver location logic
 
-      print('✅ Ride data extracted successfully');
-      print('📍 Pickup: ${_pickupAddress}');
-      print('📍 Drop: ${_dropAddress}');
+      AppLogger.d('✅ Ride data extracted successfully');
+      AppLogger.d('📍 Pickup: ${_pickupAddress}');
+      AppLogger.d('📍 Drop: ${_dropAddress}');
     } catch (e) {
-      print("❌ Error extracting ride data: $e");
+      AppLogger.d("❌ Error extracting ride data: $e");
       // Set default values if extraction fails
       _rideData = {
         'orderId': 'N/A',
@@ -492,10 +493,10 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         _rideData!['dropoffCoordinates'] = LatLng(18.5204, 73.8567); // Pune
       }
 
-      print('📍 Pickup coordinates: ${_rideData!['pickupCoordinates']}');
-      print('📍 Drop coordinates: ${_rideData!['dropoffCoordinates']}');
+      AppLogger.d('📍 Pickup coordinates: ${_rideData!['pickupCoordinates']}');
+      AppLogger.d('📍 Drop coordinates: ${_rideData!['dropoffCoordinates']}');
     } catch (e) {
-      print("❌ Error extracting coordinates: $e");
+      AppLogger.d("❌ Error extracting coordinates: $e");
       _rideData!['pickupCoordinates'] = LatLng(23.2599, 77.4126); // Bhopal
       _rideData!['dropoffCoordinates'] = LatLng(18.5204, 73.8567); // Pune
     }
@@ -520,7 +521,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   /// Start real-time location tracking with heading
   Future<void> _startLocationTracking() async {
     if (!await _requestLocationPermission()) {
-      print('❌ Location permission denied');
+      AppLogger.d('❌ Location permission denied');
       return;
     }
 
@@ -543,9 +544,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         });
       }
 
-      print('📍 Initial location: ${position.latitude}, ${position.longitude}');
+      AppLogger.d('📍 Initial location: ${position.latitude}, ${position.longitude}');
     } catch (e) {
-      print('❌ Error getting initial position: $e');
+      AppLogger.d('❌ Error getting initial position: $e');
       if (mounted) setState(() => _locationError = true);
     }
 
@@ -575,7 +576,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
             _setMarkers();
           },
           onError: (error) {
-            print('❌ Location stream error: $error');
+            AppLogger.d('❌ Location stream error: $error');
             if (mounted) {
               setState(() => _locationError = true);
             }
@@ -590,14 +591,14 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     final newMarkers = <Marker>{};
     final newCircles = <Circle>{};
 
-    print('📍 Setting simple markers...');
-    print('📍 Driver location: $_driverLocation');
-    print('📍 Pickup coordinates: ${_rideData?['pickupCoordinates']}');
-    print('📍 Drop coordinates: ${_rideData?['dropoffCoordinates']}');
+    AppLogger.d('📍 Setting simple markers...');
+    AppLogger.d('📍 Driver location: $_driverLocation');
+    AppLogger.d('📍 Pickup coordinates: ${_rideData?['pickupCoordinates']}');
+    AppLogger.d('📍 Drop coordinates: ${_rideData?['dropoffCoordinates']}');
 
     // ✅ 1. Driver marker (blue)
     if (_driverLocation != null) {
-      print('📍 Adding driver marker at: $_driverLocation');
+      AppLogger.d('📍 Adding driver marker at: $_driverLocation');
       newMarkers.add(
         Marker(
           markerId: const MarkerId("driver"),
@@ -641,7 +642,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
     // ✅ 2. Pickup marker (simple blue marker)
     if (_rideData?['pickupCoordinates'] != null) {
-      print('📍 Adding pickup marker at: ${_rideData!['pickupCoordinates']}');
+      AppLogger.d('📍 Adding pickup marker at: ${_rideData!['pickupCoordinates']}');
       newMarkers.add(
         Marker(
           markerId: const MarkerId("pickup"),
@@ -670,7 +671,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
     // ✅ 3. Drop marker (simple red marker)
     if (_rideData?['dropoffCoordinates'] != null) {
-      print('📍 Adding drop marker at: ${_rideData!['dropoffCoordinates']}');
+      AppLogger.d('📍 Adding drop marker at: ${_rideData!['dropoffCoordinates']}');
       newMarkers.add(
         Marker(
           markerId: const MarkerId("drop"),
@@ -692,7 +693,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       });
     }
 
-    print('✅ Simple markers set: ${newMarkers.length} markers');
+    AppLogger.d('✅ Simple markers set: ${newMarkers.length} markers');
 
     // Fit map to show all markers
     _fitMapToAllMarkers();
@@ -701,7 +702,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   /// Fit map to show all markers
   void _fitMapToAllMarkers() {
     if (_mapController == null) {
-      print('⚠️ Map controller not ready yet');
+      AppLogger.d('⚠️ Map controller not ready yet');
       return;
     }
 
@@ -714,7 +715,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       allPoints.add(_rideData!['dropoffCoordinates']);
 
     if (allPoints.isEmpty) {
-      print('⚠️ No points to fit map to');
+      AppLogger.d('⚠️ No points to fit map to');
       return;
     }
 
@@ -726,9 +727,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
           _mapController!.animateCamera(
             CameraUpdate.newLatLngBounds(bounds, 150),
           );
-          print('✅ Map fitted to show all markers');
+          AppLogger.d('✅ Map fitted to show all markers');
         } catch (e) {
-          print('❌ Error animating camera: $e');
+          AppLogger.d('❌ Error animating camera: $e');
         }
       }
     });
@@ -803,7 +804,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   Future<void> _getDirections() async {
     if (_rideData?['pickupCoordinates'] == null ||
         _rideData?['dropoffCoordinates'] == null) {
-      print('⚠️ Cannot get directions: coordinates missing');
+      AppLogger.d('⚠️ Cannot get directions: coordinates missing');
       return;
     }
 
@@ -818,7 +819,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
           '&key=$GOOGLE_API_KEY',
         );
 
-        print('🛣️ Fetching route from driver to pickup...');
+        AppLogger.d('🛣️ Fetching route from driver to pickup...');
         final response = await http.get(url);
 
         if (response.statusCode == 200) {
@@ -842,7 +843,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
               }
             }
 
-            print('🛣️ Route Driver → Pickup calculated');
+            AppLogger.d('🛣️ Route Driver → Pickup calculated');
           }
         }
       }
@@ -860,7 +861,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
           '&key=$GOOGLE_API_KEY',
         );
 
-        print('🛣️ Fetching route from pickup to drop...');
+        AppLogger.d('🛣️ Fetching route from pickup to drop...');
         final response = await http.get(url);
 
         if (response.statusCode == 200) {
@@ -871,14 +872,14 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
             final polylineEncoded = route['overview_polyline']['points'];
             _pickupToDropCoordinates = _decodePolyline(polylineEncoded);
 
-            print('🛣️ Route Pickup → Drop calculated');
+            AppLogger.d('🛣️ Route Pickup → Drop calculated');
           }
         }
       }
 
       _updatePolylines();
     } catch (e) {
-      print('❌ Error fetching directions: $e');
+      AppLogger.d('❌ Error fetching directions: $e');
     }
   }
 
@@ -975,7 +976,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
 
-    print("helloooooo_secduleeddd_ride_hererrer2 ${_rideData?['isScheduled']}");
+    AppLogger.d("helloooooo_secduleeddd_ride_hererrer2 ${_rideData?['isScheduled']}");
 
     return PopScope(
       canPop: false,
@@ -1109,7 +1110,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     return GoogleMap(
       onMapCreated: (GoogleMapController controller) {
         _mapController = controller;
-        print('✅ Google Map created');
+        AppLogger.d('✅ Google Map created');
 
         // Wait a bit then set markers and fit map
         Future.delayed(Duration(milliseconds: 500), () {
@@ -1149,8 +1150,8 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   }
 
   Widget _buildRideDetails(double w) {
-    print("helloooooo_secduleeddd_ride_hererrer ${_rideData!['isScheduled']}");
-    print(
+    AppLogger.d("helloooooo_secduleeddd_ride_hererrer ${_rideData!['isScheduled']}");
+    AppLogger.d(
       "helloooooo_secduleeddd_ride_hererrer2222 ${_rideData!['scheduledStartTime']}",
     );
 
@@ -1860,10 +1861,10 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   }
 
   Future<void> _acceptRide() async {
-    print("myyy_tapp33333");
+    AppLogger.d("myyy_tapp33333");
 
     if (_orderId == null) {
-      print("❌ Order ID is null, cannot accept ride");
+      AppLogger.d("❌ Order ID is null, cannot accept ride");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Cannot accept ride: Order ID not available'),
@@ -1893,7 +1894,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     if (_hasCancelled || _hasAccepted) return;
 
     if (_orderId == null) {
-      print("❌ Order ID is null, cannot cancel ride");
+      AppLogger.d("❌ Order ID is null, cannot cancel ride");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Cannot cancel ride: Order ID not available'),
@@ -1906,8 +1907,8 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     // Stop notification sound
     NotificationService.instance.cancelRideNotification();
 
-    print("declinennnndd_api");
-    print("helloooo_tappeddd>>>   ${_orderId}  ");
+    AppLogger.d("declinennnndd_api");
+    AppLogger.d("helloooo_tappeddd>>>   ${_orderId}  ");
 
     final Uri url = Uri.parse("${ApiPath.baseUri}/order/decline/$_orderId");
 
@@ -1922,7 +1923,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       },
     );
 
-    print("Response Body: ${res.body}");
+    AppLogger.d("Response Body: ${res.body}");
 
     final data = jsonDecode(res.body);
 

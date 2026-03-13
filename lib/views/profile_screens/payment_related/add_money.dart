@@ -1,4 +1,4 @@
-// import 'package:nzcu_driver/controllers/profile_controllers/add_money_wallet_controller.dart';
+﻿// import 'package:nzcu_driver/controllers/profile_controllers/add_money_wallet_controller.dart';
 // import 'package:nzcu_driver/controllers/promo_code_controller/get_promo_code_controller.dart';
 // import 'package:nzcu_driver/modals/get_promo_code_data.dart';
 // import 'package:nzcu_driver/utilities/app_buttons.dart';
@@ -65,8 +65,8 @@
 //         final discount = _calculateDiscount(amount);
 //         final finalAmount = amount - discount;
 
-//         print("Selected Promo: ${_selectedPromoCode!.code}");
-//         print("Original: $amount, Discount: $discount, Final: $finalAmount");
+//         AppLogger.d("Selected Promo: ${_selectedPromoCode!.code}");
+//         AppLogger.d("Original: $amount, Discount: $discount, Final: $finalAmount");
 //       }
 //     }
 //   }
@@ -661,6 +661,7 @@ import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class AddMoney extends StatefulWidget {
   const AddMoney({super.key});
@@ -725,13 +726,13 @@ class _AddMoneyState extends State<AddMoney> {
         final discount = _calculateDiscount(amount);
         final finalAmount = amount - discount;
 
-        print("Selected Promo: ${_selectedPromoCode!.code}");
-        print("Original: $amount, Discount: $discount, Final: $finalAmount");
+        AppLogger.d("Selected Promo: ${_selectedPromoCode!.code}");
+        AppLogger.d("Original: $amount, Discount: $discount, Final: $finalAmount");
       }
     } else if (_selectedPromoCode == null &&
         _amountController.text.isNotEmpty) {
-      print("No promo code selected");
-      print("Amount: ${_amountController.text}");
+      AppLogger.d("No promo code selected");
+      AppLogger.d("Amount: ${_amountController.text}");
     }
   }
 

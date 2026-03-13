@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class NotificationService {
   // Private constructor - Singleton pattern
@@ -57,12 +58,12 @@ class NotificationService {
   /// Initialize the notification service
   Future<void> initialize() async {
     if (_isInitialized) {
-      print('📱 [NotificationService] Already initialized, skipping...');
+      AppLogger.d('📱 [NotificationService] Already initialized, skipping...');
       return;
     }
 
     try {
-      print('📱 [NotificationService] Initializing...');
+      AppLogger.d('📱 [NotificationService] Initializing...');
 
       // Step 1: Initialize local notifications plugin
       await _initializeLocalNotifications();
@@ -83,10 +84,10 @@ class NotificationService {
       _setupMessageOpenedAppHandler();
 
       _isInitialized = true;
-      print('✅ [NotificationService] Initialization complete');
+      AppLogger.d('✅ [NotificationService] Initialization complete');
     } catch (e, stackTrace) {
-      print('❌ [NotificationService] Initialization failed: $e');
-      print('📍 StackTrace: $stackTrace');
+      AppLogger.d('❌ [NotificationService] Initialization failed: $e');
+      AppLogger.d('📍 StackTrace: $stackTrace');
     }
   }
 
@@ -98,7 +99,7 @@ class NotificationService {
       final isOnline = prefs.getBool('driver_is_online') ?? false;
 
       if (!isOnline) {
-        print(
+        AppLogger.d(
           '🔕 [Background] Notification suppressed because driver is OFFLINE',
         );
         return;
@@ -155,9 +156,9 @@ class NotificationService {
       // Show notification
       await showNotification(message);
 
-      print('✅ [Background] Notification displayed');
+      AppLogger.d('✅ [Background] Notification displayed');
     } catch (e) {
-      print('❌ [Background] Failed to show notification: $e');
+      AppLogger.d('❌ [Background] Failed to show notification: $e');
     }
   }
 
@@ -189,7 +190,7 @@ class NotificationService {
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
 
-    print('✅ [NotificationService] Local notifications initialized');
+    AppLogger.d('✅ [NotificationService] Local notifications initialized');
   }
 
   @pragma('vm:entry-point')
@@ -197,7 +198,7 @@ class NotificationService {
     NotificationResponse notificationResponse,
   ) {
     // Handle background notification tap/action
-    print(
+    AppLogger.d(
       '👆 [NotificationService] Background notification action: ${notificationResponse.actionId}',
     );
     // We can't use GetX or non-static members here.
@@ -235,7 +236,7 @@ class NotificationService {
     if (androidPlugin != null) {
       await androidPlugin.createNotificationChannel(generalChannel);
       await androidPlugin.createNotificationChannel(channel);
-      print('✅ [NotificationService] Notification channel created: $channelId');
+      AppLogger.d('✅ [NotificationService] Notification channel created: $channelId');
     }
   }
 
@@ -245,11 +246,11 @@ class NotificationService {
   bool _isRequestingPermission = false;
 
   Future<bool> _requestPermission() async {
-    print(
+    AppLogger.d(
       'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
     );
     if (_isRequestingPermission) {
-      print("⚠️ Permission request already in progress");
+      AppLogger.d("⚠️ Permission request already in progress");
       return false;
     }
 
@@ -270,23 +271,23 @@ class NotificationService {
 
       switch (status) {
         case AuthorizationStatus.authorized:
-          print('✅ Permission granted: authorized');
+          AppLogger.d('✅ Permission granted: authorized');
           return true;
 
         case AuthorizationStatus.provisional:
-          print('✅ Permission granted: provisional');
+          AppLogger.d('✅ Permission granted: provisional');
           return true;
 
         case AuthorizationStatus.denied:
-          print('❌ Permission denied');
+          AppLogger.d('❌ Permission denied');
           return false;
 
         case AuthorizationStatus.notDetermined:
-          print('⚠️ Permission not determined');
+          AppLogger.d('⚠️ Permission not determined');
           return false;
       }
     } catch (e) {
-      print('❌ Permission request failed: $e');
+      AppLogger.d('❌ Permission request failed: $e');
       return false;
     } finally {
       _isRequestingPermission = false;
@@ -301,29 +302,29 @@ class NotificationService {
       _fcmToken = await _messaging.getToken();
 
       if (_fcmToken == null) {
-        print('⚠️ [NotificationService] FCM token is null');
+        AppLogger.d('⚠️ [NotificationService] FCM token is null');
         return;
       }
 
-      print('>>>>>>>>>>>>>> [NotificationService] FCM Token: $_fcmToken');
+      AppLogger.d('>>>>>>>>>>>>>> [NotificationService] FCM Token: $_fcmToken');
 
       // Persist token and device info
       await _persistTokenAndDeviceInfo();
     } catch (e) {
-      print('❌ [NotificationService] Failed to get FCM token: $e');
+      AppLogger.d('❌ [NotificationService] Failed to get FCM token: $e');
     }
   }
 
   void _listenForTokenRefresh() {
-    print('listening for token refresh');
+    AppLogger.d('listening for token refresh');
     _messaging.onTokenRefresh
         .listen((newToken) async {
-          print('🔄 [NotificationService] FCM Token refreshed: $newToken');
+          AppLogger.d('🔄 [NotificationService] FCM Token refreshed: $newToken');
           _fcmToken = newToken;
           await _persistTokenAndDeviceInfo();
         })
         .onError((error) {
-          print('❌ [NotificationService] Token refresh error: $error');
+          AppLogger.d('❌ [NotificationService] Token refresh error: $error');
         });
   }
 
@@ -334,7 +335,7 @@ class NotificationService {
       // Save FCM token
       if (_fcmToken != null) {
         await prefs.setString('fcmToken', _fcmToken!);
-        print('💾 [NotificationService] FCM token saved to SharedPreferences');
+        AppLogger.d('💾 [NotificationService] FCM token saved to SharedPreferences');
       }
 
       // Save device ID if not already saved
@@ -343,10 +344,10 @@ class NotificationService {
         final androidInfo = await deviceInfo.androidInfo;
         final deviceId = androidInfo.id;
         await prefs.setString('deviceId', deviceId);
-        print('💾 [NotificationService] Device ID saved: $deviceId');
+        AppLogger.d('💾 [NotificationService] Device ID saved: $deviceId');
       }
     } catch (e) {
-      print('❌ [NotificationService] Failed to persist token/device info: $e');
+      AppLogger.d('❌ [NotificationService] Failed to persist token/device info: $e');
     }
   }
 
@@ -354,7 +355,7 @@ class NotificationService {
   Future<String?> getStoredFcmToken() async {
     final prefs = await SharedPreferences.getInstance();
 
-    print("get_my_fcm_token ${prefs.getString('fcmToken')}");
+    AppLogger.d("get_my_fcm_token ${prefs.getString('fcmToken')}");
     return prefs.getString('fcmToken');
   }
 
@@ -371,15 +372,15 @@ class NotificationService {
   void _setupForegroundMessageHandler() {
     FirebaseMessaging.onMessage
         .listen((RemoteMessage message) async {
-          print('📩 [NotificationService] Foreground message received');
-          print('   Title: ${message.notification?.title}');
-          print('   Body: ${message.notification?.body}');
-          print('   Data: ${message.data}');
+          AppLogger.d('📩 [NotificationService] Foreground message received');
+          AppLogger.d('   Title: ${message.notification?.title}');
+          AppLogger.d('   Body: ${message.notification?.body}');
+          AppLogger.d('   Data: ${message.data}');
 
           // Check if notification should be suppressed
           if (message.data['suppressPush'] == '1' ||
               message.data['suppressPush'] == 'true') {
-            print(
+            AppLogger.d(
               '🔕 [NotificationService] Notification suppressed by data flag',
             );
             return;
@@ -389,29 +390,29 @@ class NotificationService {
           await showNotification(message);
         })
         .onError((error) {
-          print('❌ [NotificationService] Foreground message error: $error');
+          AppLogger.d('❌ [NotificationService] Foreground message error: $error');
         });
 
-    print('✅ [NotificationService] Foreground message handler setup');
+    AppLogger.d('✅ [NotificationService] Foreground message handler setup');
   }
 
   void _setupMessageOpenedAppHandler() {
     FirebaseMessaging.onMessageOpenedApp
         .listen((RemoteMessage message) {
-          print(
+          AppLogger.d(
             '📲 [NotificationService] App opened from notification (background state)',
           );
-          print('   Title: ${message.notification?.title}');
-          print('   Data: ${message.data}');
+          AppLogger.d('   Title: ${message.notification?.title}');
+          AppLogger.d('   Data: ${message.data}');
 
           // Handle navigation based on notification data
           _handleNotificationNavigation(message.data);
         })
         .onError((error) {
-          print('❌ [NotificationService] Message opened app error: $error');
+          AppLogger.d('❌ [NotificationService] Message opened app error: $error');
         });
 
-    print('✅ [NotificationService] Message opened app handler setup');
+    AppLogger.d('✅ [NotificationService] Message opened app handler setup');
   }
 
   // ============================================================================
@@ -470,11 +471,11 @@ class NotificationService {
         payload: jsonEncode(rideData),
       );
 
-      print(
+      AppLogger.d(
         '✅ [NotificationService] Ride request notification shown for $orderId',
       );
     } catch (e) {
-      print('❌ [NotificationService] Failed to show ride notification: $e');
+      AppLogger.d('❌ [NotificationService] Failed to show ride notification: $e');
     }
   }
 
@@ -482,11 +483,11 @@ class NotificationService {
   Future<void> cancelRideNotification() async {
     try {
       await _localNotifications.cancel(888);
-      print(
+      AppLogger.d(
         '🔇 [NotificationService] Cancelled ride notification and stopped ringtone',
       );
     } catch (e) {
-      print('❌ [NotificationService] Failed to cancel ride notification: $e');
+      AppLogger.d('❌ [NotificationService] Failed to cancel ride notification: $e');
     }
   }
 
@@ -526,9 +527,9 @@ class NotificationService {
         payload: payload != null ? jsonEncode(payload) : null,
       );
 
-      print('✅ [NotificationService] Direct notification displayed: $title');
+      AppLogger.d('✅ [NotificationService] Direct notification displayed: $title');
     } catch (e) {
-      print('❌ [NotificationService] Failed to show direct notification: $e');
+      AppLogger.d('❌ [NotificationService] Failed to show direct notification: $e');
     }
   }
 
@@ -588,9 +589,9 @@ class NotificationService {
         payload: jsonEncode(message.data),
       );
 
-      print('✅ [NotificationService] Local notification displayed: $title');
+      AppLogger.d('✅ [NotificationService] Local notification displayed: $title');
     } catch (e) {
-      print('❌ [NotificationService] Error showing local notification: $e');
+      AppLogger.d('❌ [NotificationService] Error showing local notification: $e');
     }
   }
 
@@ -600,16 +601,16 @@ class NotificationService {
 
   /// Handle notification tap when app is in foreground
   void _onNotificationTap(NotificationResponse response) {
-    print('👆 [NotificationService] Notification tapped (foreground)');
-    print('   ActionId: ${response.actionId}');
-    print('   Payload: ${response.payload}');
+    AppLogger.d('👆 [NotificationService] Notification tapped (foreground)');
+    AppLogger.d('   ActionId: ${response.actionId}');
+    AppLogger.d('   Payload: ${response.payload}');
 
     if (response.payload != null) {
       try {
         final Map<String, dynamic> data = jsonDecode(response.payload!);
 
         if (response.actionId == 'accept_ride') {
-          print('✅ User clicked ACCEPT from notification');
+          AppLogger.d('✅ User clicked ACCEPT from notification');
           final String? orderId =
               data['orderId']?.toString() ??
               data['rideId']?.toString() ??
@@ -635,19 +636,19 @@ class NotificationService {
               );
 
               // Navigate to Arriving Client Screen
-              print('🚕 Navigating to ArrivingClient...');
+              AppLogger.d('🚕 Navigating to ArrivingClient...');
               Get.to(
                 () => ArrivingClient(typeCheck: false, rideData: data),
                 transition: Transition.fadeIn,
               );
             } else {
-              print(
+              AppLogger.d(
                 '❌ [NotificationService] No context available for API call',
               );
             }
           }
         } else if (response.actionId == 'decline_ride') {
-          print('❌ User clicked DECLINE from notification');
+          AppLogger.d('❌ User clicked DECLINE from notification');
           final String? orderId =
               data['orderId']?.toString() ??
               data['rideId']?.toString() ??
@@ -663,7 +664,7 @@ class NotificationService {
           _handleNotificationNavigationFromPayload(response.payload!);
         }
       } catch (e) {
-        print('❌ [NotificationService] Error in _onNotificationTap: $e');
+        AppLogger.d('❌ [NotificationService] Error in _onNotificationTap: $e');
       }
     }
   }
@@ -674,9 +675,9 @@ class NotificationService {
     final String? orderId =
         data['orderId']?.toString() ?? data['order_id']?.toString();
 
-    print('🧭 [NotificationService] Navigation requested');
-    print('   Screen: $screen');
-    print('   OrderId: $orderId');
+    AppLogger.d('🧭 [NotificationService] Navigation requested');
+    AppLogger.d('   Screen: $screen');
+    AppLogger.d('   OrderId: $orderId');
 
     // TODO: Implement your navigation logic
   }
@@ -688,7 +689,7 @@ class NotificationService {
         // TODO: Parse and navigate
       }
     } catch (e) {
-      print('❌ [NotificationService] Failed to parse payload: $e');
+      AppLogger.d('❌ [NotificationService] Failed to parse payload: $e');
     }
   }
 
@@ -701,15 +702,15 @@ class NotificationService {
     try {
       final message = await _messaging.getInitialMessage();
       if (message != null) {
-        print(
+        AppLogger.d(
           '🚀 [NotificationService] App opened from terminated state via notification',
         );
-        print('   Title: ${message.notification?.title}');
-        print('   Data: ${message.data}');
+        AppLogger.d('   Title: ${message.notification?.title}');
+        AppLogger.d('   Data: ${message.data}');
       }
       return message;
     } catch (e) {
-      print('❌ [NotificationService] Failed to get initial message: $e');
+      AppLogger.d('❌ [NotificationService] Failed to get initial message: $e');
       return null;
     }
   }
@@ -735,9 +736,9 @@ class NotificationService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('fcmToken');
 
-      print('🗑️ [NotificationService] FCM token deleted');
+      AppLogger.d('🗑️ [NotificationService] FCM token deleted');
     } catch (e) {
-      print('❌ [NotificationService] Failed to delete token: $e');
+      AppLogger.d('❌ [NotificationService] Failed to delete token: $e');
     }
   }
 
@@ -745,9 +746,9 @@ class NotificationService {
   Future<void> subscribeToTopic(String topic) async {
     try {
       await _messaging.subscribeToTopic(topic);
-      print('✅ [NotificationService] Subscribed to topic: $topic');
+      AppLogger.d('✅ [NotificationService] Subscribed to topic: $topic');
     } catch (e) {
-      print('❌ [NotificationService] Failed to subscribe to topic: $e');
+      AppLogger.d('❌ [NotificationService] Failed to subscribe to topic: $e');
     }
   }
 
@@ -755,9 +756,9 @@ class NotificationService {
   Future<void> unsubscribeFromTopic(String topic) async {
     try {
       await _messaging.unsubscribeFromTopic(topic);
-      print('✅ [NotificationService] Unsubscribed from topic: $topic');
+      AppLogger.d('✅ [NotificationService] Unsubscribed from topic: $topic');
     } catch (e) {
-      print('❌ [NotificationService] Failed to unsubscribe from topic: $e');
+      AppLogger.d('❌ [NotificationService] Failed to unsubscribe from topic: $e');
     }
   }
 }

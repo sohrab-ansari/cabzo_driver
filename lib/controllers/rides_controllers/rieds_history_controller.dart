@@ -1,8 +1,9 @@
-import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
+﻿import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
 import 'package:nzcu_driver/modals/home_modals/ride_history_response.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class RiedsHistoryController extends GetxController {
   Rx<RideHistoryResponse?> transactionsres = Rx<RideHistoryResponse?>(null);
@@ -10,7 +11,7 @@ class RiedsHistoryController extends GetxController {
   RxString errorMessage = ''.obs;
 
   Future<void> get_history_method({required String status}) async {
-    print("rides history called");
+    AppLogger.d("rides history called");
 
     isLoading.value = true;
     errorMessage.value = '';
@@ -19,20 +20,20 @@ class RiedsHistoryController extends GetxController {
       final RideHistoryResponse res =
           await HomeApiServices.get_rides_history_data(status: status);
 
-      print("API Response: ${res.success}");
-      print("API Data: ${res.data?.length}");
+      AppLogger.d("API Response: ${res.success}");
+      AppLogger.d("API Data: ${res.data?.length}");
 
       if (res.success == true) {
-        print("rides history data fetched successfully");
+        AppLogger.d("rides history data fetched successfully");
         transactionsres.value = res;
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch rides history';
-        print("Error: ${errorMessage.value}");
+        AppLogger.d("Error: ${errorMessage.value}");
         CustomToast.showError(errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
-      print("Exception: $e");
+      AppLogger.d("Exception: $e");
       CustomToast.showError(errorMessage.value);
     } finally {
       isLoading.value = false;

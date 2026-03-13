@@ -1,10 +1,11 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
 import 'package:nzcu_driver/modals/auth_modals/driver_Image_upload_res.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class EditProfileController extends GetxController {
   // Change to Rx<HomeModalResponse?> and use .obs
@@ -28,7 +29,7 @@ class EditProfileController extends GetxController {
     String? dateOfBirth,
     String? gender,
   }) async {
-    print("edit_profile_method called");
+    AppLogger.d("edit_profile_method called");
 
     // Set loading state
     isLoading.value = true;
@@ -51,10 +52,10 @@ class EditProfileController extends GetxController {
                 "${date.year.toString().padLeft(4, '0')}-"
                 "${date.month.toString().padLeft(2, '0')}-"
                 "${date.day.toString().padLeft(2, '0')}";
-            print("Formatted date: $dateOfBirth -> $formattedDateOfBirth");
+            AppLogger.d("Formatted date: $dateOfBirth -> $formattedDateOfBirth");
           }
         } catch (e) {
-          print("Error parsing date: $e");
+          AppLogger.d("Error parsing date: $e");
           formattedDateOfBirth = dateOfBirth; // Keep original if parsing fails
         }
       }
@@ -70,30 +71,30 @@ class EditProfileController extends GetxController {
             gender: gender,
           );
 
-      print("API>>>>>>Ressssponse: ${res.success}");
+      AppLogger.d("API>>>>>>Ressssponse: ${res.success}");
 
       if (res.success == true) {
-        print("Profile updated successfully");
+        AppLogger.d("Profile updated successfully");
         CustomToast.showSuccess( res.message ?? "Profile updated successfully");
 
         // ✅ Refresh home data after profile update
         try {
           final HomeController homeController = Get.find<HomeController>();
           await homeController.home_data_method();
-          print("Home data refreshed after profile update");
+          AppLogger.d("Home data refreshed after profile update");
         } catch (e) {
-          print("Failed to refresh home data: $e");
+          AppLogger.d("Failed to refresh home data: $e");
         }
 
         driverImageUploadRes.value = res;
       } else {
         errorMessage.value = res.message ?? 'Failed to update profile';
-        print("Error: ${errorMessage.value}");
+        AppLogger.d("Error: ${errorMessage.value}");
         CustomToast.showError( errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
-      print("Exception: $e");
+      AppLogger.d("Exception: $e");
       CustomToast.showError(errorMessage.value);
     } finally {
       // Reset loading state

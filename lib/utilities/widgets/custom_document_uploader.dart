@@ -1,4 +1,4 @@
-// // import 'dart:io';
+﻿// // import 'dart:io';
 // // import 'dart:math' as math;
 // // import 'package:nzcu_driver/utilities/app_buttons.dart';
 // // import 'package:nzcu_driver/utilities/colors.dart';
@@ -52,7 +52,7 @@
 // //         });
 // //       }
 // //     } catch (e) {
-// //       debugPrint('Image picking failed: $e');
+// //       AppLogger.d('Image picking failed: $e');
 // //       ScaffoldMessenger.of(
 // //         context,
 // //       ).showSnackBar(SnackBar(content: Text('Failed to pick image')));
@@ -219,7 +219,7 @@
 //         }
 //       }
 //     } catch (e) {
-//       debugPrint('Image picking failed: $e');
+//       AppLogger.d('Image picking failed: $e');
 //       ScaffoldMessenger.of(context).showSnackBar(
 //         SnackBar(content: Text('Failed to pick image')),
 //       );
@@ -342,6 +342,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class CustomDocumentUploader extends StatefulWidget {
   final String? uploadText;
@@ -420,7 +421,7 @@ class _CustomDocumentUploaderState extends State<CustomDocumentUploader> {
         }
       }
     } catch (e) {
-      debugPrint('Image picking failed: $e');
+      AppLogger.d('Image picking failed: $e');
       CustomToast.showWarning("Failed to pick image");
     }
   }
