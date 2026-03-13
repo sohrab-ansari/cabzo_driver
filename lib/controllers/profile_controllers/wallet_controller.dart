@@ -1,9 +1,8 @@
 import 'package:nzcu_driver/modals/profile_modals/wallet_response.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 
-import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 class WalletController extends GetxController {
   // Change to Rx<HomeModalResponse?> and use .obs
@@ -35,35 +34,16 @@ class WalletController extends GetxController {
 
       if (res.success == true) {
         print("wallet data fetched successfully");
-
-        // Fluttertoast.showToast(
-        //   msg: res.message ?? "Something went wrong",
-        //   toastLength: Toast.LENGTH_SHORT,
-        //   gravity: ToastGravity.TOP,
-        // );
-
         walletresponse.value = res;
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch home data';
         print("Error: ${errorMessage.value}");
-        Get.snackbar(
-          'Error',
-          errorMessage.value,
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        CustomToast.showError(errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
       print("Exception: $e");
-      Get.snackbar(
-        'Error',
-        errorMessage.value,
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      CustomToast.showError(errorMessage.value);
     } finally {
       // Reset loading state
       isLoading.value = false;

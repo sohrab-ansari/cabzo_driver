@@ -266,6 +266,7 @@ import 'package:nzcu_driver/utilities/widgets/form_field.dart';
 import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 class EditBank extends StatefulWidget {
   final dynamic account;
@@ -328,14 +329,7 @@ class _EditBankState extends State<EditBank> {
     // Check if account numbers match
     if (accountNumberController.text.trim() !=
         confirmAccountNumberController.text.trim()) {
-      Get.snackbar(
-        "Error",
-        "Account numbers do not match",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-        duration: const Duration(seconds: 3),
-      );
+      CustomToast.showError("Account numbers do not match");
       return;
     }
 
@@ -353,26 +347,12 @@ class _EditBankState extends State<EditBank> {
       );
 
       // Show success message
-      Get.snackbar(
-        "Success",
-        "Bank account updated successfully",
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-        duration: const Duration(seconds: 2),
-      );
+      CustomToast.showSuccess("Bank account updated successfully");
 
       // Navigate back with success
       Navigator.pop(context, true);
     } catch (e) {
-      Get.snackbar(
-        "Error",
-        "Failed to update bank account: ${e.toString()}",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-        duration: const Duration(seconds: 3),
-      );
+      CustomToast.showError("Failed to update bank account: ${e.toString()}");
     } finally {
       if (mounted) {
         setState(() {

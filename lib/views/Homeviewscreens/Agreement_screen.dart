@@ -5,8 +5,8 @@ import 'package:flutter/services.dart'; // Added for SystemChrome
 import 'package:http/http.dart' as http;
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:open_file/open_file.dart';
 
@@ -64,15 +64,12 @@ class _AgreementScreenState extends State<AgreementScreen> {
     try {
       // const String apiUrl =
       //     'http://api.corezap.framekarts.com/api/v1/company/getCompany';
-// ApiPath.baseUri;
+      // ApiPath.baseUri;
 
-        // const String apiUrl =
-        //   'http://api.corezap.framekarts.com/api/v1/company/getCompany';
+      // const String apiUrl =
+      //   'http://api.corezap.framekarts.com/api/v1/company/getCompany';
 
-
-
-        const String apiUrl =
-          '${ApiPath.baseUri}/company/getCompany';
+      const String apiUrl = '${ApiPath.baseUri}/company/getCompany';
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
@@ -208,10 +205,10 @@ class _AgreementScreenState extends State<AgreementScreen> {
 
     // Request permission
     bool hasPermission = await _requestStoragePermission();
-    // if (!hasPermission) {
-    //   _showToast('Storage permission required');
-    //   return;
-    // }
+    if (!hasPermission) {
+      CustomToast.showWarning('Storage permission required');
+      return;
+    }
 
     try {
       setState(() {
@@ -250,7 +247,7 @@ class _AgreementScreenState extends State<AgreementScreen> {
 
           print('📄 PDF saved to: $filePath');
 
-          _showToast('PDF downloaded successfully!');
+          CustomToast.showSuccess('PDF downloaded successfully!');
 
           // Try to open the file
           try {
@@ -262,7 +259,7 @@ class _AgreementScreenState extends State<AgreementScreen> {
         }
       }
     } catch (e) {
-      _showToast('Download failed: ${e.toString()}');
+      CustomToast.showError('Download failed: ${e.toString()}');
     } finally {
       setState(() {
         _downloading = false;
@@ -277,19 +274,8 @@ class _AgreementScreenState extends State<AgreementScreen> {
       final result = await OpenFile.open(_agreementUrl!);
       print('Open PDF result: ${result.type} - ${result.message}');
     } catch (e) {
-      _showToast('Could not open PDF: $e');
+      CustomToast.showError('Could not open PDF: $e');
     }
-  }
-
-  void _showToast(String message) {
-    Fluttertoast.showToast(
-      msg: message,
-      toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.TOP,
-      backgroundColor: Colors.black54,
-      textColor: Colors.white,
-      fontSize: 14.0,
-    );
   }
 
   PreferredSizeWidget _buildAppBar() {
@@ -374,45 +360,6 @@ class _AgreementScreenState extends State<AgreementScreen> {
 
     return Column(
       children: [
-        // Optional: Page indicator (commented out as in your original)
-        /*
-        if (_currentPage != null && _totalPages != null)
-          Container(
-            padding: const EdgeInsets.all(10),
-            color: Colors.blue[50],
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.chevron_left),
-                  onPressed: _currentPage! > 1
-                      ? () {
-                          _pdfViewController?.setPage(_currentPage! - 1);
-                        }
-                      : null,
-                  color: _currentPage! > 1 ? Colors.blue : Colors.grey,
-                ),
-                Text(
-                  'Page $_currentPage of $_totalPages',
-                  style: const TextStyle(
-                    color: Colors.blue,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.chevron_right),
-                  onPressed: _currentPage! < _totalPages!
-                      ? () {
-                          _pdfViewController?.setPage(_currentPage! + 1);
-                        }
-                      : null,
-                  color: _currentPage! < _totalPages! ? Colors.blue : Colors.grey,
-                ),
-              ],
-            ),
-          ),
-        */
-
         // PDF Viewer
         Expanded(
           child: PDFView(

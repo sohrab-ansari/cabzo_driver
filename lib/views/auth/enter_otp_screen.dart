@@ -1,5 +1,6 @@
 import 'package:nzcu_driver/controllers/auth_controllers/login.controller.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:nzcu_driver/views/auth/login_screen.dart';
 import 'package:nzcu_driver/views/profile_screens/documents_related/driver_registration.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,6 @@ import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:nzcu_driver/services/apiservices/auth_api_service.dart';
 import 'package:nzcu_driver/modals/auth_modals/Otp_verify_res.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EnterOtpScreen extends StatefulWidget {
@@ -206,26 +206,6 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
         return;
       }
 
-      // // CASE 5: All Pending -> Wait (Toast)
-      // if (imageStatus == "pending" &&
-      //     profileStatus == "pending" &&
-      //     vehicleStatus == "pending" &&
-      //     completeVerified == "pending") {
-      //   print("⏳ All Pending - Showing toast");
-      //   Fluttertoast.showToast(
-      //     msg: "Please wait, admin will approve your account.",
-      //     toastLength: Toast.LENGTH_LONG,
-      //     gravity: ToastGravity.TOP,
-      //     backgroundColor: Colors.black87,
-      //     textColor: Colors.white,
-      //   );
-      //   if (mounted) {
-      //     setState(() {
-      //       isLoading = false;
-      //     });
-      //   }
-      //   return;
-      // }
       print(">>>>>> imageStatus: $imageStatus");
       print(">>>>> profileStatus: $profileStatus");
       print(">>>>>> vehicleStatus: $vehicleStatus");
@@ -240,16 +220,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
         // ✅ Save in SharedPreferences
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString("account_status", "pending");
-        // You can change to "approve" if needed
-
-        Fluttertoast.showToast(
-          msg: "Please wait, admin will approve your account.",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.TOP,
-          backgroundColor: Colors.black87,
-          textColor: Colors.white,
-        );
-
+        CustomToast.showInfo("Please wait, admin will approve your account.");
         Get.offAll(LoginScreen());
         if (mounted) {
           setState(() {
@@ -287,13 +258,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
       // Image Pending -> Toast (Lower priority than Vehicle/Profile pending steps)
       if (imageStatus == "pending") {
         print("🖼️ Image Pending - Showing toast");
-        Fluttertoast.showToast(
-          msg: "Please wait, admin will approve your account.",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.TOP,
-          backgroundColor: Colors.black87,
-          textColor: Colors.white,
-        );
+        CustomToast.showInfo("Please wait, admin will approve your account.");
         if (mounted) {
           setState(() {
             isLoading = false;
@@ -317,13 +282,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
           errorMessage = 'An error occurred. Please try again.';
         });
       }
-      Get.snackbar(
-        'Error',
-        'Verification failed: $e',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      CustomToast.showError('Verification failed: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -457,19 +416,6 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
                     ),
 
                     SizedBox(height: w * .02),
-
-                    // Error message
-                    // if (errorMessage.isNotEmpty)
-                    //   Padding(
-                    //     padding: EdgeInsets.only(bottom: w * .02),
-                    //     child: Text(
-                    //       errorMessage,
-                    //       style: TextStyle(
-                    //         color: Colors.red,
-                    //         fontSize: w * 0.035,
-                    //       ),
-                    //     ),
-                    //   ),
 
                     // Timer/Resend OTP
                     Obx(() {

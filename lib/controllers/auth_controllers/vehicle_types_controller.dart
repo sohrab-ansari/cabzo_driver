@@ -2,6 +2,7 @@ import 'package:nzcu_driver/services/apiservices/auth_api_service.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/modals/auth_modals/get_all_vehicle_categories_response.dart';
 import 'package:nzcu_driver/modals/home_modals/order_complete_cash_response.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -122,15 +123,7 @@ class VehicleTypesController extends GetxController {
 
         // Show error snackbar only for initial load
         if (!isLoadMore) {
-          Get.snackbar(
-            'Vehicle Data Failed',
-            errorMessage.value,
-            snackPosition: SnackPosition.TOP,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-            duration: const Duration(seconds: 3),
-            margin: const EdgeInsets.all(10),
-          );
+          CustomToast.showError('Vehicle Data Failed');
         }
       }
     } catch (e) {
@@ -140,15 +133,7 @@ class VehicleTypesController extends GetxController {
 
       // Show error snackbar only for initial load
       if (!isLoadMore) {
-        Get.snackbar(
-          'Error',
-          'Something went wrong. Please try again.',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.all(10),
-        );
+        CustomToast.showError('Something went wrong. Please try again.');
       }
     } finally {
       // Always reset loading state

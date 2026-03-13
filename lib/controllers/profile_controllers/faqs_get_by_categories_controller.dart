@@ -51,24 +51,10 @@
 //     } else {
 //       errorMessage.value = res.message ?? 'Failed to update faqs categories';
 //       print("Error: ${errorMessage.value}");
-//       Get.snackbar(
-//         'Error',
-//         errorMessage.value,
-//         snackPosition: SnackPosition.TOP,
-//         backgroundColor: Colors.red,
-//         colorText: Colors.white,
-//       );
 //     }
 //   } catch (e) {
 //     errorMessage.value = 'An error occurred: $e';
 //     print("Exception: $e");
-//     Get.snackbar(
-//       'Error',
-//       errorMessage.value,
-//       snackPosition: SnackPosition.TOP,
-//       backgroundColor: Colors.red,
-//       colorText: Colors.white,
-//     );
 //   } finally {
 //     // Reset loading state
 //     isLoading.value = false;
@@ -81,6 +67,7 @@ import 'package:nzcu_driver/modals/profile_modals/get_by_category_response.dart'
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 class FaqsGetByCategoriesController extends GetxController {
   // Observable response
@@ -140,27 +127,13 @@ class FaqsGetByCategoriesController extends GetxController {
         errorMessage.value = res.message ?? 'Failed to fetch FAQs';
         print("Error: ${errorMessage.value}");
 
-        Get.snackbar(
-          'Error',
-          errorMessage.value,
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-        );
+        CustomToast.showError(errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
       print("Exception in getFaqsByCategory: $e");
 
-      Get.snackbar(
-        'Error',
-        errorMessage.value,
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-      );
+      CustomToast.showError(errorMessage.value);
     } finally {
       // Reset loading state
       isLoading.value = false;

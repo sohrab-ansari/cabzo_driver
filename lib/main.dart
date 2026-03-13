@@ -17,18 +17,6 @@ import 'package:nzcu_driver/utilities/widgets/network_status_overlay.dart';
 import 'package:nzcu_driver/utilities/widgets/location_guard.dart';
 import 'package:nzcu_driver/views/splash/splash_screen.dart';
 
-// @pragma('vm:entry-point')
-// void headlessTask(bg.HeadlessEvent event) async {
-//   print('[HeadlessTask] Event: ${event.name}');
-//   if (event.name == bg.Event.LOCATION) {
-//     bg.Location location = event.event;
-//     print(
-//       '[HeadlessTask] Location: ${location.coords.latitude}, ${location.coords.longitude}',
-//     );
-//     // Note: We could emit socket here, but BackgroundService should already be doing it if running.
-//     // Headless tasks are for when the app is completely terminated and BackgroundService isolate might be resting.
-//   }
-// }
 
 @pragma('vm:entry-point')
 Future<void> _firebaseBackgroundMessageHandler(RemoteMessage message) async {
@@ -43,13 +31,8 @@ Future<void> _firebaseBackgroundMessageHandler(RemoteMessage message) async {
 }
 
 void main() async {
-  // Ensure Flutter widgets are initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Register HeadlessTask for flutter_background_geolocation
-  // bg.BackgroundGeolocation.registerHeadlessTask(headlessTask);
-
-  print('');
   print('=' * 60);
   print('🚀 NZCU DRIVER APP INITIALIZATION');
   print('=' * 60);

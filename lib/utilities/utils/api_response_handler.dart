@@ -58,45 +58,13 @@
 // //   }
 
 // //   static void _showErrorToast(String title, String message) {
-// //     Get.snackbar(
-// //       title,
-// //       message,
-// //       snackPosition: SnackPosition.TOP,
-// //       backgroundColor: Colors.red,
-// //       colorText: Colors.white,
-// //       duration: const Duration(seconds: 3),
-// //       margin: const EdgeInsets.all(10),
-// //       borderRadius: 8,
-// //       icon: const Icon(Icons.error_outline, color: Colors.white),
-// //     );
-// //   }
+// // //   }
 
 // //   static void _showSuccessToast(String message) {
-// //     Get.snackbar(
-// //       'Success',
-// //       message,
-// //       snackPosition: SnackPosition.TOP,
-// //       backgroundColor: Colors.green,
-// //       colorText: Colors.white,
-// //       duration: const Duration(seconds: 2),
-// //       margin: const EdgeInsets.all(10),
-// //       borderRadius: 8,
-// //       icon: const Icon(Icons.check_circle, color: Colors.white),
-// //     );
-// //   }
+// // //   }
 
 // //   static void showCustomToast(String title, String message, Color color) {
-// //     Get.snackbar(
-// //       title,
-// //       message,
-// //       snackPosition: SnackPosition.TOP,
-// //       backgroundColor: color,
-// //       colorText: Colors.white,
-// //       duration: const Duration(seconds: 3),
-// //       margin: const EdgeInsets.all(10),
-// //       borderRadius: 8,
-// //     );
-// //   }
+// // //   }
 // // }
 
 // // utils/api_response_handler.dart
@@ -160,36 +128,15 @@
 //   }
 
 //   static void _showErrorToast(String title, String message) {
-//     Get.snackbar(
-//       title,
-//       message,
-//       snackPosition: SnackPosition.TOP,
-//       backgroundColor: Colors.red,
-//       colorText: Colors.white,
-//       duration: const Duration(seconds: 3),
-//       margin: const EdgeInsets.all(10),
-//       borderRadius: 8,
-//       icon: const Icon(Icons.error_outline, color: Colors.white),
-//     );
 //   }
 
 //   static void _showSuccessToast(String message) {
-//     Get.snackbar(
-//       'Success',
-//       message,
-//       snackPosition: SnackPosition.TOP,
-//       backgroundColor: Colors.green,
-//       colorText: Colors.white,
-//       duration: const Duration(seconds: 2),
-//       margin: const EdgeInsets.all(10),
-//       borderRadius: 8,
-//       icon: const Icon(Icons.check_circle, color: Colors.white),
-//     );
 //   }
 // }
 
 // utilities/utils/api_response_handler.dart
-import 'package:fluttertoast/fluttertoast.dart';
+// utilities/utils/api_response_handler.dart
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:nzcu_driver/utilities/utils/button_state_manager.dart';
 import 'package:flutter/material.dart';
 
@@ -214,23 +161,23 @@ class ApiResponseHandler {
       if (response?.success == true) {
         onSuccess(response);
         if (successMessage != null && successMessage.isNotEmpty) {
-          // Fluttertoast.showToast(msg: successMessage,toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.green,textColor: Colors.white,fontSize: 16.0);
-          // ToastService.showSuccess(context, successMessage);
+          CustomToast.showSuccess(successMessage);
         }
       } else {
         final errorMessage = response?.message;
+        
+        if (errorMessage != null && errorMessage.isNotEmpty) {
+           CustomToast.showError(errorMessage);
+        } else {
+           CustomToast.showError(errorTitle ?? 'Error');
+        }
 
-        // Fluttertoast.showToast(msg: errorMessage,toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.red,textColor: Colors.white,fontSize: 16.0);
-
-        // ToastService.showError(context, errorTitle ?? 'Error', errorMessage);
-        onError?.call(errorMessage);
+        onError?.call(errorMessage ?? '');
       }
     } catch (e) {
       final errorMessage = _parseError(e);
 
-      // Fluttertoast.showToast(msg:   errorTitle ?? 'Error',toastLength: Toast.LENGTH_SHORT,gravity: ToastGravity.TOP,timeInSecForIosWeb: 1,backgroundColor: Colors.red,textColor: Colors.white,fontSize: 16.0);
-
-      // ToastService.showError(context, errorTitle ?? 'Error', errorMessage);
+      CustomToast.showError(errorTitle ?? 'Error: $errorMessage');
       onError?.call(errorMessage);
     } finally {
       // Reset button loading state

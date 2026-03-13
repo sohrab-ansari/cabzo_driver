@@ -602,13 +602,6 @@
 //                 text: _getPayButtonText(),
 //                 onClicked: () {
 //                   if (_amountController.text.isEmpty) {
-//                     Get.snackbar(
-//                       'Error',
-//                       'Please enter an amount',
-//                       snackPosition: SnackPosition.TOP,
-//                       backgroundColor: Colors.red,
-//                       colorText: Colors.white,
-//                     );
 //                     return;
 //                   }
 
@@ -617,13 +610,6 @@
 //                   // Check if selected promo code meets minimum amount requirement
 //                   if (_selectedPromoCode != null &&
 //                       amount < (_selectedPromoCode!.minAmount ?? 0)) {
-//                     Get.snackbar(
-//                       'Error',
-//                       'Minimum amount for this promo is ₹${_selectedPromoCode!.minAmount}',
-//                       snackPosition: SnackPosition.TOP,
-//                       backgroundColor: Colors.red,
-//                       colorText: Colors.white,
-//                     );
 //                     return;
 //                   }
 
@@ -674,6 +660,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 class AddMoney extends StatefulWidget {
   const AddMoney({super.key});
@@ -1471,13 +1458,7 @@ class _AddMoneyState extends State<AddMoney> {
                 text: _getPayButtonText(),
                 onClicked: () {
                   if (_amountController.text.isEmpty) {
-                    Get.snackbar(
-                      'Error',
-                      'Please enter an amount',
-                      snackPosition: SnackPosition.TOP,
-                      backgroundColor: Colors.red,
-                      colorText: Colors.white,
-                    );
+                    CustomToast.showError('Please enter an amount');
                     return;
                   }
 
@@ -1486,13 +1467,7 @@ class _AddMoneyState extends State<AddMoney> {
                   // Check if selected promo code meets minimum amount requirement
                   if (_selectedPromoCode != null &&
                       amount < (_selectedPromoCode!.minAmount ?? 0)) {
-                    Get.snackbar(
-                      'Error',
-                      'Minimum amount for this promo is ₹${_selectedPromoCode!.minAmount}',
-                      snackPosition: SnackPosition.TOP,
-                      backgroundColor: Colors.red,
-                      colorText: Colors.white,
-                    );
+                    CustomToast.showError('Minimum amount for this promo is ₹${_selectedPromoCode!.minAmount}');
                     return;
                   }
 

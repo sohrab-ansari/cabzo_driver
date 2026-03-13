@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'package:fluttertoast/fluttertoast.dart';
-
 import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 import 'package:nzcu_driver/controllers/home_controllers/driver_toggle_duty_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
@@ -9,11 +7,11 @@ import 'package:nzcu_driver/controllers/profile_controllers/driverid_controller.
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:nzcu_driver/utilities/widgets/map_helper.dart';
 import 'package:nzcu_driver/views/ride_screens/book_ride.dart';
 import 'package:nzcu_driver/views/Homeviewscreens/Agreement_screen.dart';
 import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
-
 import 'package:nzcu_driver/utilities/widgets/home_screen_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -21,7 +19,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:permission_handler/permission_handler.dart';
 
 // Import the SocketManager
 import 'package:nzcu_driver/services/apiservices/socket_manager.dart'
@@ -204,12 +201,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     };
 
     socketManager.onRideConfirmed = (rideData) {
-      print("hellooooooooooooooooooo>>>>>>>>>>>>>>>>  222222222222222");
       _navigateToRideScreen(rideData);
     };
 
     socketManager.onRideCancelled = (data) {
-      _showToast('Ride cancelled');
+      CustomToast.showError('Ride cancelled');
       _clearPendingRideRequest();
     };
 
@@ -372,23 +368,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
       socketManager.goOnline();
     }
-  }
-
-  void _showToast(String message) {
-    if (!mounted) return;
-
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
-    // );
-
-    Fluttertoast.showToast(
-      msg: message,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.TOP, // 👈 Top position
-      backgroundColor: Colors.green,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
   }
 
   // ==================== APP LIFECYCLE (Background Sync) ====================
@@ -1459,55 +1438,6 @@ class KYCNoticeWidget extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12.0),
-                // Text Content
-                // Expanded(
-                //   child: Column(
-                //     crossAxisAlignment: CrossAxisAlignment.start,
-                //     children: [
-                //       Text(
-                //         'Driver Agreement Required',
-                //         style: TextStyle(
-                //           fontSize: 16.0,
-                //           fontWeight: FontWeight.bold,
-                //           color: Colors.grey[800],
-                //         ),
-                //       ),
-                //       const SizedBox(height: 4.0),
-                //       Text(
-                //         'Please upload and e-sign your driver agreement to continue accepting rides.',
-                //         style: TextStyle(
-                //           fontSize: 14.0,
-                //           color: Colors.grey[600],
-                //           height: 1.4,
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-
-                //     Expanded(
-                //   child: Column(
-                //     crossAxisAlignment: CrossAxisAlignment.start,
-                //     children: [
-                //       Text(
-                //         'Driver Agreement View',
-                //         style: TextStyle(
-                //           fontSize: 16.0,
-                //           fontWeight: FontWeight.bold,
-                //           color: Colors.grey[800],
-                //         ),
-                //       ),
-                //       const SizedBox(height: 4.0),
-                //       Text(
-                //         'Please View your driver driver agreement to continue accepting rides.',
-                //         style: TextStyle(
-                //           fontSize: 14.0,
-                //           color: Colors.grey[600],
-                //           height: 1.4,
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
               ],
             ),
           ),

@@ -15,6 +15,7 @@ import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 class SocketManager {
   // Singleton instance
@@ -1672,29 +1673,17 @@ class SocketManager {
                   print(
                     "❌ [SocketManager] Failed to accept ride via API: ${response.message}",
                   );
-                  Get.snackbar(
-                    'Error',
-                    'Failed to accept ride: ${response.message}',
-                    snackPosition: SnackPosition.TOP,
-                  );
+                  CustomToast.showError('Failed to accept ride: ${response.message}');
                 }
               } catch (e) {
                 print("❌ [SocketManager] Error accepting ride from API: $e");
-                Get.snackbar(
-                  'Error',
-                  'Connection failed. Please manually check the app.',
-                  snackPosition: SnackPosition.TOP,
-                );
+                CustomToast.showError('Connection failed. Please manually check the app.');
               }
             } else {
               print(
                 '❌ [SocketManager] Failed to connect socket within timeout. Cannot accept ride.',
               );
-              Get.snackbar(
-                'Error',
-                'Connection failed. Please accept the ride manually.',
-                snackPosition: SnackPosition.TOP,
-              );
+              CustomToast.showError('Connection failed. Please accept the ride manually.');
             }
             return;
           }

@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter/material.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/modals/auth_modals/Otp_verify_res.dart';
@@ -10,11 +8,10 @@ import 'package:nzcu_driver/modals/auth_modals/create_vehicle_res.dart';
 import 'package:nzcu_driver/modals/auth_modals/driver_Image_upload_res.dart';
 import 'package:nzcu_driver/modals/auth_modals/get_all_sub_vehicle_categories_response.dart';
 import 'package:nzcu_driver/modals/auth_modals/get_all_vehicle_categories_response.dart';
-import 'package:nzcu_driver/modals/home_modals/home_modal_response.dart';
 import 'package:nzcu_driver/modals/auth_modals/register_profile_res.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,8 +22,6 @@ class AuthApiService {
     final Uri url = Uri.parse("${ApiPath.registerLogin}");
 
     final Map<String, dynamic> requestBody = {"phone": phone};
-
-    // final Map<String, dynamic> requestBody = {"phone": "9908479999"};
 
     print("========== SEND OTP API ==========");
     print("URL : $url");
@@ -49,18 +44,10 @@ class AuthApiService {
         final Map<String, dynamic> data = jsonDecode(response.body);
 
         print("Parsed Response : $data");
-
-        print(">>>>>>helloooooo2222  ");
-
         return data["success"] == true;
       } else {
-        print(">>>>>>helloooooo  ");
-        Fluttertoast.showToast(
-          msg: data['error'] ?? "Something went wrong",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP,
-        );
-        print("❌ Server error");
+        CustomToast.showError(data['error'] ?? "Something went wrong");
+        print("❌ Server error: ${data['error']}");
         return false;
       }
     } catch (e) {
@@ -120,15 +107,7 @@ class AuthApiService {
 
         print("Error occurred: $errorMessage");
 
-        // Show red toast at top
-        Fluttertoast.showToast(
-          msg: errorMessage,
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.TOP,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 14.0,
-        );
+        CustomToast.showError(errorMessage);
 
         return OtpverifyRes(success: false, message: errorMessage);
       }
@@ -163,14 +142,7 @@ class AuthApiService {
         }
 
         // Show success toast (optional)
-        Fluttertoast.showToast(
-          msg: "OTP verified successfully!",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP,
-          backgroundColor: Colors.green,
-          textColor: Colors.white,
-          fontSize: 14.0,
-        );
+        CustomToast.showSuccess("OTP verified successfully!");
       } else {
         print("else__data_storedd");
         if (otpResponse.token != null &&
@@ -198,250 +170,19 @@ class AuthApiService {
       String? accountStatus = prefs.getString("account_status");
 
       if (accountStatus == null || accountStatus.isEmpty) {
-        // If nothing stored
-        Fluttertoast.showToast(
-          msg: "Something went wrong. Please try again. $e",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.TOP,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-        );
+        CustomToast.showError('Something went wrong. Please try again. $e');
       } else if (accountStatus == "pending") {
-        // If pending stored
-        Fluttertoast.showToast(
-          msg: "Please wait, adminnt.",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.TOP,
-          backgroundColor: Colors.orange,
-          textColor: Colors.white,
-        );
+                CustomToast.showError('Please wait, adminnt.');
       } else {
-        Fluttertoast.showToast(
-          msg: e.toString(),
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.TOP,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-        );
+        CustomToast.showError(e.toString());
         await prefs.setString("account_status", "Not_pending");
       }
 
       return OtpverifyRes(success: false, message: "Connection error");
 
-      //   catch (e)  {
-
-      // final prefs = await SharedPreferences.getInstance();
-
-      // // Example: check auth_token
-      // String? token = prefs.getString("auth_token");
-
-      // // If token is empty or null → show custom message
-      // if (token == null || token.isEmpty) {
-
-      //   Fluttertoast.showToast(
-      //     msg: "Please login again.",
-      //     toastLength: Toast.LENGTH_LONG,
-      //     gravity: ToastGravity.TOP,
-      //     backgroundColor: Colors.red,
-      //     textColor: Colors.white,
-      //     fontSize: 14.0,
-      //   );
-
-      // } else {
-
-      //   // Optional: show generic message
-      //   Fluttertoast.showToast(
-      //     msg: "Something went wrong. Try again.",
-      //     toastLength: Toast.LENGTH_LONG,
-      //     gravity: ToastGravity.TOP,
-      //     backgroundColor: Colors.red,
-      //     textColor: Colors.white,
-      //     fontSize: 14.0,
-      //   );
-      // }
-
-      // return OtpverifyRes(success: false, message: "Connection error");
     }
 
-    // catch (e) {
-    //   String errorMessage = "Connection error: $e";
-    //   print(errorMessage);
-
-    //   // Show red toast at top for connection errors
-    //   Fluttertoast.showToast(
-    //     msg: errorMessage,
-    //     toastLength: Toast.LENGTH_LONG,
-    //     gravity: ToastGravity.TOP,
-    //     backgroundColor: Colors.red,
-    //     textColor: Colors.white,
-    //     fontSize: 14.0,
-    //   );
-
-    //   return OtpverifyRes(success: false, message: "Connection error");
-    // }
   }
-
-  // static Future<OtpverifyRes> verifyOtp({
-  //   required String otp,
-  //   String? phoneNumber,
-  // }) async {
-  //   final prefs = await SharedPreferences.getInstance();
-
-  //   // Save FCM token
-
-  //   await prefs.getString('fcmToken');
-
-  //   final deviceInfo = DeviceInfoPlugin();
-  //   final androidInfo = await deviceInfo.androidInfo;
-  //   print(
-  //     'fcmm___token_from_shared_preferences: ${prefs.getString('fcmToken')}',
-  //   );
-
-  //   final Uri url = Uri.parse(ApiPath.verifyOtp);
-
-  //   final Map<String, dynamic> requestBody = {
-  //     "otp": otp,
-  //     "phone": phoneNumber ?? "9908479999",
-  //     // "fcmToken": "test-fcm-token-123",
-  //     "fcmToken": prefs.getString('fcmToken') ?? "test-fcm-token-123",
-
-  //     //  androidInfo.id;
-  //     // "deviceId": "device-001",
-  //     "deviceId": androidInfo.id,
-  //   };
-
-  //   print("otppppp_veriffyyyy___ ${requestBody}");
-
-  //   try {
-  //     final http.Response response = await http.post(
-  //       url,
-  //       headers: {"Content-Type": "application/json"},
-  //       body: jsonEncode(requestBody),
-  //     );
-
-  //     final Map<String, dynamic> data = jsonDecode(response.body);
-
-  //     print("otpppp>>>> ${data}");
-
-  //     print("Status Code : ${response.statusCode}");
-  //     print("Response Message : ${data['message']}");
-  //     print("Full Driver Object : ${data['driver']}");
-
-  //     final String? driverId = data['driver']?['id']?.toString();
-  //     print("Driver ID : $driverId");
-
-  //     final OtpverifyRes otpResponse = OtpverifyRes.fromJson(data);
-
-  //     print(
-  //       "isprofileee_verifyyyyy_check ${otpResponse.driver!.isProfileCompleted}",
-  //     );
-
-  //     if (otpResponse.driver!.isProfileCompleted == true) {
-  //       print(
-  //         "✅ OTP verified and profile is complete. Saving token and driver ID.",
-  //       );
-
-  //       /// ✅ SAVE TOKEN & DRIVER ID
-  //       if (otpResponse.token != null &&
-  //           otpResponse.token!.isNotEmpty &&
-  //           driverId != null &&
-  //           driverId.isNotEmpty) {
-  //         final prefs = await SharedPreferences.getInstance();
-  //         await prefs.setString("auth_token", otpResponse.token!);
-  //         await prefs.setString("driver_userid", driverId);
-
-  //         if (otpResponse.driver?.name != null &&
-  //             otpResponse.driver!.name!.isNotEmpty) {
-  //           await prefs.setString("driver_name", otpResponse.driver!.name!);
-  //         }
-  //       }
-  //     } else {
-  //       print("else__data_storedd");
-  //       if (otpResponse.token != null &&
-  //           otpResponse.token!.isNotEmpty &&
-  //           driverId != null &&
-  //           driverId.isNotEmpty) {
-  //         final prefs = await SharedPreferences.getInstance();
-  //         await prefs.setString("auth_token2", otpResponse.token!);
-  //         await prefs.setString("driver_userid2", driverId);
-
-  //         print("getting storeddd token2 ${prefs.getString("auth_token2")}");
-  //         print("getting storeddd token2 ${prefs.getString("driver_userid2")}");
-
-  //         if (otpResponse.driver?.name != null &&
-  //             otpResponse.driver!.name!.isNotEmpty) {
-  //           await prefs.setString("driver_name2", otpResponse.driver!.name!);
-  //         }
-  //       }
-  //     }
-  //     return otpResponse;
-  //   } catch (e) {
-  //     Fluttertoast.showToast(msg: "Connection error $e");
-  //     return OtpverifyRes(success: false, message: "Connection error");
-  //   }
-  // }
-
-  // static Future<OtpverifyRes> verifyOtp({
-  //   required String otp,
-  //   String? phoneNumber,
-  // }) async {
-  //   final Uri url = Uri.parse(ApiPath.verifyOtp);
-
-  //   final Map<String, dynamic> requestBody = {
-  //     "otp": otp,
-  //     "phone": phoneNumber ?? "9908479999",
-  //     "fcmToken": "test-fcm-token-123",
-  //     "deviceId": "device-001",
-  //   };
-
-  //   try {
-  //     final http.Response response = await http.post(
-  //       url,
-  //       headers: {"Content-Type": "application/json"},
-  //       body: jsonEncode(requestBody),
-  //     );
-
-  //     final Map<String, dynamic> data = jsonDecode(response.body);
-
-  //     print("Status Code : ${response.statusCode}");
-  //     print("Response Message : ${data['message']}");
-
-  //  print("Response Message otp verify full respsone  : ${data['driver']}");
-  //  print("Response Message otp verify full respsone  : ${data['driver']['id']}");
-
-  //  print("Driver ID : ${data['driver']['id']}");
-
-  //     /// 🔔 SHOW TOAST MESSAGE
-  //     // Fluttertoast.showToast(
-  //     //   msg: data['message'] ?? "Something went wrong",
-  //     //   toastLength: Toast.LENGTH_SHORT,
-  //     //   gravity: ToastGravity.BOTTOM,
-  //     // );
-  //     //  Fluttertoast.showToast(
-  //     //   msg: data['error'] ?? "Something went wrong",
-  //     //   toastLength: Toast.LENGTH_SHORT,
-  //     //   gravity: ToastGravity.BOTTOM,
-  //     // );
-
-  //     // "error": "Maximum OTP attempts exceeded. Please request a new OTP"
-
-  //     final OtpverifyRes otpResponse = OtpverifyRes.fromJson(data);
-
-  //     /// ✅ SAVE TOKEN IF EXISTS
-  //     if (otpResponse.token != null && otpResponse.token!.isNotEmpty) {
-  //       final prefs = await SharedPreferences.getInstance();
-  //       await prefs.setString("auth_token", otpResponse.token!);
-  //    await prefs.setString("driver_userid", data['driver']['id']);
-
-  //       // prefs.getString("driver_userid");
-  //     }
-
-  //     return otpResponse;
-  //   } catch (e) {
-  //     Fluttertoast.showToast(msg: "Connection error");
-  //     return OtpverifyRes(success: false, message: "Connection error");
-  //   }
-  // }
 
   void prettyPrintJson(String responseBody) {
     try {
@@ -627,35 +368,11 @@ class AuthApiService {
         try {
           final decoded = jsonDecode(responseBody);
 
-          Fluttertoast.showToast(
-            msg: decoded['message'] ?? "Something went wrong",
-            toastLength: Toast.LENGTH_SHORT, // ≈ 2 seconds
-            gravity: ToastGravity.TOP,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-          );
+          CustomToast.showError(decoded['message'] ?? "Something went wrong");
 
-          // Fluttertoast.showToast(
-          //   msg: decoded['message'] ?? "Something went wrong",
-          //   toastLength: Toast.LENGTH_SHORT,
-          //   gravity: ToastGravity.TOP,
-
-          //   backgroundColor: Colors.red,
-          // );
         } catch (e) {
-          Fluttertoast.showToast(
-            msg: "Something went wrong",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.TOP,
-            backgroundColor: Colors.red,
-          );
+          CustomToast.showError("Something went wrong");
         }
-
-        //   Fluttertoast.showToast(
-        //   msg: responseBody['']?? "Something went wrong",
-        //   toastLength: Toast.LENGTH_SHORT,
-        //   gravity: ToastGravity.TOP,
-        // );
 
         String errorMessage = "Server error (${response.statusCode})";
 
@@ -679,9 +396,7 @@ class AuthApiService {
           data,
         );
 
-        print("hellooo5");
 
-        print("hello_regiter_vehical_Api");
 
         final data1 = jsonDecode(responseBody);
 
@@ -689,25 +404,21 @@ class AuthApiService {
         print(encoder.convert(data1));
 
         if (createVehicleRes.success == true) {
-          print("✅ Vehicle created successfully!");
+          print("Vehicle created successfully!");
 
-          print("hellooo4");
 
-          print("after_suceesssssssss");
           final DriverFormController driverFormController =
               Get.find<DriverFormController>();
           // driverFormController.activeStep.value = 0;
           driverFormController.activeStep.value = 1;
         } else {
-          print("hellooo2");
-          print("❌ Vehicle creation failed: ${createVehicleRes.message}");
+          print("Vehicle creation failed: ${createVehicleRes.message}");
         }
 
         return createVehicleRes;
       } catch (e) {
-        print("hellooo3");
 
-        print("❌ Failed to parse JSON response: $e");
+        print("Failed to parse JSON response: $e");
         print("Raw response: ${responseBody}");
 
         return CreateVehicleRes(
@@ -716,7 +427,7 @@ class AuthApiService {
         );
       }
     } catch (e) {
-      print("❌ Exception in Create Vehicle API: $e");
+      print("Exception in Create Vehicle API: $e");
       print("Stack trace: ${e.toString()}");
       return CreateVehicleRes(success: false, message: "Connection error: $e");
     }
@@ -856,14 +567,6 @@ class AuthApiService {
       print("Status Code: ${response.statusCode}");
       print("Response Body: $responseBody");
 
-      //   Fluttertoast.showToast(
-      //   msg: message,
-      //   toastLength: Toast.LENGTH_SHORT,
-      //   gravity: ToastGravity.TOP,
-      //   backgroundColor: Colors.green,
-      //   textColor: Colors.white,
-      // );
-
       final Map<String, dynamic> data = jsonDecode(responseBody);
       final RegisterProfileRes registerProfileRes = RegisterProfileRes.fromJson(
         data,
@@ -890,13 +593,8 @@ class AuthApiService {
           "⚠️  Could not save driver_userid - ID is null or response not successful",
         );
 
-        Fluttertoast.showToast(
-          msg: data['message'],
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-        );
+        CustomToast.showError(data['message']);
+
       }
 
       return registerProfileRes;
@@ -942,25 +640,12 @@ class AuthApiService {
 
           const encoder = JsonEncoder.withIndent('  ');
           print(encoder.convert(data1));
-          Fluttertoast.showToast(
-            msg: res.message ?? "Something went wrong",
-            toastLength: Toast.LENGTH_LONG,
-            gravity: ToastGravity.TOP,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 14,
-          );
+          CustomToast.showSuccess(res.message ?? "Something went wrong");
         }
 
         return res;
       } else {
-        Fluttertoast.showToast(
-          msg: "Unexpected server response",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.TOP,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-        );
+        CustomToast.showError('Unexpected server response');
 
         return DriverImageUploadRes(
           success: false,
@@ -968,203 +653,11 @@ class AuthApiService {
         );
       }
     } catch (e) {
-      Fluttertoast.showToast(
-        msg: "Network error",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.TOP,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
-
+      CustomToast.showError("Network error");
       return DriverImageUploadRes(success: false, message: "Network error");
     }
   }
 
-  //   static Future<DriverImageUploadRes> uploadNewDriverImage({
-  //   required File image,
-  //   required String userType,
-  // }) async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final String? userId = prefs.getString("driver_userid2");
-  //   final String? token = prefs.getString("auth_token2");
-
-  //   final Uri url = Uri.parse(
-  //     "${ApiPath.baseUri}/driver/update?userId=$userId&userType=$userType",
-  //   );
-
-  //   print("URL => $url");
-
-  //   try {
-  //     final request = http.MultipartRequest('PUT', url)
-  //       ..headers.addAll({
-  //         "Authorization": "Bearer $token",
-  //         "Accept": "application/json",
-  //       })
-  //       ..files.add(
-  //         await http.MultipartFile.fromPath('image', image.path),
-  //       );
-
-  //     final response = await request.send();
-  //     final body = await response.stream.bytesToString();
-
-  //     print("Status Code: ${response.statusCode}");
-  //     print("Response Body: $body");
-
-  //     if (response.headers['content-type']
-  //             ?.contains('application/json') ==
-  //         true) {
-
-  //           print("hellooo1");
-  //       return DriverImageUploadRes.fromJson(jsonDecode(body));
-  //     } else {
-
-  //       print("hellooo2");
-  //       return DriverImageUploadRes(
-  //         success: false,
-  //         message: "Unexpected server response",
-  //       );
-  //     }
-  //   } catch (e) {
-
-  //     print("hellooo3");
-  //     print("Upload error: $e");
-  //     return DriverImageUploadRes(
-  //       success: false,
-  //       message: e.toString(),
-  //     );
-  //   }
-  // }
-
-  // static Future<DriverImageUploadRes> uploadNewDriverImage({
-  //   required File image,
-
-  //   required String userType,
-  // }) async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final String? userId = prefs.getString("driver_userid2");
-
-  //   print("the_paramssss1 ${image}");
-  //   print("the_paramssss2 ${userId}");
-  //   print("the_paramssss3 ${userType}");
-
-  //   print("the_paramssss3_useriddd ${userId}");
-
-  //   final Uri url = Uri.parse(
-  //     "${ApiPath.baseUri}/driver/update?userId=$userId&userType=$userType",
-  //   );
-
-  //   print("URL => $url");
-
-  //   final token = prefs.getString("auth_token2");
-
-  //   print("tookennnn_print ${token}");
-  //   try {
-  //     final request = http.MultipartRequest('PUT', url)
-  //       ..headers.addAll({
-  //         "Authorization": "Bearer $token",
-  //         "Accept": "application/json",
-  //       })
-  //       ..files.add(await http.MultipartFile.fromPath('image', image.path));
-
-  //     final response = await request.send();
-  //     final statusCode = response.statusCode;
-  //     final body = await response.stream.bytesToString();
-
-  //     print("Response Status Code: $statusCode");
-  //     print("Response Body: ${body.substring(0, min(body.length, 200))}...");
-
-  //     // Check if response is JSON before decoding
-  //     if (response.headers['content-type']?.contains('application/json') ==
-  //         true) {
-  //       return DriverImageUploadRes.fromJson(jsonDecode(body));
-  //     } else {
-  //       // Handle non-JSON responses (HTML error pages, etc.)
-  //       if (statusCode >= 400) {
-  //         return DriverImageUploadRes(
-  //           success: false,
-  //           message:
-  //               "Server error ($statusCode): ${_extractErrorMessage(body)}",
-  //         );
-  //       } else {
-  //         print("helloooo_errorrrr22 ${body['']}");
-  //         return DriverImageUploadRes(
-  //           success: false,
-  //           message: "Unexpected response format from server",
-  //         );
-  //       }
-  //     }
-  //   } catch (e) {
-  //     print("Upload error: $e");
-  //     return DriverImageUploadRes(success: false, message: e.toString());
-  //   }
-  // }
-
-  // Helper method to extract error message from HTML
-  static String _extractErrorMessage(String html) {
-    try {
-      // Try to extract title from HTML
-      final titleMatch = RegExp(
-        r'<title[^>]*>(.*?)</title>',
-        caseSensitive: false,
-      ).firstMatch(html);
-      if (titleMatch != null && titleMatch.groupCount >= 1) {
-        return titleMatch.group(1) ?? 'Unknown error';
-      }
-
-      // Try to find common error patterns
-      final h1Match = RegExp(
-        r'<h1[^>]*>(.*?)</h1>',
-        caseSensitive: false,
-      ).firstMatch(html);
-      if (h1Match != null && h1Match.groupCount >= 1) {
-        return h1Match.group(1) ?? 'Unknown error';
-      }
-
-      return 'Server returned HTML instead of JSON';
-    } catch (_) {
-      return 'Server error (check logs)';
-    }
-  }
-
-  //   static Future<HomeModalResponse> get_home_data(
-
-  // ) async {
-
-  //   // final Uri url = Uri.parse(ApiPath.createVehicle);
-  //    final Uri url = Uri.parse("${ApiPath.driver_home}");
-
-  //   /// 🔐 GET TOKEN
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final String? token = prefs.getString("auth_token");
-
-  //   print("========== CREATE VEHICLE API ==========");
-  //   print("URL : $url");
-  //   print("Token : $token");
-  //   // print("Request Body : ${jsonEncode(requestBody)}");
-  //   print("my_tokennnn ${token}");
-
-  //     try {
-  //     final http.Response response = await http.get(
-  //       url,
-  //         headers: {
-  //         "Content-Type": "application/json",
-  //         "Authorization": "Bearer $token", // ✅ BEARER TOKEN
-  //       },
-  //       // body: jsonEncode(requestBody),
-  //     );
-
-  //     print("Status Code : ${response.statusCode}");
-  //     print("Response Body : ${response.body}");
-
-  //     final Map<String, dynamic> data = jsonDecode(response.body);
-  //     final HomeModalResponse homeModalResponse = HomeModalResponse.fromJson(data);
-
-  //     return homeModalResponse;
-  //   } catch (e) {
-  //     print("❌ Exception in Create Vehicle : $e");
-  //     return HomeModalResponse(success: false, message: "Connection error: $e");
-  //   }
-  // }
 
   static Future<GetAllVehicleCategoriesResponse> get_vehical_data({
     required int limit,

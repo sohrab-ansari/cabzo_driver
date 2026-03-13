@@ -1,11 +1,7 @@
-import 'package:nzcu_driver/modals/profile_modals/review_rating_response.dart';
 import 'package:nzcu_driver/modals/profile_modals/terms_and_policy_response.dart';
-// import 'package:nzcu_driver/apiServices/services/profile_api_services.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
-
-import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 class TermsAndPolicyController extends GetxController {
   Rx<Termsandpolicyresponse?> termspolicyres = Rx<Termsandpolicyresponse?>(
@@ -14,12 +10,6 @@ class TermsAndPolicyController extends GetxController {
 
   RxBool isLoading = false.obs;
   RxString errorMessage = ''.obs;
-
-  @override
-  void onInit() {
-    super.onInit();
-    // You can add any initialization logic here
-  }
 
   Future<void> terms_pricy_method() async {
     print("Fetching reviews...");
@@ -34,7 +24,6 @@ class TermsAndPolicyController extends GetxController {
           await ProfileApiServices.get_terams_and_policy_data();
 
       print("API Response Success: ${res.success}");
-      // print("API Response Data Count: ${res.data?.length ?? 0}");
 
       if (res.success == true) {
         print("Reviews fetched successfully");
@@ -42,27 +31,13 @@ class TermsAndPolicyController extends GetxController {
         // Update the response
         termspolicyres.value = res;
 
-        // Show success message only if there are new reviews
-        // if (res.data != null && res.data!.isNotEmpty) {
-        //   Fluttertoast.showToast(
-        //     msg: "${res.data!.length} reviews loaded",
-        //     toastLength: Toast.LENGTH_SHORT,
-        //     gravity: ToastGravity.BOTTOM,
-        //   );
-        // }
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch reviews';
         print("Error: ${errorMessage.value}");
 
         // Only show snackbar if there's no existing data
         if (termspolicyres.value == null) {
-          Get.snackbar(
-            'Error',
-            errorMessage.value,
-            snackPosition: SnackPosition.TOP,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-          );
+          CustomToast.showError(errorMessage.value);
         }
       }
     } catch (e) {
@@ -71,13 +46,7 @@ class TermsAndPolicyController extends GetxController {
 
       // Only show snackbar if there's no existing data
       if (termspolicyres.value == null) {
-        Get.snackbar(
-          'Error',
-          errorMessage.value,
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        CustomToast.showError(errorMessage.value);
       }
     } finally {
       // Reset loading state
@@ -85,18 +54,4 @@ class TermsAndPolicyController extends GetxController {
     }
   }
 
-  // Helper method to get total reviews count
-  // int get totalReviews => reviewRatingResponse.value?.data?.length ?? 0;
-
-  // Helper method to get average rating
-  // double get averageRating {
-  //   final reviews = reviewRatingResponse.value?.data;
-  //   if (reviews == null || reviews.isEmpty) return 0.0;
-
-  //   double total = 0;
-  //   for (var review in reviews) {
-  //     total += (review.rating ?? 0).toDouble();
-  //   }
-  //   return total / reviews.length;
-  // }
 }

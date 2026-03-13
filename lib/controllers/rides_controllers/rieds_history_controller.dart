@@ -2,6 +2,7 @@ import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
 import 'package:nzcu_driver/modals/home_modals/ride_history_response.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 class RiedsHistoryController extends GetxController {
   Rx<RideHistoryResponse?> transactionsres = Rx<RideHistoryResponse?>(null);
@@ -27,24 +28,12 @@ class RiedsHistoryController extends GetxController {
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch rides history';
         print("Error: ${errorMessage.value}");
-        Get.snackbar(
-          'Error',
-          errorMessage.value,
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        CustomToast.showError(errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
       print("Exception: $e");
-      Get.snackbar(
-        'Error',
-        errorMessage.value,
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      CustomToast.showError(errorMessage.value);
     } finally {
       isLoading.value = false;
     }

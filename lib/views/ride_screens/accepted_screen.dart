@@ -1,18 +1,15 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
-import 'dart:typed_data';
-
 import 'package:nzcu_driver/controllers/chart_id_controller/chatid_controller.dart';
 import 'package:nzcu_driver/controllers/chart_id_controller/chat_notification_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/utilities/colors/colors_list.dart';
-import 'package:nzcu_driver/utilities/widgets/custom_images.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_text.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:nzcu_driver/utilities/widgets/location_input_textfield.dart';
-import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:nzcu_driver/utilities/utils/button_state_manager.dart';
 import 'package:nzcu_driver/utilities/utils/navigation_command.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
@@ -26,7 +23,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
@@ -1467,14 +1463,14 @@ class _ArrivingClientState extends State<ArrivingClient> {
     // Check if we have valid ride data
     if (_rideData == null) {
       print('❌ Cannot navigate to OTP: No ride data available');
-      _showSnackbar('Cannot navigate: No ride data', isError: true);
+      CustomToast.showError('Cannot navigate: No ride data');
       return;
     }
 
     final orderId = _rideData!['orderId'];
     if (orderId == null || orderId == 'N/A') {
       print('❌ Cannot navigate to OTP: Invalid order ID');
-      _showSnackbar('Invalid order ID', isError: true);
+      CustomToast.showError('Invalid order ID');
       return;
     }
 
@@ -1495,33 +1491,12 @@ class _ArrivingClientState extends State<ArrivingClient> {
     } catch (e) {
       print('❌ Error navigating to OTP screen: $e');
       if (_isScreenActive && mounted) {
-        _showSnackbar('Failed to navigate to OTP', isError: true);
+        CustomToast.showError('Failed to navigate to OTP');
         await _resumeLocationTracking(); // Resume tracking on error
-      }
+      } 
     }
   }
-
-  // Helper method to show snackbar
-  void _showSnackbar(String message, {bool isError = true}) {
-    if (mounted && _isScreenActive) {
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     content: Text(message),
-      //     backgroundColor: isError ? Colors.red : Colors.green,
-      //     duration: const Duration(seconds: 2),
-      //   ),
-      // );
-
-      Fluttertoast.showToast(
-        msg: message,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.TOP, // 👈 Top position
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-    }
-  }
+  
 
   void _handleNavigation(NavigationCommand command) {
     print("Navigation command: ${command}");
@@ -1555,15 +1530,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-
-        Fluttertoast.showToast(
-          msg: "Please complete the ride verification first",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP,
-          backgroundColor: Colors.black87,
-          textColor: Colors.white,
-          fontSize: 14,
-        );
+        CustomToast.showWarning("Please complete the ride verification first");
       },
       child: Scaffold(
         backgroundColor: ColorsList.scaffoldColor,
@@ -2069,7 +2036,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
                 shouldTriggerNavigation: true,
               );
             } else {
-              _showSnackbar('Invalid order ID', isError: true);
+              CustomToast.showError('Invalid order ID');
             }
           },
         );
@@ -2094,7 +2061,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
                 shouldTriggerNavigation: true,
               );
             } else {
-              _showSnackbar('Invalid order ID', isError: true);
+              CustomToast.showError('Invalid order ID');
             }
           },
         );
@@ -2119,7 +2086,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
                 shouldTriggerNavigation: true,
               );
             } else {
-              _showSnackbar('Invalid order ID', isError: true);
+              CustomToast.showError('Invalid order ID');
             }
           },
         );
@@ -2150,21 +2117,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
         successMessage: 'Order cancelled successfully',
       );
     } else {
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   const SnackBar(
-      //     content: Text('Invalid order ID'),
-      //     backgroundColor: Colors.red,
-      //   ),
-      // );
-
-      Fluttertoast.showToast(
-        msg: "Invalid order ID",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.TOP, // 👈 Top position
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      CustomToast.showError("Invalid order ID");
     }
   }
 

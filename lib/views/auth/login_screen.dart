@@ -13,6 +13,7 @@ import 'package:nzcu_driver/views/profile_screens/terms_condition.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -88,13 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         showPhoneError = true;
       });
-      Get.snackbar(
-        'Error',
-        'Please enter phone number',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      CustomToast.showError('Please enter phone number');
       return;
     }
 
@@ -102,13 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         showPhoneError = true;
       });
-      Get.snackbar(
-        'Error',
-        'Please enter a valid 10-digit phone number',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      CustomToast.showError('Please enter a valid 10-digit phone number');
       return;
     }
 
@@ -117,13 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         showTermsError = true;
       });
-      Get.snackbar(
-        'Error',
-        'Please accept Terms & Conditions',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      CustomToast.showError('Please accept Terms & Conditions');
       return;
     }
 

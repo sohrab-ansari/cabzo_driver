@@ -1,65 +1,9 @@
-// import 'package:nzcu_driver/utilities/colors.dart';
-// import 'package:nzcu_driver/utilities/custom_font.dart';
-// import 'package:flutter/material.dart';
-
-// class CashPaymentScreen extends StatelessWidget {
-//   const CashPaymentScreen({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     double w = MediaQuery.of(context).size.width;
-//     return Scaffold(
-//       backgroundColor: AppColors.white,
-//       body: SafeArea(
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.center,
-//           children: [
-//             SizedBox(height: w * .2),
-
-//             Image.asset(
-//               'assets/images/cash_collect.png',
-//               height: w * 0.8,
-//               width: w * 1.0,
-//             ),
-//             Padding(
-//               padding: EdgeInsets.symmetric(vertical: w * .02),
-//               child: AppFonts.textPoppins(
-//                 context,
-//                 "Collect Cash Payment",
-//                 w * 0.065,
-//                 FontWeight.w600,
-//                 AppColors.black,
-//                 TextAlign.left,
-//                 TextOverflow.visible,
-//               ),
-//             ),
-//             SizedBox(height: w * .01),
-//             Padding(
-//               padding: EdgeInsets.symmetric(horizontal: w * .04),
-//               child: AppFonts.textPoppins(
-//                 context,
-//                 "Collect the shown fare in cash from the user. Make sure the amount is correct.",
-//                 w * 0.04,
-//                 FontWeight.w400,
-//                 AppColors.mediumGray,
-//                 TextAlign.center,
-//                 TextOverflow.visible,
-//                 maxLines: 2,
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -102,31 +46,11 @@ void resetStepper() {
     double w = MediaQuery.of(context).size.width;
 
     return PopScope(
-      // canPop: false,
-      // onPopInvoked: (didPop) {
-      //   if (didPop) return;
-      //   // Show message and prevent back navigation
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(
-      //       content: Text('Please complete the payment first'),
-      //       backgroundColor: Colors.orange,
-      //       duration: Duration(seconds: 2),
-      //       behavior: SnackBarBehavior.floating,
-      //     ),
-      //   );
-      // },
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
 
-        Fluttertoast.showToast(
-          msg: "Please complete the payment first",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP,
-          backgroundColor: Colors.black87,
-          textColor: Colors.white,
-          fontSize: 14,
-        );
+        CustomToast.showWarning("Please complete the payment first");
       },
       child: Scaffold(
         backgroundColor: AppColors.white,

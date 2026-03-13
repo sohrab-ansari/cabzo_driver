@@ -2,6 +2,7 @@ import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/modals/profile_modals/get_promo_code_data.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 class GetPromoCodeController extends GetxController {
   Rx<Getpromocodedata?> cashResponse = Rx<Getpromocodedata?>(null);
@@ -26,29 +27,13 @@ class GetPromoCodeController extends GetxController {
         errorMessage.value = response.message ?? 'promo code Please try again.';
         print("❌ getPromoCode failed: ${errorMessage.value}");
 
-        Get.snackbar(
-          'promo code d Failed',
-          errorMessage.value,
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.all(10),
-        );
+        CustomToast.showError(errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
       print("❌ Exception in promo code d: $e");
 
-      Get.snackbar(
-        'Error',
-        'Something went wrong. Please try again.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.all(10),
-      );
+      CustomToast.showError('Something went wrong. Please try again.');
     } finally {
       // Always reset loading state
       isLoading.value = false;

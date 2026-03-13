@@ -1,23 +1,18 @@
-import 'dart:ui';
-
 import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
-// import 'package:nzcu_driver/models/navigation_command.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_images.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:nzcu_driver/utilities/widgets/map_helper.dart';
-
 import 'package:nzcu_driver/utilities/utils/button_state_manager.dart';
 import 'package:nzcu_driver/utilities/utils/navigation_command.dart';
 import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
-
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -25,8 +20,6 @@ import 'package:geolocator/geolocator.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -940,14 +933,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     //   ),
     // );
 
-    Fluttertoast.showToast(
-      msg: 'Ride auto-cancelled (timeout)',
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.TOP, // 👈 Top position
-      backgroundColor: Colors.red,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
+    CustomToast.showError('Ride auto-cancelled (timeout)');
 
     // Navigate to BottomnavmainScreen after 1 second
     await Future.delayed(Duration(seconds: 1));
@@ -995,15 +981,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-
-        Fluttertoast.showToast(
-          msg: "Please complete the ride verification first",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP,
-          backgroundColor: Colors.black87,
-          textColor: Colors.white,
-          fontSize: 14,
-        );
+        CustomToast.showError("Please complete the ride verification first");
       },
 
       child: Scaffold(
@@ -1948,63 +1926,12 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
     final data = jsonDecode(res.body);
 
-    Fluttertoast.showToast(
-      msg: data["message"],
-      gravity: ToastGravity.TOP,
-      backgroundColor: Colors.red,
-      textColor: Colors.white,
-    );
+    CustomToast.showError(data["message"]);
 
     if (res.statusCode == 200) {
       Navigator.pop(context);
     }
 
-    // final res = await http.patch(
-    //   url,
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     "Authorization": "Bearer $token",
-    //   },
-    // );
-
-    // print("Status Code: ${res.statusCode}");
-    // print("Response Body: ${res.body}");
-
-    // if (res.statusCode == 200) {
-    //   print("navigating_to_back >>>");
-    //   Navigator.pop(context);
-    // }
-
-    // final Uri url = Uri.parse("${ApiPath.baseUri}/order/decline/$_orderId");
-
-    // final res = await http.patch(url);
-
-    // print("Status Code: ${res.statusCode}");
-    // print("Response Body: ${res.body}");
-
-    // if (res.statusCode == 200) {
-    //   print("navigating_to_back>>>");
-    //   Navigator.pop(context);
-    // }
-
-    //       final Uri url = Uri.parse(
-    //     "${ApiPath.baseUri}/order/decline/$_orderId",
-    //   );
-
-    //     final res = await http.post(url);
-    // if (res.statusCode == 200) Navigator.pop(context);
-
-    // Use the new updateOrder method
-    // orderUpdateController.updateOrder(
-    //   context: context,
-    //   buttonId: 'cancel_button',
-    //   orderStatus: "Cancelled",
-    //   orderId: _orderId!,
-    //   rideData: widget.rideData,
-    //   stepControl: "Cancelled",
-    //   successMessage: 'Ride cancelled successfully',
-    //   shouldTriggerNavigation: true,
-    // );
   }
 }
 

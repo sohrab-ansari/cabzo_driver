@@ -3,11 +3,7 @@ import 'dart:io';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
 import 'package:nzcu_driver/modals/auth_modals/driver_Image_upload_res.dart';
-import 'package:nzcu_driver/modals/home_modals/home_modal_response.dart';
-import 'package:nzcu_driver/utilities/widgets/navigator.dart';
-import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:get/get.dart';
 
 class EditProfileController extends GetxController {
@@ -78,17 +74,7 @@ class EditProfileController extends GetxController {
 
       if (res.success == true) {
         print("Profile updated successfully");
-
-        Fluttertoast.showToast(
-          msg: res.message ?? "Profile updated successfully",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP,
-        );
-
-        print("helloooooo>>> navigation_done");
-        // Get.offAll(BottomnavmainScreen());
-
-        // Get.offAll(BottomnavmainScreen(initialIndex: 3,));
+        CustomToast.showSuccess( res.message ?? "Profile updated successfully");
 
         // ✅ Refresh home data after profile update
         try {
@@ -103,195 +89,15 @@ class EditProfileController extends GetxController {
       } else {
         errorMessage.value = res.message ?? 'Failed to update profile';
         print("Error: ${errorMessage.value}");
-        Get.snackbar(
-          'Error',
-          errorMessage.value,
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        CustomToast.showError( errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
       print("Exception: $e");
-      Get.snackbar(
-        'Error',
-        errorMessage.value,
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      CustomToast.showError(errorMessage.value);
     } finally {
       // Reset loading state
       isLoading.value = false;
     }
   }
-
-  //   Future<void> edit_profile_method({
-  //   dynamic image, // Make it optional
-  //   String? name,
-  //   String? email,
-  //   required String dateOfBirth,
-  //   required String gender,
-  // }) async {
-  //   print("edit_profile_method called");
-
-  //   // Validate required fields
-  //   if (dateOfBirth.isEmpty || gender.isEmpty) {
-  //     Get.snackbar(
-  //       'Error',
-  //       'Date of Birth and Gender are required',
-  //       snackPosition: SnackPosition.TOP,
-  //       backgroundColor: Colors.red,
-  //       colorText: Colors.white,
-  //     );
-  //     return;
-  //   }
-
-  //   // Set loading state
-  //   isLoading.value = true;
-  //   errorMessage.value = '';
-
-  //   try {
-  //     // Call API with optional image
-  //     final DriverImageUploadRes res =
-  //         await ProfileApiServices.edit_profile_data_api(
-  //           image: image, // Can be null
-  //           userType: '',
-  //           name: name ?? '',
-  //           email: email ?? '',
-  //           dateOfBirth: dateOfBirth,
-  //           gender: gender,
-  //         );
-
-  //     print("API Response: ${res.success}");
-
-  //     if (res.success == true) {
-  //       print("Profile updated successfully");
-
-  //       Fluttertoast.showToast(
-  //         msg: res.message ?? "Profile updated successfully",
-  //         toastLength: Toast.LENGTH_SHORT,
-  //         gravity: ToastGravity.BOTTOM,
-  //       );
-
-  //       Get.offAll(BottomnavmainScreen());
-
-  //       // ✅ Refresh home data after profile update
-  //       try {
-  //         final HomeController homeController = Get.find<HomeController>();
-  //         await homeController.home_data_method();
-  //         print("Home data refreshed after profile update");
-  //       } catch (e) {
-  //         print("Failed to refresh home data: $e");
-  //       }
-
-  //       driverImageUploadRes.value = res;
-  //     } else {
-  //       errorMessage.value = res.message ?? 'Failed to update profile';
-  //       print("Error: ${errorMessage.value}");
-  //       Get.snackbar(
-  //         'Error',
-  //         errorMessage.value,
-  //         snackPosition: SnackPosition.TOP,
-  //         backgroundColor: Colors.red,
-  //         colorText: Colors.white,
-  //       );
-  //     }
-  //   } catch (e) {
-  //     errorMessage.value = 'An error occurred: $e';
-  //     print("Exception: $e");
-  //     Get.snackbar(
-  //       'Error',
-  //       errorMessage.value,
-  //       snackPosition: SnackPosition.TOP,
-  //       backgroundColor: Colors.red,
-  //       colorText: Colors.white,
-  //     );
-  //   } finally {
-  //     // Reset loading state
-  //     isLoading.value = false;
-  //   }
-  // }
-
-  // Future<void> edit_profile_method({
-  //   required dynamic image,
-
-  //   String? name,
-
-  //   String? email,
-
-  //   required String dateOfBirth,
-
-  //   required String gender,
-  // }) async {
-  //   print("home_data_method called");
-
-  //   // Set loading state
-  //   isLoading.value = true;
-  //   errorMessage.value = '';
-
-  //   try {
-  //     // Call API
-  //     final DriverImageUploadRes res =
-  //         await ProfileApiServices.edit_profile_data_api(
-  //           image: image,
-  //           userType: '',
-  //           name: name.toString(),
-
-  //           email: email.toString(),
-
-  //           dateOfBirth: dateOfBirth,
-  //           gender: gender,
-  //         );
-
-  //     print("API Response: ${res.success}");
-
-  //     if (res.success == true) {
-  //       print("Home data fetched successfully");
-
-  //       Fluttertoast.showToast(
-  //         msg: res.message ?? "Something went wrong",
-  //         toastLength: Toast.LENGTH_SHORT,
-  //         gravity: ToastGravity.BOTTOM,
-  //       );
-
-  //       Get.offAll(BottomnavmainScreen());
-
-  //       // ✅ IMPORTANT: Refresh home data after profile update
-  //       try {
-  //         final HomeController homeController = Get.find<HomeController>();
-  //         await homeController.home_data_method();
-  //         print("Home data refreshed after profile update");
-  //       } catch (e) {
-  //         print("Failed to refresh home data: $e");
-  //       }
-
-  //       driverImageUploadRes.value = res;
-  //     } else {
-  //       errorMessage.value = res.message ?? 'Failed to fetch home data';
-  //       print("Error: ${errorMessage.value}");
-  //       Get.snackbar(
-  //         'Error',
-  //         errorMessage.value,
-  //         snackPosition: SnackPosition.TOP,
-  //         backgroundColor: Colors.red,
-  //         colorText: Colors.white,
-  //       );
-  //     }
-  //   } catch (e) {
-  //     errorMessage.value = 'An error occurred: $e';
-  //     print("Exception: $e");
-  //     Get.snackbar(
-  //       'Error',
-  //       errorMessage.value,
-  //       snackPosition: SnackPosition.TOP,
-  //       backgroundColor: Colors.red,
-  //       colorText: Colors.white,
-  //     );
-  //   } finally {
-  //     // Reset loading state
-  //     isLoading.value = false;
-  //   }
-  // }
 }

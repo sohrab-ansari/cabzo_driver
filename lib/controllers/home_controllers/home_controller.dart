@@ -4,6 +4,7 @@ import 'package:nzcu_driver/modals/home_modals/home_modal_response.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 class HomeController extends GetxController {
   // Change to Rx<HomeModalResponse?> and use .obs
@@ -37,24 +38,12 @@ class HomeController extends GetxController {
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch home data';
         print("Error: ${errorMessage.value}");
-        Get.snackbar(
-          'Error',
-          errorMessage.value,
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        CustomToast.showError(errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
       print("Exception: $e");
-      Get.snackbar(
-        'Error',
-        errorMessage.value,
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      CustomToast.showError(errorMessage.value);
     } finally {
       // Reset loading state
       isLoading.value = false;

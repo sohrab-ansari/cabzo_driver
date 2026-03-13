@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nzcu_driver/services/apiservices/places_api_service.dart';
 import 'package:nzcu_driver/controllers/book_ride_controller/create_By_driver_controller.dart';
 import 'package:nzcu_driver/modals/home_modals/place_prediction.dart';
 import 'package:nzcu_driver/utilities/widgets/app_buttons.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:nzcu_driver/utilities/widgets/location_input_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -246,22 +246,7 @@ class _BookRideState extends State<BookRide> {
       if (createByDriverController.cashResponse.value?.success == true) {
         // Show success message using ScaffoldMessenger
         if (mounted) {
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   SnackBar(
-          //     content: Text('Ride booked successfully!'),
-          //     backgroundColor: Colors.green,
-          //     duration: const Duration(seconds: 2),
-          //   ),
-          // );
-
-          Fluttertoast.showToast(
-            msg: 'Ride booked successfully!',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.TOP, // 👈 Top position
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
+          CustomToast.showSuccess('Ride booked successfully!');
         }
 
         // Extract ride data from API response for navigation
@@ -281,27 +266,11 @@ class _BookRideState extends State<BookRide> {
       } else {
         // Show error message using ScaffoldMessenger
         if (mounted) {
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   SnackBar(
-          //     content: Text(
-          //       createByDriverController.errorMessage.value.isNotEmpty
-          //           ? createByDriverController.errorMessage.value
-          //           : 'Failed to book ride. Please try again.',
-          //     ),
-          //     backgroundColor: Colors.red,
-          //     duration: const Duration(seconds: 3),
-          //   ),
-          // );
 
-          Fluttertoast.showToast(
-            msg: createByDriverController.errorMessage.value.isNotEmpty
+          CustomToast.showError(
+            createByDriverController.errorMessage.value.isNotEmpty
                 ? createByDriverController.errorMessage.value
                 : 'Failed to book ride. Please try again.',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.TOP, // 👈 Top position
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0,
           );
         }
       }
@@ -669,13 +638,7 @@ class _PlaceSearchSheetState extends State<_PlaceSearchSheet> {
       if (mounted) Navigator.pop(context);
     } else {
       setState(() => _isLoading = false);
-      Get.snackbar(
-        'Error',
-        'Could not get place details',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      CustomToast.showError('Could not get place details');
     }
   }
 

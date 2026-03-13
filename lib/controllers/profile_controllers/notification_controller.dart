@@ -2,6 +2,7 @@ import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/modals/profile_modals/notification_response.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 class NotificationController extends GetxController {
   Rx<NotificationResponse?> cashResponse = Rx<NotificationResponse?>(null);
@@ -27,15 +28,7 @@ class NotificationController extends GetxController {
         print("❌ Notification failed: ${errorMessage.value}");
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          Get.snackbar(
-            'Failed',
-            errorMessage.value,
-            snackPosition: SnackPosition.TOP,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-            duration: const Duration(seconds: 3),
-            margin: const EdgeInsets.all(10),
-          );
+          CustomToast.showError(errorMessage.value);
         });
       }
     } catch (e) {
@@ -43,15 +36,7 @@ class NotificationController extends GetxController {
       print("❌ Exception in getNotifications: $e");
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.snackbar(
-          'Error',
-          'Something went wrong. Please try again.',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.all(10),
-        );
+        CustomToast.showError('Something went wrong. Please try again.');
       });
     } finally {
       isLoading.value = false;

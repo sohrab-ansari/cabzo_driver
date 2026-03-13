@@ -1,8 +1,7 @@
 import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
-import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/modals/home_modals/chat_id_response.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 class ChatidController extends GetxController {
   // Change to Rx<HomeModalResponse?> and use .obs
@@ -43,24 +42,12 @@ class ChatidController extends GetxController {
         print("myupdate_order_data22222222  faileddd111");
         errorMessage.value = 'Failed to fetch chart data';
         print("Error: ${errorMessage.value}");
-        Get.snackbar(
-          'Error',
-          errorMessage.value,
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        CustomToast.showError(errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = 'An error occurred: $e';
       print("charttt_iddd   exception: $e");
-      Get.snackbar(
-        'Error',
-        'Failed to load chat: $e',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      CustomToast.showError('Failed to load chat');
     } finally {
       // Reset loading state
       isLoading.value = false;

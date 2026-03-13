@@ -405,6 +405,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/views/Homeviewscreens/details.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 class ReceivePaymentModes extends StatefulWidget {
   final dynamic rideData;
@@ -470,13 +471,7 @@ class _ReceivePaymentModesState extends State<ReceivePaymentModes> {
     final orderId = widget.rideData['orderId']?.toString();
 
     if (orderId == null || orderId.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Invalid order ID',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      CustomToast.showError('Invalid order ID');
       return;
     }
 

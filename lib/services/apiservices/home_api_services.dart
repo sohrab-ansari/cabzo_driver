@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/modals/home_modals/chat_id_response.dart';
@@ -13,6 +11,7 @@ import 'package:nzcu_driver/modals/home_modals/order_complete_cash_response.dart
 import 'package:nzcu_driver/modals/home_modals/ride_history_response.dart';
 import 'package:nzcu_driver/modals/home_modals/update_order_response.dart';
 import 'package:nzcu_driver/modals/home_modals/verify_Otp_Order_response.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeApiServices {
@@ -283,28 +282,13 @@ class HomeApiServices {
 
       print("myyyy_fulllll_respsoneeeee ${response.body}");
 
-      // Fluttertoast.showToast(msg: response.body['message']);
-
       final Map<String, dynamic> decodedJson = jsonDecode(response.body);
 
-      Fluttertoast.showToast(
-        msg: decodedJson['message'] ?? "Something went wrong",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.TOP, // 👈 THIS
-        timeInSecForIosWeb: 2,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        fontSize: 14,
-      );
+      CustomToast.showSuccess(decodedJson['message'] ?? "Something went wrong");
 
-      // ✅ Show API message in toast
-      // Fluttertoast.showToast(
-      //   msg: decodedJson['message'] ?? "Something went wrong",
-      // );
       if (response.statusCode == 200) {
         final decodedJson = jsonDecode(response.body);
 
-        // print("myyyy_fulllll_respsoneeeee ${decodedJson}");
 
         final prettyJson = const JsonEncoder.withIndent(
           '  ',
@@ -321,10 +305,6 @@ class HomeApiServices {
 
         print("herrrrrrrrrrrrrrrrrrrrrr ${prettyJson}");
 
-        //         print(
-        //   "myyyy_fulllll_respsoneeeee\n"
-        //   "${const JsonEncoder.withIndent('  ').convert(decodedJson)}"
-        // );
         return Updateorderresposne.fromJson(decodedJson);
       } else if (response.statusCode == 401) {
         return Updateorderresposne(

@@ -769,26 +769,12 @@
 // //                   }
 
 // //                   if (!hasBankAccounts) {
-// //                     Get.snackbar(
-// //                       'No Payment Method',
-// //                       'Please add a bank account or UPI ID first',
-// //                       snackPosition: SnackPosition.BOTTOM,
-// //                       backgroundColor: Colors.red,
-// //                       colorText: Colors.white,
-// //                     );
-// //                     return;
+// // //                     return;
 // //                   }
 
 // //                   if (selectedAccountId == null ||
 // //                       selectedAccountType == null) {
-// //                     Get.snackbar(
-// //                       'No Payment Method Selected',
-// //                       'Please select a bank account or UPI ID to transfer to',
-// //                       snackPosition: SnackPosition.BOTTOM,
-// //                       backgroundColor: Colors.red,
-// //                       colorText: Colors.white,
-// //                     );
-// //                     return;
+// // //                     return;
 // //                   }
 
 // //                   // Get the selected account details
@@ -1856,25 +1842,11 @@
 //                   }
 
 //                   if (!hasBankAccounts) {
-//                     Get.snackbar(
-//                       'No Payment Method',
-//                       'Please add a bank account or UPI ID first',
-//                       snackPosition: SnackPosition.BOTTOM,
-//                       backgroundColor: Colors.red,
-//                       colorText: Colors.white,
-//                     );
 //                     return;
 //                   }
 
 //                   if (selectedAccountId == null ||
 //                       selectedAccountType == null) {
-//                     Get.snackbar(
-//                       'No Payment Method Selected',
-//                       'Please select a bank account or UPI ID to transfer to',
-//                       snackPosition: SnackPosition.BOTTOM,
-//                       backgroundColor: Colors.red,
-//                       colorText: Colors.white,
-//                     );
 //                     return;
 //                   }
 
@@ -2222,13 +2194,6 @@
 //               print("Type: $type");
 
 //               // Show success message
-//               Get.snackbar(
-//                 'Success',
-//                 '$type deleted successfully',
-//                 snackPosition: SnackPosition.BOTTOM,
-//                 backgroundColor: Colors.green,
-//                 colorText: Colors.white,
-//               );
 
 //               // Refresh the list
 //               getBankAccountsController.bankdetails_mdethod();
@@ -3184,25 +3149,11 @@
 //                   }
 
 //                   if (!hasBankAccounts) {
-//                     Get.snackbar(
-//                       'No Payment Method',
-//                       'Please add a bank account or UPI ID first',
-//                       snackPosition: SnackPosition.BOTTOM,
-//                       backgroundColor: Colors.red,
-//                       colorText: Colors.white,
-//                     );
 //                     return;
 //                   }
 
 //                   if (selectedAccountId == null ||
 //                       selectedAccountType == null) {
-//                     Get.snackbar(
-//                       'No Payment Method Selected',
-//                       'Please select a bank account or UPI ID to transfer to',
-//                       snackPosition: SnackPosition.BOTTOM,
-//                       backgroundColor: Colors.red,
-//                       colorText: Colors.white,
-//                     );
 //                     return;
 //                   }
 
@@ -3524,28 +3475,12 @@
 //       );
 
 //       if (mounted) {
-//         Get.snackbar(
-//           "Success",
-//           "UPI ID deleted successfully",
-//           backgroundColor: Colors.green,
-//           colorText: Colors.white,
-//           snackPosition: SnackPosition.BOTTOM,
-//           duration: const Duration(seconds: 2),
-//         );
 
 //         Navigator.pop(context, true);
 //       }
 //     } catch (e) {
 //       print("Error in _deleteUpi: $e");
 //       if (mounted) {
-//         Get.snackbar(
-//           "Error",
-//           "Failed to delete UPI ID: ${e.toString()}",
-//           backgroundColor: Colors.red,
-//           colorText: Colors.white,
-//           snackPosition: SnackPosition.BOTTOM,
-//           duration: const Duration(seconds: 3),
-//         );
 //       }
 //     } finally {
 //       if (mounted) {

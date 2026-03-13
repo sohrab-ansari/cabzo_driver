@@ -10,6 +10,7 @@ import 'package:nzcu_driver/utilities/widgets/form_field.dart';
 import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 class EditUpi extends StatefulWidget {
   final dynamic account;
@@ -63,28 +64,14 @@ class _EditUpiState extends State<EditUpi> {
 
       // Show success message
       if (mounted) {
-        Get.snackbar(
-          "Success",
-          "UPI ID updated successfully",
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.TOP,
-          duration: const Duration(seconds: 2),
-        );
+        CustomToast.showSuccess("UPI ID updated successfully");
 
         // Navigate back with success
         Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
-        Get.snackbar(
-          "Error",
-          "Failed to update UPI ID: ${e.toString()}",
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.TOP,
-          duration: const Duration(seconds: 3),
-        );
+        CustomToast.showError("Failed to update UPI ID: ${e.toString()}");
       }
     } finally {
       if (mounted) {
@@ -202,28 +189,14 @@ class _EditUpiState extends State<EditUpi> {
       );
 
       if (mounted) {
-        Get.snackbar(
-          "Success",
-          "UPI ID deleted successfully",
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.TOP,
-          duration: const Duration(seconds: 2),
-        );
+        CustomToast.showSuccess("UPI ID deleted successfully");
 
         Navigator.pop(context, true);
       }
     } catch (e) {
       print("Error in _deleteUpi: $e");
       if (mounted) {
-        Get.snackbar(
-          "Error",
-          "Failed to delete UPI ID: ${e.toString()}",
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.TOP,
-          duration: const Duration(seconds: 3),
-        );
+        CustomToast.showError("Failed to delete UPI ID: ${e.toString()}");
       }
     } finally {
       if (mounted) {

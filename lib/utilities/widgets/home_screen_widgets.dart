@@ -61,7 +61,7 @@ class HomeScreenWidgets {
             color: shadowColor ?? Colors.black12,
             blurRadius: 1,
             offset: const Offset(0, 0.2),
-          )
+          ),
         ],
       ),
       child: child,
@@ -203,30 +203,8 @@ class HomeScreenWidgets {
     );
   }
 
-  /// Toast Notification (simple implementation)
-  static void showToast(BuildContext context, String message, {Duration duration = const Duration(seconds: 2)}) {
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(
-    //     content: Text(message),
-    //     duration: duration,
-    //   ),
-    // );
-
-        Fluttertoast.showToast(
-  msg: message,
-  toastLength: Toast.LENGTH_SHORT,
-  gravity: ToastGravity.TOP, // 👈 Top position
-  backgroundColor: Colors.green,
-  textColor: Colors.white,
-  fontSize: 16.0,
-);
-  }
-
   /// Info Section Header
-  static Widget sectionHeader({
-    required String title,
-    VoidCallback? onTap,
-  }) {
+  static Widget sectionHeader({required String title, VoidCallback? onTap}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -235,10 +213,7 @@ class HomeScreenWidgets {
           children: [
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             if (onTap != null)
               GestureDetector(
@@ -260,10 +235,7 @@ class HomeScreenWidgets {
   }
 
   /// Divider with padding
-  static Widget paddedDivider({
-    double vertical = 16,
-    double horizontal = 0,
-  }) {
+  static Widget paddedDivider({double vertical = 16, double horizontal = 0}) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: vertical, horizontal: horizontal),
       child: const Divider(height: 1, color: Colors.grey),
@@ -287,26 +259,17 @@ class HomeScreenWidgets {
           ],
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
           ),
           if (onRetry != null) ...[
             const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: const Text('Retry'),
-            ),
+            ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
           ],
         ],
       ),

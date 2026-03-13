@@ -1,10 +1,7 @@
 import 'package:nzcu_driver/modals/profile_modals/review_rating_response.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
-
-// import 'package:nzcu_driver/apiServices/services/profile_api_services.dart';
-import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 class ReviewAndRatingController extends GetxController {
   Rx<ReviewRatingResponse?> reviewRatingResponse = Rx<ReviewRatingResponse?>(
@@ -13,12 +10,6 @@ class ReviewAndRatingController extends GetxController {
 
   RxBool isLoading = false.obs;
   RxString errorMessage = ''.obs;
-
-  @override
-  void onInit() {
-    super.onInit();
-    // You can add any initialization logic here
-  }
 
   Future<void> ratings_method() async {
     print("Fetching reviews...");
@@ -41,27 +32,13 @@ class ReviewAndRatingController extends GetxController {
         // Update the response
         reviewRatingResponse.value = res;
 
-        // Show success message only if there are new reviews
-        if (res.data != null && res.data!.isNotEmpty) {
-          // Fluttertoast.showToast(
-          //   msg: "${res.data!.length} reviews loaded",
-          //   toastLength: Toast.LENGTH_SHORT,
-          //   gravity: ToastGravity.TOP,
-          // );
-        }
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch reviews';
         print("Error: ${errorMessage.value}");
 
         // Only show snackbar if there's no existing data
         if (reviewRatingResponse.value == null) {
-          Get.snackbar(
-            'Error',
-            errorMessage.value,
-            snackPosition: SnackPosition.TOP,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-          );
+          CustomToast.showError(errorMessage.value);
         }
       }
     } catch (e) {
@@ -70,13 +47,7 @@ class ReviewAndRatingController extends GetxController {
 
       // Only show snackbar if there's no existing data
       if (reviewRatingResponse.value == null) {
-        Get.snackbar(
-          'Error',
-          errorMessage.value,
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        CustomToast.showError(errorMessage.value);
       }
     } finally {
       // Reset loading state

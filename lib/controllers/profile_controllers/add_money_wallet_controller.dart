@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:nzcu_driver/services/payments_service/razorpay_service.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/wallet_controller.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:nzcu_driver/views/profile_screens/payment_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -172,39 +173,19 @@ class AddMoneyWalletController extends GetxController {
       if (successcheck == true) {
         print('agsdgshgfjds____Payment verified successfully');
 
-        // Show success message
-        Fluttertoast.showToast(
-          msg: "Payment successful!",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.TOP,
-          backgroundColor: Colors.green,
-          textColor: Colors.white,
-        );
+        CustomToast.showSuccess("Payment successful!");
 
         // Clear stored data
         currentOrderId = null;
         currentAmount = null;
 
-        // You might want to refresh wallet balance here
-        // Get.find<HomeController>().fetchWalletBalance();
-
-        // Navigate back or show success screen
-        // Future.delayed(Duration(seconds: 2), () {
-        //   Get.back(); // Close payment screen
-        // });
         final WalletController walletController = Get.find<WalletController>();
 
         walletController.wallet_method();
-        // Get.off(PaymentScreen());
 
         Get.offAll(() => PaymentScreen());
       } else {
-        Fluttertoast.showToast(
-          msg: "Payment verification failed",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP,
-        );
-        // _showError(verificationResponse.message ?? 'Payment verification failed');
+        CustomToast.showError("Payment verification failed");
       }
     } catch (e) {
       print('❌ Verification Error: $e');
@@ -266,13 +247,6 @@ class AddMoneyWalletController extends GetxController {
     errorMessage.value = message;
     print("❌ Error: $message");
 
-    Get.snackbar(
-      'Error',
-      message,
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-      duration: Duration(seconds: 4),
-    );
+    CustomToast.showError(message);
   }
 }

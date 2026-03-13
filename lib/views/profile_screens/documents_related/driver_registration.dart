@@ -25,6 +25,7 @@ import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 
 class DriverRegistration extends StatefulWidget {
   dynamic mobileNumber;
@@ -422,16 +423,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                               "Selected vehicle sub-type: ${datum.name} (ID: ${datum.id})",
                             );
 
-                            Get.snackbar(
-                              "Selected",
-                              "${datum.name}",
-                              snackPosition: SnackPosition.TOP,
-                              duration: Duration(seconds: 1),
-                              backgroundColor: AppColors.primaryRed.withOpacity(
-                                0.9,
-                              ),
-                              colorText: Colors.white,
-                            );
+                            CustomToast.showInfo("${datum.name}");
 
                             // Close the bottom sheet
                             Navigator.pop(bottomSheetContext);
@@ -683,16 +675,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                               "Selected vehicle type: ${datum.name} (ID: ${datum.id})",
                             );
 
-                            Get.snackbar(
-                              "Selected",
-                              "${datum.name}",
-                              snackPosition: SnackPosition.TOP,
-                              duration: Duration(seconds: 1),
-                              backgroundColor: AppColors.primaryRed.withOpacity(
-                                0.9,
-                              ),
-                              colorText: Colors.white,
-                            );
+                            CustomToast.showInfo("${datum.name}");
 
                             // Close the bottom sheet
                             Navigator.pop(bottomSheetContext);
@@ -799,24 +782,12 @@ class _DriverRegistrationState extends State<DriverRegistration> {
           _showRcImageError ||
           _showPlateImageError ||
           _showInsuranceImageError) {
-        Get.snackbar(
-          'Incomplete Form',
-          'Please fill all fields and upload all required documents',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        CustomToast.showError('Please fill all fields and upload all required documents');
         return;
       }
     } else {
       // Form fields invalid
-      Get.snackbar(
-        'Incomplete Form',
-        'Please fill all fields correctly',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      CustomToast.showError('Please fill all fields correctly');
       return;
     }
 
@@ -866,52 +837,27 @@ class _DriverRegistrationState extends State<DriverRegistration> {
 
     // Validate required fields
     if (vehicleNameController.text.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please enter vehicle name',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-      );
+      CustomToast.showError('Please enter vehicle name');
       return;
     }
 
     if (vehicleNumberController.text.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please enter vehicle number',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-      );
+      CustomToast.showError('Please enter vehicle number');
       return;
     }
 
     if (vehicleTypeController.text.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please select a vehicle type',
-        backgroundColor: Colors.red,
-        snackPosition: SnackPosition.TOP,
-      );
+      CustomToast.showError('Please select a vehicle type');
       return;
     }
 
     if (vehicleSubTypeController.text.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please select a vehicle sub-type',
-        backgroundColor: Colors.red,
-        snackPosition: SnackPosition.TOP,
-      );
+      CustomToast.showError('Please select a vehicle sub-type');
       return;
     }
 
     if (modelController.text.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please enter model',
-        backgroundColor: Colors.red,
-        snackPosition: SnackPosition.TOP,
-      );
+      CustomToast.showError('Please enter model');
       return;
     }
 
@@ -938,24 +884,12 @@ class _DriverRegistrationState extends State<DriverRegistration> {
           _showRcImageError ||
           _showPlateImageError ||
           _showInsuranceImageError) {
-        Get.snackbar(
-          'Incomplete Form',
-          'Please fill all fields and upload all required documents',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        CustomToast.showError('Please fill all fields and upload all required documents');
         return;
       }
     } else {
       // Form fields invalid
-      Get.snackbar(
-        'Incomplete Form',
-        'Please fill all fields correctly',
-        backgroundColor: Colors.red,
-        snackPosition: SnackPosition.TOP,
-        colorText: Colors.white,
-      );
+      CustomToast.showError('Please fill all fields correctly');
       return;
     }
 
@@ -999,13 +933,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       _scrollToTop();
     } catch (e) {
       print("❌ Error submitting vehicle details: $e");
-      Get.snackbar(
-        'Error',
-        'Failed to submit vehicle details: $e',
-        backgroundColor: Colors.red,
-        snackPosition: SnackPosition.TOP,
-        colorText: Colors.white,
-      );
+      CustomToast.showError('Failed to submit vehicle details: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -1031,23 +959,11 @@ class _DriverRegistrationState extends State<DriverRegistration> {
           _showAadharBackError ||
           _showPanError ||
           _showDlError) {
-        Get.snackbar(
-          'Incomplete Form',
-          'Please upload all required documents',
-          backgroundColor: Colors.red,
-          snackPosition: SnackPosition.TOP,
-          colorText: Colors.white,
-        );
+        CustomToast.showError('Please upload all required documents');
         return;
       }
     } else {
-      Get.snackbar(
-        'Incomplete Form',
-        'Please fill all fields correctly',
-        backgroundColor: Colors.red,
-        snackPosition: SnackPosition.TOP,
-        colorText: Colors.white,
-      );
+      CustomToast.showError('Please fill all fields correctly');
       return;
     }
 
@@ -1109,14 +1025,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
     } catch (e, stackTrace) {
       print("❌ Error in submission: $e");
       print("Stack trace: $stackTrace");
-      Get.snackbar(
-        'Error',
-        'Failed to submit personal details: $e',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-        duration: Duration(seconds: 4),
-      );
+      CustomToast.showError('Failed to submit personal details: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -1140,13 +1049,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
     });
 
     if (_showProfilePhotoError) {
-      Get.snackbar(
-        'Error',
-        'Please upload your profile photo',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-      );
+      CustomToast.showError('Please upload your profile photo');
       return;
     }
 
@@ -1167,13 +1070,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       print("✅ Profile photo uploaded successfully");
 
       // Show success message
-      // Get.snackbar(
-      //   'Success',
-      //   'Registration completed successfully!',
-      //   backgroundColor: Colors.green,
-      //   colorText: Colors.white,
-      // );
-
+      
       // // Navigate to main screen after a delay
       // await Future.delayed(Duration(seconds: 2));
 
@@ -1184,13 +1081,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
       // );
     } catch (e) {
       print("❌ Failed to upload profile photo: $e");
-      Get.snackbar(
-        'Error',
-        'Failed to submit profile photo: $e',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-      );
+      CustomToast.showError('Failed to submit profile photo: $e');
     } finally {
       setState(() {
         _isSubmitting = false;
@@ -2023,23 +1914,7 @@ class _DriverRegistrationState extends State<DriverRegistration> {
                                                           );
                                                         }
 
-                                                        Get.snackbar(
-                                                          "Selected",
-                                                          "${selectedSubType.name}",
-                                                          snackPosition:
-                                                              SnackPosition.TOP,
-                                                          duration: Duration(
-                                                            seconds: 1,
-                                                          ),
-                                                          backgroundColor:
-                                                              AppColors
-                                                                  .primaryRed
-                                                                  .withOpacity(
-                                                                    0.9,
-                                                                  ),
-                                                          colorText:
-                                                              Colors.white,
-                                                        );
+                                                        CustomToast.showInfo("${selectedSubType.name}");
                                                       });
                                                     }
                                                   },

@@ -1,12 +1,9 @@
-import 'dart:io';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
-import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/wallet_controller.dart';
 import 'package:nzcu_driver/modals/profile_modals/bank_account_add_Res.dart';
-import 'package:nzcu_driver/utilities/widgets/navigator.dart';
+import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:nzcu_driver/views/profile_screens/payment_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
 class BankAccountAddController extends GetxController {
@@ -14,248 +11,91 @@ class BankAccountAddController extends GetxController {
   RxBool isLoading = false.obs;
   RxString errorMessage = ''.obs;
 
+  Future<void> addbankaccount_method({
+    required String bankName,
+    required String accountNumber,
+    required String accountHolderName,
+    required String ifscCode,
+    String? type,
+    String? upiId,
+    required BuildContext context,
+  }) async {
+    print("add bankaccount called");
 
-Future<void> addbankaccount_method({
-  required String bankName,
-  required String accountNumber,
-  required String accountHolderName,
-  required String ifscCode,
-  String? type,
-  String? upiId,
-  required BuildContext context,
-}) async {
-  print("add bankaccount called");
-
-  // Validate inputs based on the type
-  if (type == "UPI") {
-    // For UPI, only validate UPI ID
-    if (upiId == null || upiId.isEmpty) {
-      _showError(context, "Please enter UPI ID");
-      return;
-    }
-  } else {
-    // For bank account, validate all bank fields
-    if (bankName.isEmpty ||
-        accountNumber.isEmpty ||
-        accountHolderName.isEmpty ||
-        ifscCode.isEmpty) {
-      _showError(context, "Please fill all fields");
-      return;
-    }
-  }
-
-  // Set loading state
-  isLoading.value = true;
-  errorMessage.value = '';
-
-  try {
-    // Call API
-    final BankAccountAddResp res =
-        await ProfileApiServices.addBankAccountData(
-          accountHolderName: accountHolderName,
-          accountNumber: accountNumber,
-          bankName: bankName,
-          ifscCode: ifscCode,
-          type: type,
-          upiId: upiId,
-        );
-
-    print("API Response success1: ${res.success}");
-    print("API Response message2: ${res.message}");
-    print("API Response data3: ${res.data}");
-
-    // ✅ Check both possible success indicators
-    if (res.success == true) {
-      print("✅ Bank account added successfully!");
-
-      // Show success message
-      _showSuccess(context, res.message ?? "Bank account added successfully");
-
-      // ✅ IMPORTANT: Refresh home data after profile update
-      try {
-        final WalletController walletController = Get.find<WalletController>();
-        walletController.wallet_method();
-        print("Wallet data refreshed after profile update");
-      } catch (e) {
-        print("Failed to refresh home data: $e");
+    // Validate inputs based on the type
+    if (type == "UPI") {
+      // For UPI, only validate UPI ID
+      if (upiId == null || upiId.isEmpty) {
+        CustomToast.showWarning("Please enter UPI ID");
+        return;
       }
-
-      transactionsres.value = res;
-
-      // ✅ Use GetX navigation instead of CustomNavigator
-      await Future.delayed(Duration(milliseconds: 500));
-
-      // Navigate to PaymentScreen
-      Get.off(PaymentScreen());
     } else {
-      errorMessage.value = res.message ?? 'Failed to add bank account';
-      print("❌ Error: ${errorMessage.value}");
-      _showError(context, errorMessage.value);
+      // For bank account, validate all bank fields
+      if (bankName.isEmpty ||
+          accountNumber.isEmpty ||
+          accountHolderName.isEmpty ||
+          ifscCode.isEmpty) {
+        CustomToast.showWarning("Please fill all fields");
+        return;
+      }
     }
-  } catch (e) {
-    errorMessage.value = 'An error occurred: $e';
-    print("❌ Exception: $e");
-    _showError(context, errorMessage.value);
-  } finally {
-    // Reset loading state
-    isLoading.value = false;
-  }
-}
-  // Future<void> addbankaccount_method({
-  //   required String bankName,
-  //   required String accountNumber,
-  //   required String accountHolderName,
-  //   required String ifscCode,
 
-  //   String? type,
-  //   String? upiId,
-  //   required BuildContext context,
-  // }) async {
-  //   print("add bankaccount called");
+    // Set loading state
+    isLoading.value = true;
+    errorMessage.value = '';
 
-  //   // Validate inputs
-  //   if (bankName.isEmpty ||
-  //       accountNumber.isEmpty ||
-  //       accountHolderName.isEmpty ||
-  //       ifscCode.isEmpty) {
-  //     _showError(context, "Please fill all fields");
-  //     return;
-  //   }
+    try {
+      // Call API
+      final BankAccountAddResp res =
+          await ProfileApiServices.addBankAccountData(
+            accountHolderName: accountHolderName,
+            accountNumber: accountNumber,
+            bankName: bankName,
+            ifscCode: ifscCode,
+            type: type,
+            upiId: upiId,
+          );
 
-  //   // Set loading state
-  //   isLoading.value = true;
-  //   errorMessage.value = '';
+      print("API Response success1: ${res.success}");
+      print("API Response message2: ${res.message}");
+      print("API Response data3: ${res.data}");
 
-  //   try {
-  //     // Call API
-  //     final BankAccountAddResp res =
-  //         await ProfileApiServices.addBankAccountData(
-  //           accountHolderName: accountHolderName,
-  //           accountNumber: accountNumber,
-  //           bankName: bankName,
-  //           ifscCode: ifscCode,
-  //           type: type,
-  //           upiId: upiId,
-  //         );
+      //Check both possible success indicators
+      if (res.success == true) {
+        print("✅ Bank account added successfully!");
 
-  //     print("API Response success1: ${res.success}");
-  //     print("API Response message2: ${res.message}");
-  //     print("API Response data3: ${res.data}");
+        // Show success message
+        CustomToast.showSuccess(res.message ?? "Bank account added successfully");
 
-  //     // ✅ Check both possible success indicators
-  //     if (res.success == true) {
-  //       print("✅ Bank account added successfully!");
+        //IMPORTANT: Refresh home data after profile update
+        try {
+          final WalletController walletController =
+              Get.find<WalletController>();
+          walletController.wallet_method();
+          print("Wallet data refreshed after profile update");
+        } catch (e) {
+          print("Failed to refresh home data: $e");
+        }
 
-  //       // Show success message
-  //       _showSuccess(context, res.message ?? "Bank account added successfully");
+        transactionsres.value = res;
 
-  //       // ✅ IMPORTANT: Refresh home data after profile update
-  //       try {
-  //         // final HomeController homeController = Get.find<HomeController>();
-  //         // await homeController.home_data_method();
+        //Use GetX navigation instead of CustomNavigator
+        await Future.delayed(Duration(milliseconds: 500));
 
-  //         final WalletController walletController =
-  //             Get.find<WalletController>();
-
-  //         walletController.wallet_method();
-  //         print("Wallet data refreshed after profile update");
-  //       } catch (e) {
-  //         print("Failed to refresh home data: $e");
-  //       }
-
-  //       transactionsres.value = res;
-
-  //       // ✅ Use GetX navigation instead of CustomNavigator
-  //       await Future.delayed(Duration(milliseconds: 500));
-
-  //       // Option 1: Using GetX navigation
-
-  //       Get.off(PaymentScreen());
-  //       // Get.offAll(() => PaymentScreen());
-
-  //       // Option 2: Using Navigator if you prefer
-  //       // Navigator.of(context).pushAndRemoveUntil(
-  //       //   MaterialPageRoute(builder: (context) => PaymentScreen()),
-  //       //   (route) => false,
-  //       // );
-  //     } else {
-  //       errorMessage.value = res.message ?? 'Failed to add bank account';
-  //       print("❌ Error: ${errorMessage.value}");
-  //       _showError(context, errorMessage.value);
-  //     }
-  //   } catch (e) {
-  //     errorMessage.value = 'An error occurred: $e';
-  //     print("❌ Exception: $e");
-  //     _showError(context, errorMessage.value);
-  //   } finally {
-  //     // Reset loading state
-  //     isLoading.value = false;
-  //   }
-  // }
-
-  // Helper method to show error messages
-  void _showError(BuildContext context, String message) {
-    // Try using ScaffoldMessenger first (more reliable with context)
-    if (context.mounted) {
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     content: Text(message),
-      //     backgroundColor: Colors.red,
-      //     duration: Duration(seconds: 3),
-      //   ),
-      // );
-
-
-
-      Fluttertoast.showToast(
-  msg: message,
-  toastLength: Toast.LENGTH_SHORT,
-  gravity: ToastGravity.TOP, // 👈 Top position
-  backgroundColor: Colors.green,
-  textColor: Colors.white,
-  fontSize: 16.0,
-);
-    } else {
-      // Fallback to Fluttertoast if context is not available
-      Fluttertoast.showToast(
-        msg: message,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.TOP,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
+        // Navigate to PaymentScreen
+        Get.off(PaymentScreen());
+      } else {
+        errorMessage.value = res.message ?? 'Failed to add bank account';
+        print("Error: ${errorMessage.value}");
+        CustomToast.showError(errorMessage.value);
+      }
+    } catch (e) {
+      errorMessage.value = 'An error occurred: $e';
+      print("Exception: $e");
+      CustomToast.showError(errorMessage.value);
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  // Helper method to show success messages
-  void _showSuccess(BuildContext context, String message) {
-    // Try using ScaffoldMessenger first (more reliable with context)
-    if (context.mounted) {
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     content: Text(message),
-      //     backgroundColor: Colors.green,
-      //     duration: Duration(seconds: 3),
-      //   ),
-      // );
-
-        Fluttertoast.showToast(
-  msg: message,
-  toastLength: Toast.LENGTH_SHORT,
-  gravity: ToastGravity.TOP, // 👈 Top position
-  backgroundColor: Colors.green,
-  textColor: Colors.white,
-  fontSize: 16.0,
-);
-    } else {
-      // Fallback to Fluttertoast if context is not available
-      Fluttertoast.showToast(
-        msg: message,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.TOP,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-      );
-    }
-  }
 }
