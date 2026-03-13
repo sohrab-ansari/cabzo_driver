@@ -155,6 +155,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       }
     } else if (state == AppLifecycleState.resumed) {
       OverlayService.instance.hideOverlay();
+      if (SocketManager().isOnDuty) {
+        print('📱 App resumed - forcing socket reconnect check');
+        SocketManager().forceReconnect();
+      }
     }
   }
 

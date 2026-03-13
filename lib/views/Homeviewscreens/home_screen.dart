@@ -141,17 +141,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       "online status in home screen is ::::::::::::::::::::::::::: ${widget.isOnDuty}, SocketManager is: ${socketManager.isOnDuty}",
     );
 
-    // If SocketManager already has a connected/restored state, we should NOT 
-    // overwrite it with `widget.isOnDuty` because `widget.isOnDuty` might be 
+    // If SocketManager already has a connected/restored state, we should NOT
+    // overwrite it with `widget.isOnDuty` because `widget.isOnDuty` might be
     // stale from BottomNavMainScreen when switching tabs.
-    // We only use `widget.isOnDuty` if it's true and we need to force it, 
+    // We only use `widget.isOnDuty` if it's true and we need to force it,
     // or if we're completely uninitialized.
     if (widget.isOnDuty == true && !socketManager.isOnDuty) {
       socketManager.isOnDuty = true;
     } else if (widget.isOnDuty == false && socketManager.isOnDuty) {
       // Avoid forcing offline if user manually went online and switched tabs
       // The socketManager is the single source of truth for online status.
-      print("ℹ️ Ignoring widget.isOnDuty=false to preserve true SocketManager state");
+      print(
+        "ℹ️ Ignoring widget.isOnDuty=false to preserve true SocketManager state",
+      );
     }
 
     if (socketManager.isOnDuty) {

@@ -592,8 +592,8 @@ class RideHistoryResponse {
 class Datum {
   String? id;
   UserId? userId;
-  String? vehicleType;
-  String? vehicleSubType;
+  VehicleTypeObj? vehicleType;
+  VehicleSubTypeObj? vehicleSubType;
   bool? otpVerified;
   String? orderStatus;
   Location? startLocation;
@@ -677,8 +677,8 @@ class Datum {
   factory Datum.fromJson(Map<String, dynamic> json) => Datum(
         id: json["_id"],
         userId: json["userId"] == null ? null : UserId.fromJson(json["userId"]),
-        vehicleType: json["vehicleType"],
-        vehicleSubType: json["vehicleSubType"],
+        vehicleType: json["vehicleType"] == null ? null : VehicleTypeObj.fromJson(json["vehicleType"]),
+        vehicleSubType: json["vehicleSubType"] == null ? null : VehicleSubTypeObj.fromJson(json["vehicleSubType"]),
         otpVerified: json["otpVerified"],
         orderStatus: json["orderStatus"],
         startLocation: json["startLocation"] == null
@@ -745,8 +745,8 @@ class Datum {
   Map<String, dynamic> toJson() => {
         "_id": id,
         "userId": userId?.toJson(),
-        "vehicleType": vehicleType,
-        "vehicleSubType": vehicleSubType,
+        "vehicleType": vehicleType?.toJson(),
+        "vehicleSubType": vehicleSubType?.toJson(),
         "otpVerified": otpVerified,
         "orderStatus": orderStatus,
         "startLocation": startLocation?.toJson(),
@@ -1290,5 +1290,49 @@ class Pagination {
         "limit": limit,
         "total": total,
         "pages": pages,
+      };
+}
+
+class VehicleTypeObj {
+  String? id;
+  String? name;
+
+  VehicleTypeObj({
+    this.id,
+    this.name,
+  });
+
+  factory VehicleTypeObj.fromJson(Map<String, dynamic> json) => VehicleTypeObj(
+        id: json["_id"],
+        name: json["name"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "_id": id,
+        "name": name,
+      };
+}
+
+class VehicleSubTypeObj {
+  String? id;
+  String? name;
+  String? image;
+
+  VehicleSubTypeObj({
+    this.id,
+    this.name,
+    this.image,
+  });
+
+  factory VehicleSubTypeObj.fromJson(Map<String, dynamic> json) => VehicleSubTypeObj(
+        id: json["_id"],
+        name: json["name"],
+        image: json["image"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "_id": id,
+        "name": name,
+        "image": image,
       };
 }

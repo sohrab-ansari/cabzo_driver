@@ -2746,8 +2746,10 @@
 import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 import 'package:nzcu_driver/controllers/rides_controllers/rieds_history_controller.dart';
 import 'package:nzcu_driver/modals/home_modals/ride_history_response.dart';
+import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
+import 'package:nzcu_driver/views/ride_screens/trip_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -2768,8 +2770,8 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
   final Controllers currentTabBar = Get.find<Controllers>();
 
   late TabController _tabController;
-  final List<String> _tabStatuses = ["Pending", "Completed", "Cancelled"];
-  String _currentStatus = "Pending";
+  final List<String> _tabStatuses = ["", "Completed", "Cancelled"];
+  String _currentStatus = "";
 
   @override
   void initState() {
@@ -3020,7 +3022,21 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
       }
 
       // Get rides for current status
-      final rides = riedsHistoryController.transactionsres.value?.data ?? [];
+      var rides = riedsHistoryController.transactionsres.value?.data ?? [];
+
+      // If viewing 'New trip' (all rides), reverse the list to show latest first
+      if (status == "") {
+        rides = rides.reversed.toList();
+      }
+
+      // Show loading indicator if currently loading
+      if (riedsHistoryController.isLoading.value) {
+        return const Center(
+          child: CircularProgressIndicator(
+            color: AppColors.primaryRed,
+          ),
+        );
+      }
 
       // Show empty state if no rides
       if (rides.isEmpty) {
@@ -3082,17 +3098,28 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
     });
   }
 
-  Widget _buildRideCard(Datum ride, double w, String status) {
-    final isCompleted = status == "Completed";
-    final isCancelled = status == "Cancelled";
-    final isPending = status == "Pending";
+  Widget _buildRideCard(Datum ride, double w, String tabStatus) {
+    final actualStatus = ride.orderStatus ?? "Unknown";
+    final isCompleted = actualStatus == "Completed";
+    final isCancelled = actualStatus == "Cancelled";
+    final isPending = actualStatus == "Pending" || actualStatus == "Accepted";
+
+    Color statusColor = isCancelled
+        ? const Color(0xFFE02D3C)
+        : isCompleted
+            ? Colors.green
+            : AppColors.TextBuleColor;
 
     // Safely format the date time - now passing DateTime? directly
     final dateInfo = _formatDateTime(ride.createdAt);
 
-    return Container(
-      width: w,
-      decoration: BoxDecoration(
+    return InkWell(
+      onTap: () {
+        Get.to(() => TripDetailsScreen(ride: ride));
+      },
+      child: Container(
+        width: w,
+        decoration: BoxDecoration(
         color: AppColors.lightGray.withOpacity(0.3),
         borderRadius: BorderRadius.circular(w * .035),
         border: Border.all(
@@ -3117,14 +3144,10 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                           context,
                           isPending
                               ? "New trip"
-                              : isCompleted
-                              ? "Completed"
-                              : "Cancelled",
+                              : actualStatus,
                           w * 0.035,
                           FontWeight.w600,
-                          isCancelled
-                              ? const Color(0xFFE02D3C)
-                              : AppColors.TextBuleColor,
+                          statusColor,
                           TextAlign.center,
                           TextOverflow.ellipsis,
                           maxLines: 1,
@@ -3134,9 +3157,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                           " : ",
                           w * 0.030,
                           FontWeight.w600,
-                          isCancelled
-                              ? const Color(0xFFE02D3C)
-                              : AppColors.TextBuleColor,
+                          statusColor,
                           TextAlign.center,
                           TextOverflow.ellipsis,
                           maxLines: 1,
@@ -3146,9 +3167,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
                           dateInfo['time']!,
                           w * 0.035,
                           FontWeight.w600,
-                          isCancelled
-                              ? const Color(0xFFE02D3C)
-                              : AppColors.TextBuleColor,
+                          statusColor,
                           TextAlign.center,
                           TextOverflow.ellipsis,
                           maxLines: 1,
@@ -3250,23 +3269,37 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
             if (!isCancelled) ...[
               Row(
                 children: [
-                  Image.asset(
-                    _getVehicleIcon(ride.vehicleType ?? "bike"),
-                    height: 30,
-                    width: 30,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(
-                        Icons.directions_bike,
-                        size: 30,
-                        color: AppColors.primaryRed,
-                      );
-                    },
-                  ),
+                  // Check for dynamic image from vehicleSubType
+                  ride.vehicleSubType?.image != null
+                      ? Image.network(
+                          "${ApiPath.imagebaseUrl}${ride.vehicleSubType!.image}",
+                          height: 30,
+                          width: 30,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              _getVehicleIcon(ride.vehicleType?.name ?? "bike"),
+                              height: 30,
+                              width: 30,
+                            );
+                          },
+                        )
+                      : Image.asset(
+                          _getVehicleIcon(ride.vehicleType?.name ?? "bike"),
+                          height: 30,
+                          width: 30,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              Icons.directions_bike,
+                              size: 30,
+                              color: AppColors.primaryRed,
+                            );
+                          },
+                        ),
                   SizedBox(width: w * 0.02),
                   AppFonts.textPoppins(
                     context,
                     _getVehicleTypeText(
-                      ride.vehicleId?.vehicleName ?? ride.vehicleType ?? "bike",
+                      ride.vehicleSubType?.name ?? ride.vehicleId?.vehicleName ?? ride.vehicleType?.name ?? "bike",
                     ),
                     w * 0.035,
                     FontWeight.w600,
@@ -3383,7 +3416,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
           ],
         ),
       ),
-    );
+    ));
   }
 
   String _getVehicleIcon(String vehicleType) {

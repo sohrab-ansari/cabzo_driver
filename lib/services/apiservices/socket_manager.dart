@@ -674,8 +674,8 @@ class SocketManager {
         return true;
       }
 
-      // Disconnect existing
-      _disconnectSocket();
+      // Disconnect existing socket object but keep online state alive
+      _cleanupSocketConnection();
 
       print('🔌 Creating socket connection...');
 
@@ -2137,11 +2137,7 @@ class SocketManager {
     stopLocationWatch();
     _stopLocationUpdates();
 
-    if (_socket != null) {
-      _socket!.disconnect();
-      _socket!.dispose();
-      _socket = null;
-    }
+    _cleanupSocketConnection();
 
     _isSocketConnected = false;
     _socketId = null;
@@ -2150,7 +2146,37 @@ class SocketManager {
     onConnectionStatusChange?.call(false);
     onDriverStatusChange?.call(false);
 
-    print('🔌 Driver socket disconnected');
+    print('🔌 Driver socket disconnected and driver is offline');
+  }
+
+  /// Disposes of the internal socket physics without altering
+  /// high-level online state (`isOnDuty`, `_isRideInProgress`).
+  void _cleanupSocketConnection() {
+    if (_socket != null) {
+      _socket!.disconnect();
+      _socket!.dispose();
+      _socket = null;
+    }
+  }
+
+  /// Instantly forces a socket reconnection if the driver is online.
+  /// Typically called when network connectivity is restored.
+  Future<void> forceReconnect() async {
+    if (!isOnDuty) return;
+
+    print('⚡ [SocketManager] Forcing immediate socket reconnection...');
+    _cancelReconnect(); // Cancel backoff timers
+
+    final connected = await connectSocket();
+    if (connected && isOnDuty) {
+      print('✅ [SocketManager] Force reconnect successful - re-emitting user:online');
+      await goOnline();
+    } else {
+      print('⚠️ [SocketManager] Force reconnect failed. Falling back to retry loop.');
+      if (isOnDuty) {
+        _scheduleReconnect();
+      }
+    }
   }
 
   Map<String, dynamic> getConnectionStatus() {

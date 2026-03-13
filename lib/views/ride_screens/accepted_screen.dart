@@ -57,13 +57,20 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
   // Map & Location
   GoogleMapController? _mapController;
-  LatLng? _driverLocation;
-  double _driverHeading = 0;
+  LatLng? _driverLocation;          // raw GPS fix
+  LatLng? _animatedDriverLocation;  // interpolated position shown on map
+  double _animatedHeading = 0;      // smoothly interpolated bearing (replaces raw GPS heading)
   double _distanceToPickup = 0;
   bool _locationError = false;
   bool _isScreenActive = true;
   bool _isInitialized = false;
   StreamSubscription<Position>? _positionStreamSubscription;
+
+  // Smooth marker animation
+  Timer? _markerAnimationTimer;
+  static const int _animTotalFrames = 30; // 30 × 16ms ≈ 480ms
+  int _animFrame = 0;
+  double _previousTravelBearing = -1; // -1 = uninitialised
 
   // Map Elements
   Set<Marker> markers = {};
@@ -210,6 +217,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
     // Cancel all timers and subscriptions first
     _positionStreamSubscription?.cancel();
     _polylineRefreshTimer?.cancel();
+    _markerAnimationTimer?.cancel();
 
     // Clean up workers
     _navigationWorker?.dispose();
@@ -240,6 +248,8 @@ class _ArrivingClientState extends State<ArrivingClient> {
     _positionStreamSubscription = null;
     _polylineRefreshTimer?.cancel();
     _polylineRefreshTimer = null;
+    _markerAnimationTimer?.cancel();
+    _markerAnimationTimer = null;
 
     _mapController?.dispose();
     _mapController = null;
@@ -654,11 +664,11 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
       if (!_isScreenActive || !mounted) return;
 
+      final initialPos = LatLng(position.latitude, position.longitude);
       setState(() {
-        _driverLocation = LatLng(position.latitude, position.longitude);
-        if (position.heading.isFinite && position.heading >= 0) {
-          _driverHeading = position.heading;
-        }
+        _driverLocation = initialPos;
+        // Bootstrap animated position so there is no null on first frame
+        _animatedDriverLocation ??= initialPos;
         _locationError = false;
       });
 
@@ -690,13 +700,10 @@ class _ArrivingClientState extends State<ArrivingClient> {
           (Position position) {
             if (!_isScreenActive || !mounted) return;
 
+            final newLocation = LatLng(position.latitude, position.longitude);
+
             setState(() {
-              _driverLocation = LatLng(position.latitude, position.longitude);
-
-              if (position.heading.isFinite && position.heading >= 0) {
-                _driverHeading = position.heading;
-              }
-
+              _driverLocation = newLocation;
               _locationError = false;
             });
 
@@ -710,9 +717,8 @@ class _ArrivingClientState extends State<ArrivingClient> {
               );
             }
 
-            // Update markers and dynamically trim/re-fetch polyline
-            _setMarkers();
-            _updateDynamicPolyline();
+            // Smoothly animate marker from old → new position (Ola/Rapido style)
+            _animateMarkerTo(newLocation);
           },
           onError: (error) {
             print('❌ Location stream error: $error');
@@ -747,11 +753,187 @@ class _ArrivingClientState extends State<ArrivingClient> {
     return degree * pi / 180;
   }
 
+  // ==================== Smooth Marker Animation ====================
+
+  /// Ola/Rapido/Uber-style smooth glide: interpolates marker from current
+  /// animated position → [newPos] over [_animTotalFrames] frames at 16ms each.
+  void _animateMarkerTo(LatLng newPos) {
+    _markerAnimationTimer?.cancel();
+
+    final LatLng startPos = _animatedDriverLocation ?? newPos;
+    // Raw bearing without the image offset — used for U-turn detection
+    final double rawBearing = _rawBearing(startPos, newPos);
+    final double targetBearing = _calculateBearing(startPos, newPos);
+    final double startHeading = _animatedHeading;
+    _animFrame = 0;
+
+    // ── U-turn detection ─────────────────────────────────────────────────
+    final distMoved = _calculateDistance(
+      startPos.latitude, startPos.longitude,
+      newPos.latitude, newPos.longitude,
+    );
+    if (_previousTravelBearing >= 0 && distMoved > 0.005) {
+      // Angular difference between previous travel direction and current
+      final double angleDiff =
+          (((rawBearing - _previousTravelBearing) + 540) % 360) - 180;
+      if (angleDiff.abs() > 130) {
+        // Driver made a U-turn — clear stale polyline immediately so the
+        // V-shape disappears, then re-fetch fresh route.
+        print('🔄 U-turn detected (${angleDiff.abs().toStringAsFixed(0)}°) — clearing polyline');
+        _immediateReFetchRoute();
+      }
+    }
+    if (distMoved > 0.005) _previousTravelBearing = rawBearing;
+
+    _markerAnimationTimer = Timer.periodic(
+      const Duration(milliseconds: 16),
+      (timer) {
+        if (!_isScreenActive || !mounted) {
+          timer.cancel();
+          return;
+        }
+
+        _animFrame++;
+        final double t = _animFrame / _animTotalFrames;
+
+        final double animLat =
+            startPos.latitude + (newPos.latitude - startPos.latitude) * t;
+        final double animLng =
+            startPos.longitude + (newPos.longitude - startPos.longitude) * t;
+
+        final interpPos = LatLng(animLat, animLng);
+
+        // Compute new heading (only when actually moving >2m)
+        final distMoved = _calculateDistance(
+          startPos.latitude, startPos.longitude,
+          newPos.latitude, newPos.longitude,
+        );
+        double newHeading = _animatedHeading;
+        if (distMoved > 0.002) {
+          newHeading = _lerpAngle(startHeading, targetBearing, t);
+        }
+
+        setState(() {
+          _animatedDriverLocation = interpPos;
+          _animatedHeading = newHeading;
+
+          // 🔑 KEY FIX: Directly update the driver Marker inside the Set
+          // so GoogleMap re-renders the icon at the interpolated position.
+          // Using copyWith avoids rebuilding the entire markers Set.
+          markers = markers.map((m) {
+            if (m.markerId.value == 'driver') {
+              return m.copyWith(
+                positionParam: interpPos,
+                rotationParam: newHeading,
+              );
+            }
+            return m;
+          }).toSet();
+
+          // Keep driver circles centred on the animated position
+          circles = circles.map((c) {
+            if (c.circleId.value == 'outer_shadow' ||
+                c.circleId.value == 'inner_green') {
+              return Circle(
+                circleId: c.circleId,
+                center: interpPos,
+                radius: c.radius,
+                fillColor: c.fillColor,
+                strokeColor: c.strokeColor,
+                strokeWidth: c.strokeWidth,
+              );
+            }
+            return c;
+          }).toSet();
+        });
+
+        // Update polyline origin on every animation frame
+        _updateDynamicPolyline();
+
+        if (_animFrame >= _animTotalFrames) {
+          timer.cancel();
+          // Rebuild full marker set at exact target to stay in sync
+          if (mounted && _isScreenActive) {
+            _setMarkers();
+          }
+        }
+      },
+    );
+  }
+
+  /// Bearing (degrees 0–360) without image-offset correction.
+  /// Used only for U-turn detection (we need true compass direction).
+  double _rawBearing(LatLng from, LatLng to) {
+    final lat1 = from.latitude * pi / 180;
+    final lat2 = to.latitude * pi / 180;
+    final dLng = (to.longitude - from.longitude) * pi / 180;
+    final y = sin(dLng) * cos(lat2);
+    final x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLng);
+    return (atan2(y, x) * 180 / pi + 360) % 360;
+  }
+
+  /// Bearing (degrees 0–360) from [from] → [to], corrected for the bike2.png
+  /// image orientation (bike nose points upper-right at ~45° in the asset,
+  /// so we subtract 45° to align to true travel direction).
+  static const double _markerImageOffset = -45.0;
+
+  double _calculateBearing(LatLng from, LatLng to) {
+    final lat1 = from.latitude * pi / 180;
+    final lat2 = to.latitude * pi / 180;
+    final dLng = (to.longitude - from.longitude) * pi / 180;
+    final y = sin(dLng) * cos(lat2);
+    final x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLng);
+    final rawBearing = (atan2(y, x) * 180 / pi + 360) % 360;
+    // Apply image offset so the bike's nose aligns with the direction of travel
+    return (rawBearing + _markerImageOffset + 360) % 360;
+  }
+
+  /// Short-path angle lerp — avoids 359° → 1° backward spin
+  double _lerpAngle(double a, double b, double t) {
+    final diff = ((b - a + 540) % 360) - 180;
+    return (a + diff * t + 360) % 360;
+  }
+
   // ==================== Dynamic Polyline Methods ====================
 
-  /// Called on every location update to trim the polyline and conditionally re-fetch
+  /// U-turn response: immediately clears the current route polyline so the
+  /// V-shape disappears, then re-fetches a fresh route from driver position
+  /// (bypasses the normal 15-second throttle).
+  void _immediateReFetchRoute() {
+    if (!_isScreenActive || !mounted || _isFetchingDirections) return;
+    final step = stepperController.activeStep.value;
+    LatLng? dest;
+    if (step < 2) {
+      dest = _rideData?['pickupCoordinates'] as LatLng?;
+    } else {
+      dest = _rideData?['dropoffCoordinates'] as LatLng?;
+    }
+    if (dest == null) return;
+
+    // Clear polyline instantly so V-shape vanishes
+    if (mounted) {
+      setState(() {
+        if (step < 2) {
+          _routeCoordinates = [];
+        } else {
+          _driverToDropCoordinates = [];
+        }
+        _polylines = {};
+      });
+    }
+
+    // Reset throttle timer so the re-fetch fires immediately
+    _lastPolylineRefresh = DateTime.fromMillisecondsSinceEpoch(0);
+    _fetchRouteFromDriverTo(dest, isPickup: step < 2);
+  }
+
+  /// Called on every animation frame to trim the polyline from the animated
+  /// car position and conditionally re-fetch when driver goes off-route.
   void _updateDynamicPolyline() {
-    if (!_isScreenActive || !mounted || _driverLocation == null) return;
+    if (!_isScreenActive || !mounted) return;
+    // Use the animated position if available, fall back to raw GPS
+    final carPos = _animatedDriverLocation ?? _driverLocation;
+    if (carPos == null) return;
 
     final step = stepperController.activeStep.value;
 
@@ -760,13 +942,13 @@ class _ArrivingClientState extends State<ArrivingClient> {
       if (_routeCoordinates.isNotEmpty) {
         _routeCoordinates = _trimPolylineToDriverPosition(
           _routeCoordinates,
-          _driverLocation!,
+          carPos,
         );
       }
 
       // Check if driver deviated from route - re-fetch if needed
       if (_routeCoordinates.isEmpty ||
-          _isDriverOffRoute(_routeCoordinates, _driverLocation!)) {
+          _isDriverOffRoute(_routeCoordinates, carPos)) {
         _throttledRefetchRoute(
           _rideData?['pickupCoordinates'] as LatLng?,
           isPickup: true,
@@ -777,13 +959,13 @@ class _ArrivingClientState extends State<ArrivingClient> {
       if (_driverToDropCoordinates.isNotEmpty) {
         _driverToDropCoordinates = _trimPolylineToDriverPosition(
           _driverToDropCoordinates,
-          _driverLocation!,
+          carPos,
         );
       }
 
       // Check if driver deviated from route - re-fetch if needed
       if (_driverToDropCoordinates.isEmpty ||
-          _isDriverOffRoute(_driverToDropCoordinates, _driverLocation!)) {
+          _isDriverOffRoute(_driverToDropCoordinates, carPos)) {
         _throttledRefetchRoute(
           _rideData?['dropoffCoordinates'] as LatLng?,
           isPickup: false,
@@ -792,15 +974,8 @@ class _ArrivingClientState extends State<ArrivingClient> {
     }
 
     _updatePolylines();
-
-    // Follow driver on map after initial fit
-    if (_initialFitDone && _mapController != null) {
-      try {
-        _mapController!.animateCamera(CameraUpdate.newLatLng(_driverLocation!));
-      } catch (e) {
-        print('❌ Error animating camera: $e');
-      }
-    }
+    // Camera follow is handled once per GPS update in _animateMarkerTo,
+    // NOT on every 16ms animation frame — avoids overriding the bounds fit.
   }
 
   /// Trim polyline to the driver's current position by removing passed points
@@ -927,19 +1102,22 @@ class _ArrivingClientState extends State<ArrivingClient> {
   void _setMarkers() {
     if (!_isScreenActive || !mounted) return;
 
+    // Use animated position for the on-map icon; fall back to raw GPS
+    final markerPos = _animatedDriverLocation ?? _driverLocation;
+
     final step = stepperController.activeStep.value;
     final newMarkers = <Marker>{};
     final newCircles = <Circle>{};
 
-    // Always show driver marker
-    if (_driverLocation != null && _bikeMarkerIcon != null) {
+    // Always show driver marker at animated (interpolated) position
+    if (markerPos != null && _bikeMarkerIcon != null) {
       newMarkers.add(
         Marker(
           markerId: const MarkerId("driver"),
-          position: _driverLocation!,
+          position: markerPos,
           icon: _bikeMarkerIcon!,
           anchor: const Offset(0.5, 0.5),
-          rotation: _driverHeading,
+          rotation: _animatedHeading, // smooth interpolated bearing
           flat: true,
           infoWindow: const InfoWindow(title: "Your Location"),
           zIndex: 2,
@@ -949,7 +1127,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
       newCircles.add(
         Circle(
           circleId: const CircleId('outer_shadow'),
-          center: _driverLocation!,
+          center: markerPos,
           radius: 140,
           fillColor: Colors.grey.withOpacity(0.25),
           strokeColor: Colors.transparent,
@@ -959,7 +1137,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
       newCircles.add(
         Circle(
           circleId: const CircleId('inner_green'),
-          center: _driverLocation!,
+          center: markerPos,
           radius: 60,
           fillColor: Colors.green.withOpacity(0.35),
           strokeColor: Colors.green,
@@ -1032,7 +1210,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
     final step = stepperController.activeStep.value;
     final List<LatLng> allPoints = [];
 
-    if (_driverLocation != null) allPoints.add(_driverLocation!);
+    // Use animated position if available, else raw GPS
+    final driverPos = _animatedDriverLocation ?? _driverLocation;
+    if (driverPos != null) allPoints.add(driverPos);
 
     if (step < 2) {
       if (_rideData?['pickupCoordinates'] != null)
@@ -1042,7 +1222,18 @@ class _ArrivingClientState extends State<ArrivingClient> {
         allPoints.add(_rideData!['dropoffCoordinates']);
     }
 
-    if (allPoints.isEmpty) return;
+    // Need at least 2 distinct points to make a valid bounds rectangle.
+    // If GPS isn't ready yet, retry after the first location fix arrives.
+    if (allPoints.length < 2) {
+      print('⏳ _fitMapToAllMarkers: waiting for GPS — only ${allPoints.length} point(s)');
+      return; // _setMarkers() will retry until _initialFitDone is true
+    }
+
+    // Safety: if both points are identical (driver AT pickup/drop), expand
+    // bounds slightly so Google Maps doesn't crash with a zero-size rect.
+    if (allPoints.first == allPoints.last) {
+      allPoints.add(LatLng(allPoints.first.latitude + 0.002, allPoints.first.longitude + 0.002));
+    }
 
     final bounds = _boundsFromLatLngList(allPoints);
 
@@ -1050,7 +1241,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
       if (_mapController != null && _isScreenActive && mounted) {
         try {
           _mapController!.animateCamera(
-            CameraUpdate.newLatLngBounds(bounds, 150),
+            CameraUpdate.newLatLngBounds(bounds, 100),
           );
           _initialFitDone = true;
         } catch (e) {

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
+import 'package:nzcu_driver/services/apiservices/socket_manager.dart';
 
 class NetworkController extends GetxController {
   // Reactive variable for online status
@@ -43,11 +44,27 @@ class NetworkController extends GetxController {
 
     // Additional check: connectivity_plus says "connected" even if verify fail
     // In a real app we might ping google.com, but for this specific issue
-    // just checking network interface is enough to unblock the "No Internet" UI
-
+    bool previousConnection = isOnline.value;
     isOnline.value = hasConnection;
     print(
       '🌐 NetworkController: Connection status changed. Online: $hasConnection ($results)',
     );
+
+    // If we just regained connection and driver is supposed to be online
+    if (!previousConnection && hasConnection) {
+      print('🌐 NetworkController: Internet restored. Forcing socket reconnect if on duty.');
+      
+      // Delay slightly to ensure network is fully stable
+      Future.delayed(const Duration(seconds: 2), () {
+        try {
+          // Import SocketManager if it isn't already, but we need to ensure it's available.
+          // Since it's a singleton, we can just call it if it's imported.
+          SocketManager().forceReconnect();
+        } catch (e) {
+          print('Error triggering reconnect: $e');
+        }
+      });
+    }
   }
 }
+
