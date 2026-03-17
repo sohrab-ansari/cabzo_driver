@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:nzcu_driver/controllers/chart_id_controller/chatid_controller.dart';
@@ -28,6 +28,7 @@ import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/services.dart';
 import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/get_city_by_location_controller.dart';
 
 class ArrivingClient extends StatefulWidget {
   final bool? typeCheck;
@@ -93,6 +94,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
   // Navigation listener subscription
   Worker? _navigationWorker;
   Worker? _stepperWorker;
+  Worker? _otpRestoreWorker;
 
   @override
   void initState() {
@@ -103,17 +105,14 @@ class _ArrivingClientState extends State<ArrivingClient> {
     image_get_from_shared();
 
     _isScreenActive = true;
-    AppLogger.d('🚗 ArrivingClient initState called');
+    AppLogger.d('[RIDE_FLOW] ArrivingClient initState → orderId=${widget.rideData?['orderId']} step=${stepperController.activeStep.value}');
 
-    // Set up navigation listener
     _setupNavigationListener();
     _setupStepperListener();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _initializeAll();
     });
-
-    AppLogger.d("hellooooo_stepss_screen  ${stepperController.activeStep}");
   }
 
   dynamic profileImage = "";
@@ -125,7 +124,6 @@ class _ArrivingClientState extends State<ArrivingClient> {
         profileImage = prefs.getString('active_ride_profile_image') ?? "";
       });
     }
-    AppLogger.d("profileImage>>>> : $profileImage");
   }
 
   void _setupNavigationListener() {
@@ -139,7 +137,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
           clearAll: orderUpdateController.clearAll,
         );
 
-        AppLogger.d("Navigation command: ${command}");
+        AppLogger.d('[RIDE_FLOW] ArrivingClient navigation → route=${command.route} clearAll=${command.clearAll}');
         _handleNavigation(command);
         orderUpdateController.clearNavigation();
       }
@@ -152,14 +150,25 @@ class _ArrivingClientState extends State<ArrivingClient> {
         _onStepChanged(step);
       }
     });
+
+    // Listen for OTP restore signal from socket reconnect handler.
+    // When the socket reconnects and sees status='arriving' + otpVerified=false,
+    // it signals us to re-open the OTP screen. We handle it here because we
+    // already have the fully extracted rideData and loaded profileImage.
+    _otpRestoreWorker = ever(stepperController.shouldRestoreOtp, (_) {
+      if (mounted && _isScreenActive && _isInitialized) {
+        AppLogger.d('🔔 OTP restore signal received — re-opening OTP screen');
+        _navigateToOtpScreen();
+      }
+    });
   }
 
   void myridedataprint() {
-    AppLogger.d("my_datat_print ${widget.rideData}");
+    AppLogger.d('[RIDE_FLOW] ArrivingClient rideData keys: ${widget.rideData?.keys.join(", ")}');
   }
 
   void _onStepChanged(int step) {
-    AppLogger.d('🔄 Stepper step changed to: $step');
+    AppLogger.d('[RIDE_FLOW] ArrivingClient step changed → $step (${stepperController.stepNames[step]})');
     if (step == 2) {
       // Trip started - switch to driver → drop polyline
       _routeCoordinates.clear();
@@ -191,15 +200,11 @@ class _ArrivingClientState extends State<ArrivingClient> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    AppLogger.d('🔄 ArrivingClient didChangeDependencies called');
-
     if (_isScreenActive) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!_isInitialized) {
-          AppLogger.d('📍 First time initialization');
           await _initializeAll();
         } else {
-          AppLogger.d('🔄 Refreshing screen on return');
           await _refreshOnReturn();
         }
       });
@@ -219,6 +224,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
     // Clean up workers
     _navigationWorker?.dispose();
     _stepperWorker?.dispose();
+    _otpRestoreWorker?.dispose();
 
     // Call super.dispose first
     super.dispose();
@@ -291,6 +297,15 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
       _isInitialized = true;
       AppLogger.d('✅ ArrivingClient initialized successfully');
+
+      // ─────────────────────────────────────────────────────────────────────
+      // AUTO OTP RECOVERY: If the driver already clicked "I've Arrived" in a
+      // previous session/screen, the socket status will already be "arriving"
+      // but the OTP screen may have been dismissed (e.g. app was minimized).
+      // Since the driver cannot click "I've Arrived" again (socket already
+      // updated), we automatically re-show the OTP screen here.
+      // ─────────────────────────────────────────────────────────────────────
+      _checkAndRestoreOtpScreen();
     } catch (e) {
       AppLogger.d('❌ Error initializing: $e');
       if (mounted) {
@@ -298,6 +313,39 @@ class _ArrivingClientState extends State<ArrivingClient> {
           _locationError = true;
         });
       }
+    }
+  }
+
+  /// Checks if the OTP screen should be automatically shown based on ride data.
+  /// Called on first initialization after data extraction.
+  /// Handles COLD-START resume: the app was killed while on the OTP screen.
+  /// The SOCKET RECONNECT case is handled via `_otpRestoreWorker` (shouldRestoreOtp signal).
+  void _checkAndRestoreOtpScreen() {
+    // Use the already-extracted _rideData (normalized by _extractAndStoreRideData)
+    final orderStatus = (_rideData?['orderStatus'] ?? '')
+        .toString()
+        .toLowerCase()
+        .trim();
+    final isOtpVerified = _rideData?['otpVerified'] == true;
+
+    AppLogger.d(
+      '🔍 Cold-start OTP Check — status: $orderStatus | otpVerified: $isOtpVerified',
+    );
+
+    // Only auto-launch if:
+    // 1. The ride reports status='arriving'
+    // 2. OTP has not been verified yet
+    // 3. We are not already on the OTP screen (checked via mounted + _isScreenActive)
+    if (orderStatus == 'arriving' && !isOtpVerified) {
+      AppLogger.d(
+        '🔄 Cold-start: Status is "arriving" but OTP unverified — auto-launching OTP screen',
+      );
+      // Small delay ensures the map/UI is fully rendered before pushing OTP
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (mounted && _isScreenActive) {
+          _navigateToOtpScreen();
+        }
+      });
     }
   }
 
@@ -357,8 +405,6 @@ class _ArrivingClientState extends State<ArrivingClient> {
   }
 
   void _extractAndStoreRideData() {
-    AppLogger.d("📦 Ride Data Received: ${widget.rideData}");
-
     // Extract rider data - handle both nested 'rider' object and flat structure
     final riderData = widget.rideData?['rider'];
     final userId = widget.rideData?['userId'];
@@ -415,8 +461,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
     };
 
     _extractCoordinates();
-    AppLogger.d('✅ Ride data extracted successfully');
-    AppLogger.d('📋 Final extracted data: $_rideData');
+    AppLogger.d('[RIDE_FLOW] ArrivingClient ride data extracted → orderId=${_rideData?['orderId']}');
   }
 
   void _extractCoordinates() {
@@ -430,10 +475,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
           final lng = pickup['longitude']?.toDouble();
           if (lat != null && lng != null) {
             _rideData!['pickupCoordinates'] = LatLng(lat, lng);
-            AppLogger.d('📍 Pickup: from pickup.lat/lng: $lat, $lng');
-          }
-          // 2. Try map with GeoJSON 'coordinates' list
-          else if (pickup['coordinates'] != null) {
+          } else if (pickup['coordinates'] != null) {
             final coords = pickup['coordinates'];
             if (coords is List && coords.length >= 2) {
               final coord0 = coords[0]?.toDouble() ?? 0;
@@ -441,18 +483,8 @@ class _ArrivingClientState extends State<ArrivingClient> {
               final bool isLatLngFormat =
                   (coord0 >= 8 && coord0 <= 37) &&
                   (coord1 >= 68 && coord1 <= 97);
-
-              if (isLatLngFormat) {
-                _rideData!['pickupCoordinates'] = LatLng(coord0, coord1);
-                AppLogger.d(
-                  '📍 Pickup: [lat, lng] format from pickup.coordinates: $coord0, $coord1',
-                );
-              } else {
-                _rideData!['pickupCoordinates'] = LatLng(coord1, coord0);
-                AppLogger.d(
-                  '📍 Pickup: GeoJSON [lng, lat] from pickup.coordinates: $coord1, $coord0',
-                );
-              }
+              _rideData!['pickupCoordinates'] =
+                  isLatLngFormat ? LatLng(coord0, coord1) : LatLng(coord1, coord0);
             }
           }
         }
@@ -462,30 +494,18 @@ class _ArrivingClientState extends State<ArrivingClient> {
           widget.rideData?['startLocation'] != null) {
         final startLocation = widget.rideData!['startLocation'];
         final coords = startLocation['coordinates'];
-
         if (coords is List && coords.length >= 2) {
           final coord0 = coords[0]?.toDouble() ?? 0;
           final coord1 = coords[1]?.toDouble() ?? 0;
-
-          // Latitude for India: 8-37, Longitude for India: 68-97
           final bool isLatLngFormat =
               (coord0 >= 8 && coord0 <= 37) && (coord1 >= 68 && coord1 <= 97);
-
-          if (isLatLngFormat) {
-            _rideData!['pickupCoordinates'] = LatLng(coord0, coord1);
-            AppLogger.d('📍 Pickup: [lat, lng] format: $coord0, $coord1');
-          } else {
-            // GeoJSON format: [longitude, latitude]
-            _rideData!['pickupCoordinates'] = LatLng(coord1, coord0);
-            AppLogger.d('📍 Pickup: GeoJSON [lng, lat] format: $coord1, $coord0');
-          }
+          _rideData!['pickupCoordinates'] =
+              isLatLngFormat ? LatLng(coord0, coord1) : LatLng(coord1, coord0);
         } else if (coords is Map) {
-          // Safety net: coordinates stored as {latitude, longitude} Map
           final lat = coords['latitude']?.toDouble();
           final lng = coords['longitude']?.toDouble();
           if (lat != null && lng != null) {
             _rideData!['pickupCoordinates'] = LatLng(lat, lng);
-            AppLogger.d('📍 Pickup: coords Map format: $lat, $lng');
           }
         }
       }
@@ -496,15 +516,11 @@ class _ArrivingClientState extends State<ArrivingClient> {
         final destination =
             widget.rideData?['destination'] ?? widget.rideData?['dropoff'];
         if (destination is Map) {
-          // 1. Try Map with latitude/longitude keys
           final lat = destination['latitude']?.toDouble();
           final lng = destination['longitude']?.toDouble();
           if (lat != null && lng != null) {
             _rideData!['dropoffCoordinates'] = LatLng(lat, lng);
-            AppLogger.d('📍 Drop: from destination.lat/lng: $lat, $lng');
-          }
-          // 2. Try map with GeoJSON 'coordinates' list
-          else if (destination['coordinates'] != null) {
+          } else if (destination['coordinates'] != null) {
             final coords = destination['coordinates'];
             if (coords is List && coords.length >= 2) {
               final coord0 = coords[0]?.toDouble() ?? 0;
@@ -512,18 +528,8 @@ class _ArrivingClientState extends State<ArrivingClient> {
               final bool isLatLngFormat =
                   (coord0 >= 8 && coord0 <= 37) &&
                   (coord1 >= 68 && coord1 <= 97);
-
-              if (isLatLngFormat) {
-                _rideData!['dropoffCoordinates'] = LatLng(coord0, coord1);
-                AppLogger.d(
-                  '📍 Drop: [lat, lng] format from destination.coordinates: $coord0, $coord1',
-                );
-              } else {
-                _rideData!['dropoffCoordinates'] = LatLng(coord1, coord0);
-                AppLogger.d(
-                  '📍 Drop: GeoJSON [lng, lat] from destination.coordinates: $coord1, $coord0',
-                );
-              }
+              _rideData!['dropoffCoordinates'] =
+                  isLatLngFormat ? LatLng(coord0, coord1) : LatLng(coord1, coord0);
             }
           }
         }
@@ -533,46 +539,28 @@ class _ArrivingClientState extends State<ArrivingClient> {
           widget.rideData?['endLocation'] != null) {
         final endLocation = widget.rideData!['endLocation'];
         final coords = endLocation['coordinates'];
-
         if (coords is List && coords.length >= 2) {
           final coord0 = coords[0]?.toDouble() ?? 0;
           final coord1 = coords[1]?.toDouble() ?? 0;
-
           final bool isLatLngFormat =
               (coord0 >= 8 && coord0 <= 37) && (coord1 >= 68 && coord1 <= 97);
-
-          if (isLatLngFormat) {
-            _rideData!['dropoffCoordinates'] = LatLng(coord0, coord1);
-            AppLogger.d('📍 Drop: [lat, lng] format: $coord0, $coord1');
-          } else {
-            // GeoJSON format: [longitude, latitude]
-            _rideData!['dropoffCoordinates'] = LatLng(coord1, coord0);
-            AppLogger.d('📍 Drop: GeoJSON [lng, lat] format: $coord1, $coord0');
-          }
+          _rideData!['dropoffCoordinates'] =
+              isLatLngFormat ? LatLng(coord0, coord1) : LatLng(coord1, coord0);
         } else if (coords is Map) {
-          // Safety net: coordinates stored as {latitude, longitude} Map
           final lat = coords['latitude']?.toDouble();
           final lng = coords['longitude']?.toDouble();
           if (lat != null && lng != null) {
             _rideData!['dropoffCoordinates'] = LatLng(lat, lng);
-            AppLogger.d('📍 Drop: coords Map format: $lat, $lng');
           }
         }
       }
 
-      // ── Fallbacks (logged as warnings) ────────────────────────────────────
       if (_rideData!['pickupCoordinates'] == null) {
-        AppLogger.d('⚠️ Pickup coordinates not found in any field — using fallback');
         _rideData!['pickupCoordinates'] = const LatLng(23.2599, 77.4126);
       }
-
       if (_rideData!['dropoffCoordinates'] == null) {
-        AppLogger.d('⚠️ Drop coordinates not found in any field — using fallback');
         _rideData!['dropoffCoordinates'] = const LatLng(18.5204, 73.8567);
       }
-
-      AppLogger.d('📍 Pickup coordinates: ${_rideData!['pickupCoordinates']}');
-      AppLogger.d('📍 Drop coordinates: ${_rideData!['dropoffCoordinates']}');
     } catch (e) {
       AppLogger.d("❌ Error extracting coordinates: $e");
       _rideData!['pickupCoordinates'] = const LatLng(23.2599, 77.4126);
@@ -696,6 +684,11 @@ class _ArrivingClientState extends State<ArrivingClient> {
         Geolocator.getPositionStream(locationSettings: locationSettings).listen(
           (Position position) {
             if (!_isScreenActive || !mounted) return;
+            
+            // Fetch city polygon
+            Get.find<GetCityByLocationController>().getCityByLocation(
+                lat: position.latitude.toString(),
+                lng: position.longitude.toString());
 
             final newLocation = LatLng(position.latitude, position.longitude);
 
@@ -1430,7 +1423,8 @@ class _ArrivingClientState extends State<ArrivingClient> {
         ? _driverLocation!
         : (_rideData?['pickupCoordinates'] ?? const LatLng(23.2599, 77.4126));
 
-    return GoogleMap(
+    return Obx(() => GoogleMap(
+      polygons: Get.find<GetCityByLocationController>().cityPolygons.toSet(),
       onMapCreated: (GoogleMapController controller) {
         _mapController = controller;
         AppLogger.d('✅ Google Map created');
@@ -1455,7 +1449,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
       compassEnabled: true,
       rotateGesturesEnabled: true,
       tiltGesturesEnabled: false,
-    );
+    ));
   }
 
   Future<void> _navigateToOtpScreen() async {
@@ -1500,25 +1494,28 @@ class _ArrivingClientState extends State<ArrivingClient> {
   
 
   void _handleNavigation(NavigationCommand command) {
-    AppLogger.d("Navigation command: ${command}");
     if (!mounted || !_isScreenActive) return;
 
     switch (command.route) {
       case 'bottom_nav':
+        AppLogger.d('[RIDE_FLOW] ArrivingClient → bottom_nav (cancel/complete)');
         Get.offAll(() => BottomnavmainScreen(isOnDuty: true));
         break;
       case 'arriving_screen':
+        AppLogger.d('[RIDE_FLOW] ArrivingClient → OTP screen');
         _navigateToOtpScreen();
         break;
       case 'payment_screen':
+        AppLogger.d('[RIDE_FLOW] ArrivingClient → payment_screen');
         Get.offAll(() => ReceivePaymentModes(
               rideData: command.arguments ?? widget.rideData,
             ));
         break;
-      case 'arriving_client': // Already on arriving client screen
+      case 'arriving_client':
+      case '':
         break;
       default:
-        AppLogger.d('⚠️ Unknown navigation route: ${command.route}');
+        AppLogger.d('[RIDE_FLOW] ArrivingClient unknown route: ${command.route}');
         break;
     }
   }
@@ -2026,6 +2023,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
           buttonId: 'arrive_button',
           onTap: () {
             if (orderId != null && orderId.isNotEmpty) {
+              AppLogger.d('[RIDE_FLOW] ArrivingClient "I\'ve Arrived" tapped → orderId=$orderId');
               orderUpdateController.updateOrder(
                 context: context,
                 buttonId: 'arrive_button',
@@ -2042,7 +2040,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
           },
         );
 
-      case 1: // "Start Trip" - This should trigger OTP screen
+      case 1: // "Start Trip"
         return _buildLoadingButton(
           text: "Start Trip",
           isLoading: isStartTripLoading,
@@ -2051,10 +2049,11 @@ class _ArrivingClientState extends State<ArrivingClient> {
           buttonId: 'start_trip_button',
           onTap: () {
             if (orderId != null && orderId.isNotEmpty) {
+              AppLogger.d('[RIDE_FLOW] ArrivingClient "Start Trip" tapped → orderId=$orderId');
               orderUpdateController.updateOrder(
                 context: context,
                 buttonId: 'start_trip_button',
-                orderStatus: "Progress", // This should trigger OTP navigation
+                orderStatus: "Progress",
                 orderId: orderId,
                 rideData: _rideData,
                 stepControl: "Progress",
@@ -2076,6 +2075,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
           buttonId: 'complete_button',
           onTap: () {
             if (orderId != null && orderId.isNotEmpty) {
+              AppLogger.d('[RIDE_FLOW] ArrivingClient "Complete" tapped → orderId=$orderId');
               orderUpdateController.updateOrder(
                 context: context,
                 buttonId: 'complete_button',
@@ -2106,8 +2106,8 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
   void _handleCancelOrder() {
     final orderId = _rideData?['orderId'];
-
     if (orderId != null && orderId.isNotEmpty) {
+      AppLogger.d('[RIDE_FLOW] ArrivingClient Cancel tapped → orderId=$orderId');
       orderUpdateController.updateOrder(
         context: context,
         buttonId: 'cancel_button',

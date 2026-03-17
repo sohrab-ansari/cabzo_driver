@@ -118,15 +118,16 @@ class SocketForegroundService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        Log.i(TAG, "Service created")
+        Log.i(TAG, "[LIFECYCLE] onCreate() - Service created")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.getStringExtra(EXTRA_ACTION)
+        Log.i(TAG, "[LIFECYCLE] onStartCommand() - action: $action, flags: $flags, startId: $startId")
 
         when (action) {
             ACTION_STOP -> {
-                Log.i(TAG, "Stopping service")
+                Log.i(TAG, "[LIFECYCLE] onStartCommand - Stopping service via ACTION_STOP")
                 stopSelf()
                 return START_NOT_STICKY
             }
@@ -252,7 +253,7 @@ class SocketForegroundService : Service() {
     }
 
     override fun onDestroy() {
-        Log.i(TAG, "Service destroyed")
+        Log.i(TAG, "[LIFECYCLE] onDestroy() - Service destroyed")
         onlineTimer?.cancel()
         locationEmitTimer?.cancel()
         stopLocationUpdates()
@@ -261,11 +262,14 @@ class SocketForegroundService : Service() {
         super.onDestroy()
     }
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    override fun onBind(intent: Intent?): IBinder? {
+        Log.i(TAG, "[LIFECYCLE] onBind() - action: ${intent?.action}")
+        return null
+    }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-        Log.w(TAG, "⚠️ App killed (onTaskRemoved) — connecting Kotlin socket as takeover")
+        Log.w(TAG, "[LIFECYCLE] onTaskRemoved() - ⚠️ App killed (onTaskRemoved) — connecting Kotlin socket as takeover")
         appState = "Killed"
 
         // Update notification to show killed state
@@ -315,7 +319,7 @@ class SocketForegroundService : Service() {
     // ──────────────────────────────────────────────────────────
 
     fun setAppState(state: String) {
-        Log.i(TAG, "App state changed: $appState -> $state")
+        Log.i(TAG, "[STATE] App state changed: $appState -> $state")
         val oldState = appState
         appState = state
         // Only update the notification if we are actually running as foreground (driver is online).
@@ -377,7 +381,7 @@ class SocketForegroundService : Service() {
             socket = IO.socket(URI.create(SOCKET_URL), options)
 
             socket?.on(Socket.EVENT_CONNECT) {
-                Log.i(TAG, "✅ Socket connected (id=${socket?.id()})")
+                Log.i(TAG, "[SOCKET] ✅ Socket connected (id=${socket?.id()})")
                 isSocketConnected = true
                 emitOnline()
             }
@@ -470,7 +474,7 @@ class SocketForegroundService : Service() {
             }
 
             socket?.on("driver:online_success") { args ->
-                Log.i(TAG, "✅ Driver online confirmed by server")
+                // Log.v(TAG, "✅ Driver online confirmed by server") // Commented out, runs every 5s with emitOnline
             }
 
             // ── Chat Events ────────────────────────────────────
@@ -548,7 +552,7 @@ class SocketForegroundService : Service() {
 
         try {
             socket?.emit("user:online", payload)
-            Log.d(TAG, "📡 Emitted user:online (${currentLat}, ${currentLng})")
+            // Log.d(TAG, "📡 Emitted user:online (${currentLat}, ${currentLng})") // Commented out to reduce spam
         } catch (e: Exception) {
             Log.e(TAG, "Error emitting user:online: ${e.message}")
         }
@@ -853,7 +857,7 @@ class SocketForegroundService : Service() {
                 result.lastLocation?.let { location ->
                     currentLat = location.latitude
                     currentLng = location.longitude
-                    Log.d(TAG, "📍 Location: ($currentLat, $currentLng)")
+                    // Log.v(TAG, "📍 Location: ($currentLat, $currentLng)") // Commented out to reduce spam
                 }
             }
         }

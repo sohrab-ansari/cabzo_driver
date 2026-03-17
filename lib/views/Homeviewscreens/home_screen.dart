@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 import 'package:nzcu_driver/controllers/home_controllers/driver_toggle_duty_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
@@ -26,6 +26,7 @@ import 'package:nzcu_driver/services/apiservices/socket_manager.dart'
 import 'package:nzcu_driver/services/background_service.dart';
 import 'package:nzcu_driver/services/overlay_service.dart';
 import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/get_city_by_location_controller.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool? isOnDuty;
@@ -131,14 +132,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
       profileimage = prefs.getString("driver_image");
     });
-    AppLogger.d("Driver Name from SharedPreferences: $driverName");
   }
 
   void handleonline() {
-    AppLogger.d(
-      "online status in home screen is ::::::::::::::::::::::::::: ${widget.isOnDuty}, SocketManager is: ${socketManager.isOnDuty}",
-    );
-
     // If SocketManager already has a connected/restored state, we should NOT
     // overwrite it with `widget.isOnDuty` because `widget.isOnDuty` might be
     // stale from BottomNavMainScreen when switching tabs.
@@ -148,17 +144,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       socketManager.isOnDuty = true;
     } else if (widget.isOnDuty == false && socketManager.isOnDuty) {
       // Avoid forcing offline if user manually went online and switched tabs
-      // The socketManager is the single source of truth for online status.
-      AppLogger.d(
-        "ℹ️ Ignoring widget.isOnDuty=false to preserve true SocketManager state",
-      );
     }
 
     if (socketManager.isOnDuty) {
-      AppLogger.d("✅ Driver is ONLINE");
       _updateDriverMarker();
-    } else {
-      AppLogger.d("🔴 Driver is OFFLINE");
     }
   }
 
@@ -196,16 +185,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _setupSocketCallbacks() {
     socketManager.onNewRide = (rideData) {
-      AppLogger.d("hellooooooooooooooooooo>>>>>>>>>>>>>>>>  11111111111111111111");
-
+      AppLogger.d('[RIDE_FLOW] HomeScreen onNewRide → orderId=${rideData['orderId'] ?? rideData['_id']}');
       _processRideRequest(rideData);
     };
 
     socketManager.onRideConfirmed = (rideData) {
+      AppLogger.d('[RIDE_FLOW] HomeScreen onRideConfirmed → navigating to ArrivingClient');
       _navigateToRideScreen(rideData);
     };
 
     socketManager.onRideCancelled = (data) {
+      AppLogger.d('[RIDE_FLOW] HomeScreen onRideCancelled');
       CustomToast.showError('Ride cancelled');
       _clearPendingRideRequest();
     };
@@ -244,6 +234,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         // Update socket manager with new location
         socketManager.updateLocation(position.latitude, position.longitude);
 
+        // Fetch city polygon
+        Get.find<GetCityByLocationController>().getCityByLocation(
+          lat: position.latitude.toString(),
+          lng: position.longitude.toString(),
+        );
+
         // Update marker on map
         if (mounted && socketManager.isOnDuty) {
           _updateMarkerOnly(
@@ -251,13 +247,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             position.accuracy,
           );
         }
-
-        AppLogger.d(
-          '📍 Location updated: ${position.latitude}, ${position.longitude}',
-        );
       },
       onError: (error) {
-        AppLogger.d('⚠️ Location error: $error');
+        AppLogger.d('⚠️ HomeScreen location error: $error');
       },
     );
   }
@@ -1009,37 +1001,42 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget _buildOnlineScreen(double w, isFirstLaunc) {
     return Scaffold(
       body: SafeArea(
+        top: false,
         child: Stack(
           children: [
             /// 1️⃣ Google Map (BOTTOM)
-            GoogleMap(
-              initialCameraPosition: _initialCameraPosition,
-              myLocationEnabled: false,
-              myLocationButtonEnabled: false,
-              zoomControlsEnabled: false,
-              onMapCreated: (controller) {
-                _mapController = controller;
+            Obx(
+              () => GoogleMap(
+                initialCameraPosition: _initialCameraPosition,
+                myLocationEnabled: false,
+                myLocationButtonEnabled: false,
+                zoomControlsEnabled: false,
+                polygons: Get.find<GetCityByLocationController>().cityPolygons
+                    .toSet(),
+                onMapCreated: (controller) {
+                  _mapController = controller;
 
-                // Immediately move camera if we have location
-                if (socketManager.currentLatitude != 0.0 &&
-                    socketManager.currentLongitude != 0.0) {
-                  controller.moveCamera(
-                    CameraUpdate.newLatLng(
-                      LatLng(
-                        socketManager.currentLatitude - 0.0015,
-                        socketManager.currentLongitude,
+                  // Immediately move camera if we have location
+                  if (socketManager.currentLatitude != 0.0 &&
+                      socketManager.currentLongitude != 0.0) {
+                    controller.moveCamera(
+                      CameraUpdate.newLatLng(
+                        LatLng(
+                          socketManager.currentLatitude - 0.0015,
+                          socketManager.currentLongitude,
+                        ),
                       ),
-                    ),
-                  );
-                }
-              },
-              markers: markers,
-              circles: circles,
+                    );
+                  }
+                },
+                markers: markers,
+                circles: circles,
+              ),
             ),
 
             /// 2️⃣ Book Ride Button (Top Right)
             Positioned(
-              top: 16,
+              top: 32,
               right: 16,
               child: ElevatedButton(
                 onPressed: () {

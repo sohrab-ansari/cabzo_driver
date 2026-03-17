@@ -1,4 +1,4 @@
-﻿import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
+import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
@@ -24,6 +24,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/get_city_by_location_controller.dart';
 
 class RideRequestScreen extends StatefulWidget {
   final Map<String, dynamic> rideData;
@@ -39,9 +40,10 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   static const String GOOGLE_API_KEY =
       'AIzaSyCtM1jo8qzhEn2XZ8SVCoboULcondCjZio';
 
-  // Timer - 10 seconds
-  static const int TOTAL_TIME = 10;
-  int _timer = TOTAL_TIME;
+  // Timer - from ride request timeout (seconds), fallback 10
+  static const int _defaultTimeoutSeconds = 10;
+  int _totalTimerSeconds = _defaultTimeoutSeconds;
+  int _timer = _defaultTimeoutSeconds;
   double _progress = 1.0;
   Timer? _countdownTimer;
 
@@ -160,9 +162,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
   Future<void> _initializeAll() async {
     if (mounted) setState(() => _isLoading = true);
+    AppLogger.d('[RIDE_FLOW] RideRequestScreen init → orderId=${widget.rideData['orderId'] ?? widget.rideData['_id']}');
 
     try {
-      // Extract ride data FIRST
       _extractAndStoreRideData();
 
       // Load bike icon only
@@ -242,7 +244,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         if (mounted) {
           setState(() {
             _timer--;
-            _progress = _timer / TOTAL_TIME;
+            _progress = _totalTimerSeconds > 0 ? _timer / _totalTimerSeconds : 0;
           });
         }
       }
@@ -341,6 +343,24 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   void _extractAndStoreRideData() {
     AppLogger.d("my_rideeee_datatatt ${widget.rideData}");
     try {
+      // Timeout from ride request (seconds), clamp 5–120, default 10
+      int timeoutSec = _defaultTimeoutSeconds;
+      final rawTimeout = widget.rideData['timeout'];
+      if (rawTimeout != null) {
+        if (rawTimeout is int) {
+          timeoutSec = rawTimeout.clamp(5, 120);
+        } else if (rawTimeout is String) {
+          timeoutSec = int.tryParse(rawTimeout) ?? _defaultTimeoutSeconds;
+          timeoutSec = timeoutSec.clamp(5, 120);
+        } else if (rawTimeout is num) {
+          timeoutSec = rawTimeout.toInt().clamp(5, 120);
+        }
+      }
+      _totalTimerSeconds = timeoutSec;
+      _timer = timeoutSec;
+      _progress = 1.0;
+      if (mounted) setState(() {});
+
       // Store all data locally
       _rideData = {
         'orderId': widget.rideData['orderId']?.toString() ?? 'N/A',
@@ -365,6 +385,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         'status': 'pending',
         'isScheduled': widget.rideData['isScheduled'] ?? false,
         'scheduledStartTime': widget.rideData['scheduledStartTime'],
+        'timeout': timeoutSec,
       };
 
       // Also store in local variables for easy access
@@ -408,6 +429,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       AppLogger.d('📍 Drop: ${_dropAddress}');
     } catch (e) {
       AppLogger.d("❌ Error extracting ride data: $e");
+      _totalTimerSeconds = _defaultTimeoutSeconds;
+      _timer = _defaultTimeoutSeconds;
+      _progress = 1.0;
       // Set default values if extraction fails
       _rideData = {
         'orderId': 'N/A',
@@ -560,6 +584,11 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         Geolocator.getPositionStream(locationSettings: locationSettings).listen(
           (Position position) {
             if (!mounted) return;
+            
+            // Fetch city polygon
+            Get.find<GetCityByLocationController>().getCityByLocation(
+                lat: position.latitude.toString(),
+                lng: position.longitude.toString());
 
             setState(() {
               _driverLocation = LatLng(position.latitude, position.longitude);
@@ -584,21 +613,13 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         );
   }
 
-  /// SIMPLE MARKER SETUP FUNCTION
   void _setMarkers() {
     if (!mounted) return;
 
     final newMarkers = <Marker>{};
     final newCircles = <Circle>{};
 
-    AppLogger.d('📍 Setting simple markers...');
-    AppLogger.d('📍 Driver location: $_driverLocation');
-    AppLogger.d('📍 Pickup coordinates: ${_rideData?['pickupCoordinates']}');
-    AppLogger.d('📍 Drop coordinates: ${_rideData?['dropoffCoordinates']}');
-
-    // ✅ 1. Driver marker (blue)
     if (_driverLocation != null) {
-      AppLogger.d('📍 Adding driver marker at: $_driverLocation');
       newMarkers.add(
         Marker(
           markerId: const MarkerId("driver"),
@@ -640,9 +661,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       );
     }
 
-    // ✅ 2. Pickup marker (simple blue marker)
     if (_rideData?['pickupCoordinates'] != null) {
-      AppLogger.d('📍 Adding pickup marker at: ${_rideData!['pickupCoordinates']}');
       newMarkers.add(
         Marker(
           markerId: const MarkerId("pickup"),
@@ -669,9 +688,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       );
     }
 
-    // ✅ 3. Drop marker (simple red marker)
     if (_rideData?['dropoffCoordinates'] != null) {
-      AppLogger.d('📍 Adding drop marker at: ${_rideData!['dropoffCoordinates']}');
       newMarkers.add(
         Marker(
           markerId: const MarkerId("drop"),
@@ -692,19 +709,11 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         circles = newCircles;
       });
     }
-
-    AppLogger.d('✅ Simple markers set: ${newMarkers.length} markers');
-
-    // Fit map to show all markers
     _fitMapToAllMarkers();
   }
 
-  /// Fit map to show all markers
   void _fitMapToAllMarkers() {
-    if (_mapController == null) {
-      AppLogger.d('⚠️ Map controller not ready yet');
-      return;
-    }
+    if (_mapController == null) return;
 
     final List<LatLng> allPoints = [];
 
@@ -714,10 +723,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     if (_rideData?['dropoffCoordinates'] != null)
       allPoints.add(_rideData!['dropoffCoordinates']);
 
-    if (allPoints.isEmpty) {
-      AppLogger.d('⚠️ No points to fit map to');
-      return;
-    }
+    if (allPoints.isEmpty) return;
 
     final bounds = _boundsFromLatLngList(allPoints);
 
@@ -727,9 +733,8 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
           _mapController!.animateCamera(
             CameraUpdate.newLatLngBounds(bounds, 150),
           );
-          AppLogger.d('✅ Map fitted to show all markers');
         } catch (e) {
-          AppLogger.d('❌ Error animating camera: $e');
+          AppLogger.d('❌ RideRequestScreen map fit error: $e');
         }
       }
     });
@@ -934,9 +939,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     //   ),
     // );
 
+    AppLogger.d('[RIDE_FLOW] RideRequestScreen auto-decline (timeout) → home');
     CustomToast.showError('Ride auto-cancelled (timeout)');
 
-    // Navigate to BottomnavmainScreen after 1 second
     await Future.delayed(Duration(seconds: 1));
     if (mounted) {
       Get.offAll(() => BottomnavmainScreen(isOnDuty: true));
@@ -947,15 +952,13 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
   void _handleNavigation(NavigationCommand command) {
     if (!mounted) return;
+    AppLogger.d('[RIDE_FLOW] RideRequestScreen navigation → route=${command.route}');
 
     switch (command.route) {
       case 'bottom_nav':
-        // Go back to home screen on cancellation
-        // Get.back();
         Get.offAll(() => BottomnavmainScreen(isOnDuty: true));
         break;
       case 'arriving_screen':
-        // Navigate to ArrivingClient screen
         _hasAccepted = true;
         _isTimerRunning = false;
         _autoCancelTimer?.cancel();
@@ -975,9 +978,6 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
-
-    AppLogger.d("helloooooo_secduleeddd_ride_hererrer2 ${_rideData?['isScheduled']}");
-
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -1107,7 +1107,8 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         ? _driverLocation!
         : (_rideData!['pickupCoordinates'] ?? LatLng(23.2599, 77.4126));
 
-    return GoogleMap(
+    return Obx(() => GoogleMap(
+      polygons: Get.find<GetCityByLocationController>().cityPolygons.toSet(),
       onMapCreated: (GoogleMapController controller) {
         _mapController = controller;
         AppLogger.d('✅ Google Map created');
@@ -1125,7 +1126,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       myLocationEnabled: false,
       myLocationButtonEnabled: false,
       zoomControlsEnabled: false,
-    );
+    ));
   }
 
   Widget _buildWarningBadge() {
@@ -1554,11 +1555,11 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
   Future<void> _handleCustomDecline(String reason) async {
     if (_hasAccepted || _hasDeclined) return;
+    AppLogger.d('[RIDE_FLOW] RideRequestScreen Decline with reason → orderId=$_orderId reason=$reason');
 
     if (mounted) setState(() => _isDeclining = true);
 
     try {
-      // Stop notification sound
       NotificationService.instance.cancelRideNotification();
 
       // Use the new updateOrder method for custom decline
@@ -1861,7 +1862,12 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   }
 
   Future<void> _acceptRide() async {
-    AppLogger.d("myyy_tapp33333");
+    if (_hasAccepted || _hasCancelled) return;
+    AppLogger.d('[RIDE_FLOW] RideRequestScreen Accept tapped → orderId=$_orderId');
+    
+    if (mounted) {
+      setState(() => _hasAccepted = true);
+    }
 
     if (_orderId == null) {
       AppLogger.d("❌ Order ID is null, cannot accept ride");
@@ -1871,6 +1877,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
           backgroundColor: Colors.red,
         ),
       );
+      if (mounted) setState(() => _hasAccepted = false);
       return;
     }
 
@@ -1892,15 +1899,21 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
   Future<void> _cancelRide() async {
     if (_hasCancelled || _hasAccepted) return;
+    AppLogger.d('[RIDE_FLOW] RideRequestScreen Decline (Cancel) tapped → orderId=$_orderId');
+
+    if (mounted) {
+      setState(() => _hasCancelled = true);
+    }
 
     if (_orderId == null) {
-      AppLogger.d("❌ Order ID is null, cannot cancel ride");
+      AppLogger.d('[RIDE_FLOW] Decline failed: Order ID is null');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Cannot cancel ride: Order ID not available'),
           backgroundColor: Colors.red,
         ),
       );
+      if (mounted) setState(() => _hasCancelled = false);
       return;
     }
 

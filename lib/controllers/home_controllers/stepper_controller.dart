@@ -154,11 +154,14 @@
 
 // controllers/home_controllers/stepper_controller.dart
 import 'package:get/get.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class StepperController extends GetxController {
   RxInt activeStep = 0.obs;
-  
-  // Define step names for clarity
+
+  // Signal flag: when true, ArrivingClient should re-open the OTP screen.
+  RxBool shouldRestoreOtp = false.obs;
+
   final List<String> stepNames = [
     'Going to Pickup',
     'Arrived at Pickup',
@@ -169,12 +172,14 @@ class StepperController extends GetxController {
   void reachStep(int index) {
     if (index >= 0 && index <= 3) {
       activeStep.value = index;
+      AppLogger.d('[RIDE_FLOW] Stepper reachStep($index) → ${stepNames[index]}');
     }
   }
 
   void nextStep() {
     if (activeStep.value < 3) {
       activeStep.value++;
+      AppLogger.d('[RIDE_FLOW] Stepper nextStep → ${activeStep.value} (${stepNames[activeStep.value]})');
     }
   }
 
@@ -186,8 +191,15 @@ class StepperController extends GetxController {
 
   void resetSteps() {
     activeStep.value = 0;
+    AppLogger.d('[RIDE_FLOW] Stepper resetSteps → 0');
   }
-  
+
+  /// Signals ArrivingClient to restore the OTP screen.
+  /// Toggles the flag so `ever()` fires even on repeated calls.
+  void signalOtpRestore() {
+    shouldRestoreOtp.value = !shouldRestoreOtp.value;
+  }
+
   String get currentStepName => stepNames[activeStep.value];
 }
 

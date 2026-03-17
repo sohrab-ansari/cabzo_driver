@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
@@ -81,8 +81,8 @@ class OrderUpdateController extends GetxController {
   }) {
     _updateResponse.value = response;
 
-    // Handle stepper updates
     if (stepControl == "Progress") {
+      AppLogger.d('[RIDE_FLOW] Stepper nextStep (Progress)');
       stepperController.nextStep();
     }
 
@@ -109,21 +109,28 @@ class OrderUpdateController extends GetxController {
     String? orderStatus,
     Map<String, dynamic>? rideData,
   ) {
+    AppLogger.d('[RIDE_FLOW] Order update success → navigating to: ${orderStatus?.toLowerCase() ?? "none"}');
     switch (orderStatus?.toLowerCase()) {
       case 'cancelled':
         navigationRoute$.value = 'bottom_nav';
         clearAll$.value = true;
+        shouldNavigate$.value = false; // toggle
         shouldNavigate$.value = true;
         break;
       case 'accepted':
       case 'arriving':
         navigationRoute$.value = 'arriving_screen';
         navigationArgs$.value = rideData;
+        shouldNavigate$.value = false; // toggle
         shouldNavigate$.value = true;
         break;
       case 'progress': // Add this case for starting trip
-        navigationRoute$.value = 'otp_screen'; // Changed to otp_screen
-        navigationArgs$.value = rideData;
+        // Fix for "Start Trip" duplicate navigation: We're already on the Accepted Screen
+        // We shouldn't navigate to OTP again. We just clear any pending nav commands.
+        navigationRoute$.value = '';
+        navigationArgs$.value = null;
+        // Toggle shouldNavigate$ to force it to run GetX listeners
+        shouldNavigate$.value = false;
         shouldNavigate$.value = true;
         break;
       case 'completed':
@@ -149,6 +156,7 @@ class OrderUpdateController extends GetxController {
         }
         navigationRoute$.value = 'payment_screen';
         clearAll$.value = true;
+        shouldNavigate$.value = false; // toggle
         shouldNavigate$.value = true;
         break;
       default:
@@ -184,7 +192,7 @@ class OrderUpdateController extends GetxController {
   // }
 
   void _handleError(String error, String buttonId, BuildContext context) {
-    AppLogger.d('Order update error on button $buttonId: $error');
+    AppLogger.d('[RIDE_FLOW] Order update failed buttonId=$buttonId: $error');
   }
 
   void clearNavigation() {

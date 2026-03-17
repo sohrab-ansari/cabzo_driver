@@ -1,15 +1,18 @@
-﻿import 'package:nzcu_driver/modals/home_modals/get_city_by_location_response.dart';
-import 'package:nzcu_driver/modals/profile_modals/faq_category_responses.dart';
+import 'package:nzcu_driver/modals/home_modals/get_city_by_location_response.dart';
 import 'package:nzcu_driver/services/apiservices/profile_api_services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class GetCityByLocationController extends GetxController {
   // Observable response
-  Rx<GetCityByLocationResponse?> faqsCategoriesResponse =
+  Rx<GetCityByLocationResponse?> cityByLocationResponse =
       Rx<GetCityByLocationResponse?>(null);
+
+  // Observable polygons for maps
+  RxSet<Polygon> cityPolygons = <Polygon>{}.obs;
 
   // Loading and error states
   RxBool isLoading = false.obs;
@@ -20,11 +23,11 @@ class GetCityByLocationController extends GetxController {
     super.onInit();
   }
 
-  Future<void> faqscategorimethod({
+  Future<void> getCityByLocation({
     required String lat,
     required String lng,
   }) async {
-    AppLogger.d("faqscategorimethod called");
+    AppLogger.d("getCityByLocation called");
 
     // Set loading state
     isLoading.value = true;
@@ -35,23 +38,42 @@ class GetCityByLocationController extends GetxController {
       final GetCityByLocationResponse res =
           await ProfileApiServices.get_cit_by_loc_method(lat: lat, lng: lng);
 
-      AppLogger.d("API Response Success: ${res.success}");
-      AppLogger.d("API Response Message: ${res.message}");
+      AppLogger.d("API Response Success: \${res.success}");
+      AppLogger.d("API Response Message: \${res.message}");
 
       if (res.success == true) {
-        AppLogger.d("FAQs categories fetched successfully");
+        AppLogger.d("City location fetched successfully");
 
         // Assign the response to the observable
-        faqsCategoriesResponse.value = res;
+        cityByLocationResponse.value = res;
+
+        // Create polygon
+        final coordinates = res.data?.location?.coordinates;
+        if (coordinates != null && coordinates.isNotEmpty) {
+          final polygon = Polygon(
+            polygonId: const PolygonId('city_boundary'),
+            points: coordinates,
+            strokeColor: Colors.black,
+            strokeWidth: 3,
+            fillColor: Colors.transparent,
+          );
+          cityPolygons.assignAll({polygon});
+          AppLogger.d("City boundary polygon created and added to observable set.");
+        } else {
+           cityPolygons.clear();
+        }
+
       } else {
-        errorMessage.value = res.message ?? 'Failed to fetch FAQs categories';
-        AppLogger.d("Error: ${errorMessage.value}");
+        errorMessage.value = res.message ?? 'Failed to fetch city location';
+        AppLogger.d("Error: \${errorMessage.value}");
+        cityPolygons.clear();
 
         CustomToast.showError(errorMessage.value);
       }
     } catch (e) {
-      errorMessage.value = 'An error occurred: $e';
-      AppLogger.d("Exception in faqscategorimethod: $e");
+      errorMessage.value = 'An error occurred: \$e';
+      AppLogger.d("Exception in getCityByLocation: \$e");
+      cityPolygons.clear();
 
       CustomToast.showError(errorMessage.value);
     } finally {
@@ -62,7 +84,8 @@ class GetCityByLocationController extends GetxController {
 
   // Method to clear data
   void clearData() {
-    faqsCategoriesResponse.value = null;
+    cityByLocationResponse.value = null;
+    cityPolygons.clear();
     errorMessage.value = '';
   }
 }
