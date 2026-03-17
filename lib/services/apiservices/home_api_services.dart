@@ -285,7 +285,7 @@ class HomeApiServices {
 
       final Map<String, dynamic> decodedJson = jsonDecode(response.body);
 
-      CustomToast.showSuccess(decodedJson['message'] ?? "Something went wrong");
+      // CustomToast.showSuccess(decodedJson['message'] ?? "Something went wrong");
 
       if (response.statusCode == 200) {
         final decodedJson = jsonDecode(response.body);

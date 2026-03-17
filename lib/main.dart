@@ -14,6 +14,7 @@ import 'package:nzcu_driver/ui/screens/overlay_bubble.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/controllers/chart_id_controller/chat_notification_controller.dart';
 import 'package:nzcu_driver/utilities/widgets/network_status_overlay.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/get_city_by_location_controller.dart';
 import 'package:nzcu_driver/utilities/widgets/location_guard.dart';
 import 'package:nzcu_driver/views/splash/splash_screen.dart';
 import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
@@ -100,6 +101,7 @@ void main() async {
 
   Get.put(NetworkController(), permanent: true);
   Get.put(ChatNotificationController(), permanent: true);
+  Get.put(GetCityByLocationController(), permanent: true);
   // ========================================================================
   // RUN THE APP
   // ========================================================================

@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:nzcu_driver/controllers/chart_id_controller/chatid_controller.dart';
@@ -28,6 +28,7 @@ import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/services.dart';
 import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/get_city_by_location_controller.dart';
 
 class ArrivingClient extends StatefulWidget {
   final bool? typeCheck;
@@ -93,6 +94,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
   // Navigation listener subscription
   Worker? _navigationWorker;
   Worker? _stepperWorker;
+  Worker? _otpRestoreWorker;
 
   @override
   void initState() {
@@ -150,6 +152,17 @@ class _ArrivingClientState extends State<ArrivingClient> {
     _stepperWorker = ever(stepperController.activeStep, (int step) {
       if (mounted && _isScreenActive) {
         _onStepChanged(step);
+      }
+    });
+
+    // Listen for OTP restore signal from socket reconnect handler.
+    // When the socket reconnects and sees status='arriving' + otpVerified=false,
+    // it signals us to re-open the OTP screen. We handle it here because we
+    // already have the fully extracted rideData and loaded profileImage.
+    _otpRestoreWorker = ever(stepperController.shouldRestoreOtp, (_) {
+      if (mounted && _isScreenActive && _isInitialized) {
+        AppLogger.d('🔔 OTP restore signal received — re-opening OTP screen');
+        _navigateToOtpScreen();
       }
     });
   }
@@ -219,6 +232,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
     // Clean up workers
     _navigationWorker?.dispose();
     _stepperWorker?.dispose();
+    _otpRestoreWorker?.dispose();
 
     // Call super.dispose first
     super.dispose();
@@ -291,6 +305,15 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
       _isInitialized = true;
       AppLogger.d('✅ ArrivingClient initialized successfully');
+
+      // ─────────────────────────────────────────────────────────────────────
+      // AUTO OTP RECOVERY: If the driver already clicked "I've Arrived" in a
+      // previous session/screen, the socket status will already be "arriving"
+      // but the OTP screen may have been dismissed (e.g. app was minimized).
+      // Since the driver cannot click "I've Arrived" again (socket already
+      // updated), we automatically re-show the OTP screen here.
+      // ─────────────────────────────────────────────────────────────────────
+      _checkAndRestoreOtpScreen();
     } catch (e) {
       AppLogger.d('❌ Error initializing: $e');
       if (mounted) {
@@ -298,6 +321,39 @@ class _ArrivingClientState extends State<ArrivingClient> {
           _locationError = true;
         });
       }
+    }
+  }
+
+  /// Checks if the OTP screen should be automatically shown based on ride data.
+  /// Called on first initialization after data extraction.
+  /// Handles COLD-START resume: the app was killed while on the OTP screen.
+  /// The SOCKET RECONNECT case is handled via `_otpRestoreWorker` (shouldRestoreOtp signal).
+  void _checkAndRestoreOtpScreen() {
+    // Use the already-extracted _rideData (normalized by _extractAndStoreRideData)
+    final orderStatus = (_rideData?['orderStatus'] ?? '')
+        .toString()
+        .toLowerCase()
+        .trim();
+    final isOtpVerified = _rideData?['otpVerified'] == true;
+
+    AppLogger.d(
+      '🔍 Cold-start OTP Check — status: $orderStatus | otpVerified: $isOtpVerified',
+    );
+
+    // Only auto-launch if:
+    // 1. The ride reports status='arriving'
+    // 2. OTP has not been verified yet
+    // 3. We are not already on the OTP screen (checked via mounted + _isScreenActive)
+    if (orderStatus == 'arriving' && !isOtpVerified) {
+      AppLogger.d(
+        '🔄 Cold-start: Status is "arriving" but OTP unverified — auto-launching OTP screen',
+      );
+      // Small delay ensures the map/UI is fully rendered before pushing OTP
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (mounted && _isScreenActive) {
+          _navigateToOtpScreen();
+        }
+      });
     }
   }
 
@@ -696,6 +752,11 @@ class _ArrivingClientState extends State<ArrivingClient> {
         Geolocator.getPositionStream(locationSettings: locationSettings).listen(
           (Position position) {
             if (!_isScreenActive || !mounted) return;
+            
+            // Fetch city polygon
+            Get.find<GetCityByLocationController>().getCityByLocation(
+                lat: position.latitude.toString(),
+                lng: position.longitude.toString());
 
             final newLocation = LatLng(position.latitude, position.longitude);
 
@@ -1430,7 +1491,8 @@ class _ArrivingClientState extends State<ArrivingClient> {
         ? _driverLocation!
         : (_rideData?['pickupCoordinates'] ?? const LatLng(23.2599, 77.4126));
 
-    return GoogleMap(
+    return Obx(() => GoogleMap(
+      polygons: Get.find<GetCityByLocationController>().cityPolygons.toSet(),
       onMapCreated: (GoogleMapController controller) {
         _mapController = controller;
         AppLogger.d('✅ Google Map created');
@@ -1455,7 +1517,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
       compassEnabled: true,
       rotateGesturesEnabled: true,
       tiltGesturesEnabled: false,
-    );
+    ));
   }
 
   Future<void> _navigateToOtpScreen() async {
@@ -1516,6 +1578,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
             ));
         break;
       case 'arriving_client': // Already on arriving client screen
+      case '': // Empty route meant for no navigation (e.g., Progress status)
         break;
       default:
         AppLogger.d('⚠️ Unknown navigation route: ${command.route}');

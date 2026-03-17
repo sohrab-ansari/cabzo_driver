@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nzcu_driver/views/ride_screens/ride_request_screen.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/get_city_by_location_controller.dart';
 
 class HomeMapsScreen extends StatefulWidget {
 
@@ -56,15 +57,16 @@ class _HomeMapsScreenState extends State<HomeMapsScreen> {
         child: Stack(
           children: [
             /// 1️⃣ Google Map (BOTTOM)
-            GoogleMap(
+            Obx(() => GoogleMap(
               initialCameraPosition: _initialCameraPosition,
               myLocationEnabled: true,
               myLocationButtonEnabled: false,
               zoomControlsEnabled: false,
+              polygons: Get.find<GetCityByLocationController>().cityPolygons.toSet(),
               onMapCreated: (controller) {
                 _mapController = controller;
               },
-            ),
+            )),
 
             /// 2️⃣ Book Ride Button (Top Right)
             Positioned(

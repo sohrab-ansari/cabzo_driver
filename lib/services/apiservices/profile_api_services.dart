@@ -40,7 +40,6 @@ class ProfileApiServices {
     final prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString("auth_token");
 
-    AppLogger.d("========== GET FAQS CATEGORIES API ==========");
     AppLogger.d("URL : $url");
     AppLogger.d("Token : $token");
 

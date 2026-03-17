@@ -1,7 +1,6 @@
 package com.nzcu_driver
 
 import android.Manifest
-import android.app.AlarmManager
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -16,11 +15,11 @@ import android.os.Build
 import android.os.IBinder
 import android.os.Looper
 import android.os.PowerManager
-import android.os.SystemClock
 import android.net.wifi.WifiManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 import com.google.android.gms.location.*
 import io.socket.client.IO
 import io.socket.client.Socket
@@ -118,15 +117,16 @@ class SocketForegroundService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        Log.i(TAG, "Service created")
+        Log.i(TAG, "[LIFECYCLE] onCreate() - Service created")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.getStringExtra(EXTRA_ACTION)
+        Log.i(TAG, "[LIFECYCLE] onStartCommand() - action: $action, flags: $flags, startId: $startId")
 
         when (action) {
             ACTION_STOP -> {
-                Log.i(TAG, "Stopping service")
+                Log.i(TAG, "[LIFECYCLE] onStartCommand - Stopping service via ACTION_STOP")
                 stopSelf()
                 return START_NOT_STICKY
             }
@@ -181,7 +181,8 @@ class SocketForegroundService : Service() {
                 } else {
                     startForeground(STATUS_NOTIFICATION_ID, notification)
                 }
-                stopForeground(STOP_FOREGROUND_REMOVE) // removes the notification immediately
+                // stopForeground(int) is API 24+. Use ServiceCompat for backwards safety.
+                ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
             } catch (e: Exception) {
                 Log.e(TAG, "startForeground failed while stopping: ${e.message}")
             }
@@ -252,7 +253,7 @@ class SocketForegroundService : Service() {
     }
 
     override fun onDestroy() {
-        Log.i(TAG, "Service destroyed")
+        Log.i(TAG, "[LIFECYCLE] onDestroy() - Service destroyed")
         onlineTimer?.cancel()
         locationEmitTimer?.cancel()
         stopLocationUpdates()
@@ -261,11 +262,14 @@ class SocketForegroundService : Service() {
         super.onDestroy()
     }
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    override fun onBind(intent: Intent?): IBinder? {
+        Log.i(TAG, "[LIFECYCLE] onBind() - action: ${intent?.action}")
+        return null
+    }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-        Log.w(TAG, "⚠️ App killed (onTaskRemoved) — connecting Kotlin socket as takeover")
+        Log.w(TAG, "[LIFECYCLE] onTaskRemoved() - ⚠️ App killed (onTaskRemoved) — connecting Kotlin socket as takeover")
         appState = "Killed"
 
         // Update notification to show killed state
@@ -295,19 +299,13 @@ class SocketForegroundService : Service() {
                 }, 5000, 30000)
             }
         }.start()
-
-        // Schedule restart via AlarmManager (1 second)
-        val restartIntent = Intent(applicationContext, SocketForegroundService::class.java)
-        val pendingIntent = PendingIntent.getService(
-            applicationContext, 1, restartIntent,
-            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
-        )
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.set(
-            AlarmManager.ELAPSED_REALTIME,
-            SystemClock.elapsedRealtime() + 1000,
-            pendingIntent
-        )
+        // IMPORTANT:
+        // Do NOT try to "resurrect" the service with AlarmManager after task removal.
+        // On Android 12+ (and many OEM builds), background-starting/restarting a foreground
+        // service can crash with ForegroundServiceStartNotAllowedException or be blocked.
+        //
+        // If the OS kills this process later due to memory/battery policy, that's expected.
+        // Killed-state reliability should be implemented via FCM / WorkManager, not alarms.
     }
 
     // ──────────────────────────────────────────────────────────
@@ -315,7 +313,7 @@ class SocketForegroundService : Service() {
     // ──────────────────────────────────────────────────────────
 
     fun setAppState(state: String) {
-        Log.i(TAG, "App state changed: $appState -> $state")
+        Log.i(TAG, "[STATE] App state changed: $appState -> $state")
         val oldState = appState
         appState = state
         // Only update the notification if we are actually running as foreground (driver is online).
@@ -377,7 +375,7 @@ class SocketForegroundService : Service() {
             socket = IO.socket(URI.create(SOCKET_URL), options)
 
             socket?.on(Socket.EVENT_CONNECT) {
-                Log.i(TAG, "✅ Socket connected (id=${socket?.id()})")
+                Log.i(TAG, "[SOCKET] ✅ Socket connected (id=${socket?.id()})")
                 isSocketConnected = true
                 emitOnline()
             }
@@ -470,7 +468,7 @@ class SocketForegroundService : Service() {
             }
 
             socket?.on("driver:online_success") { args ->
-                Log.i(TAG, "✅ Driver online confirmed by server")
+                // Log.v(TAG, "✅ Driver online confirmed by server") // Commented out, runs every 5s with emitOnline
             }
 
             // ── Chat Events ────────────────────────────────────
@@ -548,7 +546,7 @@ class SocketForegroundService : Service() {
 
         try {
             socket?.emit("user:online", payload)
-            Log.d(TAG, "📡 Emitted user:online (${currentLat}, ${currentLng})")
+            // Log.d(TAG, "📡 Emitted user:online (${currentLat}, ${currentLng})") // Commented out to reduce spam
         } catch (e: Exception) {
             Log.e(TAG, "Error emitting user:online: ${e.message}")
         }
@@ -853,7 +851,7 @@ class SocketForegroundService : Service() {
                 result.lastLocation?.let { location ->
                     currentLat = location.latitude
                     currentLng = location.longitude
-                    Log.d(TAG, "📍 Location: ($currentLat, $currentLng)")
+                    // Log.v(TAG, "📍 Location: ($currentLat, $currentLng)") // Commented out to reduce spam
                 }
             }
         }
@@ -972,23 +970,44 @@ class RideActionReceiver : BroadcastReceiver() {
         val orderId = intent.getStringExtra(SocketForegroundService.EXTRA_ORDER_ID) ?: ""
         Log.i("RideActionReceiver", "Action: ${intent.action}, orderId: $orderId")
 
-        val serviceIntent = Intent(context, SocketForegroundService::class.java).apply {
+        // IMPORTANT:
+        // Do NOT start the Service from here.
+        // On Android 8+, calling startForegroundService() requires the Service to call
+        // startForeground() within ~5 seconds or the process crashes with:
+        // "Context.startForegroundService() did not then call Service.startForeground()".
+        //
+        // Also, Android 12+ heavily restricts starting foreground services from the background.
+        // Since Accept/Decline are user-initiated notification actions, we can handle them
+        // directly inside this BroadcastReceiver and persist the decision for Flutter.
+        try {
+            val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            val editor = prefs.edit()
             when (intent.action) {
                 "com.nzcu_driver.ACCEPT_RIDE" -> {
-                    putExtra(SocketForegroundService.EXTRA_ACTION, SocketForegroundService.ACTION_ACCEPT_RIDE)
-                    putExtra(SocketForegroundService.EXTRA_ORDER_ID, orderId)
+                    editor
+                        .putString("flutter.pending_accept_order_id", orderId)
+                        .putLong("flutter.pending_accept_timestamp", System.currentTimeMillis())
+                        .remove("flutter.pending_decline_order_id")
+                        // Prevent "ghost" ride screen on cold start when user already accepted
+                        .putBoolean("flutter.pending_ride_from_killed", false)
                 }
                 "com.nzcu_driver.DECLINE_RIDE" -> {
-                    putExtra(SocketForegroundService.EXTRA_ACTION, SocketForegroundService.ACTION_DECLINE_RIDE)
-                    putExtra(SocketForegroundService.EXTRA_ORDER_ID, orderId)
+                    editor
+                        .putString("flutter.pending_decline_order_id", orderId)
+                        .remove("flutter.pending_accept_order_id")
                 }
             }
+            editor.apply()
+        } catch (e: Exception) {
+            Log.e("RideActionReceiver", "Error writing pending action: ${e.message}")
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(serviceIntent)
-        } else {
-            context.startService(serviceIntent)
+        // Dismiss ride notification immediately.
+        try {
+            val nm = context.getSystemService(NotificationManager::class.java)
+            nm.cancel(SocketForegroundService.RIDE_NOTIFICATION_ID)
+        } catch (e: Exception) {
+            Log.e("RideActionReceiver", "Error cancelling ride notification: ${e.message}")
         }
 
         // ── For ACCEPT only: open the app directly from here ────────────────
@@ -997,19 +1016,6 @@ class RideActionReceiver : BroadcastReceiver() {
         // Context.startActivity() works here even when the app is fully killed.
         // Do NOT do this from inside the Service (PendingIntent.send() is still restricted).
         if (intent.action == "com.nzcu_driver.ACCEPT_RIDE") {
-            // Proactively clear the pending_ride_from_killed flag so that when
-            // checkPendingRideFromKilledState() runs in splash it finds nothing and skips
-            // RideRequestScreen. The accepted state is handled by _processPendingNativeNotificationActions.
-            try {
-                val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-                prefs.edit()
-                    .putBoolean("flutter.pending_ride_from_killed", false)
-                    .apply()
-                Log.i("RideActionReceiver", "✅ Cleared pending_ride_from_killed to prevent ghost RideRequestScreen")
-            } catch (e: Exception) {
-                Log.e("RideActionReceiver", "Error clearing pending flag: ${e.message}")
-            }
-
             try {
                 // Collapse the notification panel so the activity can come to the foreground
                 context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))

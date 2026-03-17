@@ -1,4 +1,4 @@
-﻿import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
+import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
@@ -24,6 +24,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/get_city_by_location_controller.dart';
 
 class RideRequestScreen extends StatefulWidget {
   final Map<String, dynamic> rideData;
@@ -560,6 +561,11 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         Geolocator.getPositionStream(locationSettings: locationSettings).listen(
           (Position position) {
             if (!mounted) return;
+            
+            // Fetch city polygon
+            Get.find<GetCityByLocationController>().getCityByLocation(
+                lat: position.latitude.toString(),
+                lng: position.longitude.toString());
 
             setState(() {
               _driverLocation = LatLng(position.latitude, position.longitude);
@@ -1107,7 +1113,8 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         ? _driverLocation!
         : (_rideData!['pickupCoordinates'] ?? LatLng(23.2599, 77.4126));
 
-    return GoogleMap(
+    return Obx(() => GoogleMap(
+      polygons: Get.find<GetCityByLocationController>().cityPolygons.toSet(),
       onMapCreated: (GoogleMapController controller) {
         _mapController = controller;
         AppLogger.d('✅ Google Map created');
@@ -1125,7 +1132,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       myLocationEnabled: false,
       myLocationButtonEnabled: false,
       zoomControlsEnabled: false,
-    );
+    ));
   }
 
   Widget _buildWarningBadge() {
@@ -1863,6 +1870,12 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   Future<void> _acceptRide() async {
     AppLogger.d("myyy_tapp33333");
 
+    if (_hasAccepted || _hasCancelled) return;
+    
+    if (mounted) {
+      setState(() => _hasAccepted = true);
+    }
+
     if (_orderId == null) {
       AppLogger.d("❌ Order ID is null, cannot accept ride");
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1871,6 +1884,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
           backgroundColor: Colors.red,
         ),
       );
+      if (mounted) setState(() => _hasAccepted = false);
       return;
     }
 
@@ -1892,6 +1906,10 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
   Future<void> _cancelRide() async {
     if (_hasCancelled || _hasAccepted) return;
+    
+    if (mounted) {
+      setState(() => _hasCancelled = true);
+    }
 
     if (_orderId == null) {
       AppLogger.d("❌ Order ID is null, cannot cancel ride");
@@ -1901,6 +1919,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
           backgroundColor: Colors.red,
         ),
       );
+      if (mounted) setState(() => _hasCancelled = false);
       return;
     }
 

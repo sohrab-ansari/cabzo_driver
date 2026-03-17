@@ -151,6 +151,11 @@ class ApiResponseHandler {
     String? successMessage,
     String? errorTitle = 'Error',
   }) async {
+    // Prevent multiple calls if already loading
+    if (ButtonStateManager.isLoading(buttonId)) {
+      return;
+    }
+
     // Set button to loading state
     ButtonStateManager.setLoading(buttonId, true);
 

@@ -157,7 +157,13 @@ import 'package:get/get.dart';
 
 class StepperController extends GetxController {
   RxInt activeStep = 0.obs;
-  
+
+  // Signal flag: when true, ArrivingClient should re-open the OTP screen.
+  // This is used on socket reconnect when status is 'arriving' but OTP not verified.
+  // We use a toggle (flip between true/false) so `ever()` always fires even if
+  // the previous value was already true.
+  RxBool shouldRestoreOtp = false.obs;
+
   // Define step names for clarity
   final List<String> stepNames = [
     'Going to Pickup',
@@ -187,7 +193,13 @@ class StepperController extends GetxController {
   void resetSteps() {
     activeStep.value = 0;
   }
-  
+
+  /// Signals ArrivingClient to restore the OTP screen.
+  /// Toggles the flag so `ever()` fires even on repeated calls.
+  void signalOtpRestore() {
+    shouldRestoreOtp.value = !shouldRestoreOtp.value;
+  }
+
   String get currentStepName => stepNames[activeStep.value];
 }
 

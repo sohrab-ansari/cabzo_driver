@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/get_city_by_location_controller.dart';
 import 'package:nzcu_driver/modals/home_modals/place_prediction.dart';
 import 'package:nzcu_driver/services/apiservices/places_api_service.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
@@ -90,6 +91,11 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
           timeLimit: Duration(seconds: 8),
         ),
       );
+      
+      // Fetch city polygon
+      Get.find<GetCityByLocationController>().getCityByLocation(
+          lat: pos.latitude.toString(),
+          lng: pos.longitude.toString());
 
       final loc = LatLng(pos.latitude, pos.longitude);
       if (mounted) setState(() => _pickedLatLng = loc);
@@ -167,7 +173,8 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
       body: Stack(
         children: [
           // 1. Full-screen map
-          GoogleMap(
+          Obx(() => GoogleMap(
+            polygons: Get.find<GetCityByLocationController>().cityPolygons.toSet(),
             initialCameraPosition: CameraPosition(
               target: _pickedLatLng,
               zoom: 16,
@@ -192,7 +199,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
             onCameraIdle: () {
               _reverseGeocode(_pickedLatLng);
             },
-          ),
+          )),
 
           // 2. Fixed centre pin (moves visually with map)
           Center(

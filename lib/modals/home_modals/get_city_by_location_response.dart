@@ -1,3 +1,5 @@
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 class GetCityByLocationResponse {
   bool? success;
   String? message;
@@ -84,7 +86,7 @@ class CityData {
 
 class Location {
   String? type;
-  List<double>? coordinates;
+  List<LatLng>? coordinates;
 
   Location({
     this.type,
@@ -92,18 +94,34 @@ class Location {
   });
 
   factory Location.fromJson(Map<String, dynamic> json) {
+    List<LatLng>? parsedCoordinates;
+    if (json['coordinates'] != null && json['coordinates'] is List) {
+      // Typically GeoJSON format: Polygon is basically List<List<List<double>>> 
+      // First array is the polygon wrapper, second array is the linear ring
+      var outerCoords = json['coordinates'] as List;
+      if (outerCoords.isNotEmpty && outerCoords[0] is List) {
+        var linearRing = outerCoords[0] as List;
+        parsedCoordinates = linearRing.map<LatLng>((coord) {
+          // GeoJSON is [longitude, latitude]
+          return LatLng((coord[1] as num).toDouble(), (coord[0] as num).toDouble());
+        }).toList();
+      }
+    }
+
     return Location(
       type: json['type'],
-      coordinates: json['coordinates'] != null 
-          ? List<double>.from(json['coordinates'].map((x) => x.toDouble()))
-          : null,
+      coordinates: parsedCoordinates,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'type': type,
-      'coordinates': coordinates,
+      'coordinates': coordinates != null
+          ? [
+              coordinates!.map((latLng) => [latLng.longitude, latLng.latitude]).toList()
+            ]
+          : null,
     };
   }
 }

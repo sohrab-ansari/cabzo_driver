@@ -6,6 +6,7 @@ import 'package:nzcu_driver/controllers/chart_id_controller/chatid_controller.da
 import 'package:nzcu_driver/controllers/home_controllers/cash_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/driver_toggle_duty_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
+import 'package:nzcu_driver/controllers/home_controllers/ride_request_queue_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/faqs_categories_controler.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/notification_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/bank_account_add_controller.dart';
@@ -36,6 +37,7 @@ class DependencyInjection {
     Get.put(ReviewAndRatingController(), permanent: true);
     Get.put(TermsAndPolicyController(), permanent: true);
     Get.put(OrderUpdateController(), permanent: true);
+    Get.put(RideRequestQueueController(), permanent: true);
 
     Get.put(CashController(), permanent: true);
 

@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 import 'package:nzcu_driver/controllers/home_controllers/driver_toggle_duty_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
@@ -26,6 +26,7 @@ import 'package:nzcu_driver/services/apiservices/socket_manager.dart'
 import 'package:nzcu_driver/services/background_service.dart';
 import 'package:nzcu_driver/services/overlay_service.dart';
 import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/get_city_by_location_controller.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool? isOnDuty;
@@ -196,7 +197,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _setupSocketCallbacks() {
     socketManager.onNewRide = (rideData) {
-      AppLogger.d("hellooooooooooooooooooo>>>>>>>>>>>>>>>>  11111111111111111111");
+      AppLogger.d(
+        "hellooooooooooooooooooo>>>>>>>>>>>>>>>>  11111111111111111111",
+      );
 
       _processRideRequest(rideData);
     };
@@ -243,6 +246,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       (position) {
         // Update socket manager with new location
         socketManager.updateLocation(position.latitude, position.longitude);
+
+        // Fetch city polygon
+        Get.find<GetCityByLocationController>().getCityByLocation(
+          lat: position.latitude.toString(),
+          lng: position.longitude.toString(),
+        );
 
         // Update marker on map
         if (mounted && socketManager.isOnDuty) {
@@ -1009,37 +1018,42 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget _buildOnlineScreen(double w, isFirstLaunc) {
     return Scaffold(
       body: SafeArea(
+        top: false,
         child: Stack(
           children: [
             /// 1️⃣ Google Map (BOTTOM)
-            GoogleMap(
-              initialCameraPosition: _initialCameraPosition,
-              myLocationEnabled: false,
-              myLocationButtonEnabled: false,
-              zoomControlsEnabled: false,
-              onMapCreated: (controller) {
-                _mapController = controller;
+            Obx(
+              () => GoogleMap(
+                initialCameraPosition: _initialCameraPosition,
+                myLocationEnabled: false,
+                myLocationButtonEnabled: false,
+                zoomControlsEnabled: false,
+                polygons: Get.find<GetCityByLocationController>().cityPolygons
+                    .toSet(),
+                onMapCreated: (controller) {
+                  _mapController = controller;
 
-                // Immediately move camera if we have location
-                if (socketManager.currentLatitude != 0.0 &&
-                    socketManager.currentLongitude != 0.0) {
-                  controller.moveCamera(
-                    CameraUpdate.newLatLng(
-                      LatLng(
-                        socketManager.currentLatitude - 0.0015,
-                        socketManager.currentLongitude,
+                  // Immediately move camera if we have location
+                  if (socketManager.currentLatitude != 0.0 &&
+                      socketManager.currentLongitude != 0.0) {
+                    controller.moveCamera(
+                      CameraUpdate.newLatLng(
+                        LatLng(
+                          socketManager.currentLatitude - 0.0015,
+                          socketManager.currentLongitude,
+                        ),
                       ),
-                    ),
-                  );
-                }
-              },
-              markers: markers,
-              circles: circles,
+                    );
+                  }
+                },
+                markers: markers,
+                circles: circles,
+              ),
             ),
 
             /// 2️⃣ Book Ride Button (Top Right)
             Positioned(
-              top: 16,
+              top: 32,
               right: 16,
               child: ElevatedButton(
                 onPressed: () {
