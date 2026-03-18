@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:nzcu_driver/controllers/chart_id_controller/chatid_controller.dart';
@@ -95,7 +95,6 @@ class _ArrivingClientState extends State<ArrivingClient> {
   // Navigation listener subscription
   Worker? _navigationWorker;
   Worker? _stepperWorker;
-  Worker? _otpRestoreWorker;
   Worker? _otpRestoreWorker;
 
   @override
@@ -336,39 +335,6 @@ class _ArrivingClientState extends State<ArrivingClient> {
           _locationError = true;
         });
       }
-    }
-  }
-
-  /// Checks if the OTP screen should be automatically shown based on ride data.
-  /// Called on first initialization after data extraction.
-  /// Handles COLD-START resume: the app was killed while on the OTP screen.
-  /// The SOCKET RECONNECT case is handled via `_otpRestoreWorker` (shouldRestoreOtp signal).
-  void _checkAndRestoreOtpScreen() {
-    // Use the already-extracted _rideData (normalized by _extractAndStoreRideData)
-    final orderStatus = (_rideData?['orderStatus'] ?? '')
-        .toString()
-        .toLowerCase()
-        .trim();
-    final isOtpVerified = _rideData?['otpVerified'] == true;
-
-    AppLogger.d(
-      '🔍 Cold-start OTP Check — status: $orderStatus | otpVerified: $isOtpVerified',
-    );
-
-    // Only auto-launch if:
-    // 1. The ride reports status='arriving'
-    // 2. OTP has not been verified yet
-    // 3. We are not already on the OTP screen (checked via mounted + _isScreenActive)
-    if (orderStatus == 'arriving' && !isOtpVerified) {
-      AppLogger.d(
-        '🔄 Cold-start: Status is "arriving" but OTP unverified — auto-launching OTP screen',
-      );
-      // Small delay ensures the map/UI is fully rendered before pushing OTP
-      Future.delayed(const Duration(milliseconds: 600), () {
-        if (mounted && _isScreenActive) {
-          _navigateToOtpScreen();
-        }
-      });
     }
   }
 
@@ -1484,11 +1450,13 @@ class _ArrivingClientState extends State<ArrivingClient> {
         ? _driverLocation!
         : (_rideData?['pickupCoordinates'] ?? const LatLng(23.2599, 77.4126));
 
-    return Obx(() => GoogleMap(
-      polygons: Get.find<GetCityByLocationController>().cityPolygons.toSet(),
-    return Obx(() => GoogleMap(
-      polygons: Get.find<GetCityByLocationController>().cityPolygons.toSet(),
-      onMapCreated: (GoogleMapController controller) {
+    return Obx(() {
+      // Force observable tracking even if the set is empty by accessing .length
+      Get.find<GetCityByLocationController>().cityPolygons.length;
+
+      return GoogleMap(
+        polygons: Get.find<GetCityByLocationController>().cityPolygons.toSet(),
+        onMapCreated: (GoogleMapController controller) {
         _mapController = controller;
         AppLogger.d('✅ Google Map created');
 
@@ -1512,8 +1480,8 @@ class _ArrivingClientState extends State<ArrivingClient> {
       compassEnabled: true,
       rotateGesturesEnabled: true,
       tiltGesturesEnabled: false,
-    ));
-    ));
+    );
+    });
   }
 
   Future<void> _navigateToOtpScreen() async {
@@ -1638,6 +1606,8 @@ class _ArrivingClientState extends State<ArrivingClient> {
   }
 
   Widget _buildLocationInputs(double w) {
+    bool isRental = _rideData?['orderType'] == 'rental' || _rideData?['orderType'] == 'Rental';
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: w * .03, vertical: w * .01),
       child: Column(
@@ -1647,12 +1617,14 @@ class _ArrivingClientState extends State<ArrivingClient> {
             preffixImage: "assets/icons/greenDot.png",
             hintText: _rideData?['pickupLocation'] ?? 'Pickup location',
           ),
-          SizedBox(height: w * .02),
-          LocationInputTextfield(
-            onPressed: () {},
-            preffixImage: "assets/icons/redDot.png",
-            hintText: _rideData?['dropLocation'] ?? 'Drop location',
-          ),
+          if (!isRental) ...[
+            SizedBox(height: w * .02),
+            LocationInputTextfield(
+              onPressed: () {},
+              preffixImage: "assets/icons/redDot.png",
+              hintText: _rideData?['dropLocation'] ?? 'Drop location',
+            ),
+          ],
         ],
       ),
     );

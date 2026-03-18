@@ -1040,7 +1040,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return Scaffold(
       body: SafeArea(
         top: false,
-        top: false,
         child: Stack(
           children: [
             /// 1️⃣ Google Map (BOTTOM)
@@ -1054,33 +1053,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     .toSet(),
                 onMapCreated: (controller) {
                   _mapController = controller;
-            Obx(
-              () => GoogleMap(
-                initialCameraPosition: _initialCameraPosition,
-                myLocationEnabled: false,
-                myLocationButtonEnabled: false,
-                zoomControlsEnabled: false,
-                polygons: Get.find<GetCityByLocationController>().cityPolygons
-                    .toSet(),
-                onMapCreated: (controller) {
-                  _mapController = controller;
 
-                  // Immediately move camera if we have location
-                  if (socketManager.currentLatitude != 0.0 &&
-                      socketManager.currentLongitude != 0.0) {
-                    controller.moveCamera(
-                      CameraUpdate.newLatLng(
-                        LatLng(
-                          socketManager.currentLatitude - 0.0015,
-                          socketManager.currentLongitude,
-                        ),
-                      ),
-                    );
-                  }
-                },
-                markers: markers,
-                circles: circles,
-              ),
                   // Immediately move camera if we have location
                   if (socketManager.currentLatitude != 0.0 &&
                       socketManager.currentLongitude != 0.0) {
@@ -1101,7 +1074,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
             /// 2️⃣ Book Ride Button (Top Right)
             Positioned(
-              top: 32,
               top: 32,
               right: 16,
               child: ElevatedButton(
@@ -1124,6 +1096,36 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+              ),
+            ),
+
+            /// Location Pin Button
+            Positioned(
+              top: 32,
+              left: 16,
+              child: FloatingActionButton(
+                heroTag: "location_pin_btn",
+                mini: true,
+                backgroundColor: AppColors.white,
+                onPressed: () {
+                  try {
+                    if (socketManager.currentLatitude != 0.0 &&
+                        socketManager.currentLongitude != 0.0) {
+                      _mapController.animateCamera(
+                        CameraUpdate.newLatLngZoom(
+                          LatLng(
+                            socketManager.currentLatitude - 0.0015,
+                            socketManager.currentLongitude,
+                          ),
+                          17.0,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    AppLogger.d("Map controller not initialized yet: $e");
+                  }
+                },
+                child: const Icon(Icons.my_location, color: Colors.black54),
               ),
             ),
 

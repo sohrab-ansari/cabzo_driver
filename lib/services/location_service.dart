@@ -9,11 +9,14 @@ class LocationService {
 
   bool _locationServiceEnabled = false;
   bool _locationPermissionGranted = false;
+  bool _locationPermissionPermanentlyDenied = false;
   StreamSubscription<ServiceStatus>? _serviceStatusSubscription;
   Function? _onStatusChanged;
 
   bool get locationServiceEnabled => _locationServiceEnabled;
   bool get locationPermissionGranted => _locationPermissionGranted;
+  bool get locationPermissionPermanentlyDenied =>
+      _locationPermissionPermanentlyDenied;
   bool get allGood => _locationServiceEnabled && _locationPermissionGranted;
 
   Future<void> initialize() async {
@@ -35,8 +38,23 @@ class LocationService {
     _locationPermissionGranted =
         (permission == LocationPermission.always ||
         permission == LocationPermission.whileInUse);
+    _locationPermissionPermanentlyDenied =
+        permission == LocationPermission.deniedForever;
 
     _onStatusChanged?.call();
+  }
+
+  /// Requests location permission directly (shows system dialog).
+  /// Returns true if granted.
+  Future<bool> requestLocationPermission() async {
+    LocationPermission permission = await Geolocator.requestPermission();
+    _locationPermissionGranted =
+        (permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse);
+    _locationPermissionPermanentlyDenied =
+        permission == LocationPermission.deniedForever;
+    _onStatusChanged?.call();
+    return _locationPermissionGranted;
   }
 
   void startMonitoring(Function onStatusChanged) {

@@ -1,4 +1,4 @@
-﻿// // // // import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
+// // // // import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 // // // // import 'package:nzcu_driver/controllers/rides_controllers/rieds_history_controller.dart';
 // // // // import 'package:nzcu_driver/modals/home_modals/ride_history_response.dart';
 // // // // import 'package:nzcu_driver/utilities/colors/colors.dart';
@@ -2773,6 +2773,7 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
   late TabController _tabController;
   final List<String> _tabStatuses = ["", "Completed", "Cancelled"];
   String _currentStatus = "";
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -2780,7 +2781,8 @@ class _RidehistoryScreenState extends State<RidehistoryScreen>
     _tabController = TabController(length: 3, vsync: this);
 
     _tabController.addListener(() {
-      if (_tabController.indexIsChanging) {
+      if (_selectedIndex != _tabController.index) {
+        _selectedIndex = _tabController.index;
         currentTabBar.currentTabIndex.value = _tabController.index;
         _currentStatus = _tabStatuses[_tabController.index];
 

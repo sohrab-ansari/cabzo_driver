@@ -163,7 +163,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
   Future<void> _initializeAll() async {
     if (mounted) setState(() => _isLoading = true);
-    AppLogger.d('[RIDE_FLOW] RideRequestScreen init → orderId=${widget.rideData['orderId'] ?? widget.rideData['_id']}');
+    AppLogger.d(
+      '[RIDE_FLOW] RideRequestScreen init → orderId=${widget.rideData['orderId'] ?? widget.rideData['_id']}',
+    );
 
     try {
       _extractAndStoreRideData();
@@ -245,7 +247,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         if (mounted) {
           setState(() {
             _timer--;
-            _progress = _totalTimerSeconds > 0 ? _timer / _totalTimerSeconds : 0;
+            _progress = _totalTimerSeconds > 0
+                ? _timer / _totalTimerSeconds
+                : 0;
           });
         }
       }
@@ -569,7 +573,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         });
       }
 
-      AppLogger.d('📍 Initial location: ${position.latitude}, ${position.longitude}');
+      AppLogger.d(
+        '📍 Initial location: ${position.latitude}, ${position.longitude}',
+      );
     } catch (e) {
       AppLogger.d('❌ Error getting initial position: $e');
       if (mounted) setState(() => _locationError = true);
@@ -585,16 +591,18 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         Geolocator.getPositionStream(locationSettings: locationSettings).listen(
           (Position position) {
             if (!mounted) return;
-            
+
             // Fetch city polygon
             Get.find<GetCityByLocationController>().getCityByLocation(
-                lat: position.latitude.toString(),
-                lng: position.longitude.toString());
-            
+              lat: position.latitude.toString(),
+              lng: position.longitude.toString(),
+            );
+
             // Fetch city polygon
             Get.find<GetCityByLocationController>().getCityByLocation(
-                lat: position.latitude.toString(),
-                lng: position.longitude.toString());
+              lat: position.latitude.toString(),
+              lng: position.longitude.toString(),
+            );
 
             setState(() {
               _driverLocation = LatLng(position.latitude, position.longitude);
@@ -958,7 +966,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
   void _handleNavigation(NavigationCommand command) {
     if (!mounted) return;
-    AppLogger.d('[RIDE_FLOW] RideRequestScreen navigation → route=${command.route}');
+    AppLogger.d(
+      '[RIDE_FLOW] RideRequestScreen navigation → route=${command.route}',
+    );
 
     switch (command.route) {
       case 'bottom_nav':
@@ -1113,29 +1123,31 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         ? _driverLocation!
         : (_rideData!['pickupCoordinates'] ?? LatLng(23.2599, 77.4126));
 
-    return Obx(() => GoogleMap(
-      polygons: Get.find<GetCityByLocationController>().cityPolygons.toSet(),
-    return Obx(() => GoogleMap(
-      polygons: Get.find<GetCityByLocationController>().cityPolygons.toSet(),
-      onMapCreated: (GoogleMapController controller) {
-        _mapController = controller;
-        AppLogger.d('✅ Google Map created');
+    return Obx(
+      () => GoogleMap(
+        polygons: Get.find<GetCityByLocationController>().cityPolygons.toSet(),
+        onMapCreated: (GoogleMapController controller) {
+          _mapController = controller;
+          AppLogger.d('✅ Google Map created');
 
-        // Wait a bit then set markers and fit map
-        Future.delayed(Duration(milliseconds: 500), () {
-          _setMarkers();
-          _fitMapToAllMarkers();
-        });
-      },
-      initialCameraPosition: CameraPosition(target: initialLocation, zoom: 16),
-      markers: markers,
-      circles: circles,
-      polylines: _polylines,
-      myLocationEnabled: false,
-      myLocationButtonEnabled: false,
-      zoomControlsEnabled: false,
-    ));
-    ));
+          // Wait a bit then set markers and fit map
+          Future.delayed(Duration(milliseconds: 500), () {
+            _setMarkers();
+            _fitMapToAllMarkers();
+          });
+        },
+        initialCameraPosition: CameraPosition(
+          target: initialLocation,
+          zoom: 16,
+        ),
+        markers: markers,
+        circles: circles,
+        polylines: _polylines,
+        myLocationEnabled: false,
+        myLocationButtonEnabled: false,
+        zoomControlsEnabled: false,
+      ),
+    );
   }
 
   Widget _buildWarningBadge() {
@@ -1160,7 +1172,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
   }
 
   Widget _buildRideDetails(double w) {
-    AppLogger.d("helloooooo_secduleeddd_ride_hererrer ${_rideData!['isScheduled']}");
+    AppLogger.d(
+      "helloooooo_secduleeddd_ride_hererrer ${_rideData!['isScheduled']}",
+    );
     AppLogger.d(
       "helloooooo_secduleeddd_ride_hererrer2222 ${_rideData!['scheduledStartTime']}",
     );
@@ -1564,7 +1578,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
   Future<void> _handleCustomDecline(String reason) async {
     if (_hasAccepted || _hasDeclined) return;
-    AppLogger.d('[RIDE_FLOW] RideRequestScreen Decline with reason → orderId=$_orderId reason=$reason');
+    AppLogger.d(
+      '[RIDE_FLOW] RideRequestScreen Decline with reason → orderId=$_orderId reason=$reason',
+    );
 
     if (mounted) setState(() => _isDeclining = true);
 
@@ -1874,7 +1890,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     AppLogger.d("myyy_tapp33333");
 
     if (_hasAccepted || _hasCancelled) return;
-    
+
     if (mounted) {
       setState(() => _hasAccepted = true);
     }
@@ -1910,7 +1926,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
 
   Future<void> _cancelRide() async {
     if (_hasCancelled || _hasAccepted) return;
-    
+
     if (mounted) {
       setState(() => _hasCancelled = true);
     }
@@ -1956,7 +1972,6 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     if (res.statusCode == 200) {
       Navigator.pop(context);
     }
-
   }
 }
 

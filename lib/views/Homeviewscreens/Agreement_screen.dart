@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Added for SystemChrome
@@ -164,42 +164,17 @@ class _AgreementScreenState extends State<AgreementScreen> {
         return true;
       }
 
-      if (status.isPermanentlyDenied) {
-        // Show dialog to open app settings
-        _showPermissionDialog();
-        return false;
-      }
-
       status = await Permission.storage.request();
-      return status.isGranted;
+      if (status.isGranted) return true;
+
+      // On Android 13+, Permission.storage is always denied but we can still write to Downloads.
+      // So we return true to let the download ATTEMPT proceed.
+      return true;
     }
     return true; // iOS doesn't need storage permission for app directories
   }
 
-  void _showPermissionDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Permission Required'),
-        content: const Text(
-          'Storage permission is required to download files. Please enable it in app settings.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await openAppSettings();
-            },
-            child: const Text('Open Settings'),
-          ),
-        ],
-      ),
-    );
-  }
+  // Removed _showPermissionDialog as it's no longer used
 
   Future<void> _downloadPdfToDevice() async {
     if (_agreementUrl == null) return;
@@ -225,14 +200,14 @@ class _AgreementScreenState extends State<AgreementScreen> {
         Directory? downloadDir;
 
         if (Platform.isAndroid) {
-          // Try multiple locations
+          // Try to use public Downloads directory
           try {
             downloadDir = Directory('/storage/emulated/0/Download');
             if (!await downloadDir.exists()) {
-              downloadDir = await getExternalStorageDirectory();
+              await downloadDir.create(recursive: true);
             }
           } catch (e) {
-            downloadDir = await getApplicationDocumentsDirectory();
+            downloadDir = await getExternalStorageDirectory();
           }
         } else {
           downloadDir = await getApplicationDocumentsDirectory();
@@ -240,31 +215,50 @@ class _AgreementScreenState extends State<AgreementScreen> {
 
         if (downloadDir != null && await downloadDir.exists()) {
           final uri = Uri.parse(_agreementUrl!);
-          final filename = uri.pathSegments.last;
-          final filePath = '${downloadDir.path}/$filename';
+          String filename = 'Agreement.pdf';
+          if (uri.pathSegments.isNotEmpty &&
+              uri.pathSegments.last.endsWith('.pdf')) {
+            filename = uri.pathSegments.last;
+          }
+
+          // Ensure unique filename
+          String filePath = '${downloadDir.path}/$filename';
+          int counter = 1;
+          while (await File(filePath).exists()) {
+            final nameWithoutExt = filename.replaceAll('.pdf', '');
+            filePath = '${downloadDir.path}/${nameWithoutExt}_$counter.pdf';
+            counter++;
+          }
           final file = File(filePath);
 
           await file.writeAsBytes(bytes);
 
           AppLogger.d('📄 PDF saved to: $filePath');
-
           CustomToast.showSuccess('PDF downloaded successfully!');
 
           // Try to open the file
           try {
             final result = await OpenFile.open(filePath);
             AppLogger.d('Open file result: ${result.type} - ${result.message}');
+            if (result.type != ResultType.done) {
+              CustomToast.showWarning('Saved! Please check your Downloads folder.');
+            }
           } catch (e) {
             AppLogger.d('Error opening file: $e');
+            CustomToast.showWarning('Saved! Please check your file manager.');
           }
+        } else {
+          CustomToast.showError('Could not find download folder.');
         }
       }
     } catch (e) {
-      CustomToast.showError('Download failed: ${e.toString()}');
+      CustomToast.showError('Download failed. Ensure storage has space.');
     } finally {
-      setState(() {
-        _downloading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _downloading = false;
+        });
+      }
     }
   }
 

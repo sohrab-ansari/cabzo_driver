@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nzcu_driver/services/location_service.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
 
 class LocationGuard extends StatefulWidget {
@@ -18,6 +19,16 @@ class _LocationGuardState extends State<LocationGuard>
   bool _showPermissionScreen = false;
   Timer? _permissionCheckTimer;
   bool _isReturningFromSettings = false;
+
+  // Notification permission state
+  PermissionStatus _notificationStatus = PermissionStatus.denied;
+  bool _notificationChecked = false;
+
+  // Track how many times we've already shown the in-app request dialog.
+  // Android stops showing the system dialog after 2 total denials (splash used 1),
+  // so after 1 failed attempt here we fall back to opening settings.
+  int _locationRequestAttempts = 0;
+  int _notificationRequestAttempts = 0;
 
   @override
   void initState() {
@@ -41,7 +52,7 @@ class _LocationGuardState extends State<LocationGuard>
         _isReturningFromSettings = false;
         _startAggressiveChecking();
       } else {
-        _checkLocationStatus();
+        _checkAllStatus();
       }
     }
   }
@@ -49,26 +60,36 @@ class _LocationGuardState extends State<LocationGuard>
   void _startMonitoring() {
     _locationService.startMonitoring(() {
       if (mounted) {
-        setState(() {
-          _showPermissionScreen = !_locationService.allGood;
-        });
-
-        if (_locationService.allGood) {
-          _permissionCheckTimer?.cancel();
-        }
+        _updatePermissionScreen();
       }
     });
 
-    _checkLocationStatus();
+    _checkAllStatus();
   }
 
-  Future<void> _checkLocationStatus() async {
+  Future<void> _checkAllStatus() async {
     await _locationService.checkLocationStatus();
+    await _checkNotificationStatus();
     if (!mounted) return;
+    _updatePermissionScreen();
+  }
 
+  Future<void> _checkNotificationStatus() async {
+    _notificationStatus = await Permission.notification.status;
+    _notificationChecked = true;
+  }
+
+  void _updatePermissionScreen() {
+    if (!mounted) return;
     setState(() {
-      _showPermissionScreen = !_locationService.allGood;
+      _showPermissionScreen =
+          !_locationService.allGood ||
+          (_notificationChecked && !_notificationStatus.isGranted);
     });
+
+    if (!_showPermissionScreen) {
+      _permissionCheckTimer?.cancel();
+    }
   }
 
   void _startAggressiveChecking() {
@@ -82,8 +103,9 @@ class _LocationGuardState extends State<LocationGuard>
       }
 
       await _locationService.checkLocationStatus();
+      await _checkNotificationStatus();
 
-      if (_locationService.allGood) {
+      if (_locationService.allGood && _notificationStatus.isGranted) {
         timer.cancel();
         if (mounted) {
           setState(() {
@@ -94,13 +116,54 @@ class _LocationGuardState extends State<LocationGuard>
     });
   }
 
-  void _handleEnableButton() {
-    _isReturningFromSettings = true;
+  /// Returns true if we should skip the in-app dialog and go straight to settings.
+  /// Android silently refuses requestPermission() after 2 denials total;
+  /// since splash already used 1, we only get 1 re-request here.
+  bool _shouldGoToSettingsForLocation() =>
+      _locationService.locationPermissionPermanentlyDenied ||
+      _locationRequestAttempts >= 1;
 
+  bool _shouldGoToSettingsForNotification() =>
+      _notificationStatus.isPermanentlyDenied ||
+      _notificationRequestAttempts >= 1;
+
+  /// Handles the action button press.
+  Future<void> _handleEnableButton() async {
+    // --- Location ---
     if (!_locationService.locationServiceEnabled) {
-      _locationService.openLocationSettings();
-    } else if (!_locationService.locationPermissionGranted) {
-      _locationService.openAppPermissionSettings();
+      _isReturningFromSettings = true;
+      await _locationService.openLocationSettings();
+      return;
+    }
+
+    if (!_locationService.locationPermissionGranted) {
+      if (_shouldGoToSettingsForLocation()) {
+        _isReturningFromSettings = true;
+        await _locationService.openAppPermissionSettings();
+      } else {
+        _locationRequestAttempts++;
+        await _locationService.requestLocationPermission();
+        if (mounted) {
+          setState(() {}); // refresh button text based on new attempt count
+          _updatePermissionScreen();
+        }
+      }
+      return;
+    }
+
+    // --- Notification ---
+    if (_notificationChecked && !_notificationStatus.isGranted) {
+      if (_shouldGoToSettingsForNotification()) {
+        _isReturningFromSettings = true;
+        await openAppSettings();
+      } else {
+        _notificationRequestAttempts++;
+        _notificationStatus = await Permission.notification.request();
+        if (mounted) {
+          setState(() {}); // refresh button text based on new attempt count
+          _updatePermissionScreen();
+        }
+      }
     }
   }
 
@@ -225,31 +288,42 @@ class _LocationGuardState extends State<LocationGuard>
     );
   }
 
+  // ─── Status helpers ───────────────────────────────────────────────────────
+
+  bool get _isNotificationIssue =>
+      _notificationChecked && !_notificationStatus.isGranted;
+
   IconData _getIconForStatus() {
-    if (!_locationService.locationServiceEnabled) {
-      return Icons.location_off;
-    } else if (!_locationService.locationPermissionGranted) {
+    if (!_locationService.locationServiceEnabled) return Icons.location_off;
+    if (!_locationService.locationPermissionGranted) {
       return Icons.location_disabled;
     }
+    if (_isNotificationIssue) return Icons.notifications_off;
     return Icons.location_on;
   }
 
   String _getTitleForStatus() {
-    if (!_locationService.locationServiceEnabled) {
-      return "GPS is Off";
-    } else if (!_locationService.locationPermissionGranted) {
-      return "Permission Required";
+    if (!_locationService.locationServiceEnabled) return "GPS is Off";
+    if (!_locationService.locationPermissionGranted) {
+      return "Location Required";
     }
+    if (_isNotificationIssue) return "Notifications Required";
     return "Enable Location";
   }
 
   String _getButtonText() {
-    if (!_locationService.locationServiceEnabled) {
-      return "Turn On GPS";
-    } else if (!_locationService.locationPermissionGranted) {
-      return "Grant Permission";
+    if (!_locationService.locationServiceEnabled) return "Turn On GPS";
+    if (!_locationService.locationPermissionGranted) {
+      return _shouldGoToSettingsForLocation()
+          ? "Open Settings"
+          : "Allow Location";
     }
-    return "Enable Location";
+    if (_isNotificationIssue) {
+      return _shouldGoToSettingsForNotification()
+          ? "Open Settings"
+          : "Allow Notifications";
+    }
+    return "Enable";
   }
 
   String _buildPermissionMessage() {
@@ -259,19 +333,28 @@ class _LocationGuardState extends State<LocationGuard>
     } else if (!_locationService.locationServiceEnabled) {
       return "Please turn on GPS to continue using the app for tracking and navigation.";
     } else if (!_locationService.locationPermissionGranted) {
-      return "Location permission is not granted.\n\nPlease allow location access to continue using the app features.";
+      return _shouldGoToSettingsForLocation()
+          ? "Location permission was denied.\n\nPlease open Settings and grant location access to continue."
+          : "Location permission is required to use the app.\n\nTap below to allow location access.";
+    } else if (_isNotificationIssue) {
+      return _shouldGoToSettingsForNotification()
+          ? "Notification permission was denied.\n\nPlease open Settings and enable notifications to continue."
+          : "Notification permission is required for ride alerts.\n\nTap below to allow notifications.";
     }
     return "";
   }
 
   String _getStatusMessage() {
-    if (!_locationService.locationServiceEnabled &&
-        !_locationService.locationPermissionGranted) {
-      return "Waiting for GPS to be turned on...";
-    } else if (!_locationService.locationServiceEnabled) {
+    if (!_locationService.locationServiceEnabled) {
       return "Waiting for GPS to be turned on...";
     } else if (!_locationService.locationPermissionGranted) {
-      return "Waiting for permission to be granted...";
+      return _shouldGoToSettingsForLocation()
+          ? "Please grant permission from app settings."
+          : "Tap the button to allow location access.";
+    } else if (_isNotificationIssue) {
+      return _shouldGoToSettingsForNotification()
+          ? "Please enable notifications from app settings."
+          : "Tap the button to allow notifications.";
     }
     return "";
   }

@@ -974,8 +974,6 @@ class SocketManager {
       // Ensure any looping background ringtone shuts off if driver hasn't touched the screen
       NotificationService.instance.cancelRideNotification();
 
-      // FIX: Use rideId instead of orderId
-      final rideId = data['rideId'] ?? data['orderId'];
 
       final rideIdStr = rideId?.toString() ?? '';
       if (rideIdStr.isEmpty) {
