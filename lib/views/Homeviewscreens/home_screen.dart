@@ -51,6 +51,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // Socket Manager instance
   final SocketManager socketManager = SocketManager();
 
+  // Keep references so we can safely unregister on dispose.
+  Function(Map<String, dynamic>)? _onNewRideCb;
+  Function(Map<String, dynamic>)? _onRideConfirmedCb;
+  Function(Map<String, dynamic>)? _onRideCancelledCb;
+  Function(bool)? _onConnectionStatusCb;
+  Function(bool)? _onDriverStatusCb;
+
   // Ride request
   Map<String, dynamic>? _newRideRequest;
   bool _hasPendingRideRequest = false;
@@ -196,24 +203,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _setupSocketCallbacks() {
-    socketManager.onNewRide = (rideData) {
+    _onNewRideCb = (rideData) {
       AppLogger.d(
         "hellooooooooooooooooooo>>>>>>>>>>>>>>>>  11111111111111111111",
       );
 
       _processRideRequest(rideData);
     };
+    socketManager.onNewRide = _onNewRideCb;
 
-    socketManager.onRideConfirmed = (rideData) {
+    _onRideConfirmedCb = (rideData) {
       _navigateToRideScreen(rideData);
     };
+    socketManager.onRideConfirmed = _onRideConfirmedCb;
 
-    socketManager.onRideCancelled = (data) {
+    _onRideCancelledCb = (data) {
       CustomToast.showError('Ride cancelled');
       _clearPendingRideRequest();
     };
+    socketManager.onRideCancelled = _onRideCancelledCb;
 
-    socketManager.onConnectionStatusChange = (isConnected) {
+    _onConnectionStatusCb = (isConnected) {
       if (mounted) {
         setState(() {
           if (isConnected) {
@@ -222,8 +232,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         });
       }
     };
+    socketManager.onConnectionStatusChange = _onConnectionStatusCb;
 
-    socketManager.onDriverStatusChange = (isOnline) {
+    _onDriverStatusCb = (isOnline) {
       if (mounted) {
         setState(() {});
 
@@ -234,6 +245,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         }
       }
     };
+    socketManager.onDriverStatusChange = _onDriverStatusCb;
   }
 
   void _startLocationListener() {
@@ -358,6 +370,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _clearPendingRideRequest() {
+    if (!mounted) return;
     setState(() {
       _newRideRequest = null;
       _hasPendingRideRequest = false;
@@ -468,6 +481,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void dispose() {
     _heartbeatTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this); // Remove lifecycle observer
+    // IMPORTANT: HomeScreen is not always the active screen.
+    // If we keep these callbacks set after disposal, SocketManager will retain
+    // a reference to this State and can call setState after dispose().
+    if (socketManager.onNewRide == _onNewRideCb) socketManager.onNewRide = null;
+    if (socketManager.onRideConfirmed == _onRideConfirmedCb) {
+      socketManager.onRideConfirmed = null;
+    }
+    if (socketManager.onRideCancelled == _onRideCancelledCb) {
+      socketManager.onRideCancelled = null;
+    }
+    if (socketManager.onConnectionStatusChange == _onConnectionStatusCb) {
+      socketManager.onConnectionStatusChange = null;
+    }
+    if (socketManager.onDriverStatusChange == _onDriverStatusCb) {
+      socketManager.onDriverStatusChange = null;
+    }
+
     // ❌ DON'T dispose SocketManager here - it's a singleton used across the app
     // Only remove the observer and cleanup local resources
     // socketManager.dispose() should only be called on app logout

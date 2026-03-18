@@ -5,7 +5,9 @@ import 'package:nzcu_driver/controllers/home_controllers/ride_request_queue_cont
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
 import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/utils/navigation_command.dart';
 import 'package:nzcu_driver/views/bottomnav/bottomNavMain_screen.dart';
+import 'package:nzcu_driver/views/ride_screens/accepted_screen.dart';
 import 'package:nzcu_driver/views/ride_screens/widgets/ride_request_card.dart';
 
 class RideRequestQueueScreen extends StatefulWidget {
@@ -24,17 +26,60 @@ class _RideRequestQueueScreenState extends State<RideRequestQueueScreen> {
       Get.find<OrderUpdateController>();
 
   bool _suppressEmptyAutoHome = false;
+  Worker? _navigationWorker;
 
   @override
   void initState() {
     super.initState();
     AppLogger.d('🧾 [RideQueue] RideRequestQueueScreen opened');
     queue.isQueueScreenOpen.value = true;
+    _setupNavigationListener();
+  }
+
+  void _setupNavigationListener() {
+    _navigationWorker = ever(orderUpdateController.shouldNavigate$, (
+      bool shouldNavigate,
+    ) {
+      if (!shouldNavigate || !mounted) return;
+
+      final command = NavigationCommand(
+        route: orderUpdateController.navigationRoute,
+        arguments: orderUpdateController.navigationArgs,
+        clearAll: orderUpdateController.clearAll,
+      );
+
+      AppLogger.d('🧾 [RideQueue] Navigation command: $command');
+      _handleNavigation(command);
+      orderUpdateController.clearNavigation();
+    });
+  }
+
+  void _handleNavigation(NavigationCommand command) {
+    if (!mounted) return;
+
+    switch (command.route) {
+      case 'bottom_nav':
+        queue.clearAll(reason: 'nav_bottom');
+        Get.offAll(() => BottomnavmainScreen(isOnDuty: true));
+        break;
+      case 'arriving_screen':
+        // Remove queue screen from stack and go to ArrivingClient.
+        queue.clearAll(reason: 'nav_arriving');
+        Get.off(
+          () => ArrivingClient(
+            rideData: command.arguments,
+            typeCheck: command.arguments?['isScheduled'] == true,
+          ),
+          transition: Transition.rightToLeft,
+        );
+        break;
+    }
   }
 
   @override
   void dispose() {
     queue.isQueueScreenOpen.value = false;
+    _navigationWorker?.dispose();
     super.dispose();
   }
 
@@ -67,9 +112,6 @@ class _RideRequestQueueScreenState extends State<RideRequestQueueScreen> {
       successMessage: 'Ride accepted successfully!',
       shouldTriggerNavigation: true,
     );
-
-    // Clear queue immediately to avoid leftover offers after starting a ride.
-    queue.clearAll(reason: 'accepted');
   }
 
   Future<void> _declineRide(RideRequestItem item) async {
