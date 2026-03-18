@@ -1,8 +1,10 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
+import 'package:nzcu_driver/services/notification_services/notification_service.dart';
 import 'package:nzcu_driver/modals/auth_modals/Otp_verify_res.dart';
 import 'package:nzcu_driver/modals/auth_modals/create_vehicle_res.dart';
 import 'package:nzcu_driver/modals/auth_modals/driver_Image_upload_res.dart';
@@ -63,21 +65,32 @@ class AuthApiService {
   }) async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Save FCM token
-    await prefs.getString('fcmToken');
+    // Get real FCM token: live from NotificationService, then stored, then request from Firebase
+    String? fcmToken = NotificationService.instance.fcmToken;
+    if (fcmToken == null || fcmToken.isEmpty) {
+      fcmToken = await NotificationService.instance.getStoredFcmToken();
+    }
+    if (fcmToken == null || fcmToken.isEmpty) {
+      try {
+        fcmToken = await FirebaseMessaging.instance.getToken();
+        if (fcmToken != null && fcmToken.isNotEmpty) {
+          await prefs.setString('fcmToken', fcmToken);
+        }
+      } catch (e) {
+        AppLogger.d('⚠️ [AuthApiService] Could not get FCM token: $e');
+      }
+    }
+    AppLogger.d('FCM token for verify OTP: ${fcmToken != null && fcmToken.isNotEmpty ? "present" : "missing"}');
 
     final deviceInfo = DeviceInfoPlugin();
     final androidInfo = await deviceInfo.androidInfo;
-    AppLogger.d(
-      'fcmm___token_from_shared_preferences: ${prefs.getString('fcmToken')}',
-    );
 
     final Uri url = Uri.parse(ApiPath.verifyOtp);
 
     final Map<String, dynamic> requestBody = {
       "otp": otp,
       "phone": phoneNumber ?? "9908479999",
-      "fcmToken": prefs.getString('fcmToken') ?? "test-fcm-token-123",
+      "fcmToken": fcmToken ?? "",
       "deviceId": androidInfo.id,
     };
 

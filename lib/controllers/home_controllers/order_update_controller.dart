@@ -81,8 +81,8 @@ class OrderUpdateController extends GetxController {
   }) {
     _updateResponse.value = response;
 
-    // Handle stepper updates
     if (stepControl == "Progress") {
+      AppLogger.d('[RIDE_FLOW] Stepper nextStep (Progress)');
       stepperController.nextStep();
     }
 
@@ -109,7 +109,7 @@ class OrderUpdateController extends GetxController {
     String? orderStatus,
     Map<String, dynamic>? rideData,
   ) {
-    AppLogger.e("Navigating to $orderStatus");
+    AppLogger.d('[RIDE_FLOW] Order update success → navigating to: ${orderStatus?.toLowerCase() ?? "none"}');
     switch (orderStatus?.toLowerCase()) {
       case 'cancelled':
         navigationRoute$.value = 'bottom_nav';
@@ -192,7 +192,7 @@ class OrderUpdateController extends GetxController {
   // }
 
   void _handleError(String error, String buttonId, BuildContext context) {
-    AppLogger.d('Order update error on button $buttonId: $error');
+    AppLogger.d('[RIDE_FLOW] Order update failed buttonId=$buttonId: $error');
   }
 
   void clearNavigation() {

@@ -266,7 +266,7 @@ class HomeApiServices {
 
       final Uri url = Uri.parse("${ApiPath.baseUri}/order/update/$orderid");
 
-      AppLogger.d("🔄 Order Update API: $orderid -> $orderstatus");
+      AppLogger.d('[RIDE_FLOW] Order update API request: $orderid -> $orderstatus');
 
       final response = await http
           .patch(
@@ -279,33 +279,10 @@ class HomeApiServices {
           )
           .timeout(apiTimeout);
 
-      AppLogger.d("✅ Response Status: ${response.statusCode}");
-
-      AppLogger.d("myyyy_fulllll_respsoneeeee ${response.body}");
-
       final Map<String, dynamic> decodedJson = jsonDecode(response.body);
 
-      // CustomToast.showSuccess(decodedJson['message'] ?? "Something went wrong");
-
       if (response.statusCode == 200) {
-        final decodedJson = jsonDecode(response.body);
-
-
-        final prettyJson = const JsonEncoder.withIndent(
-          '  ',
-        ).convert(decodedJson);
-
-        for (var i = 0; i < prettyJson.length; i += 800) {
-          AppLogger.d(
-            prettyJson.substring(
-              i,
-              i + 800 > prettyJson.length ? prettyJson.length : i + 800,
-            ),
-          );
-        }
-
-        AppLogger.d("herrrrrrrrrrrrrrrrrrrrrr ${prettyJson}");
-
+        AppLogger.d('[RIDE_FLOW] Order update API success: $orderid -> $orderstatus');
         return Updateorderresposne.fromJson(decodedJson);
       } else if (response.statusCode == 401) {
         return Updateorderresposne(
@@ -329,7 +306,7 @@ class HomeApiServices {
         message: "Request timeout. Please check your connection.",
       );
     } catch (e) {
-      AppLogger.d("❌ API Error: $e");
+      AppLogger.d('[RIDE_FLOW] Order update API error: $e');
       return Updateorderresposne(
         success: false,
         message: "Connection error. Please check your internet.",
