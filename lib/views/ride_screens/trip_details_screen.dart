@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:nzcu_driver/modals/home_modals/ride_history_response.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
 // Removed unused import for api_path
 
@@ -15,12 +16,31 @@ class TripDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
+    Map<String, String> _formatDateTime(DateTime? dateTime) {
+      if (dateTime == null) {
+        return {'full': '', 'date': '', 'time': ''};
+      }
 
-    // Date formatting
-    final dateFormat = DateFormat('MMM dd, yyyy - hh:mm a');
-    String formattedDate = ride.createdAt != null
-        ? dateFormat.format(ride.createdAt!)
-        : "N/A";
+      try {
+        // Convert to local time if needed
+        final localDateTime = dateTime.toLocal();
+
+        return {
+          'full': DateFormat('hh:mm a, dd MMM yyyy').format(localDateTime),
+          'date': DateFormat('MMM dd, yyyy').format(localDateTime),
+          'time': DateFormat('h:mm a').format(localDateTime),
+        };
+      } catch (e) {
+        AppLogger.d('Error formatting date: $e');
+        return {
+          'full': dateTime.toString(),
+          'date': '',
+          'time': dateTime.toString(),
+        };
+      }
+    }
+
+    final dateInfo = _formatDateTime(ride.createdAt);
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -50,7 +70,11 @@ class TripDetailsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. Status and Date Section
-              _buildHeaderSection(context, w, formattedDate),
+              _buildHeaderSection(
+                context,
+                w,
+                '${dateInfo['date']!} - ${dateInfo['time']!}',
+              ),
               SizedBox(height: h * 0.03),
 
               // 2. Map / Locations

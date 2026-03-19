@@ -39,6 +39,7 @@ class Data {
   DateTime? updatedAt;
   int? v;
   int? driverCommision;
+  int? driverWalletLimit;
 
   Data({
     this.id,
@@ -60,6 +61,7 @@ class Data {
     this.updatedAt,
     this.v,
     this.driverCommision,
+    this.driverWalletLimit,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
@@ -86,6 +88,7 @@ class Data {
         : DateTime.parse(json["updatedAt"]),
     v: json["__v"],
     driverCommision: json["driverCommision"],
+    driverWalletLimit: json["driverWalletLimit"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -108,5 +111,6 @@ class Data {
     "updatedAt": updatedAt?.toIso8601String(),
     "__v": v,
     "driverCommision": driverCommision,
+    "driverWalletLimit": driverWalletLimit,
   };
 }

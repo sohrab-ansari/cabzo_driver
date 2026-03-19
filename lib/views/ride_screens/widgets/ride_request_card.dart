@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/controllers/home_controllers/ride_request_queue_controller.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
@@ -41,7 +42,10 @@ class RideRequestCard extends StatelessWidget {
       fallback: 'Drop',
     );
 
-    final pickupDistance = _str(ride['pickupDistance'] ?? ride['distanceToPickup'], fallback: '');
+    final pickupDistance = _str(
+      ride['pickupDistance'] ?? ride['distanceToPickup'],
+      fallback: '',
+    );
     final tripDistance = _str(ride['distance'], fallback: '');
 
     return Container(
@@ -64,7 +68,11 @@ class RideRequestCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.currency_rupee, color: Color(0xFF22C55E), size: 20),
+              const Icon(
+                Icons.currency_rupee,
+                color: Color(0xFF22C55E),
+                size: 20,
+              ),
               const SizedBox(width: 2),
               Text(
                 fare,
@@ -76,14 +84,20 @@ class RideRequestCard extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF3F4F6),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
                   '#${item.orderId.length > 6 ? item.orderId.substring(item.orderId.length - 6) : item.orderId}',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -96,7 +110,10 @@ class RideRequestCard extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   '$pickupDistance km to pickup',
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -111,7 +128,10 @@ class RideRequestCard extends StatelessWidget {
                   pickupAddress,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -124,7 +144,10 @@ class RideRequestCard extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   '$tripDistance km trip',
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -139,7 +162,10 @@ class RideRequestCard extends StatelessWidget {
                   dropAddress,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -147,17 +173,27 @@ class RideRequestCard extends StatelessWidget {
           const SizedBox(height: 14),
           Row(
             children: [
-              SizedBox(
-                width: 46,
-                height: 46,
-                child: OutlinedButton(
-                  onPressed: isBusy ? null : onDecline,
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    side: BorderSide(color: Colors.grey.shade300),
-                    backgroundColor: Colors.white,
+              GestureDetector(
+                onTap: isBusy ? null : onDecline,
+                child: Container(
+                  width: 46,
+                  height: 46,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: const Icon(Icons.close, color: Colors.black87),
+                  // OutlinedButton(
+                  //   onPressed: isBusy ? null : onDecline,
+                  //   style: OutlinedButton.styleFrom(
+                  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  //     side: BorderSide(color: Colors.grey.shade300),
+                  //     backgroundColor: Colors.white,
+                  //   ),
+                  //   child: const Icon(Icons.close, color: Colors.black87),
+                  // ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -170,26 +206,39 @@ class RideRequestCard extends StatelessWidget {
                       backgroundColor: const Color(0xFF00BFA6),
                       foregroundColor: Colors.white,
                       minimumSize: const Size(double.infinity, 46),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      disabledBackgroundColor: AppColors.mediumGray.withOpacity(0.4),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      disabledBackgroundColor: AppColors.mediumGray.withOpacity(
+                        0.4,
+                      ),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text(
                           'Accept',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                         const SizedBox(width: 10),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.18),
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Text(
                             '⏱ $seconds s',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ],
@@ -204,4 +253,3 @@ class RideRequestCard extends StatelessWidget {
     );
   }
 }
-

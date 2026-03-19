@@ -13,7 +13,7 @@ class TermsAndPolicyController extends GetxController {
   RxString errorMessage = ''.obs;
 
   Future<void> terms_pricy_method() async {
-    AppLogger.d("Fetching reviews...");
+    AppLogger.d("Fetching company details...");
 
     // Set loading state
     isLoading.value = true;
@@ -27,13 +27,13 @@ class TermsAndPolicyController extends GetxController {
       AppLogger.d("API Response Success: ${res.success}");
 
       if (res.success == true) {
-        AppLogger.d("Reviews fetched successfully");
+        AppLogger.d("Company details fetched successfully");
 
         // Update the response
         termspolicyres.value = res;
 
       } else {
-        errorMessage.value = res.message ?? 'Failed to fetch reviews';
+        errorMessage.value = res.message ?? 'Failed to fetch company details';
         AppLogger.d("Error: ${errorMessage.value}");
 
         // Only show snackbar if there's no existing data

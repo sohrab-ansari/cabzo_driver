@@ -4,6 +4,8 @@ import 'package:nzcu_driver/controllers/home_controllers/driver_toggle_duty_cont
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/driverid_controller.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/terms_and_policy_controller.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/wallet_controller.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
@@ -27,7 +29,6 @@ import 'package:nzcu_driver/services/background_service.dart';
 import 'package:nzcu_driver/services/overlay_service.dart';
 import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/get_city_by_location_controller.dart';
-import 'package:nzcu_driver/controllers/profile_controllers/get_city_by_location_controller.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool? isOnDuty;
@@ -48,6 +49,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final StepperController stepperController = Get.find<StepperController>();
 
   final DriveridController driveridController = Get.put(DriveridController());
+
+  final WalletController walletController = Get.find<WalletController>();
+
+  final TermsAndPolicyController termsController = Get.put(
+    TermsAndPolicyController(),
+  );
 
   // Socket Manager instance
   final SocketManager socketManager = SocketManager();
@@ -95,10 +102,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Set<Circle> circles = {};
   BitmapDescriptor? _bikeMarkerIcon;
 
-  // Nearby riders/drivers
-  List<Map<String, dynamic>> _nearbyRiders = [];
-  Map<String, BitmapDescriptor> _vehicleIcons = {};
-
   String? driverName;
 
   dynamic profileimage;
@@ -111,6 +114,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     handleonline();
     homeController.home_data_method();
     driveridController.driverid_mdethod();
+    termsController.terms_pricy_method();
+    walletController.wallet_method();
     // driverToggleDutyController.driver_toggle_method();
 
     WidgetsBinding.instance.addObserver(
@@ -164,7 +169,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     // Load custom icons
     await _loadCustomBikeMarker();
-    await _loadVehicleIcons();
 
     // Start socket callbacks
     _setupSocketCallbacks();
@@ -344,12 +348,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!mounted) return;
     AppLogger.d('🚕 Processing ride request... in home screen..');
 
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => RideRequestScreen(rideData: rideData),
-    //   ),
-    // );
   }
 
   void _navigateToRideScreen(Map<String, dynamic> rideData) {
@@ -373,6 +371,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       OverlayService.instance.hideOverlay();
       socketManager.goOffline();
     } else {
+      // Check wallet balance before going online
+      final walletData = walletController.walletresponse.value?.data;
+      final double availableBalance = walletData?.availableBalance ?? 0.0;
+      final double minBalance =
+          termsController.termspolicyres.value?.data?.driverWalletLimit
+              ?.toDouble() ??
+          2;
+
+      if (minBalance > 0 && availableBalance < minBalance) {
+        CustomToast.showInfo(
+          'Your wallet balance is ₹${availableBalance.toStringAsFixed(0)}. '
+          'A minimum balance of ₹${minBalance.toStringAsFixed(0)} is required to receive rides. '
+          'Please add money to your wallet.',
+        );
+        return;
+      }
+
       // Request overlay permission before going online (one-time prompt)
       final hasOverlayPermission = await OverlayService.instance
           .hasPermission();
@@ -508,15 +523,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _bikeMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(
         BitmapDescriptor.hueBlue,
       );
-    }
-  }
-
-  Future<void> _loadVehicleIcons() async {
-    try {
-      _vehicleIcons = await MapHelper.loadVehicleIcons(iconSize: 70);
-      AppLogger.d('✅ Vehicle icons loaded');
-    } catch (e) {
-      AppLogger.d('❌ Error loading vehicle icons: $e');
     }
   }
 

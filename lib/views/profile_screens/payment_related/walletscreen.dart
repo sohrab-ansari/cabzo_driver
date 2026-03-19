@@ -1,18 +1,16 @@
-﻿import 'package:flutter_animate/flutter_animate.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:get/get.dart';
+import 'package:nzcu_driver/controllers/profile_controllers/terms_and_policy_controller.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/wallet_controller.dart';
+import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/colors/colors_list.dart';
+import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_font.dart';
 import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:nzcu_driver/views/profile_screens/payment_related/add_money.dart';
 import 'package:nzcu_driver/views/profile_screens/payment_related/money_transfer_screen.dart';
 import 'package:nzcu_driver/views/profile_screens/payment_related/transactions.dart';
 import 'package:flutter/material.dart';
-import 'package:nzcu_driver/views/profile_screens/payment_related/wallet.dart';
-import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -23,15 +21,20 @@ class WalletScreen extends StatefulWidget {
 
 class _WalletScreenState extends State<WalletScreen> {
   final WalletController walletController = Get.find<WalletController>();
+  final TermsAndPolicyController termsController = Get.put(
+    TermsAndPolicyController(),
+  );
 
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Fetch data if not already loaded
       if (walletController.walletresponse.value == null) {
         walletController.wallet_method();
+      }
+      if (termsController.termspolicyres.value == null) {
+        termsController.terms_pricy_method();
       }
     });
   }
@@ -51,22 +54,20 @@ class _WalletScreenState extends State<WalletScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Wallet balance card
+            // ── Wallet balance card ──────────────────────────────────────
             Obx(() {
               final controller = walletController;
 
-              // Show loading indicator for the entire section
               if (controller.isLoading.value &&
                   controller.walletresponse.value == null) {
                 return Center(
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: w * .1),
-                    child: CircularProgressIndicator(),
+                    child: const CircularProgressIndicator(),
                   ),
                 );
               }
 
-              // Show error message if any
               if (controller.errorMessage.value.isNotEmpty &&
                   controller.walletresponse.value == null) {
                 return Center(
@@ -76,13 +77,13 @@ class _WalletScreenState extends State<WalletScreen> {
                       children: [
                         Text(
                           controller.errorMessage.value,
-                          style: TextStyle(color: Colors.red),
+                          style: const TextStyle(color: Colors.red),
                           textAlign: TextAlign.center,
                         ),
                         SizedBox(height: w * .02),
                         ElevatedButton(
                           onPressed: () => controller.wallet_method(),
-                          child: Text("Retry"),
+                          child: const Text("Retry"),
                         ),
                       ],
                     ),
@@ -96,7 +97,6 @@ class _WalletScreenState extends State<WalletScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     InkWell(
-                      // onTap: () => Get.to(() => Wallet()),
                       child: Container(
                         width: double.infinity,
                         color: ColorsList.scaffoldColor,
@@ -125,7 +125,6 @@ class _WalletScreenState extends State<WalletScreen> {
                                   ),
                                   SizedBox(height: w * .01),
 
-                                  // Show loader only when initially loading
                                   if (controller.walletresponse.value == null &&
                                       controller.isLoading.value)
                                     SizedBox(
@@ -134,9 +133,9 @@ class _WalletScreenState extends State<WalletScreen> {
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
                                           valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                Color(0xFF27C840),
-                                              ),
+                                              const AlwaysStoppedAnimation<
+                                                Color
+                                              >(Color(0xFF27C840)),
                                         ),
                                       ),
                                     )
@@ -149,22 +148,19 @@ class _WalletScreenState extends State<WalletScreen> {
                                           "₹${controller.walletresponse.value!.data?.availableBalance?.toStringAsFixed(2) ?? '0.00'}",
                                           w * 0.1,
                                           FontWeight.w600,
-                                          Color(0xFF27C840),
+                                          const Color(0xFF27C840),
                                           TextAlign.center,
                                           TextOverflow.visible,
                                         ).animate().fade(duration: 900.ms).scale(),
-
-                                        // Text("gashdghs"),
                                         const Text(
-                                          "Yours wallet balance",
+                                          "Your wallet balance",
                                           style: TextStyle(
                                             fontSize: 16,
                                             color: Colors.grey,
                                           ),
                                         ),
                                         const SizedBox(height: 12),
-
-                                        SizedBox(
+                                        const SizedBox(
                                           width: double.infinity,
                                           child: Divider(),
                                         ),
@@ -195,7 +191,7 @@ class _WalletScreenState extends State<WalletScreen> {
                                       "₹0.00",
                                       w * 0.1,
                                       FontWeight.w600,
-                                      Color(0xFF27C840),
+                                      const Color(0xFF27C840),
                                       TextAlign.center,
                                       TextOverflow.visible,
                                     ),
@@ -212,72 +208,133 @@ class _WalletScreenState extends State<WalletScreen> {
                 ),
               );
             }),
-            // SizedBox(
-            //   width: double.infinity,
-            //   child: Card(
-            //     color: Colors.white,
-            //     shape: RoundedRectangleBorder(
-            //       borderRadius: BorderRadius.circular(12),
-            //     ),
-            //     elevation: 2,
-            //     child: Padding(
-            //       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-            //       child: Column(
-            //         children: [
-            //           const Text(
-            //             "₹500.0",
-            //             style: TextStyle(
-            //               fontSize: 28,
-            //               fontWeight: FontWeight.bold,
-            //               color: Colors.green,
-            //             ),
-            //           ),
-            //           const SizedBox(height: 8),
-            //           const Text(
-            //             "Yoursss wallet balance",
-            //             style: TextStyle(fontSize: 16, color: Colors.grey),
-            //           ),
-            //           const SizedBox(height: 12),
 
-            //           SizedBox(
-            //             width: double.infinity,
-            //             child: Divider()),
-            //           GestureDetector(
-            //             onTap: () {
-
-            //               AppLogger.d("i_was_tapped");
-            //               CustomNavigator.push(
-            //                                   context,
-            //                                   AddMoney(),
-            //                                   transition: TransitionType.slideLeft,
-            //                                 );
-            //             },
-            //             child: const Text(
-            //               "+ Add Money",
-            //               style: TextStyle(
-            //                 color: Colors.red,
-            //                 fontWeight: FontWeight.bold,
-            //                 fontSize: 16,
-            //               ),
-            //             ),
-            //           ),
-            //         ],
-            //       ),
-            //     ),
-            //   ),
-            // ),
             const SizedBox(height: 12),
 
-            const Text(
-              "Maintain a minimum balance of ₹200 in your wallet to accept rides.",
+            // ── Commission & Minimum balance info cards ──────────────────
+            Obx(() {
+              final commission =
+                  termsController.termspolicyres.value?.data?.driverCommision;
+              final minBalance =
+                  termsController.termspolicyres.value?.data?.driverWalletLimit;
 
-              style: TextStyle(fontSize: 14, color: Colors.grey),
-              textAlign: TextAlign.left,
-            ),
+              return Column(
+                children: [
+                  // Commission info card
+                  if (commission != null) ...[
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.primaryRed.withOpacity(0.08),
+                            AppColors.primaryRed.withOpacity(0.02),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: AppColors.primaryRed.withOpacity(0.25),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.percent_rounded,
+                            color: AppColors.primaryRed,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.black87,
+                                ),
+                                children: [
+                                  const TextSpan(text: 'Platform commission: '),
+                                  TextSpan(
+                                    text: '$commission%',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primaryRed,
+                                    ),
+                                  ),
+                                  const TextSpan(
+                                    text:
+                                        ' is deducted from each completed ride.',
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+
+                  // Minimum balance info card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.info_outline_rounded,
+                          color: Colors.blueAccent,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Colors.black87,
+                              ),
+                              children: [
+                                const TextSpan(
+                                  text: 'Maintain a minimum balance of ',
+                                ),
+                                TextSpan(
+                                  text: minBalance != null
+                                      ? '₹${minBalance.toStringAsFixed(0)}'
+                                      : '₹200',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blueAccent,
+                                  ),
+                                ),
+                                const TextSpan(
+                                  text: ' in your wallet to accept rides.',
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            }),
 
             const SizedBox(height: 20),
 
-            // Money Transfer Card
+            // ── Money Transfer Card ──────────────────────────────────────
             SizedBox(
               width: 250,
               child: Card(
@@ -323,7 +380,7 @@ class _WalletScreenState extends State<WalletScreen> {
 
             const SizedBox(height: 12),
 
-            // Transactions Card
+            // ── Transactions Card ────────────────────────────────────────
             SizedBox(
               width: 250,
               child: Card(
