@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
@@ -42,12 +42,22 @@ class OverlayService {
       return;
     }
 
-    // Calculate dynamic size using MediaQuery logic without BuildContext (25% of screen width)
-    final flutterView = ui.PlatformDispatcher.instance.views.first;
-    final logicalWidth =
-        flutterView.physicalSize.width / flutterView.devicePixelRatio;
-    final dynamicSize = (logicalWidth * 0.35)
-        .toInt(); // 39% of screen width e.g., ~150px on typical phones
+    // Use a safe fallback size because some OEM lifecycle transitions
+    // (notably OPPO/realme on lock/unlock) may briefly report zero Flutter views.
+    int dynamicSize = 150;
+    try {
+      final views = ui.PlatformDispatcher.instance.views;
+      if (views.isNotEmpty) {
+        final flutterView = views.first;
+        final logicalWidth =
+            flutterView.physicalSize.width / flutterView.devicePixelRatio;
+        dynamicSize = (logicalWidth * 0.35).toInt();
+      } else {
+        AppLogger.d('[OverlayService] No Flutter views available; using fallback size');
+      }
+    } catch (e) {
+      AppLogger.d('[OverlayService] Failed to compute overlay size: $e');
+    }
 
     try {
       await FlutterOverlayWindow.showOverlay(

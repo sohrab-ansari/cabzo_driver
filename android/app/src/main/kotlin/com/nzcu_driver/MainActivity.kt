@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.os.Build
 import androidx.annotation.NonNull
+import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -12,6 +13,14 @@ import android.view.WindowManager
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.nzcu_driver/background_service"
+
+    private fun startSocketServiceCompat(intent: Intent) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ContextCompat.startForegroundService(this, intent)
+        } else {
+            startService(intent)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,37 +90,64 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "startService" -> {
-                    val intent = Intent(this, SocketForegroundService::class.java)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        startForegroundService(intent)
-                    } else {
-                        startService(intent)
+                    try {
+                        val intent = Intent(this, SocketForegroundService::class.java)
+                        startSocketServiceCompat(intent)
+                        result.success("Service Started")
+                    } catch (e: Exception) {
+                        android.util.Log.e("MainActivity", "startService failed: ${e.message}", e)
+                        result.error("START_FAILED", e.message, null)
                     }
-                    result.success("Service Started")
                 }
                 "stopService" -> {
-                    val intent = Intent(this, SocketForegroundService::class.java)
-                    intent.putExtra(SocketForegroundService.EXTRA_ACTION, SocketForegroundService.ACTION_STOP)
-                    startService(intent)
-                    result.success("Service Stopped")
+                    try {
+                        val stopped = stopService(Intent(this, SocketForegroundService::class.java))
+                        result.success(if (stopped) "Service Stopped" else "Service Not Running")
+                    } catch (e: Exception) {
+                        android.util.Log.e("MainActivity", "stopService failed: ${e.message}", e)
+                        result.error("STOP_FAILED", e.message, null)
+                    }
                 }
                 "updateNotification" -> {
-                    val title = call.argument<String>("title")
-                    val body = call.argument<String>("body")
-                    val intent = Intent(this, SocketForegroundService::class.java)
-                    intent.putExtra(SocketForegroundService.EXTRA_ACTION, SocketForegroundService.ACTION_UPDATE)
-                    if (title != null) intent.putExtra(SocketForegroundService.EXTRA_TITLE, title)
-                    if (body != null) intent.putExtra(SocketForegroundService.EXTRA_BODY, body)
-                    startService(intent)
-                    result.success("Notification Updated")
+                    try {
+                        val title = call.argument<String>("title")
+                        val body = call.argument<String>("body")
+                        val intent = Intent(this, SocketForegroundService::class.java)
+                        intent.putExtra(SocketForegroundService.EXTRA_ACTION, SocketForegroundService.ACTION_UPDATE)
+                        if (title != null) intent.putExtra(SocketForegroundService.EXTRA_TITLE, title)
+                        if (body != null) intent.putExtra(SocketForegroundService.EXTRA_BODY, body)
+                        // Do not start as foreground here: ACTION_UPDATE path is lightweight
+                        // and may not call startForeground() immediately if service wasn't running.
+                        startService(intent)
+                        result.success("Notification Updated")
+                    } catch (e: Exception) {
+                        android.util.Log.e("MainActivity", "updateNotification failed: ${e.message}", e)
+                        result.error("UPDATE_FAILED", e.message, null)
+                    }
                 }
                 "setAppState" -> {
-                    val state = call.argument<String>("state") ?: "Foreground"
-                    val intent = Intent(this, SocketForegroundService::class.java)
-                    intent.putExtra(SocketForegroundService.EXTRA_ACTION, SocketForegroundService.ACTION_SET_APP_STATE)
-                    intent.putExtra(SocketForegroundService.EXTRA_APP_STATE, state)
-                    startService(intent)
-                    result.success("App state updated")
+                    try {
+                        val state = call.argument<String>("state") ?: "Foreground"
+                        val prefs = getSharedPreferences("FlutterSharedPreferences", android.content.Context.MODE_PRIVATE)
+                        val isDriverOnline = prefs.getBoolean("flutter.driver_is_online", false)
+
+                        // Avoid unnecessary service starts while offline, which are brittle on OEM ROMs.
+                        if (!isDriverOnline) {
+                            result.success("App state skipped (driver offline)")
+                            return@setMethodCallHandler
+                        }
+
+                        val intent = Intent(this, SocketForegroundService::class.java)
+                        intent.putExtra(SocketForegroundService.EXTRA_ACTION, SocketForegroundService.ACTION_SET_APP_STATE)
+                        intent.putExtra(SocketForegroundService.EXTRA_APP_STATE, state)
+                        // Do not force foreground start for state sync actions.
+                        // This avoids Android OEM crashes when service is not already active.
+                        startService(intent)
+                        result.success("App state updated")
+                    } catch (e: Exception) {
+                        android.util.Log.e("MainActivity", "setAppState failed: ${e.message}", e)
+                        result.error("SET_STATE_FAILED", e.message, null)
+                    }
                 }
                 "bringToFront" -> {
                     val appIntent = Intent(this@MainActivity, MainActivity::class.java).apply {
