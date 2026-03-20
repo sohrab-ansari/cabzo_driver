@@ -25,6 +25,7 @@ import io.socket.client.IO
 import io.socket.client.Socket
 import org.json.JSONObject
 import java.net.URI
+import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -55,6 +56,13 @@ class SocketForegroundService : Service() {
         // Location update interval (ms)
         private const val LOCATION_INTERVAL_MS = 5000L
         private const val LOCATION_FASTEST_MS = 3000L
+
+        // WakeLock timeout: 30 minutes. Re-acquired periodically.
+        // OPPO/ColorOS force-kills processes holding indefinite WakeLocks.
+        private const val WAKELOCK_TIMEOUT_MS = 30 * 60 * 1000L
+
+        // Socket reconnection cap to prevent memory exhaustion on network loss
+        private const val MAX_SOCKET_RECONNECT_ATTEMPTS = 200
 
         // Pref keys — MUST match Flutter's SharedPreferences keys exactly
         // Flutter shared_preferences plugin uses file: FlutterSharedPreferences
@@ -111,6 +119,16 @@ class SocketForegroundService : Service() {
     // Timer for location socket emit
     private var locationEmitTimer: Timer? = null
 
+    // Timer to periodically re-acquire WakeLock before it expires
+    private var wakeLockRefreshTimer: Timer? = null
+
+    // Thread-safe ISO 8601 date formatter (avoids Date.toInstant() which requires API 26+)
+    private val isoDateFormat: SimpleDateFormat by lazy {
+        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
+    }
+
     // ──────────────────────────────────────────────────────────
     //  Lifecycle
     // ──────────────────────────────────────────────────────────
@@ -131,7 +149,7 @@ class SocketForegroundService : Service() {
                 return START_NOT_STICKY
             }
             ACTION_UPDATE -> {
-                val title = intent.getStringExtra(EXTRA_TITLE) ?: "NZCU Driver — Online"
+                val title = intent.getStringExtra(EXTRA_TITLE) ?: "You are Online"
                 val body = intent.getStringExtra(EXTRA_BODY) ?: "Waiting for rides..."
                 updateStatusNotification(title, body)
                 return START_STICKY
@@ -167,7 +185,9 @@ class SocketForegroundService : Service() {
         if (!driverIsOnline) {
             // Android rule: when started via startForegroundService(), the service MUST call
             // startForeground() within 5 seconds or the system throws a fatal exception.
-            // We satisfy this rule with a silent placeholder, then immediately remove it and stop.
+            // We satisfy this rule with a silent placeholder, then stop after a short delay.
+            // OPPO/ColorOS has stricter timing — adding a small delay between
+            // startForeground and stopSelf prevents RemoteServiceException.
             Log.i(TAG, "Service started but driver is offline — starting foreground briefly then stopping.")
             try {
                 val notification = buildStatusNotification("NZCU Driver", "Starting...")
@@ -181,12 +201,18 @@ class SocketForegroundService : Service() {
                 } else {
                     startForeground(STATUS_NOTIFICATION_ID, notification)
                 }
-                // stopForeground(int) is API 24+. Use ServiceCompat for backwards safety.
-                ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
             } catch (e: Exception) {
                 Log.e(TAG, "startForeground failed while stopping: ${e.message}")
             }
-            stopSelf()
+            // Delay stopSelf to let ColorOS process the startForeground call fully
+            android.os.Handler(Looper.getMainLooper()).postDelayed({
+                try {
+                    ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+                } catch (e: Exception) {
+                    Log.e(TAG, "stopForeground failed: ${e.message}")
+                }
+                stopSelf()
+            }, 200)
             return START_NOT_STICKY
         }
 
@@ -197,8 +223,8 @@ class SocketForegroundService : Service() {
         try {
             // Start as foreground immediately (MUST happen within 5s)
             val notification = buildStatusNotification(
-                "NZCU Driver — Online",
-                "\uD83D\uDFE2 App Active — Foreground • Waiting for rides..."
+                "You are Online",
+                "Waiting for rides..." 
             )
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 startForeground(
@@ -216,6 +242,11 @@ class SocketForegroundService : Service() {
             return START_NOT_STICKY
         }
 
+        // Cancel any zombie timers from a previous service incarnation.
+        // When the OS kills and restarts via START_STICKY, onDestroy() may not
+        // have been called, leaving old Timer threads alive.
+        cancelAllTimers()
+
         // Defer heavy operations to background thread to avoid ANR
         Thread {
             try {
@@ -230,8 +261,7 @@ class SocketForegroundService : Service() {
             // Connecting both simultaneously causes the server to deliver rides
             // only to the Kotlin socket, breaking Flutter's RideRequestScreen navigation.
 
-            locationEmitTimer?.cancel()
-            locationEmitTimer = Timer().also {
+            locationEmitTimer = Timer("LocationEmit", true).also {
                 it.scheduleAtFixedRate(object : TimerTask() {
                     override fun run() {
                         try { emitLocation() } catch (e: Exception) {
@@ -254,17 +284,25 @@ class SocketForegroundService : Service() {
 
     override fun onDestroy() {
         Log.i(TAG, "[LIFECYCLE] onDestroy() - Service destroyed")
-        onlineTimer?.cancel()
-        locationEmitTimer?.cancel()
+        cancelAllTimers()
         stopLocationUpdates()
         disconnectSocket()
         releaseLocks()
         super.onDestroy()
     }
 
+    private fun cancelAllTimers() {
+        onlineTimer?.cancel()
+        onlineTimer = null
+        locationEmitTimer?.cancel()
+        locationEmitTimer = null
+        wakeLockRefreshTimer?.cancel()
+        wakeLockRefreshTimer = null
+    }
+
     override fun onBind(intent: Intent?): IBinder? {
         Log.i(TAG, "[LIFECYCLE] onBind() - action: ${intent?.action}")
-        return null
+        return null 
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
@@ -274,8 +312,8 @@ class SocketForegroundService : Service() {
 
         // Update notification to show killed state
         updateStatusNotification(
-            "NZCU Driver — Online",
-            "🔴 App Killed — Running in Background • Waiting for rides..."
+            "You are Online",
+            "Running in Background • Waiting for rides..."
         )
 
         // NOW connect the Kotlin socket — Flutter's socket is dead, we take over
@@ -289,7 +327,7 @@ class SocketForegroundService : Service() {
 
             // Start online emit timer (only needed in killed state)
             onlineTimer?.cancel()
-            onlineTimer = Timer().also {
+            onlineTimer = Timer("OnlineEmit", true).also {
                 it.scheduleAtFixedRate(object : TimerTask() {
                     override fun run() {
                         try { emitOnline() } catch (e: Exception) {
@@ -320,7 +358,7 @@ class SocketForegroundService : Service() {
         // Do NOT show any notification when the service is invoked for state tracking while offline.
         if (isOnDuty) {
             val body = buildNotificationBody()
-            updateStatusNotification("NZCU Driver — Online", body)
+            updateStatusNotification("You are Online", body)
         }
 
         // When Flutter comes back alive, disconnect Kotlin socket
@@ -364,10 +402,10 @@ class SocketForegroundService : Service() {
             val options = IO.Options().apply {
                 transports = arrayOf("websocket", "polling")
                 reconnection = true
-                reconnectionAttempts = Int.MAX_VALUE
-                reconnectionDelay = 1000
-                reconnectionDelayMax = 5000
-                timeout = 10000
+                reconnectionAttempts = MAX_SOCKET_RECONNECT_ATTEMPTS
+                reconnectionDelay = 2000
+                reconnectionDelayMax = 30000
+                timeout = 15000
                 auth = mapOf("token" to token)
                 query = "userRole=Driver&platform=android_native&driverId=$driverId"
             }
@@ -426,7 +464,7 @@ class SocketForegroundService : Service() {
 
                         // Update status notification
                         updateStatusNotification(
-                            "NZCU Driver — Ride in Progress",
+                            "Ride in Progress...",
                             buildNotificationBody()
                         )
                     } catch (e: Exception) {
@@ -552,6 +590,8 @@ class SocketForegroundService : Service() {
         }
     }
 
+    private fun nowIso(): String = isoDateFormat.format(Date())
+
     private fun emitLocation() {
         if (!isOnDuty || socket == null || !isSocketConnected) return
         if (currentLat == 0.0 && currentLng == 0.0) return
@@ -562,6 +602,7 @@ class SocketForegroundService : Service() {
         val vehicleType = prefs.getString(PREF_VEHICLE_TYPE, "") ?: ""
 
         try {
+            val timestamp = nowIso()
             if (isRide && activeRideId.isNotEmpty()) {
                 val payload = JSONObject().apply {
                     put("rideId", activeRideId)
@@ -570,7 +611,7 @@ class SocketForegroundService : Service() {
                         put("longitude", currentLng)
                         put("lat", currentLat)
                         put("lng", currentLng)
-                        put("timestamp", Date().toInstant().toString())
+                        put("timestamp", timestamp)
                         put("accuracy", 0.0)
                         put("speed", 0.0)
                     })
@@ -582,7 +623,7 @@ class SocketForegroundService : Service() {
                     put("longitude", currentLng)
                     put("role", "Driver")
                     put("vehicleType", vehicleType)
-                    put("timestamp", Date().toInstant().toString())
+                    put("timestamp", timestamp)
                 }
                 socket?.emit("driver:location:update", payload)
             }
@@ -753,8 +794,8 @@ class SocketForegroundService : Service() {
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_CALL)
-            .setAutoCancel(false)
-            .setOngoing(true)
+            .setAutoCancel(true)
+            .setOngoing(false)
             .setContentIntent(openPendingIntent)
             .addAction(0, "✅ Accept", acceptPendingIntent)
             .addAction(0, "❌ Decline", declinePendingIntent)
@@ -889,9 +930,9 @@ class SocketForegroundService : Service() {
         val sb = StringBuilder()
 
         when (appState) {
-            "Killed" -> sb.append("🔴 App Killed — Running in Background")
-            "Background" -> sb.append("🟡 App Minimised — Running in Background")
-            else -> sb.append("🟢 App Active — Foreground")
+            "Killed" -> sb.append("Running in Background")
+            "Background" -> sb.append("Running in Background")
+            else -> sb.append("")
         }
 
         if (isRide) {
@@ -934,18 +975,59 @@ class SocketForegroundService : Service() {
     // ──────────────────────────────────────────────────────────
 
     private fun acquireLocks() {
-        if (wakeLock == null) {
-            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
-            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "NZCUDriver::SocketWakeLock")
-            wakeLock?.acquire()
+        try {
+            if (wakeLock == null) {
+                val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+                wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "NZCUDriver::SocketWakeLock")
+            }
+            // Always re-acquire with a timeout. OPPO/ColorOS force-kills processes
+            // holding indefinite WakeLocks. Using a timeout and periodically refreshing
+            // keeps the lock active without triggering the battery guardian.
+            wakeLock?.acquire(WAKELOCK_TIMEOUT_MS)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error acquiring WakeLock: ${e.message}")
         }
-        if (wifiLock == null) {
-            val wm = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-            @Suppress("DEPRECATION")
-            wifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "NZCUDriver::SocketWifiLock")
-            wifiLock?.acquire()
+
+        try {
+            if (wifiLock == null) {
+                val wm = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+                wifiLock = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    // WIFI_MODE_FULL_HIGH_PERF is deprecated on API 29+; use LOW_LATENCY
+                    wm.createWifiLock(WifiManager.WIFI_MODE_FULL_LOW_LATENCY, "NZCUDriver::SocketWifiLock")
+                } else {
+                    @Suppress("DEPRECATION")
+                    wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "NZCUDriver::SocketWifiLock")
+                }
+            }
+            if (wifiLock?.isHeld == false) {
+                wifiLock?.acquire()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error acquiring WifiLock: ${e.message}")
         }
-        Log.i(TAG, "🔒 Locks acquired")
+
+        // Schedule periodic WakeLock refresh (re-acquire before timeout expires)
+        startWakeLockRefresh()
+
+        Log.i(TAG, "🔒 Locks acquired (WakeLock timeout=${WAKELOCK_TIMEOUT_MS}ms)")
+    }
+
+    private fun startWakeLockRefresh() {
+        wakeLockRefreshTimer?.cancel()
+        // Refresh at 80% of the timeout interval to ensure it never actually expires
+        val refreshInterval = (WAKELOCK_TIMEOUT_MS * 0.8).toLong()
+        wakeLockRefreshTimer = Timer("WakeLockRefresh", true).also {
+            it.scheduleAtFixedRate(object : TimerTask() {
+                override fun run() {
+                    try {
+                        wakeLock?.acquire(WAKELOCK_TIMEOUT_MS)
+                        Log.d(TAG, "🔒 WakeLock refreshed")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error refreshing WakeLock: ${e.message}")
+                    }
+                }
+            }, refreshInterval, refreshInterval)
+        }
     }
 
     private fun releaseLocks() {

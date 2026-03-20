@@ -6,6 +6,7 @@ import 'package:nzcu_driver/controllers/chart_id_controller/chat_notification_co
 import 'package:nzcu_driver/controllers/home_controllers/order_update_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/stepper_controller.dart';
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
+import 'package:nzcu_driver/utilities/colors/colors.dart';
 import 'package:nzcu_driver/utilities/colors/colors_list.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_text.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
@@ -56,9 +57,10 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
   // Map & Location
   GoogleMapController? _mapController;
-  LatLng? _driverLocation;          // raw GPS fix
-  LatLng? _animatedDriverLocation;  // interpolated position shown on map
-  double _animatedHeading = 0;      // smoothly interpolated bearing (replaces raw GPS heading)
+  LatLng? _driverLocation; // raw GPS fix
+  LatLng? _animatedDriverLocation; // interpolated position shown on map
+  double _animatedHeading =
+      0; // smoothly interpolated bearing (replaces raw GPS heading)
   double _distanceToPickup = 0;
   bool _locationError = false;
   bool _isScreenActive = true;
@@ -106,7 +108,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
     image_get_from_shared();
 
     _isScreenActive = true;
-    AppLogger.d('[RIDE_FLOW] ArrivingClient initState → orderId=${widget.rideData?['orderId']} step=${stepperController.activeStep.value}');
+    AppLogger.d(
+      '[RIDE_FLOW] ArrivingClient initState → orderId=${widget.rideData?['orderId']} step=${stepperController.activeStep.value}',
+    );
 
     _setupNavigationListener();
     _setupStepperListener();
@@ -138,7 +142,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
           clearAll: orderUpdateController.clearAll,
         );
 
-        AppLogger.d('[RIDE_FLOW] ArrivingClient navigation → route=${command.route} clearAll=${command.clearAll}');
+        AppLogger.d(
+          '[RIDE_FLOW] ArrivingClient navigation → route=${command.route} clearAll=${command.clearAll}',
+        );
         _handleNavigation(command);
         orderUpdateController.clearNavigation();
       }
@@ -176,11 +182,15 @@ class _ArrivingClientState extends State<ArrivingClient> {
   }
 
   void myridedataprint() {
-    AppLogger.d('[RIDE_FLOW] ArrivingClient rideData keys: ${widget.rideData?.keys.join(", ")}');
+    AppLogger.d(
+      '[RIDE_FLOW] ArrivingClient rideData keys: ${widget.rideData?.keys.join(", ")}',
+    );
   }
 
   void _onStepChanged(int step) {
-    AppLogger.d('[RIDE_FLOW] ArrivingClient step changed → $step (${stepperController.stepNames[step]})');
+    AppLogger.d(
+      '[RIDE_FLOW] ArrivingClient step changed → $step (${stepperController.stepNames[step]})',
+    );
     if (step == 2) {
       // Trip started - switch to driver → drop polyline
       _routeCoordinates.clear();
@@ -483,7 +493,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
     };
 
     _extractCoordinates();
-    AppLogger.d('[RIDE_FLOW] ArrivingClient ride data extracted → orderId=${_rideData?['orderId']}');
+    AppLogger.d(
+      '[RIDE_FLOW] ArrivingClient ride data extracted → orderId=${_rideData?['orderId']}',
+    );
   }
 
   void _extractCoordinates() {
@@ -505,8 +517,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
               final bool isLatLngFormat =
                   (coord0 >= 8 && coord0 <= 37) &&
                   (coord1 >= 68 && coord1 <= 97);
-              _rideData!['pickupCoordinates'] =
-                  isLatLngFormat ? LatLng(coord0, coord1) : LatLng(coord1, coord0);
+              _rideData!['pickupCoordinates'] = isLatLngFormat
+                  ? LatLng(coord0, coord1)
+                  : LatLng(coord1, coord0);
             }
           }
         }
@@ -521,8 +534,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
           final coord1 = coords[1]?.toDouble() ?? 0;
           final bool isLatLngFormat =
               (coord0 >= 8 && coord0 <= 37) && (coord1 >= 68 && coord1 <= 97);
-          _rideData!['pickupCoordinates'] =
-              isLatLngFormat ? LatLng(coord0, coord1) : LatLng(coord1, coord0);
+          _rideData!['pickupCoordinates'] = isLatLngFormat
+              ? LatLng(coord0, coord1)
+              : LatLng(coord1, coord0);
         } else if (coords is Map) {
           final lat = coords['latitude']?.toDouble();
           final lng = coords['longitude']?.toDouble();
@@ -550,8 +564,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
               final bool isLatLngFormat =
                   (coord0 >= 8 && coord0 <= 37) &&
                   (coord1 >= 68 && coord1 <= 97);
-              _rideData!['dropoffCoordinates'] =
-                  isLatLngFormat ? LatLng(coord0, coord1) : LatLng(coord1, coord0);
+              _rideData!['dropoffCoordinates'] = isLatLngFormat
+                  ? LatLng(coord0, coord1)
+                  : LatLng(coord1, coord0);
             }
           }
         }
@@ -566,8 +581,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
           final coord1 = coords[1]?.toDouble() ?? 0;
           final bool isLatLngFormat =
               (coord0 >= 8 && coord0 <= 37) && (coord1 >= 68 && coord1 <= 97);
-          _rideData!['dropoffCoordinates'] =
-              isLatLngFormat ? LatLng(coord0, coord1) : LatLng(coord1, coord0);
+          _rideData!['dropoffCoordinates'] = isLatLngFormat
+              ? LatLng(coord0, coord1)
+              : LatLng(coord1, coord0);
         } else if (coords is Map) {
           final lat = coords['latitude']?.toDouble();
           final lng = coords['longitude']?.toDouble();
@@ -679,7 +695,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
         _locationError = false;
       });
 
-      AppLogger.d('📍 Initial location: ${position.latitude}, ${position.longitude}');
+      AppLogger.d(
+        '📍 Initial location: ${position.latitude}, ${position.longitude}',
+      );
 
       if (_rideData?['pickupCoordinates'] != null) {
         final pickupCoords = _rideData!['pickupCoordinates'] as LatLng;
@@ -706,16 +724,18 @@ class _ArrivingClientState extends State<ArrivingClient> {
         Geolocator.getPositionStream(locationSettings: locationSettings).listen(
           (Position position) {
             if (!_isScreenActive || !mounted) return;
-            
+
             // Fetch city polygon
             Get.find<GetCityByLocationController>().getCityByLocation(
-                lat: position.latitude.toString(),
-                lng: position.longitude.toString());
-            
+              lat: position.latitude.toString(),
+              lng: position.longitude.toString(),
+            );
+
             // Fetch city polygon
             Get.find<GetCityByLocationController>().getCityByLocation(
-                lat: position.latitude.toString(),
-                lng: position.longitude.toString());
+              lat: position.latitude.toString(),
+              lng: position.longitude.toString(),
+            );
 
             final newLocation = LatLng(position.latitude, position.longitude);
 
@@ -786,8 +806,10 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
     // ── U-turn detection ─────────────────────────────────────────────────
     final distMoved = _calculateDistance(
-      startPos.latitude, startPos.longitude,
-      newPos.latitude, newPos.longitude,
+      startPos.latitude,
+      startPos.longitude,
+      newPos.latitude,
+      newPos.longitude,
     );
     if (_previousTravelBearing >= 0 && distMoved > 0.005) {
       // Angular difference between previous travel direction and current
@@ -796,86 +818,89 @@ class _ArrivingClientState extends State<ArrivingClient> {
       if (angleDiff.abs() > 130) {
         // Driver made a U-turn — clear stale polyline immediately so the
         // V-shape disappears, then re-fetch fresh route.
-        AppLogger.d('🔄 U-turn detected (${angleDiff.abs().toStringAsFixed(0)}°) — clearing polyline');
+        AppLogger.d(
+          '🔄 U-turn detected (${angleDiff.abs().toStringAsFixed(0)}°) — clearing polyline',
+        );
         _immediateReFetchRoute();
       }
     }
     if (distMoved > 0.005) _previousTravelBearing = rawBearing;
 
-    _markerAnimationTimer = Timer.periodic(
-      const Duration(milliseconds: 16),
-      (timer) {
-        if (!_isScreenActive || !mounted) {
-          timer.cancel();
-          return;
-        }
+    _markerAnimationTimer = Timer.periodic(const Duration(milliseconds: 16), (
+      timer,
+    ) {
+      if (!_isScreenActive || !mounted) {
+        timer.cancel();
+        return;
+      }
 
-        _animFrame++;
-        final double t = _animFrame / _animTotalFrames;
+      _animFrame++;
+      final double t = _animFrame / _animTotalFrames;
 
-        final double animLat =
-            startPos.latitude + (newPos.latitude - startPos.latitude) * t;
-        final double animLng =
-            startPos.longitude + (newPos.longitude - startPos.longitude) * t;
+      final double animLat =
+          startPos.latitude + (newPos.latitude - startPos.latitude) * t;
+      final double animLng =
+          startPos.longitude + (newPos.longitude - startPos.longitude) * t;
 
-        final interpPos = LatLng(animLat, animLng);
+      final interpPos = LatLng(animLat, animLng);
 
-        // Compute new heading (only when actually moving >2m)
-        final distMoved = _calculateDistance(
-          startPos.latitude, startPos.longitude,
-          newPos.latitude, newPos.longitude,
-        );
-        double newHeading = _animatedHeading;
-        if (distMoved > 0.002) {
-          newHeading = _lerpAngle(startHeading, targetBearing, t);
-        }
+      // Compute new heading (only when actually moving >2m)
+      final distMoved = _calculateDistance(
+        startPos.latitude,
+        startPos.longitude,
+        newPos.latitude,
+        newPos.longitude,
+      );
+      double newHeading = _animatedHeading;
+      if (distMoved > 0.002) {
+        newHeading = _lerpAngle(startHeading, targetBearing, t);
+      }
 
-        setState(() {
-          _animatedDriverLocation = interpPos;
-          _animatedHeading = newHeading;
+      setState(() {
+        _animatedDriverLocation = interpPos;
+        _animatedHeading = newHeading;
 
-          // 🔑 KEY FIX: Directly update the driver Marker inside the Set
-          // so GoogleMap re-renders the icon at the interpolated position.
-          // Using copyWith avoids rebuilding the entire markers Set.
-          markers = markers.map((m) {
-            if (m.markerId.value == 'driver') {
-              return m.copyWith(
-                positionParam: interpPos,
-                rotationParam: newHeading,
-              );
-            }
-            return m;
-          }).toSet();
-
-          // Keep driver circles centred on the animated position
-          circles = circles.map((c) {
-            if (c.circleId.value == 'outer_shadow' ||
-                c.circleId.value == 'inner_green') {
-              return Circle(
-                circleId: c.circleId,
-                center: interpPos,
-                radius: c.radius,
-                fillColor: c.fillColor,
-                strokeColor: c.strokeColor,
-                strokeWidth: c.strokeWidth,
-              );
-            }
-            return c;
-          }).toSet();
-        });
-
-        // Update polyline origin on every animation frame
-        _updateDynamicPolyline();
-
-        if (_animFrame >= _animTotalFrames) {
-          timer.cancel();
-          // Rebuild full marker set at exact target to stay in sync
-          if (mounted && _isScreenActive) {
-            _setMarkers();
+        // 🔑 KEY FIX: Directly update the driver Marker inside the Set
+        // so GoogleMap re-renders the icon at the interpolated position.
+        // Using copyWith avoids rebuilding the entire markers Set.
+        markers = markers.map((m) {
+          if (m.markerId.value == 'driver') {
+            return m.copyWith(
+              positionParam: interpPos,
+              rotationParam: newHeading,
+            );
           }
+          return m;
+        }).toSet();
+
+        // Keep driver circles centred on the animated position
+        circles = circles.map((c) {
+          if (c.circleId.value == 'outer_shadow' ||
+              c.circleId.value == 'inner_green') {
+            return Circle(
+              circleId: c.circleId,
+              center: interpPos,
+              radius: c.radius,
+              fillColor: c.fillColor,
+              strokeColor: c.strokeColor,
+              strokeWidth: c.strokeWidth,
+            );
+          }
+          return c;
+        }).toSet();
+      });
+
+      // Update polyline origin on every animation frame
+      _updateDynamicPolyline();
+
+      if (_animFrame >= _animTotalFrames) {
+        timer.cancel();
+        // Rebuild full marker set at exact target to stay in sync
+        if (mounted && _isScreenActive) {
+          _setMarkers();
         }
-      },
-    );
+      }
+    });
   }
 
   /// Bearing (degrees 0–360) without image-offset correction.
@@ -1242,14 +1267,21 @@ class _ArrivingClientState extends State<ArrivingClient> {
     // Need at least 2 distinct points to make a valid bounds rectangle.
     // If GPS isn't ready yet, retry after the first location fix arrives.
     if (allPoints.length < 2) {
-      AppLogger.d('⏳ _fitMapToAllMarkers: waiting for GPS — only ${allPoints.length} point(s)');
+      AppLogger.d(
+        '⏳ _fitMapToAllMarkers: waiting for GPS — only ${allPoints.length} point(s)',
+      );
       return; // _setMarkers() will retry until _initialFitDone is true
     }
 
     // Safety: if both points are identical (driver AT pickup/drop), expand
     // bounds slightly so Google Maps doesn't crash with a zero-size rect.
     if (allPoints.first == allPoints.last) {
-      allPoints.add(LatLng(allPoints.first.latitude + 0.002, allPoints.first.longitude + 0.002));
+      allPoints.add(
+        LatLng(
+          allPoints.first.latitude + 0.002,
+          allPoints.first.longitude + 0.002,
+        ),
+      );
     }
 
     final bounds = _boundsFromLatLngList(allPoints);
@@ -1457,30 +1489,30 @@ class _ArrivingClientState extends State<ArrivingClient> {
       return GoogleMap(
         polygons: Get.find<GetCityByLocationController>().cityPolygons.toSet(),
         onMapCreated: (GoogleMapController controller) {
-        _mapController = controller;
-        AppLogger.d('✅ Google Map created');
+          _mapController = controller;
+          AppLogger.d('✅ Google Map created');
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (_isScreenActive && mounted) {
-            _setMarkers();
-            _fitMapToAllMarkers();
-          }
-        });
-      },
-      initialCameraPosition: CameraPosition(
-        target: initialLocation,
-        zoom: 14.5,
-      ),
-      markers: markers,
-      circles: circles,
-      polylines: _polylines,
-      myLocationEnabled: false,
-      myLocationButtonEnabled: false,
-      zoomControlsEnabled: false,
-      compassEnabled: true,
-      rotateGesturesEnabled: true,
-      tiltGesturesEnabled: false,
-    );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_isScreenActive && mounted) {
+              _setMarkers();
+              _fitMapToAllMarkers();
+            }
+          });
+        },
+        initialCameraPosition: CameraPosition(
+          target: initialLocation,
+          zoom: 14.5,
+        ),
+        markers: markers,
+        circles: circles,
+        polylines: _polylines,
+        myLocationEnabled: false,
+        myLocationButtonEnabled: false,
+        zoomControlsEnabled: false,
+        compassEnabled: true,
+        rotateGesturesEnabled: true,
+        tiltGesturesEnabled: false,
+      );
     });
   }
 
@@ -1520,17 +1552,18 @@ class _ArrivingClientState extends State<ArrivingClient> {
       if (_isScreenActive && mounted) {
         CustomToast.showError('Failed to navigate to OTP');
         await _resumeLocationTracking(); // Resume tracking on error
-      } 
+      }
     }
   }
-  
 
   void _handleNavigation(NavigationCommand command) {
     if (!mounted || !_isScreenActive) return;
 
     switch (command.route) {
       case 'bottom_nav':
-        AppLogger.d('[RIDE_FLOW] ArrivingClient → bottom_nav (cancel/complete)');
+        AppLogger.d(
+          '[RIDE_FLOW] ArrivingClient → bottom_nav (cancel/complete)',
+        );
         Get.offAll(() => BottomnavmainScreen(isOnDuty: true));
         break;
       case 'arriving_screen':
@@ -1539,15 +1572,19 @@ class _ArrivingClientState extends State<ArrivingClient> {
         break;
       case 'payment_screen':
         AppLogger.d('[RIDE_FLOW] ArrivingClient → payment_screen');
-        Get.offAll(() => ReceivePaymentModes(
-              rideData: command.arguments ?? widget.rideData,
-            ));
+        Get.offAll(
+          () => ReceivePaymentModes(
+            rideData: command.arguments ?? widget.rideData,
+          ),
+        );
         break;
       case 'arriving_client': // Already on arriving client screen
       case '': // Empty route meant for no navigation (e.g., Progress status)
         break;
       default:
-        AppLogger.d('[RIDE_FLOW] ArrivingClient unknown route: ${command.route}');
+        AppLogger.d(
+          '[RIDE_FLOW] ArrivingClient unknown route: ${command.route}',
+        );
         break;
     }
   }
@@ -1606,7 +1643,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
   }
 
   Widget _buildLocationInputs(double w) {
-    bool isRental = _rideData?['orderType'] == 'rental' || _rideData?['orderType'] == 'Rental';
+    bool isRental =
+        _rideData?['orderType'] == 'rental' ||
+        _rideData?['orderType'] == 'Rental';
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: w * .03, vertical: w * .01),
@@ -1652,8 +1691,72 @@ class _ArrivingClientState extends State<ArrivingClient> {
               ),
             ),
           ),
+
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: _buildNavigateButton(),
+          ),
+        ),
       ],
     );
+  }
+
+  Widget _buildNavigateButton() {
+    return Obx(() {
+      final step = stepperController.activeStep.value;
+
+      // Step 0 = driving to pickup → "Go to Pickup"
+      // Step 1 = arrived at pickup / OTP → hide button
+      // Step 2+ = trip started → "Go to Drop"
+      if (step == 1) return const SizedBox.shrink();
+
+      final bool isPickupPhase = step == 0;
+      final LatLng? destination = isPickupPhase
+          ? (_rideData?['pickupCoordinates'] as LatLng?)
+          : (_rideData?['dropoffCoordinates'] as LatLng?);
+
+      if (destination == null) return const SizedBox.shrink();
+
+      final String label = isPickupPhase ? "Go to Pickup" : "Go to Drop";
+      final IconData icon = Icons.navigation_rounded;
+      // final Color bgColor = isPickupPhase
+      //     ? const Color(0xFF08875D)
+      //     : const Color(0xFFD32F2F);
+
+      return Material(
+        elevation: 4,
+        borderRadius: BorderRadius.circular(24),
+        shadowColor: AppColors.primaryblue.withOpacity(0.4),
+        child: InkWell(
+          onTap: () => _launchGoogleMapsNavigation(destination),
+          borderRadius: BorderRadius.circular(24),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.primaryblue,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: Colors.white, size: 18),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    });
   }
 
   Widget _buildBottomSheet(double w) {
@@ -2059,7 +2162,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
           buttonId: 'arrive_button',
           onTap: () {
             if (orderId != null && orderId.isNotEmpty) {
-              AppLogger.d('[RIDE_FLOW] ArrivingClient "I\'ve Arrived" tapped → orderId=$orderId');
+              AppLogger.d(
+                '[RIDE_FLOW] ArrivingClient "I\'ve Arrived" tapped → orderId=$orderId',
+              );
               orderUpdateController.updateOrder(
                 context: context,
                 buttonId: 'arrive_button',
@@ -2085,7 +2190,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
           buttonId: 'start_trip_button',
           onTap: () {
             if (orderId != null && orderId.isNotEmpty) {
-              AppLogger.d('[RIDE_FLOW] ArrivingClient "Start Trip" tapped → orderId=$orderId');
+              AppLogger.d(
+                '[RIDE_FLOW] ArrivingClient "Start Trip" tapped → orderId=$orderId',
+              );
               orderUpdateController.updateOrder(
                 context: context,
                 buttonId: 'start_trip_button',
@@ -2111,7 +2218,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
           buttonId: 'complete_button',
           onTap: () {
             if (orderId != null && orderId.isNotEmpty) {
-              AppLogger.d('[RIDE_FLOW] ArrivingClient "Complete" tapped → orderId=$orderId');
+              AppLogger.d(
+                '[RIDE_FLOW] ArrivingClient "Complete" tapped → orderId=$orderId',
+              );
               orderUpdateController.updateOrder(
                 context: context,
                 buttonId: 'complete_button',
@@ -2143,7 +2252,9 @@ class _ArrivingClientState extends State<ArrivingClient> {
   void _handleCancelOrder() {
     final orderId = _rideData?['orderId'];
     if (orderId != null && orderId.isNotEmpty) {
-      AppLogger.d('[RIDE_FLOW] ArrivingClient Cancel tapped → orderId=$orderId');
+      AppLogger.d(
+        '[RIDE_FLOW] ArrivingClient Cancel tapped → orderId=$orderId',
+      );
       orderUpdateController.updateOrder(
         context: context,
         buttonId: 'cancel_button',
@@ -2186,6 +2297,26 @@ class _ArrivingClientState extends State<ArrivingClient> {
       await launch(url);
     } else {
       throw 'Could not launch $url';
+    }
+  }
+
+  Future<void> _launchGoogleMapsNavigation(LatLng destination) async {
+    final lat = destination.latitude;
+    final lng = destination.longitude;
+    final uri = Uri.parse('google.navigation:q=$lat,$lng&mode=d');
+    final fallbackUri = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving',
+    );
+
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        await launchUrl(fallbackUri, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      AppLogger.d('❌ Error launching Google Maps navigation: $e');
+      CustomToast.showError('Could not open Google Maps');
     }
   }
 }

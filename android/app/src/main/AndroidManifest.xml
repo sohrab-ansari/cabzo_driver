@@ -145,6 +145,16 @@
             </intent-filter>
         </receiver>
 
+        <!-- Restart foreground service after device reboot (critical for OPPO/Realme) -->
+        <receiver
+            android:name=".BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
         <!-- flutter_overlay_window service -->
         <service
             android:name="flutter.overlay.window.flutter_overlay_window.OverlayService"

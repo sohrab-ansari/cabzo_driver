@@ -72,6 +72,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   // App lifecycle
   Timer? _heartbeatTimer;
+  StreamSubscription<Position>? _locationStreamSubscription;
 
   // UI State
   String _selectedTab = "Driver";
@@ -242,15 +243,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _startLocationListener() {
-    Geolocator.getPositionStream(
+    _locationStreamSubscription?.cancel();
+    _locationStreamSubscription = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.best,
         distanceFilter: 5,
       ),
     ).listen(
       (position) {
+         if (!mounted) return;
         // Update socket manager with new location
         socketManager.updateLocation(position.latitude, position.longitude);
+
+        if (Get.isRegistered<GetCityByLocationController>()) {
+          Get.find<GetCityByLocationController>().getCityByLocation(
+            lat: position.latitude.toString(),
+            lng: position.longitude.toString(),
+          );
+        }
 
         // Fetch city polygon
         Get.find<GetCityByLocationController>().getCityByLocation(
@@ -409,6 +419,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       AppLogger.d('⏸️ [HomeScreen] App moved to BACKGROUND');
       BackgroundService.notifyAppState('Background');
 
+      // Cancel the HomeScreen location stream when going to background
+      // to prevent callbacks on a potentially frozen/killed widget.
+      // SocketManager's own location watch continues independently.
+      _locationStreamSubscription?.cancel();
+      _locationStreamSubscription = null;
+
       // If driver is online, ensure background service is running
       if (socketManager.isOnDuty) {
         _ensureBackgroundServiceRunning();
@@ -418,6 +434,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       AppLogger.d('▶️ [HomeScreen] App moved to FOREGROUND');
       BackgroundService.notifyAppState('Foreground');
       BackgroundService.sendHeartbeat();
+
+         // Restart the HomeScreen location listener
+      _startLocationListener();
 
       // Re-sync state from SharedPreferences (background may have changed things)
       _syncStateFromBackground();
@@ -486,6 +505,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     _heartbeatTimer?.cancel();
+    _locationStreamSubscription?.cancel();
+    _locationStreamSubscription = null;
     WidgetsBinding.instance.removeObserver(this); // Remove lifecycle observer
     // IMPORTANT: HomeScreen is not always the active screen.
     // If we keep these callbacks set after disposal, SocketManager will retain

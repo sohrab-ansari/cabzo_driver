@@ -1,5 +1,6 @@
 package com.nzcu_driver
 
+import android.app.NotificationManager
 import android.content.Intent
 import android.os.Build
 import androidx.annotation.NonNull
@@ -40,23 +41,37 @@ class MainActivity : FlutterActivity() {
         if (intent == null) return
         
         val isFromNotification = intent.getBooleanExtra("from_notification", false)
+        val isFromRideNotification = intent.getBooleanExtra("from_ride_notification", false)
         val isAcceptedRide = intent.getBooleanExtra("accepted_ride", false)
         val orderId = intent.getStringExtra(SocketForegroundService.EXTRA_ORDER_ID)
+
+        // Always cancel the native ride notification when the app is opened from it
+        if (isFromNotification && isFromRideNotification) {
+            cancelNativeRideNotification()
+        }
         
         if (isFromNotification && isAcceptedRide && orderId != null) {
             try {
-                // Emulate what handleAcceptRide used to do in the background service
                 val prefs = getSharedPreferences("FlutterSharedPreferences", android.content.Context.MODE_PRIVATE)
                 prefs.edit()
                     .putString("flutter.pending_accept_order_id", orderId)
                     .putLong("flutter.pending_accept_timestamp", System.currentTimeMillis())
-                    // Clear the pending ride screen flag so splash doesn't pause incorrectly
                     .putBoolean("flutter.pending_ride_from_killed", false)
                     .apply()
                 android.util.Log.i("MainActivity", "✅ Captured Accept Intent! Wrote orderId=$orderId to SharedPreferences")
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error writing to SharedPreferences: ${e.message}")
             }
+        }
+    }
+
+    private fun cancelNativeRideNotification() {
+        try {
+            val nm = getSystemService(NotificationManager::class.java)
+            nm.cancel(SocketForegroundService.RIDE_NOTIFICATION_ID)
+            android.util.Log.i("MainActivity", "🔇 Cancelled native ride notification (ID=${SocketForegroundService.RIDE_NOTIFICATION_ID})")
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Error cancelling ride notification: ${e.message}")
         }
     }
 
@@ -104,6 +119,24 @@ class MainActivity : FlutterActivity() {
                     }
                     startActivity(appIntent)
                     result.success("Brought to front")
+                }
+                "cancelRideNotification" -> {
+                    cancelNativeRideNotification()
+                    result.success("Ride notification cancelled")
+                }
+                "launchIntent" -> {
+                    val pkg = call.argument<String>("package") ?: ""
+                    val cls = call.argument<String>("class") ?: ""
+                    try {
+                        val intent = Intent().apply {
+                            component = android.content.ComponentName(pkg, cls)
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        startActivity(intent)
+                        result.success("Launched")
+                    } catch (e: Exception) {
+                        result.error("LAUNCH_FAILED", e.message, null)
+                    }
                 }
                 else -> result.notImplemented()
             }

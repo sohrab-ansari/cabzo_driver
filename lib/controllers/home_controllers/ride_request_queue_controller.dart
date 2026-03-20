@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:nzcu_driver/services/baseurl/api_path.dart';
+import 'package:nzcu_driver/services/notification_services/notification_service.dart';
 import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -128,6 +129,7 @@ class RideRequestQueueController extends GetxController {
 
     item.start(onExpired: () async {
       AppLogger.w('⏱️ [RideQueue] Timeout expired orderId=$orderId. Auto-declining (best effort).');
+      NotificationService.instance.cancelRideNotification();
       await _declineOrderApi(orderId);
       removeRide(orderId, reason: 'timeout');
     });

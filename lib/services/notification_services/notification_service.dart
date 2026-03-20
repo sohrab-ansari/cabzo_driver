@@ -1,7 +1,9 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:nzcu_driver/services/apiservices/socket_manager.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -40,6 +42,10 @@ class NotificationService {
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
+  static const _nativeChannel =
+      MethodChannel('com.nzcu_driver/background_service');
+
+  final AudioPlayer _rideAudioPlayer = AudioPlayer();
 
   // ============================================================================
   // STATE
@@ -419,7 +425,9 @@ class NotificationService {
   // NOTIFICATION DISPLAY
   // ============================================================================
 
-  /// Show a notification for a ride request with Accept/Decline buttons
+  /// Show a notification for a ride request with Accept/Decline buttons.
+  /// Sound is played via AudioPlayer (not the notification channel) so it
+  /// works reliably in foreground, recent-apps, and background states.
   Future<void> showRideRequestNotification(
     Map<String, dynamic> rideData,
   ) async {
@@ -431,18 +439,18 @@ class NotificationService {
           rideData['pickupAddress']?.toString() ?? 'Pickup Location';
 
       final androidDetails = AndroidNotificationDetails(
-        channelId, // Uses standard high priority channel for flutter foreground
+        channelId,
         channelName,
         channelDescription: channelDescription,
         importance: Importance.max,
         priority: Priority.max,
         fullScreenIntent: true,
         category: AndroidNotificationCategory.alarm,
-        playSound: true,
-        sound: const RawResourceAndroidNotificationSound('ride_sound'),
+        playSound: false,
+        silent: true,
         additionalFlags: Int32List.fromList(<int>[
           4,
-        ]), // FLAG_INSISTENT loops audio infinitely
+        ]), // FLAG_INSISTENT kept for killed-state fallback
         actions: <AndroidNotificationAction>[
           const AndroidNotificationAction(
             'accept_ride',
@@ -464,12 +472,15 @@ class NotificationService {
       final notificationDetails = NotificationDetails(android: androidDetails);
 
       await _localNotifications.show(
-        888, // Constant ID for ride requests
+        888,
         'New Ride Request!',
         'Rider: $riderName\nPickup: $pickup',
         notificationDetails,
         payload: jsonEncode(rideData),
       );
+
+      // Play ride sound via AudioPlayer — works in foreground & recent apps
+      await playRideSound();
 
       AppLogger.d(
         '✅ [NotificationService] Ride request notification shown for $orderId',
@@ -479,15 +490,55 @@ class NotificationService {
     }
   }
 
-  /// Cancels the ride request notification (stops the ringing native sound)
+  /// Cancels both the Flutter (ID 888) and native (ID 900) ride notifications,
+  /// stops the AudioPlayer ringtone, and stops any looping FLAG_INSISTENT sound.
   Future<void> cancelRideNotification() async {
+    // 1. Stop the in-app audio player
+    await stopRideSound();
+
+    // 2. Cancel Flutter local notification
     try {
       await _localNotifications.cancel(888);
       AppLogger.d(
-        '🔇 [NotificationService] Cancelled ride notification and stopped ringtone',
+        '🔇 [NotificationService] Cancelled Flutter ride notification (ID=888)',
       );
     } catch (e) {
-      AppLogger.d('❌ [NotificationService] Failed to cancel ride notification: $e');
+      AppLogger.d('❌ [NotificationService] Failed to cancel Flutter ride notification: $e');
+    }
+
+    // 3. Cancel native Kotlin ride notification via MethodChannel
+    try {
+      await _nativeChannel.invokeMethod('cancelRideNotification');
+      AppLogger.d(
+        '🔇 [NotificationService] Cancelled native ride notification (ID=900)',
+      );
+    } catch (e) {
+      AppLogger.d('❌ [NotificationService] Failed to cancel native ride notification: $e');
+    }
+  }
+
+  /// Plays the custom ride_sound.ogg in a loop via AudioPlayer.
+  /// Used when the app is in the foreground or recent apps, where Android
+  /// may suppress notification channel sounds.
+  Future<void> playRideSound() async {
+    try {
+      await _rideAudioPlayer.stop();
+      await _rideAudioPlayer.setReleaseMode(ReleaseMode.loop);
+      await _rideAudioPlayer.setVolume(1.0);
+      await _rideAudioPlayer.play(AssetSource('audio/ride_sound.ogg'));
+      AppLogger.d('🔊 [NotificationService] Ride sound playing (AudioPlayer)');
+    } catch (e) {
+      AppLogger.d('❌ [NotificationService] Failed to play ride sound: $e');
+    }
+  }
+
+  /// Stops the AudioPlayer ride sound.
+  Future<void> stopRideSound() async {
+    try {
+      await _rideAudioPlayer.stop();
+      AppLogger.d('🔇 [NotificationService] Ride sound stopped (AudioPlayer)');
+    } catch (e) {
+      AppLogger.d('❌ [NotificationService] Failed to stop ride sound: $e');
     }
   }
 
@@ -605,6 +656,9 @@ class NotificationService {
     AppLogger.d('   ActionId: ${response.actionId}');
     AppLogger.d('   Payload: ${response.payload}');
 
+    // Always stop the ringtone on any notification interaction
+    cancelRideNotification();
+
     if (response.payload != null) {
       try {
         final Map<String, dynamic> data = jsonDecode(response.payload!);
@@ -617,10 +671,7 @@ class NotificationService {
               data['_id']?.toString();
 
           if (orderId != null) {
-            // Trigger API Call via Controller
             final orderUpdateController = Get.find<OrderUpdateController>();
-
-            // Use overlay context or Get.context
             final context = Get.overlayContext ?? Get.context;
 
             if (context != null) {
@@ -629,13 +680,12 @@ class NotificationService {
                 buttonId: 'accept_button',
                 orderStatus: "Accepted",
                 orderId: orderId,
-                rideData: data, // Pass full ride data from payload
+                rideData: data,
                 stepControl: "Accepted",
                 successMessage: 'Ride accepted successfully!',
-                shouldTriggerNavigation: true, // As requested by user
+                shouldTriggerNavigation: true,
               );
 
-              // Navigate to Arriving Client Screen
               AppLogger.d('🚕 Navigating to ArrivingClient...');
               Get.to(
                 () => ArrivingClient(typeCheck: false, rideData: data),

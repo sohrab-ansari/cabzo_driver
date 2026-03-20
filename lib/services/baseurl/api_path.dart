@@ -27,20 +27,20 @@ class ApiPath {
   // new _baseurl
 
 
-  static const String baseUri = "http://13.63.162.51:7000/api/v1";
+  // static const String baseUri = "http://13.63.162.51:7000/api/v1";
 
-    // static const String baseUri = "https://api.nzcu.framekarts.com/api/v1";
+    static const String baseUri = "https://api.nzcu.framekarts.com/api/v1";
 
 
 
-    static const String SOCKET_URL = 'http://13.63.162.51:7000';
+    // static const String SOCKET_URL = 'http://13.63.162.51:7000';
 
 
 
 
 // socket url 
 
-    // static const String SOCKET_URL = 'https://api.nzcu.framekarts.com';
+    static const String SOCKET_URL = 'https://api.nzcu.framekarts.com';
 
     
 

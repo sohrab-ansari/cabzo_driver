@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
@@ -35,8 +37,172 @@ class SocketManager {
           '⚠️ Battery optimizations NOT ignored - App might be killed in background',
         );
       }
+      // For OPPO/Realme/OnePlus: prompt auto-start settings if not already shown
+      if (Platform.isAndroid) {
+        await _promptOemAutoStart();
+      }
     } catch (e) {
       AppLogger.d('❌ Error requesting battery permission: $e');
+    }
+  }
+
+  /// Detects OPPO/Realme/OnePlus devices and opens their proprietary
+  /// auto-start / battery management settings. These OEMs aggressively
+  /// kill background apps even with standard battery optimization exemption.
+  Future<void> _promptOemAutoStart() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final alreadyPrompted = prefs.getBool('oem_autostart_prompted') ?? false;
+      if (alreadyPrompted) return;
+
+      final deviceInfo = DeviceInfoPlugin();
+      final androidInfo = await deviceInfo.androidInfo;
+      final manufacturer = androidInfo.manufacturer.toLowerCase();
+
+      AppLogger.d('🔋 Device manufacturer: $manufacturer');
+
+      // Only target OEMs with aggressive background killing
+      final isAggressiveOem =
+          manufacturer == 'oppo' ||
+          manufacturer == 'realme' ||
+          manufacturer == 'oneplus' ||
+          manufacturer == 'vivo' ||
+          manufacturer == 'xiaomi' ||
+          manufacturer == 'redmi' ||
+          manufacturer == 'huawei' ||
+          manufacturer == 'honor';
+
+      if (!isAggressiveOem) return;
+
+      // Mark as prompted so we only show once
+      await prefs.setBool('oem_autostart_prompted', true);
+
+      // Show a dialog explaining the need for auto-start permission
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final context = Get.overlayContext ?? Get.context;
+        if (context == null) return;
+
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Keep App Running'),
+            content: Text(
+              'Your ${androidInfo.manufacturer} device may stop this app from running in the background. '
+              'To ensure you receive ride requests without interruption, please:\n\n'
+              '1. Tap "Open Settings" below\n'
+              '2. Find "NZCU Driver" in the list\n'
+              '3. Enable "Auto-start" or set battery to "Unrestricted"\n\n'
+              'This is required for the app to work properly on ${androidInfo.manufacturer} devices.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Later'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _openOemAutoStartSettings(manufacturer);
+                },
+                child: const Text('Open Settings'),
+              ),
+            ],
+          ),
+        );
+      });
+    } catch (e) {
+      AppLogger.d('❌ Error in OEM auto-start prompt: $e');
+    }
+  }
+
+  /// Opens the OEM-specific auto-start or battery management settings page.
+  Future<void> _openOemAutoStartSettings(String manufacturer) async {
+    try {
+      final intents = <Map<String, String>>[];
+
+      switch (manufacturer) {
+        case 'oppo':
+        case 'realme':
+          intents.addAll([
+            {
+              'package': 'com.coloros.safecenter',
+              'class':
+                  'com.coloros.safecenter.permission.startup.StartupAppListActivity',
+            },
+            {
+              'package': 'com.coloros.safecenter',
+              'class':
+                  'com.coloros.safecenter.startupapp.StartupAppListActivity',
+            },
+            {
+              'package': 'com.oppo.safe',
+              'class':
+                  'com.oppo.safe.permission.startup.StartupAppListActivity',
+            },
+          ]);
+          break;
+        case 'oneplus':
+          intents.addAll([
+            {
+              'package': 'com.oneplus.security',
+              'class':
+                  'com.oneplus.security.chainlaunch.view.ChainLaunchAppListActivity',
+            },
+          ]);
+          break;
+        case 'xiaomi':
+        case 'redmi':
+          intents.addAll([
+            {
+              'package': 'com.miui.securitycenter',
+              'class':
+                  'com.miui.permcenter.autostart.AutoStartManagementActivity',
+            },
+          ]);
+          break;
+        case 'vivo':
+          intents.addAll([
+            {
+              'package': 'com.vivo.permissionmanager',
+              'class':
+                  'com.vivo.permissionmanager.activity.BgStartUpManagerActivity',
+            },
+          ]);
+          break;
+        case 'huawei':
+        case 'honor':
+          intents.addAll([
+            {
+              'package': 'com.huawei.systemmanager',
+              'class':
+                  'com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity',
+            },
+            {
+              'package': 'com.huawei.systemmanager',
+              'class':
+                  'com.huawei.systemmanager.optimize.process.ProtectActivity',
+            },
+          ]);
+          break;
+      }
+
+      for (final intentData in intents) {
+        try {
+          await _platform.invokeMethod('launchIntent', {
+            'package': intentData['package'],
+            'class': intentData['class'],
+          });
+          return;
+        } catch (_) {
+          continue;
+        }
+      }
+
+      // Fallback: open general battery optimization settings
+      await Permission.ignoreBatteryOptimizations.request();
+    } catch (e) {
+      AppLogger.d('❌ Error opening OEM settings: $e');
     }
   }
 
@@ -174,7 +340,9 @@ class SocketManager {
           queue.addOrUpdateRide(rideDataMapped);
 
           if (!queue.isQueueScreenOpen.value) {
-            AppLogger.d('🧾 [RideQueue] Opening RideRequestQueueScreen (killed-state)');
+            AppLogger.d(
+              '🧾 [RideQueue] Opening RideRequestQueueScreen (killed-state)',
+            );
             Get.to(() => const RideRequestQueueScreen());
           }
         });
@@ -253,6 +421,7 @@ class SocketManager {
   StreamSubscription<Position>? _positionStreamSubscription;
   Timer? _locationUpdateTimer;
   Timer? _reconnectTimer;
+  Timer? _healthCheckTimer; // NEW: Detect stale socket connections
 
   // Ride tracking
   String? _activeRideId;
@@ -780,9 +949,7 @@ class SocketManager {
     // Log only ride-related socket events (avoid noise from pings/location)
     _socket!.onAny((event, data) {
       if (_debug && _isRideEvent(event)) {
-        AppLogger.d(
-          '[RIDE_FLOW] Socket event: $event',
-        );
+        AppLogger.d('[RIDE_FLOW] Socket event: $event');
       }
     });
 
@@ -807,6 +974,7 @@ class SocketManager {
       AppLogger.d('❌ Driver socket disconnected');
       _isSocketConnected = false;
       _socketStatus = 'Disconnected';
+      _cancelHealthCheck(); // STOP health check on disconnect
 
       // Only stop location updates if driver went offline intentionally.
       // If still on duty, keep GPS alive so we can resume on reconnect.
@@ -908,7 +1076,9 @@ class SocketManager {
     _socket!.on('ride:confirmed', (data) async {
       final rideData = Map<String, dynamic>.from(data);
       final orderId = rideData['orderId'] ?? rideData['_id'];
-      AppLogger.d('[RIDE_FLOW] ride:confirmed → orderId=$orderId (storing & notifying)');
+      AppLogger.d(
+        '[RIDE_FLOW] ride:confirmed → orderId=$orderId (storing & notifying)',
+      );
 
       final prefs = await SharedPreferences.getInstance();
 
@@ -936,14 +1106,18 @@ class SocketManager {
 
       // Clear any queued offers once a ride is confirmed.
       if (Get.isRegistered<RideRequestQueueController>()) {
-        Get.find<RideRequestQueueController>().clearAll(reason: 'ride_confirmed');
+        Get.find<RideRequestQueueController>().clearAll(
+          reason: 'ride_confirmed',
+        );
       }
     });
 
     _socket!.on('ride:status', (data) {
       final orderId = data['orderId'] ?? data['rideId'];
       final statusStr = data['status']?.toString() ?? '';
-      AppLogger.d('[RIDE_FLOW] ride:status → orderId=$orderId status=$statusStr');
+      AppLogger.d(
+        '[RIDE_FLOW] ride:status → orderId=$orderId status=$statusStr',
+      );
 
       if (orderId != null) {
         if (_currentRide != null && _currentRide!['orderId'] == orderId) {
@@ -966,14 +1140,15 @@ class SocketManager {
 
     _socket!.on('ride:orderCancelled', (data) {
       final rideId = data['rideId'] ?? data['orderId'];
-      AppLogger.d('[RIDE_FLOW] ride:orderCancelled → rideId=$rideId (navigating to home)');
+      AppLogger.d(
+        '[RIDE_FLOW] ride:orderCancelled → rideId=$rideId (navigating to home)',
+      );
 
       // Block any pending ride:newRide microtask from navigating after cancel
       _hasPendingRideRequest = false;
 
       // Ensure any looping background ringtone shuts off if driver hasn't touched the screen
       NotificationService.instance.cancelRideNotification();
-
 
       final rideIdStr = rideId?.toString() ?? '';
       if (rideIdStr.isEmpty) {
@@ -985,7 +1160,9 @@ class SocketManager {
       if (Get.isRegistered<RideRequestQueueController>()) {
         final queue = Get.find<RideRequestQueueController>();
         if (queue.findByOrderId(rideIdStr) != null) {
-          AppLogger.i('🧾 [RideQueue] orderCancelled for queued orderId=$rideIdStr → removing card');
+          AppLogger.i(
+            '🧾 [RideQueue] orderCancelled for queued orderId=$rideIdStr → removing card',
+          );
           queue.removeRide(rideIdStr, reason: 'orderCancelled');
           return;
         }
@@ -1006,7 +1183,9 @@ class SocketManager {
       final fullRideData = Map<String, dynamic>.from(data);
       final orderId = fullRideData['orderId']?.toString();
       final orderStatus = fullRideData['orderStatus']?.toString() ?? '';
-      AppLogger.d('[RIDE_FLOW] ride:reconnected → orderId=$orderId status=$orderStatus (restoring & navigating)');
+      AppLogger.d(
+        '[RIDE_FLOW] ride:reconnected → orderId=$orderId status=$orderStatus (restoring & navigating)',
+      );
 
       // ✅ Store FULL ride data (not just orderId and status)
       _currentRide = fullRideData;
@@ -1024,7 +1203,9 @@ class SocketManager {
         );
         await prefs.setString('active_order_id', orderId.toString());
       } catch (e) {
-        AppLogger.d('⚠️ [SocketManager] Error saving reconnected ride data: $e');
+        AppLogger.d(
+          '⚠️ [SocketManager] Error saving reconnected ride data: $e',
+        );
       }
 
       onRideReconnected?.call(fullRideData);
@@ -1347,7 +1528,6 @@ class SocketManager {
       isOnDuty = true;
       await _saveOnlineStatusToPrefs(true);
 
-
       // ✅ CRITICAL FIX: Save online status to SharedPreferences IMMEDIATELY before starting the native service.
       // If we wait for the backend's 'driver:online_success' to save this, the native Android service
       // starts up, checks 'flutter.driver_is_online', sees false, and instantly commits suicide (stopSelf()).
@@ -1571,16 +1751,23 @@ class SocketManager {
 
   void _startLocationUpdates() {
     _stopLocationUpdates();
+    // FIXED: Only send updates during active ride, not while idle
     _locationUpdateTimer = Timer.periodic(
       const Duration(milliseconds: LOCATION_UPDATE_INTERVAL),
       (_) {
+        // Only send location if socket is connected, driver is on duty, AND
+        // either in active ride OR started location watch explicitly
         if (_socket != null && _isSocketConnected && isOnDuty) {
           if (_currentLatitude != 0.0 && _currentLongitude != 0.0) {
             _sendLocationUpdate();
           }
+        } else if (!isOnDuty || !_isSocketConnected) {
+          // Stop location updates if driver went offline or socket disconnected
+          _stopLocationUpdates();
         }
       },
     );
+    _startConnectionHealthCheck(); // NEW: Monitor socket health
   }
 
   void _stopLocationUpdates() {
@@ -1644,6 +1831,39 @@ class SocketManager {
   void _cancelReconnect() {
     _reconnectTimer?.cancel();
     _reconnectTimer = null;
+  }
+
+  // NEW: Health check to detect stale socket connections
+  void _startConnectionHealthCheck() {
+    _cancelHealthCheck();
+    // Check socket health every 30 seconds to detect stale connections
+    _healthCheckTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (_socket != null && isOnDuty && _isSocketConnected) {
+        // If location hasn't updated in > 2 minutes, socket may be stale
+        final lastUpdate = _lastLocationUpdate;
+        if (lastUpdate != null) {
+          final stalenessMs = DateTime.now()
+              .difference(lastUpdate)
+              .inMilliseconds;
+          if (stalenessMs > 120000) {
+            AppLogger.d(
+              '⚠️ [HealthCheck] Socket connection may be stale (no location update for ${stalenessMs ~/ 1000}s)',
+            );
+            // Force reconnect if stale
+            _scheduleReconnect();
+          }
+        }
+      }
+    });
+  }
+
+  void _restartHealthCheck() {
+    _startConnectionHealthCheck();
+  }
+
+  void _cancelHealthCheck() {
+    _healthCheckTimer?.cancel();
+    _healthCheckTimer = null;
   }
 
   // ==================== RIDE METHODS ====================
@@ -1875,7 +2095,9 @@ class SocketManager {
         AppLogger.d('[RIDE_FLOW] Arriving but OTP unverified → keeping step=0');
       }
 
-      AppLogger.d('[RIDE_FLOW] Ride reconnection → status=$orderStatus step=$step → ArrivingClient');
+      AppLogger.d(
+        '[RIDE_FLOW] Ride reconnection → status=$orderStatus step=$step → ArrivingClient',
+      );
 
       // Update the stepper controller with the correct step
       final stepperController = Get.find<StepperController>();
@@ -1975,7 +2197,7 @@ class SocketManager {
     bool isTyping, {
     String userRole = 'driver',
   }) {
-    if (_socket != null && _isSocketConnected) {
+    if (_socket == null || !_isSocketConnected) {
       return false;
     }
 
@@ -2284,6 +2506,8 @@ class SocketManager {
     _disconnectSocket();
     _stopLocationUpdates();
     stopLocationWatch();
+    _cancelHealthCheck(); // NEW: Clean up health check timer
+    _cancelReconnect(); // NEW: Clean up reconnect timer
     if (_positionStreamSubscription != null) {
       _positionStreamSubscription!.cancel();
     }
@@ -2296,6 +2520,18 @@ class SocketManager {
 
       // Go offline first
       await goOffline();
+
+      // Full cleanup of socket, timers, streams
+      _cancelHealthCheck();
+      _cancelReconnect();
+      _stopLocationUpdates();
+      stopLocationWatch();
+      _cleanupSocketConnection();
+
+      // Close the broadcast stream controller
+      if (!_chatMessageStreamController.isClosed) {
+        _chatMessageStreamController.close();
+      }
 
       // Clear all SharedPreferences data
       final prefs = await SharedPreferences.getInstance();
@@ -2310,9 +2546,32 @@ class SocketManager {
 
       // Reset internal state
       isOnDuty = false;
+      _isProcessingOnline = false;
+      _isSocketConnected = false;
       _activeRideId = null;
       _currentRide = null;
       _isRideInProgress = false;
+      _socketId = null;
+      _socketStatus = 'Not Connected';
+
+      // Clear callbacks to prevent stale references
+      onNewRide = null;
+      onRideConfirmed = null;
+      onRideStatusUpdate = null;
+      onRideCancelled = null;
+      onRideLocationUpdate = null;
+      onRideReconnected = null;
+      onChatMessage = null;
+      onChatTyping = null;
+      onChatMessageSent = null;
+      onChatJoin = null;
+      onChatError = null;
+      onConnectionStatusChange = null;
+      onDriverStatusChange = null;
+      onSocketError = null;
+
+      // Allow restoration on next login
+      _hasAttemptedRestoration = false;
 
       AppLogger.d('✅ All data cleared on logout');
     } catch (error) {

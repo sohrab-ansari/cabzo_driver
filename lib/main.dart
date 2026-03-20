@@ -19,7 +19,6 @@ import 'package:nzcu_driver/utilities/widgets/location_guard.dart';
 import 'package:nzcu_driver/views/splash/splash_screen.dart';
 import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
-
 @pragma('vm:entry-point')
 Future<void> _firebaseBackgroundMessageHandler(RemoteMessage message) async {
   // IMPORTANT: Firebase must be initialized in background isolate
@@ -143,7 +142,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       OverlayService.instance.hideOverlay();
       if (SocketManager().isOnDuty) {
         AppLogger.d('📱 App resumed - forcing socket reconnect check');
-        SocketManager().forceReconnect();
+        try {
+          SocketManager().forceReconnect();
+        } catch (e) {
+          AppLogger.d('⚠️ Error during forceReconnect on resume: $e');
+        }
       }
     }
   }

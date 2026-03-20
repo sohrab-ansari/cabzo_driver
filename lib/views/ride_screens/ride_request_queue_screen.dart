@@ -198,17 +198,22 @@ class _RideRequestQueueScreenState extends State<RideRequestQueueScreen> {
 
                       final accepting = queue.acceptingOrderId.value;
 
+                      final items = queue.rideRequests.toList();
+
                       return ListView.builder(
                         padding: const EdgeInsets.only(bottom: 16),
-                        itemCount: queue.rideRequests.length,
+                        itemCount: items.length,
                         itemBuilder: (context, index) {
-                          final item = queue.rideRequests[index];
+                          final item = items[index];
+                          final isThisAccepting = accepting == item.orderId;
                           final isBusy =
-                              accepting.isNotEmpty && accepting != item.orderId;
+                              accepting.isNotEmpty && !isThisAccepting;
 
                           return RideRequestCard(
+                            key: ValueKey(item.orderId),
                             item: item,
                             isBusy: isBusy,
+                            isAccepting: isThisAccepting,
                             onAccept: () => _acceptRide(item),
                             onDecline: () => _declineRide(item),
                           );

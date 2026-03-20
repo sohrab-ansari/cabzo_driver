@@ -1,4 +1,6 @@
-﻿import 'package:get/get.dart';
+﻿import 'dart:async';
+
+import 'package:get/get.dart';
 import 'package:nzcu_driver/services/apiservices/socket_manager.dart';
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
 import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
@@ -9,6 +11,7 @@ class ChatNotificationController extends GetxController {
   var unreadCount = 0.obs;
   bool isChatScreenActive = false;
   String? activeChatId;
+  StreamSubscription<Map<String, dynamic>>? _chatStreamSubscription;
 
   @override
   void onInit() {
@@ -16,8 +19,16 @@ class ChatNotificationController extends GetxController {
     _setupSocketListener();
   }
 
+  @override
+  void onClose() {
+    _chatStreamSubscription?.cancel();
+    _chatStreamSubscription = null;
+    super.onClose();
+  }
+
   void _setupSocketListener() {
-    SocketManager().chatMessageStream.listen((data) {
+   _chatStreamSubscription?.cancel();
+    _chatStreamSubscription =  SocketManager().chatMessageStream.listen((data) {
       handleIncomingMessage(data);
     });
   }

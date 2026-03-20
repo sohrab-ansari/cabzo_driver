@@ -1,3 +1,4 @@
+import 'package:nzcu_driver/services/apiservices/socket_manager.dart';
 import 'package:nzcu_driver/utilities/widgets/app_buttons.dart';
 import 'package:nzcu_driver/utilities/bottom_Sheets/custom_bottom_sheets.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
@@ -163,6 +164,8 @@ class PopUps {
                   text: "Logout",
 
                   onClicked: () async {
+                    // Properly dispose socket, timers, and streams before clearing data
+                    await SocketManager().logout();
                     final prefs = await SharedPreferences.getInstance();
 
                     // 🔥 Clear ALL stored data

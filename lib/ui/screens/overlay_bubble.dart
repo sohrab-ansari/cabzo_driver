@@ -1,4 +1,5 @@
-﻿import 'dart:convert';
+﻿import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:android_intent_plus/android_intent.dart';
@@ -16,11 +17,12 @@ class OverlayBubble extends StatefulWidget {
 
 class _OverlayBubbleState extends State<OverlayBubble> {
   Uint8List? _appIcon;
+  StreamSubscription? _overlayListenerSub;
 
   @override
   void initState() {
     super.initState();
-    FlutterOverlayWindow.overlayListener.listen((event) {
+   _overlayListenerSub = FlutterOverlayWindow.overlayListener.listen((event) {
       if (event == 'close_overlay') {
         FlutterOverlayWindow.closeOverlay();
       } else if (event is String && event.startsWith('icon:')) {
@@ -33,6 +35,14 @@ class _OverlayBubbleState extends State<OverlayBubble> {
       }
     });
   }
+  
+  @override
+  void dispose() {
+    _overlayListenerSub?.cancel();
+    _overlayListenerSub = null;
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {

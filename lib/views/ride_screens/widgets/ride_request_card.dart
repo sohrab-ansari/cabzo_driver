@@ -9,12 +9,14 @@ class RideRequestCard extends StatelessWidget {
     super.key,
     required this.item,
     required this.isBusy,
+    required this.isAccepting,
     required this.onAccept,
     required this.onDecline,
   });
 
   final RideRequestItem item;
   final bool isBusy;
+  final bool isAccepting;
   final VoidCallback onAccept;
   final VoidCallback onDecline;
 
@@ -200,49 +202,77 @@ class RideRequestCard extends StatelessWidget {
               Expanded(
                 child: Obx(() {
                   final seconds = item.remainingSeconds.value;
+                  final bool disabled = isBusy || isAccepting;
                   return ElevatedButton(
-                    onPressed: isBusy ? null : onAccept,
+                    onPressed: disabled ? null : onAccept,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00BFA6),
+                      backgroundColor: isAccepting
+                          ? const Color(0xFF00BFA6)
+                          : const Color(0xFF00BFA6),
                       foregroundColor: Colors.white,
                       minimumSize: const Size(double.infinity, 46),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      disabledBackgroundColor: AppColors.mediumGray.withOpacity(
-                        0.4,
-                      ),
+                      disabledBackgroundColor: isAccepting
+                          ? const Color(0xFF00BFA6)
+                          : AppColors.mediumGray.withOpacity(0.4),
+                      disabledForegroundColor: isAccepting
+                          ? Colors.white
+                          : null,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Accept',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
+                    child: isAccepting
+                        ? const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                'Accepting...',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'Accept',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.18),
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  '⏱ $seconds s',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.18),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            '⏱ $seconds s',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                   );
                 }),
               ),
