@@ -262,18 +262,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           );
         }
 
-        // Fetch city polygon
-        Get.find<GetCityByLocationController>().getCityByLocation(
-          lat: position.latitude.toString(),
-          lng: position.longitude.toString(),
-        );
-
-        // Fetch city polygon
-        Get.find<GetCityByLocationController>().getCityByLocation(
-          lat: position.latitude.toString(),
-          lng: position.longitude.toString(),
-        );
-
         // Update marker on map
         if (mounted && socketManager.isOnDuty) {
           _updateMarkerOnly(

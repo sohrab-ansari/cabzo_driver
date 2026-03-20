@@ -98,6 +98,7 @@ class SocketForegroundService : Service() {
     // Socket
     private var socket: Socket? = null
     private var isSocketConnected = false
+    private var isForegroundActive = false
 
     // Location
     private var fusedLocationClient: FusedLocationProviderClient? = null
@@ -151,6 +152,7 @@ class SocketForegroundService : Service() {
             ACTION_UPDATE -> {
                 val title = intent.getStringExtra(EXTRA_TITLE) ?: "You are Online"
                 val body = intent.getStringExtra(EXTRA_BODY) ?: "Waiting for rides..."
+                ensureForegroundForOnlineDriver()
                 updateStatusNotification(title, body)
                 return START_STICKY
             }
@@ -161,6 +163,9 @@ class SocketForegroundService : Service() {
                 // When offline, don't persist the service just for state tracking.
                 val driverOnline = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                     .getBoolean("flutter.driver_is_online", false)
+                if (driverOnline) {
+                    ensureForegroundForOnlineDriver()
+                }
                 return if (driverOnline) START_STICKY else START_NOT_STICKY
             }
             ACTION_ACCEPT_RIDE -> {
@@ -201,6 +206,7 @@ class SocketForegroundService : Service() {
                 } else {
                     startForeground(STATUS_NOTIFICATION_ID, notification)
                 }
+                isForegroundActive = true
             } catch (e: Exception) {
                 Log.e(TAG, "startForeground failed while stopping: ${e.message}")
             }
@@ -236,6 +242,7 @@ class SocketForegroundService : Service() {
             } else {
                 startForeground(STATUS_NOTIFICATION_ID, notification)
             }
+            isForegroundActive = true
         } catch (e: Exception) {
             Log.e(TAG, "FATAL: startForeground failed: ${e.message}", e)
             stopSelf()
@@ -284,6 +291,7 @@ class SocketForegroundService : Service() {
 
     override fun onDestroy() {
         Log.i(TAG, "[LIFECYCLE] onDestroy() - Service destroyed")
+        isForegroundActive = false
         cancelAllTimers()
         stopLocationUpdates()
         disconnectSocket()
@@ -968,6 +976,30 @@ class SocketForegroundService : Service() {
         val notification = buildStatusNotification(title, body)
         val nm = getSystemService(NotificationManager::class.java)
         nm.notify(STATUS_NOTIFICATION_ID, notification)
+    }
+
+    private fun ensureForegroundForOnlineDriver() {
+        if (isForegroundActive) return
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val driverOnline = prefs.getBoolean("flutter.driver_is_online", false)
+        if (!driverOnline) return
+        try {
+            val notification = buildStatusNotification("You are Online", buildNotificationBody())
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(
+                    STATUS_NOTIFICATION_ID,
+                    notification,
+                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION or
+                        android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                )
+            } else {
+                startForeground(STATUS_NOTIFICATION_ID, notification)
+            }
+            isForegroundActive = true
+            Log.i(TAG, "✅ ensureForegroundForOnlineDriver: foreground started")
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ ensureForegroundForOnlineDriver failed: ${e.message}", e)
+        }
     }
 
     // ──────────────────────────────────────────────────────────
