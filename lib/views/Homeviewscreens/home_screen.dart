@@ -29,6 +29,8 @@ import 'package:nzcu_driver/services/background_service.dart';
 import 'package:nzcu_driver/services/overlay_service.dart';
 import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/get_city_by_location_controller.dart';
+import 'package:nzcu_driver/utilities/widgets/navigator.dart';
+import 'package:nzcu_driver/views/profile_screens/payment_related/walletscreen.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool? isOnDuty;
@@ -244,48 +246,49 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _startLocationListener() {
     _locationStreamSubscription?.cancel();
-    _locationStreamSubscription = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.best,
-        distanceFilter: 5,
-      ),
-    ).listen(
-      (position) {
-         if (!mounted) return;
-        // Update socket manager with new location
-        socketManager.updateLocation(position.latitude, position.longitude);
+    _locationStreamSubscription =
+        Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.best,
+            distanceFilter: 5,
+          ),
+        ).listen(
+          (position) {
+            if (!mounted) return;
+            // Update socket manager with new location
+            socketManager.updateLocation(position.latitude, position.longitude);
 
-        if (Get.isRegistered<GetCityByLocationController>()) {
-          Get.find<GetCityByLocationController>().getCityByLocation(
-            lat: position.latitude.toString(),
-            lng: position.longitude.toString(),
-          );
-        }
+            if (Get.isRegistered<GetCityByLocationController>()) {
+              Get.find<GetCityByLocationController>().getCityByLocation(
+                lat: position.latitude.toString(),
+                lng: position.longitude.toString(),
+              );
+            }
 
-        // Fetch city polygon
-        Get.find<GetCityByLocationController>().getCityByLocation(
-          lat: position.latitude.toString(),
-          lng: position.longitude.toString(),
+            // Fetch city polygon
+            Get.find<GetCityByLocationController>().getCityByLocation(
+              lat: position.latitude.toString(),
+              lng: position.longitude.toString(),
+            );
+
+            // Fetch city polygon
+            Get.find<GetCityByLocationController>().getCityByLocation(
+              lat: position.latitude.toString(),
+              lng: position.longitude.toString(),
+            );
+
+            // Update marker on map
+            if (mounted && socketManager.isOnDuty) {
+              _updateMarkerOnly(
+                LatLng(position.latitude, position.longitude),
+                position.accuracy,
+              );
+            }
+          },
+          onError: (error) {
+            AppLogger.d('⚠️ HomeScreen location error: $error');
+          },
         );
-
-        // Fetch city polygon
-        Get.find<GetCityByLocationController>().getCityByLocation(
-          lat: position.latitude.toString(),
-          lng: position.longitude.toString(),
-        );
-
-        // Update marker on map
-        if (mounted && socketManager.isOnDuty) {
-          _updateMarkerOnly(
-            LatLng(position.latitude, position.longitude),
-            position.accuracy,
-          );
-        }
-      },
-      onError: (error) {
-        AppLogger.d('⚠️ HomeScreen location error: $error');
-      },
-    );
   }
 
   void _updateMarkerOnly(LatLng location, double accuracy) {
@@ -357,7 +360,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void _processRideRequest(Map<String, dynamic> rideData) {
     if (!mounted) return;
     AppLogger.d('🚕 Processing ride request... in home screen..');
-
   }
 
   void _navigateToRideScreen(Map<String, dynamic> rideData) {
@@ -381,22 +383,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       OverlayService.instance.hideOverlay();
       socketManager.goOffline();
     } else {
-      // Check wallet balance before going online
-      final walletData = walletController.walletresponse.value?.data;
-      final double availableBalance = walletData?.availableBalance ?? 0.0;
-      final double minBalance =
-          termsController.termspolicyres.value?.data?.driverWalletLimit
-              ?.toDouble() ??
-          2;
-
-      if (minBalance > 0 && availableBalance < minBalance) {
-        CustomToast.showInfo(
-          'Your wallet balance is ₹${availableBalance.toStringAsFixed(0)}. '
-          'A minimum balance of ₹${minBalance.toStringAsFixed(0)} is required to receive rides. '
-          'Please add money to your wallet.',
-        );
-        return;
-      }
+      // Check wallet balance before going online (Refreshed via home_data_method)
+      await homeController.home_data_method();
 
       // Request overlay permission before going online (one-time prompt)
       final hasOverlayPermission = await OverlayService.instance
@@ -435,7 +423,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       BackgroundService.notifyAppState('Foreground');
       BackgroundService.sendHeartbeat();
 
-         // Restart the HomeScreen location listener
+      // Refresh home data to catch any wallet/status changes
+      homeController.home_data_method();
+
+      // Restart the HomeScreen location listener
       _startLocationListener();
 
       // Re-sync state from SharedPreferences (background may have changed things)
@@ -1099,32 +1090,143 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
             ),
 
-            /// 2️⃣ Book Ride Button (Top Right)
+            //Low Wallet / WillNotGetOrder
             Positioned(
-              top: 32,
+              top: MediaQuery.of(context).size.height * 0.35,
+              left: 16,
               right: 16,
-              child: ElevatedButton(
-                onPressed: () {
-                  Get.to(() => const BookRide());
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.cyan,
-                  elevation: 4,
-                  shape: const StadiumBorder(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 10,
-                  ),
-                ),
-                child: const Text(
-                  "Book Ride",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+              child: Obx(() {
+                final driver = homeController.homemodalresponse.value?.driver;
+                if (driver != null && driver.willGetOrder == false) {
+                  return Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.12),
+                              blurRadius: 12,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.account_balance_wallet_rounded,
+                                color: Colors.red.shade700,
+                                size: 22,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "Low Wallet Balance",
+                                    style: TextStyle(
+                                      color: Colors.grey.shade900,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    "Recharge to continue receiving new rides.",
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            ElevatedButton(
+                              onPressed: () {
+                                CustomNavigator.push(
+                                  context,
+                                  const WalletScreen(),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue.shade600,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              child: const Text(
+                                "Recharge",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                      .animate()
+                      .slideY(
+                        begin: -1,
+                        end: 0,
+                        duration: 500.ms,
+                        curve: Curves.easeOutBack,
+                      )
+                      .fade();
+                }
+                return const SizedBox.shrink();
+              }),
             ),
+
+            /// 2️⃣ Book Ride Button (Top Right)
+            Obx(() {
+              final driver = homeController.homemodalresponse.value?.driver;
+              return (driver != null && driver.willGetOrder == false)
+                  ? SizedBox.shrink()
+                  : Positioned(
+                      top: 32,
+                      right: 16,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Get.to(() => const BookRide());
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.cyan,
+                          elevation: 4,
+                          shape: const StadiumBorder(),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 10,
+                          ),
+                        ),
+                        child: const Text(
+                          "Book Ride",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    );
+            }),
 
             /// Location Pin Button
             Positioned(

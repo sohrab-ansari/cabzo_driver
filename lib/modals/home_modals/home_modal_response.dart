@@ -51,6 +51,7 @@ class Driver {
   bool? isOnline;
   String? verificationStatus;
   String? imageVerificationStatus;
+  bool? willGetOrder;
 
   Driver({
     this.id,
@@ -59,6 +60,7 @@ class Driver {
     this.isOnline,
     this.verificationStatus,
     this.imageVerificationStatus,
+    this.willGetOrder,
   });
 
   factory Driver.fromJson(Map<String, dynamic> json) {
@@ -69,6 +71,7 @@ class Driver {
       isOnline: json['isOnline'],
       verificationStatus: json['verificationStatus'],
       imageVerificationStatus: json['imageVerificationStatus'],
+      willGetOrder: json['willGetOrder'],
     );
   }
 
@@ -80,6 +83,7 @@ class Driver {
       'isOnline': isOnline,
       'verificationStatus': verificationStatus,
       'imageVerificationStatus': imageVerificationStatus,
+      'willGetOrder': willGetOrder,
     };
   }
 }

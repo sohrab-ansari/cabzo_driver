@@ -1536,49 +1536,6 @@ class SocketManager {
 
       await _startNativeService();
 
-      // Native SocketForegroundService handles killed-state socket via Kotlin
-
-      // START APP KEEP-ALIVE (isolated try-catch)
-      // try {
-      //   AppLogger.d('🚀 [SocketManager] Enabling FlutterBackground keep-alive...');
-      //   bool hasPermissions = await bg_lib.FlutterBackground.hasPermissions;
-
-      //   if (!hasPermissions) {
-      //     AppLogger.d(
-      //       '⚠️ [SocketManager] FlutterBackground missing permissions - attempting to initialize...',
-      //     );
-      //     const androidConfig = bg_lib.FlutterBackgroundAndroidConfig(
-      //       notificationTitle: "NZCU Driver",
-      //       notificationText: "App is running in the background",
-      //       notificationImportance: bg_lib.AndroidNotificationImportance.high,
-      //       notificationIcon: bg_lib.AndroidResource(
-      //         name: 'ic_launcher',
-      //         defType: 'mipmap',
-      //       ),
-      //     );
-      //     await bg_lib.FlutterBackground.initialize(
-      //       androidConfig: androidConfig,
-      //     );
-      //     hasPermissions = await bg_lib.FlutterBackground.hasPermissions;
-      //   }
-
-      //   if (hasPermissions) {
-      //     bool enabled =
-      //         await bg_lib.FlutterBackground.enableBackgroundExecution();
-      //     AppLogger.d(
-      //       '✅ [SocketManager] FlutterBackground execution enabled: $enabled',
-      //     );
-      //   } else {
-      //     AppLogger.d(
-      //       '❌ [SocketManager] FlutterBackground permissions still missing after init attempt',
-      //     );
-      //   }
-      // } catch (bgKeepAliveError) {
-      //   AppLogger.d(
-      //     '⚠️ [SocketManager] FlutterBackground keep-alive failed (non-fatal): $bgKeepAliveError',
-      //   );
-      // }
-
       // START ADVANCED GEOLOCATION TRACKING
       try {
         AppLogger.d(

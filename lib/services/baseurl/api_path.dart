@@ -1,51 +1,14 @@
 class ApiPath {
-  // static const String baseUri2 = "https://corezap.smarttechbros.com/api/v1";
-
-    // // static const String baseUri2 = "https://nzcu.smarttechbros.com/api/v1";
-
-
-    static const String baseUri2 = "https://api.nzcu.framekarts.com/api/v1";
-
-
-
-// api and socket is working with this URL check it @240715753873593 @223110783615175
-
-  // static const String baseUri2 = "https://api.nzcu.framekarts.com/api/v1";
-
-// ==========================================================================
- 
-  // static const String baseUri = "http://api.corezap.framekarts.com:7000/api/v1";
-  
-  // static const String baseUrpi = "https://api.corezap.framekarts.com/api/v1"; //
-
-  // static const String baseUri = "https://corezap.smarttechbros.com/api/v1";
-
-  //  static const String baseUri = "https://api.nzcu.framekarts.com/api/v1";
-
-
-
-  // new _baseurl
-
 
   // static const String baseUri = "http://13.63.162.51:7000/api/v1";
 
-    static const String baseUri = "https://api.nzcu.framekarts.com/api/v1";
+  static const String baseUri = "https://api.nzcu.framekarts.com/api/v1";
+
+  // static const String SOCKET_URL = 'http://13.63.162.51:7000';
+
+  static const String SOCKET_URL = 'https://api.nzcu.framekarts.com';
 
 
-
-    // static const String SOCKET_URL = 'http://13.63.162.51:7000';
-
-
-
-
-// socket url 
-
-    static const String SOCKET_URL = 'https://api.nzcu.framekarts.com';
-
-    
-
-
-//  =======================================================================4
   static const String imagebaseUrl =
       "https://sgp1.digitaloceanspaces.com/satyakabir-bucket/";
 
@@ -72,7 +35,7 @@ class ApiPath {
 
   // static String ratings_api = "$baseUri/rating/getDriver";
 
-  static String ratings_api = "$baseUri2/rating/getDriver";
+  static String ratings_api = "$baseUri/rating/getDriver";
 
   static String bank_account_add = "$baseUri/bank-accounts/add";
 
@@ -101,8 +64,4 @@ static String get_All_Categories = "$baseUri/getAllCategories";
 
  static String order_declined_api = "$baseUri/order/verifyOtp";
 
-
-
-
-  // static String order_declined = "$baseUri/order/verify-otp";
 }

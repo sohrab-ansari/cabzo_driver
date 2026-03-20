@@ -37,6 +37,7 @@ class WalletData {
   double? pendingWithdrawals;
   double? minimumBalanceForOrder;
   double? totalExpenses;
+  double? driverDebtBalance;
 
   WalletData({
     this.walletId,
@@ -45,6 +46,7 @@ class WalletData {
     this.pendingWithdrawals,
     this.minimumBalanceForOrder,
     this.totalExpenses,
+    this.driverDebtBalance,
   });
 
   factory WalletData.fromJson(Map<String, dynamic> json) {
@@ -57,6 +59,7 @@ class WalletData {
       minimumBalanceForOrder:
           (json['minimumBalanceForOrder'] as num?)?.toDouble(),
       totalExpenses: (json['totalExpenses'] as num?)?.toDouble(),
+      driverDebtBalance: (json['driverDebtBalance'] as num?)?.toDouble(),
     );
   }
 
@@ -68,6 +71,7 @@ class WalletData {
       'pendingWithdrawals': pendingWithdrawals,
       'minimumBalanceForOrder': minimumBalanceForOrder,
       'totalExpenses': totalExpenses,
+      'driverDebtBalance': driverDebtBalance,
     };
   }
 }

@@ -281,6 +281,8 @@ class HomeApiServices {
 
       final Map<String, dynamic> decodedJson = jsonDecode(response.body);
 
+      AppLogger.d('[RIDE_FLOW] Order update API response: $decodedJson');
+
       if (response.statusCode == 200) {
         AppLogger.d('[RIDE_FLOW] Order update API success: $orderid -> $orderstatus');
         return Updateorderresposne.fromJson(decodedJson);
@@ -297,7 +299,7 @@ class HomeApiServices {
       } else {
         return Updateorderresposne(
           success: false,
-          // message: "Request failed with status ${response.statusCode}",
+          message: "Request failed with status ${response.body}",
         );
       }
     } on TimeoutException {
