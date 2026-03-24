@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:nzcu_driver/controllers/home_controllers/ride_request_queue_controller.dart';
 import 'package:nzcu_driver/utilities/colors/colors.dart';
 
@@ -23,6 +24,101 @@ class RideRequestCard extends StatelessWidget {
   String _str(dynamic v, {String fallback = ''}) {
     final s = v?.toString();
     return (s == null || s.isEmpty) ? fallback : s;
+  }
+
+  /// Builds a ride type badge for the queue card.
+  /// Returns SizedBox.shrink() for normal rides.
+  Widget _buildRideTypeBadge(Map<String, dynamic> ride) {
+    final String rideType = ride['rideType']?.toString().toLowerCase() ?? 'normal';
+    final bool isScheduled = ride['isScheduled'] == true;
+    final bool isRental = rideType == 'rental';
+
+    if (!isScheduled && !isRental) return const SizedBox.shrink();
+
+    if (isRental) {
+      final rentalHours = ride['rentalDurationHours'];
+      return Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: const Color(0xFF7C3AED).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFF7C3AED).withOpacity(0.4)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.car_rental, size: 16, color: Color(0xFF7C3AED)),
+            const SizedBox(width: 6),
+            Text(
+              'Rental Ride',
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF7C3AED),
+              ),
+            ),
+            if (rentalHours != null) ...[
+              const SizedBox(width: 6),
+              Text(
+                '• $rentalHours hrs',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF7C3AED).withOpacity(0.8),
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    // Scheduled badge
+    String? timeText;
+    if (ride['scheduledStartTime'] != null) {
+      try {
+        final utcTime = DateTime.parse(ride['scheduledStartTime'].toString());
+        final localTime = utcTime.toLocal();
+        timeText = DateFormat('hh:mm a, dd MMM').format(localTime);
+      } catch (_) {}
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.orange.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.orange.withOpacity(0.4)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.schedule, size: 16, color: Colors.orange[800]),
+          const SizedBox(width: 6),
+          Text(
+            'Scheduled',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: Colors.orange[800],
+            ),
+          ),
+          if (timeText != null) ...[
+            const SizedBox(width: 6),
+            Text(
+              '• $timeText',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.orange[700],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   @override
@@ -104,7 +200,9 @@ class RideRequestCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
+          // Ride type badge (rental / scheduled)
+          _buildRideTypeBadge(ride),
           if (pickupDistance.isNotEmpty)
             Row(
               children: [

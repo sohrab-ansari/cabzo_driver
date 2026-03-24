@@ -390,6 +390,8 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
         'status': 'pending',
         'isScheduled': widget.rideData['isScheduled'] ?? false,
         'scheduledStartTime': widget.rideData['scheduledStartTime'],
+        'rideType': widget.rideData['rideType']?.toString() ?? 'normal',
+        'rentalDurationHours': widget.rideData['rentalDurationHours'],
         'timeout': timeoutSec,
       };
 
@@ -1171,14 +1173,110 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     );
   }
 
-  Widget _buildRideDetails(double w) {
-    AppLogger.d(
-      "helloooooo_secduleeddd_ride_hererrer ${_rideData!['isScheduled']}",
-    );
-    AppLogger.d(
-      "helloooooo_secduleeddd_ride_hererrer2222 ${_rideData!['scheduledStartTime']}",
-    );
+  Widget _buildRideTypeBadge() {
+    final String rideType = _rideData!['rideType']?.toString() ?? 'normal';
+    final bool isScheduled = _rideData!['isScheduled'] == true;
+    final bool isRental = rideType.toLowerCase() == 'rental';
 
+    if (!isScheduled && !isRental) return const SizedBox.shrink();
+
+    // Rental badge
+    if (isRental) {
+      final rentalHours = _rideData!['rentalDurationHours'];
+      return Center(
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: Color(0xFF7C3AED).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Color(0xFF7C3AED).withOpacity(0.5)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.car_rental, size: 18, color: Color(0xFF7C3AED)),
+              SizedBox(width: 6),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Rental Ride',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF7C3AED),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (rentalHours != null)
+                    Text(
+                      'Duration: ${rentalHours} hrs',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF7C3AED).withOpacity(0.8),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Scheduled badge
+    return Center(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.orange.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.orange.withOpacity(0.5)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.schedule, size: 18, color: Colors.orange[800]),
+            SizedBox(width: 6),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Scheduled Ride',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.orange[800],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (_rideData!['scheduledStartTime'] != null)
+                  Builder(
+                    builder: (context) {
+                      final utcTime = DateTime.parse(
+                        _rideData!['scheduledStartTime'],
+                      );
+                      final localTime = utcTime.toLocal();
+                      return Text(
+                        DateFormat('hh:mm a, dd MMM yyyy').format(localTime),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.orange[700],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRideDetails(double w) {
     return Padding(
       padding: EdgeInsets.all(16),
       child: Column(
@@ -1195,75 +1293,9 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
               ),
             ),
           ),
-          if (_rideData!['isScheduled'] == true) ...[
-            SizedBox(height: 8),
-            Center(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.orange.withOpacity(0.5)),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      'Scheduled Pickup',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.orange[800],
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (_rideData!['scheduledStartTime'] != null)
-                      Builder(
-                        builder: (context) {
-                          final utcTime = DateTime.parse(
-                            _rideData!['scheduledStartTime'],
-                          );
-
-                          final localTime = utcTime.toLocal(); // ✅ important
-
-                          return Text(
-                            DateFormat(
-                              'hh:mm a, dd MMM yyyy',
-                            ).format(localTime),
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.orange[700],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          );
-                        },
-                      ),
-                  ],
-                ),
-                // Column(
-                //   children: [
-                //     Text(
-                //       'Scheduled Pickup',
-                //       style: TextStyle(
-                //         fontSize: 14,
-                //         color: Colors.orange[800],
-                //         fontWeight: FontWeight.bold,
-                //       ),
-                //     ),
-                //     if (_rideData!['scheduledStartTime'] != null)
-                //       Text(
-                //         DateFormat('hh:mm a, dd MMM yyyy').format(
-                //           DateTime.parse(_rideData!['scheduledStartTime']),
-                //         ),
-                //         style: TextStyle(
-                //           fontSize: 13,
-                //           color: Colors.orange[700],
-                //           fontWeight: FontWeight.w500,
-                //         ),
-                //       ),
-                //   ],
-                // ),
-              ),
-            ),
-          ],
+          // Ride type badge (scheduled / rental)
+          SizedBox(height: 8),
+          _buildRideTypeBadge(),
           SizedBox(height: 16),
 
           Text(
@@ -1295,6 +1327,41 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
     );
   }
 
+  Widget _buildRideTypeChip() {
+    final String rideType = _rideData!['rideType']?.toString() ?? 'normal';
+    final bool isScheduled = _rideData!['isScheduled'] == true;
+    final bool isRental = rideType.toLowerCase() == 'rental';
+
+    if (!isScheduled && !isRental) return const SizedBox.shrink();
+
+    final Color chipColor = isRental ? Color(0xFF7C3AED) : Colors.orange;
+    final IconData chipIcon = isRental ? Icons.car_rental : Icons.schedule;
+    final String chipLabel = isRental ? 'Rental' : 'Scheduled';
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: chipColor.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(chipIcon, size: 14, color: chipColor),
+          SizedBox(width: 4),
+          Text(
+            chipLabel,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: chipColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildUserInfoCard(double w) {
     return Container(
       padding: EdgeInsets.all(16),
@@ -1310,47 +1377,43 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
         children: [
-          // Row(
-          //   children: [
-          //     CircleAvatar(
-          //       radius: 24,
-          //       backgroundImage: NetworkImage(_rideData!['riderImage']),
-          //     ),
-          //     SizedBox(width: 12),
-          //     Text(
-          //       _rideData!['riderName'],
-          //       style: TextStyle(
-          //         fontSize: 18,
-          //         fontWeight: FontWeight.w600,
-          //         color: Colors.black,
-          //       ),
-          //     ),
-          //   ],
-          // ),
-          Text(
-            "Estimated Fare",
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(Icons.currency_rupee, color: Color(0xFF22C55E), size: 22),
               Text(
-                _rideData!['fare'],
+                "Estimated Fare",
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: 16,
+                  color: Colors.grey,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF22C55E),
                 ),
+              ),
+              Row(
+                children: [
+                  Icon(Icons.currency_rupee, color: Color(0xFF22C55E), size: 22),
+                  Text(
+                    _rideData!['fare'],
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF22C55E),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
+          // Show ride type chip if not normal
+          if (_rideData!['rideType']?.toString().toLowerCase() == 'rental' ||
+              _rideData!['isScheduled'] == true) ...[
+            SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: _buildRideTypeChip(),
+            ),
+          ],
         ],
       ),
     );

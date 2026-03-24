@@ -359,18 +359,17 @@ class TripDetailsScreen extends StatelessWidget {
             "Payment Method",
             ride.paymentMethod?.toUpperCase() ?? "UNKNOWN",
           ),
-          SizedBox(height: w * 0.02),
+          SizedBox(height: w * 0.02), 
           _buildFareRow(context, w, "Order Type", ride.orderType ?? "Normal"),
 
-          if (ride.weather != null && ride.weather != "CLEAR") ...[
-            SizedBox(height: w * 0.02),
-            _buildFareRow(context, w, "Weather", ride.weather!),
-          ],
-
-          if (ride.traffic != null && ride.traffic != "LOW") ...[
-            SizedBox(height: w * 0.02),
-            _buildFareRow(context, w, "Traffic", ride.traffic!),
-          ],
+          // if (ride.weather != null && ride.weather != "CLEAR") ...[
+          //   SizedBox(height: w * 0.02),
+          //   _buildFareRow(context, w, "Weather", ride.weather!),
+          // ],
+          // if (ride.traffic != null && ride.traffic != "LOW") ...[
+          //   SizedBox(height: w * 0.02),
+          //   _buildFareRow(context, w, "Traffic", ride.traffic!),
+          // ],
 
           SizedBox(height: w * 0.04),
           const Divider(),

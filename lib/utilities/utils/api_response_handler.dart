@@ -139,6 +139,7 @@
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
 import 'package:nzcu_driver/utilities/utils/button_state_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:nzcu_driver/utilities/widgets/connection_error_popup.dart';
 
 class ApiResponseHandler {
   // Handle API call with reactive button loading
@@ -172,7 +173,11 @@ class ApiResponseHandler {
         final errorMessage = response?.message;
         
         if (errorMessage != null && errorMessage.isNotEmpty) {
-           CustomToast.showError(errorMessage);
+           if (_isNetworkError(errorMessage)) {
+             _showConnectionErrorPopup(context, errorMessage);
+           } else {
+             CustomToast.showError(errorMessage);
+           }
         } else {
            CustomToast.showError(errorTitle ?? 'Error');
         }
@@ -182,7 +187,11 @@ class ApiResponseHandler {
     } catch (e) {
       final errorMessage = _parseError(e);
 
-      CustomToast.showError(errorTitle ?? 'Error: $errorMessage');
+      if (_isNetworkError(e.toString()) || _isNetworkError(errorMessage)) {
+         _showConnectionErrorPopup(context, errorMessage);
+      } else {
+         CustomToast.showError(errorTitle != null ? '$errorTitle: $errorMessage' : errorMessage);
+      }
       onError?.call(errorMessage);
     } finally {
       // Reset button loading state
@@ -204,5 +213,25 @@ class ApiResponseHandler {
       return 'Server is not responding. Please try later.';
     }
     return 'Something went wrong. Please try again.';
+  }
+
+  static bool _isNetworkError(String errorMsg) {
+    final msg = errorMsg.toLowerCase();
+    return msg.contains('socketexception') ||
+           msg.contains('connection error') ||
+           msg.contains('no internet') ||
+           msg.contains('timeout') ||
+           msg.contains('connection refused') ||
+           msg.contains('handshake') ||
+           msg.contains('software caused connection abort');
+  }
+
+  static void _showConnectionErrorPopup(BuildContext context, String rawMessage) {
+    String displayMessage = "Please check your internet settings and try again.";
+    if (rawMessage.toLowerCase().contains("timeout")) {
+      displayMessage = "The request timed out. Please try again when you have a better connection.";
+    }
+
+    ConnectionErrorPopup.show(context, message: displayMessage);
   }
 }

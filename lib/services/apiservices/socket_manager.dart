@@ -18,6 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:nzcu_driver/services/notification_services/notification_service.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
+import 'package:nzcu_driver/utilities/widgets/connection_error_popup.dart';
 import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 
 class SocketManager {
@@ -38,9 +39,9 @@ class SocketManager {
         );
       }
       // For OPPO/Realme/OnePlus: prompt auto-start settings if not already shown
-      if (Platform.isAndroid) {
-        await _promptOemAutoStart();
-      }
+      // if (Platform.isAndroid) {
+      //   await _promptOemAutoStart();
+      // }
     } catch (e) {
       AppLogger.d('❌ Error requesting battery permission: $e');
     }
@@ -1032,12 +1033,6 @@ class SocketManager {
       // Pretty print the full ride request data
       AppLogger.d('🚕 NEW RIDE REQUEST RECEIVED: $rideData');
 
-      // Convert rideData to JSON with pretty formatting
-      final prettyJson = JsonEncoder.withIndent('  ').convert(rideData);
-      prettyJson.split('\n').forEach((line) {
-        AppLogger.d('║ $line');
-      });
-
       if (!isOnDuty) {
         AppLogger.d('⚠️ Received ride request but driver is offline');
         return;
@@ -1202,6 +1197,13 @@ class SocketManager {
           jsonEncode(fullRideData),
         );
         await prefs.setString('active_order_id', orderId.toString());
+
+        // Extract and save profile image for reconnection cases
+        final profileImage = fullRideData['rider']?['profileImage'] ?? '';
+        if (profileImage.isNotEmpty) {
+          await prefs.setString('active_ride_profile_image', profileImage);
+          AppLogger.d('💾 Saved profile image on reconnect: $profileImage');
+        }
       } catch (e) {
         AppLogger.d(
           '⚠️ [SocketManager] Error saving reconnected ride data: $e',
@@ -1879,41 +1881,20 @@ class SocketManager {
                   // Navigate to ArrivingClient
                   _handleRideReconnection(rideDataMapped, 'accepted');
                 } else {
-                  AppLogger.d(
-                    "❌ [SocketManager] Failed to accept ride via API: ${response.message}",
-                  );
-                  CustomToast.showError(
-                    'Failed to accept ride: ${response.message}',
-                  );
-                  CustomToast.showError(
-                    'Failed to accept ride: ${response.message}',
-                  );
+                  if (response.message.toString().toLowerCase().contains('connection') || response.message.toString().toLowerCase().contains('socket')) {
+                     ConnectionErrorPopup.show(Get.context!, message: "Connection failed. Please manually check the app.");
+                  } else {
+                     CustomToast.showError('Failed to accept ride: ${response.message}');
+                  }
                 }
               } catch (e) {
-                AppLogger.d(
-                  "❌ [SocketManager] Error accepting ride from API: $e",
-                );
-                CustomToast.showError(
-                  'Connection failed. Please manually check the app.',
-                );
-                AppLogger.d(
-                  "❌ [SocketManager] Error accepting ride from API: $e",
-                );
-                CustomToast.showError(
-                  'Connection failed. Please manually check the app.',
-                );
+                AppLogger.d("❌ [SocketManager] Error accepting ride from API: $e");
+                ConnectionErrorPopup.show(Get.context!, message: "Connection failed. Please manually check the app.");
               }
             } else {
-              AppLogger.d(
-                '❌ [SocketManager] Failed to connect socket within timeout. Cannot accept ride.',
-              );
-              CustomToast.showError(
-                'Connection failed. Please accept the ride manually.',
-              );
-              CustomToast.showError(
-                'Connection failed. Please accept the ride manually.',
-              );
-            }
+              AppLogger.d('❌ [SocketManager] Failed to connect socket within timeout. Cannot accept ride.');
+            ConnectionErrorPopup.show(Get.context!, message: "Connection failed. Please accept the ride manually.");
+          }
             return;
           }
         }

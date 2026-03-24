@@ -35,21 +35,21 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   AppLogger.d('=' * 60);
-  AppLogger.d('🚀 NZCU DRIVER APP INITIALIZATION');
+  AppLogger.d('NZCU DRIVER APP INITIALIZATION');
   AppLogger.d('=' * 60);
 
   try {
-    AppLogger.d('1️⃣ Initializing Firebase...');
+    AppLogger.d('Initializing Firebase...');
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    AppLogger.d('   ✅ Firebase Core initialized');
+    AppLogger.d('Firebase Core initialized');
 
-    AppLogger.d('2️⃣ Registering background message handler...');
+    AppLogger.d('Registering background message handler...');
     FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundMessageHandler);
-    AppLogger.d('   ✅ Background handler registered');
+    AppLogger.d('Background handler registered');
 
-    AppLogger.d('3️⃣ Configuring System UI...');
+    AppLogger.d('Configuring System UI...');
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(

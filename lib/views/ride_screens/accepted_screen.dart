@@ -105,7 +105,6 @@ class _ArrivingClientState extends State<ArrivingClient> {
 
     image_get_from_shared();
     myridedataprint();
-    image_get_from_shared();
 
     _isScreenActive = true;
     AppLogger.d(
@@ -496,6 +495,20 @@ class _ArrivingClientState extends State<ArrivingClient> {
     AppLogger.d(
       '[RIDE_FLOW] ArrivingClient ride data extracted → orderId=${_rideData?['orderId']}',
     );
+
+    // ✅ Fallback: If profileImage (from shared prefs) is empty, use the freshly extracted riderImage.
+    // This handles cases where the app was restarted or reconnected and shared prefs haven't synced yet.
+    if (profileImage == "" &&
+        _rideData != null &&
+        _rideData?['riderImage'] != null &&
+        _rideData!['riderImage'].toString().isNotEmpty) {
+      if (mounted) {
+        setState(() {
+          profileImage = _rideData!['riderImage'];
+        });
+        AppLogger.d('🖼️ Profile image updated from extracted ride data: $profileImage');
+      }
+    }
   }
 
   void _extractCoordinates() {
@@ -1934,7 +1947,7 @@ class _ArrivingClientState extends State<ArrivingClient> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => ChatScreen(
-                            rideData: widget.rideData,
+                            rideData: _rideData,
                             profileImage: profileImage,
                             driverName: riderName,
                           ),

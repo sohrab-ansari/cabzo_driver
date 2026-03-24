@@ -11,8 +11,7 @@ import 'package:nzcu_driver/views/ride_screens/ride_request_screen.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/get_city_by_location_controller.dart';
 
 class HomeMapsScreen extends StatefulWidget {
-
-   HomeMapsScreen({super.key, });
+  HomeMapsScreen({super.key});
 
   @override
   State<HomeMapsScreen> createState() => _HomeMapsScreenState();
@@ -39,7 +38,6 @@ class _HomeMapsScreenState extends State<HomeMapsScreen> {
     // });
   }
 
-
   String _selectedTab = "Driver"; // Tracks selected tab
 
   final CameraPosition _initialCameraPosition = const CameraPosition(
@@ -49,24 +47,24 @@ class _HomeMapsScreenState extends State<HomeMapsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return 
-    
-    Scaffold(
-      body: 
-      SafeArea(
+    return Scaffold(
+      body: SafeArea(
         child: Stack(
           children: [
             /// 1️⃣ Google Map (BOTTOM)
-            Obx(() => GoogleMap(
-              initialCameraPosition: _initialCameraPosition,
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-              zoomControlsEnabled: false,
-              polygons: Get.find<GetCityByLocationController>().cityPolygons.toSet(),
-              onMapCreated: (controller) {
-                _mapController = controller;
-              },
-            )),
+            Obx(
+              () => GoogleMap(
+                initialCameraPosition: _initialCameraPosition,
+                myLocationEnabled: true,
+                myLocationButtonEnabled: false,
+                zoomControlsEnabled: false,
+                polygons: Get.find<GetCityByLocationController>().cityPolygons
+                    .toSet(),
+                onMapCreated: (controller) {
+                  _mapController = controller;
+                },
+              ),
+            ),
 
             /// 2️⃣ Book Ride Button (Top Right)
             Positioned(
@@ -138,8 +136,6 @@ class _HomeMapsScreenState extends State<HomeMapsScreen> {
       /// Bottom Navigation
       // bottomNavigationBar: BottomnavmainScreen(),
     );
- 
- 
   }
 
   /// 🧱 Bottom Offline UI
@@ -204,7 +200,7 @@ class _HomeMapsScreenState extends State<HomeMapsScreen> {
     return Column(
       children: [
         /// Offline Image
-        Image.asset("assets/images/onlinee.png", height: 120),
+        SvgPicture.asset('assets/images/online.svg', height: 120),
 
         const SizedBox(height: 12),
 
@@ -229,7 +225,7 @@ class _HomeMapsScreenState extends State<HomeMapsScreen> {
           height: 48,
           child: ElevatedButton(
             onPressed: () {
-              Get.to(() =>  BottomnavmainScreen());
+              Get.to(() => BottomnavmainScreen());
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,

@@ -1,4 +1,4 @@
-﻿import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
+import 'package:nzcu_driver/services/apiservices/home_api_services.dart';
 import 'package:nzcu_driver/modals/home_modals/chat_id_response.dart';
 import 'package:get/get.dart';
 import 'package:nzcu_driver/utilities/widgets/custom_toast.dart';
@@ -23,6 +23,7 @@ class ChatidController extends GetxController {
     // Set loading state
     isLoading.value = true;
     errorMessage.value = '';
+    chartresposne.value = null;
 
     try {
       // Call API
@@ -33,15 +34,14 @@ class ChatidController extends GetxController {
       AppLogger.d("API Response: ${res.success}");
 
       if (res.success == true) {
-        AppLogger.d("charttt_iddd  fetched successfully");
         chartresposne.value = res;
 
-        AppLogger.d("charttt_iddd>>>>  ${chartresposne.value}");
+        AppLogger.d("Chat ID>>>>  ${chartresposne.value}");
 
-        AppLogger.d("charttt_iddd respsoneee ${res}");
+        AppLogger.d("Chat ID respsone ${res}");
       } else {
         AppLogger.d("myupdate_order_data22222222  faileddd111");
-        errorMessage.value = 'Failed to fetch chart data';
+        errorMessage.value = 'Failed to fetch chat data';
         AppLogger.d("Error: ${errorMessage.value}");
         CustomToast.showError(errorMessage.value);
       }

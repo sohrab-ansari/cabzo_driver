@@ -1,4 +1,4 @@
-﻿// // import 'dart:async';
+// // import 'dart:async';
 // // import 'dart:convert';
 // // import 'dart:io';
 
@@ -2988,7 +2988,19 @@ class _ChatScreenState extends State<ChatScreen> {
     // Get receiver ID - make sure to handle null values
     final String receiverId;
     if (isSender) {
-      receiverId = widget.rideData?['riderId']?.toString() ?? '';
+      String? rId;
+      if (widget.rideData?['riderId'] != null) {
+        rId = widget.rideData?['riderId']?.toString();
+      } else if (widget.rideData?['rider'] != null && widget.rideData?['rider'] is Map) {
+        rId = widget.rideData?['rider']?['id']?.toString() ?? widget.rideData?['rider']?['_id']?.toString();
+      } else if (widget.rideData?['userId'] != null) {
+        if (widget.rideData?['userId'] is Map) {
+           rId = widget.rideData?['userId']?['id']?.toString() ?? widget.rideData?['userId']?['_id']?.toString();
+        } else {
+           rId = widget.rideData?['userId']?.toString();
+        }
+      }
+      receiverId = rId ?? '';
     } else {
       receiverId = _driverId ?? '';
     }
@@ -3129,9 +3141,15 @@ class _ChatScreenState extends State<ChatScreen> {
     String? riderId;
 
     if (widget.rideData?['riderId'] != null) {
-      riderId = widget.rideData?['riderId'];
-    } else {
-      riderId = widget.rideData?['rider']?['id'];
+      riderId = widget.rideData?['riderId']?.toString();
+    } else if (widget.rideData?['rider'] != null && widget.rideData?['rider'] is Map) {
+      riderId = widget.rideData?['rider']?['id']?.toString() ?? widget.rideData?['rider']?['_id']?.toString();
+    } else if (widget.rideData?['userId'] != null) {
+      if (widget.rideData?['userId'] is Map) {
+         riderId = widget.rideData?['userId']?['id']?.toString() ?? widget.rideData?['userId']?['_id']?.toString();
+      } else {
+         riderId = widget.rideData?['userId']?.toString();
+      }
     }
 
     AppLogger.d("myyyy_rideeeee_iddd_iss>>>> storingg>>> $riderId");
@@ -3692,3 +3710,4 @@ class ChatMessage {
     this.messageType = 'text',
   });
 }
+

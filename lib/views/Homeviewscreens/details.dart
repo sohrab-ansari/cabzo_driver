@@ -16,15 +16,9 @@ class Details {
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // CricleImage().circleImage(
-            //   context,
-            //   "assets/images/profileImage.png",
-            //   circleSize: w * .06,
-            // ),
             SizedBox(width: w * .03),
             SizedBox(
               width: w * .35,
-              // color: Colors.red,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -58,7 +52,6 @@ class Details {
             SizedBox(width: w * .05),
             SizedBox(
               width: w * .28,
-              //color: Colors.red,
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: w * .005,
@@ -69,11 +62,6 @@ class Details {
                   children: [
                     Row(
                       children: [
-                        // CustomImages.images(
-                        //   "assets/icons/fulldateIcon.png",
-                        //   w * .045,
-                        //   w * .045,
-                        // ),
                         SizedBox(width: w * .02),
                         CustomText(
                           text: "12/09/2025",
@@ -85,11 +73,6 @@ class Details {
                     ),
                     Row(
                       children: [
-                        // CustomImages.images(
-                        //   "assets/icons/roundTrip.png",
-                        //   w * .04,
-                        //   w * .04,
-                        // ),
                         SizedBox(width: w * .02),
                         CustomText(
                           text: "Round Trip",
@@ -113,7 +96,6 @@ class Details {
   Widget rideLocations(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     return Column(
-      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         //? pickUp location history
         Row(
@@ -157,22 +139,11 @@ class Details {
   //? ride history=> cost---distance ---time
   Widget rideCostDetails(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
-    // List cardDetailsIconList = [
-    //   "assets/icons/clockIcon.png",
-    //   "assets/icons/totalCost.png",
-    //   "assets/icons/routing.png",
-    // ];
-    // List detailsList = ["05:03 Pm", "12/09/2025", "₹85"];
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        CustomImages.images(
-          "assets/icons/clockIcon.png",
-          //  "assets/icons/totalCost.png",
-          w * .045,
-          w * .045,
-        ),
+        CustomImages.images("assets/icons/clockIcon.png", w * .045, w * .045),
         SizedBox(width: w * .02),
         CustomText(
           text: "05:03 Pm",
@@ -180,7 +151,6 @@ class Details {
           textFontSize: w * .035,
           textFontWeight: FontWeight.w400,
         ),
-
         SizedBox(width: w * .02),
         CircleAvatar(radius: 2, backgroundColor: ColorsList.subtitleTextColor),
         CustomText(
@@ -190,12 +160,6 @@ class Details {
           textFontWeight: FontWeight.w400,
         ),
         Spacer(),
-        // CustomImages.images(
-        //   "assets/icons/clockIcon.png",
-        //   //  "assets/icons/totalCost.png",
-        //   w * .045,
-        //   w * .045,
-        // ),
         SizedBox(width: w * .02),
         CustomText(
           text: "₹250",
@@ -207,17 +171,55 @@ class Details {
     );
   }
 
-  Widget invoice(BuildContext context, dynamic rideData) {
+  Widget invoice(BuildContext context, dynamic orderData) {
     double w = MediaQuery.of(context).size.width;
 
-    // Extract totalFare from rideData
-    String totalFare = "0.00";
-    if (rideData != null && rideData['totalFare'] != null) {
-      totalFare = rideData['totalFare'].toString();
+    // Extract values safely
+    final double totalFare = (orderData?['totalFare'] as num?)?.toDouble() ?? 0;
+    final double pendingDue =
+        (orderData?['pendingDue'] as num?)?.toDouble() ?? 0;
+    final Map<String, dynamic>? waitingDetails =
+        orderData?['waitingChargeDetails'] is Map<String, dynamic>
+        ? orderData['waitingChargeDetails']
+        : null;
+    final double waitingCharge =
+        (waitingDetails?['totalCharge'] as num?)?.toDouble() ?? 0;
+    final int waitingMinutes =
+        (waitingDetails?['chargeableMinutes'] as num?)?.toInt() ?? 0;
+
+    // Grand Total = totalFare + pendingDue - promoCodeDiscount
+    final double grandTotal = totalFare + pendingDue;
+
+    // Build breakup lines: [name, amount, isNegative, subtitle]
+    List<Map<String, dynamic>> breakupLines = [];
+
+    // 1. Ride Fare (the base totalFare from backend)
+    breakupLines.add({
+      'name': 'Ride Fare',
+      'amount': totalFare,
+      'isNegative': false,
+      'subtitle': null,
+    });
+
+    // 2. Waiting Charges (informational - already included in totalFare)
+    if (waitingCharge > 0) {
+      breakupLines.add({
+        'name': 'Waiting Charges',
+        'amount': waitingCharge,
+        'isNegative': false,
+        'subtitle': '($waitingMinutes min, included in Ride Fare)',
+      });
     }
 
-    List changesName = ["Ride Charge"];
-    List chargesAmount = [totalFare];
+    // 3. Pending Due
+    if (pendingDue > 0) {
+      breakupLines.add({
+        'name': 'Pending Due',
+        'amount': pendingDue,
+        'isNegative': false,
+        'subtitle': null,
+      });
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -234,106 +236,137 @@ class Details {
       child: Column(
         children: [
           SizedBox(height: w * .04),
+
+          // Header
           Padding(
             padding: EdgeInsets.symmetric(horizontal: w * .04),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 CustomText(
-                  text: "Payment Detail",
+                  text: "Fare Breakup",
                   textColor: ColorsList.titleTextColor,
                   textFontSize: w * .04,
-                  textFontWeight: FontWeight.w500,
+                  textFontWeight: FontWeight.w600,
                 ),
                 SizedBox(),
               ],
             ),
           ),
 
+          SizedBox(height: w * .02),
+
+          // Breakup lines
           Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: w * .04,
-              vertical: w * .01,
-            ),
+            padding: EdgeInsets.symmetric(horizontal: w * .04),
             child: Column(
-              children: List.generate(changesName.length, (index) {
-                String amount = chargesAmount[index];
-                bool isNegative = amount.startsWith("-");
+              children: breakupLines.map((line) {
+                final String name = line['name'];
+                final double amount = line['amount'];
+                final bool isNegative = line['isNegative'];
+                final String? subtitle = line['subtitle'];
 
                 return Padding(
-                  padding: EdgeInsets.symmetric(vertical: w * .005),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  padding: EdgeInsets.symmetric(vertical: w * .008),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CustomText(
-                        text: changesName[index],
-                        textColor: ColorsList.titleTextColor,
-                        textFontSize: w * .036,
-                        textFontWeight: FontWeight.w400,
-                      ),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          if (isNegative)
-                            CustomText(
-                              text: "-",
+                          Flexible(
+                            child: CustomText(
+                              text: name,
                               textColor: ColorsList.titleTextColor,
                               textFontSize: w * .036,
                               textFontWeight: FontWeight.w400,
                             ),
-                          Icon(
-                            Icons.currency_rupee,
-                            size: w * .036,
-                            color: ColorsList.titleTextColor,
                           ),
-                          CustomText(
-                            text: isNegative ? amount.substring(1) : amount,
-                            textColor: ColorsList.titleTextColor,
-                            textFontSize: w * .036,
-                            textFontWeight: FontWeight.w400,
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (isNegative)
+                                CustomText(
+                                  text: "- ",
+                                  textColor: Colors.green.shade700,
+                                  textFontSize: w * .036,
+                                  textFontWeight: FontWeight.w500,
+                                ),
+                              Icon(
+                                Icons.currency_rupee,
+                                size: w * .034,
+                                color: isNegative
+                                    ? Colors.green.shade700
+                                    : ColorsList.titleTextColor,
+                              ),
+                              CustomText(
+                                text: amount.toStringAsFixed(
+                                  amount == amount.roundToDouble() ? 0 : 2,
+                                ),
+                                textColor: isNegative
+                                    ? Colors.green.shade700
+                                    : ColorsList.titleTextColor,
+                                textFontSize: w * .036,
+                                textFontWeight: FontWeight.w400,
+                              ),
+                            ],
                           ),
                         ],
                       ),
+                      if (subtitle != null)
+                        Padding(
+                          padding: EdgeInsets.only(top: w * .005),
+                          child: CustomText(
+                            text: subtitle,
+                            textColor: ColorsList.subtitleTextColor,
+                            textFontSize: w * .028,
+                            textFontWeight: FontWeight.w400,
+                          ),
+                        ),
                     ],
                   ),
                 );
-              }),
+              }).toList(),
             ),
           ),
-          Divider(),
+
+          // Divider
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: w * .03),
+            child: Divider(thickness: 1),
+          ),
+
+          // Grand Total
           Padding(
             padding: EdgeInsets.symmetric(
               horizontal: w * .04,
-              vertical: w * .01,
+              vertical: w * .015,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 CustomText(
-                  text: "Total fare ",
+                  text: "Total Payable",
                   textColor: ColorsList.titleTextColor,
-                  textFontSize: w * .04,
-                  textFontWeight: FontWeight.w500,
+                  textFontSize: w * .042,
+                  textFontWeight: FontWeight.w600,
                 ),
-                // CustomText(
-                //   text: "74",
-                //   textColor: ColorsList.titleTextColor,
-                //   textFontSize: w * .04,
-                //   textFontWeight: FontWeight.w500,
-                // ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.currency_rupee,
-                      size: w * .04,
+                      size: w * .042,
                       color: ColorsList.titleTextColor,
                     ),
                     CustomText(
-                      text: totalFare,
+                      text: grandTotal.toStringAsFixed(
+                        grandTotal == grandTotal.roundToDouble() ? 0 : 2,
+                      ),
                       textColor: ColorsList.titleTextColor,
-                      textFontSize: w * .04,
-                      textFontWeight: FontWeight.w500,
+                      textFontSize: w * .042,
+                      textFontWeight: FontWeight.w600,
                     ),
                   ],
                 ),

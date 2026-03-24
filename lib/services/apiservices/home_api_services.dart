@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -53,7 +53,9 @@ class HomeApiServices {
       if (homeModalResponse.success == true &&
           homeModalResponse.driver != null &&
           homeModalResponse.driver!.id != null) {
-        AppLogger.d("Response Body222222222kkkk : ${homeModalResponse.driver!.id}");
+        AppLogger.d(
+          "Response Body222222222kkkk : ${homeModalResponse.driver!.id}",
+        );
         // Use ! to assert non-null or provide default value
         await prefs.setString(
           "driver_userid",
@@ -65,7 +67,9 @@ class HomeApiServices {
           homeModalResponse.driver!.name.toString(),
         );
 
-        AppLogger.d("Response Body222222222jjjj : ${homeModalResponse.driver!.id}");
+        AppLogger.d(
+          "Response Body222222222jjjj : ${homeModalResponse.driver!.id}",
+        );
         // AppLogger.d(
         //   "✅ Driver user ID saved to SharedPreferences: ${registerProfileRes.data!.id}",
         // );
@@ -117,7 +121,9 @@ class HomeApiServices {
           Drivertoggledutyresponse.fromJson(data);
 
       AppLogger.d("my_driver_tokennnn_toggle_respose ${data}");
-      AppLogger.d("Response Body222222222 : ${drivertoggledutyresponse.driver!.id}");
+      AppLogger.d(
+        "Response Body222222222 : ${drivertoggledutyresponse.driver!.id}",
+      );
 
       if (drivertoggledutyresponse.success == true &&
           drivertoggledutyresponse.driver != null &&
@@ -185,7 +191,9 @@ class HomeApiServices {
       );
 
       AppLogger.d("Status Code : ${response.statusCode}");
-      AppLogger.d("drievrrrrrid>>>>>>> resss >>>> Response Body : ${response.body}");
+      AppLogger.d(
+        "drievrrrrrid>>>>>>> resss >>>> Response Body : ${response.body}",
+      );
 
       final Map<String, dynamic> data = jsonDecode(response.body);
       final DriverIdResponse driverIdResponse = DriverIdResponse.fromJson(data);
@@ -266,7 +274,9 @@ class HomeApiServices {
 
       final Uri url = Uri.parse("${ApiPath.baseUri}/order/update/$orderid");
 
-      AppLogger.d('[RIDE_FLOW] Order update API request: $orderid -> $orderstatus');
+      AppLogger.d(
+        '[RIDE_FLOW] Order update API request: $orderid -> $orderstatus',
+      );
 
       final response = await http
           .patch(
@@ -284,7 +294,9 @@ class HomeApiServices {
       AppLogger.d('[RIDE_FLOW] Order update API response: $decodedJson');
 
       if (response.statusCode == 200) {
-        AppLogger.d('[RIDE_FLOW] Order update API success: $orderid -> $orderstatus');
+        AppLogger.d(
+          '[RIDE_FLOW] Order update API success: $orderid -> $orderstatus',
+        );
         return Updateorderresposne.fromJson(decodedJson);
       } else if (response.statusCode == 401) {
         return Updateorderresposne(
@@ -585,6 +597,44 @@ class HomeApiServices {
     } catch (e) {
       AppLogger.d("❌ Exception in get_chat_messages_data");
       throw Exception(e);
+    }
+  }
+
+  /// Fetch full order details by orderId
+  static Future<Map<String, dynamic>?> get_order_details({
+    required String orderId,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString("auth_token");
+
+    final Uri url = Uri.parse(ApiPath.orderDetails(orderId));
+
+    AppLogger.d("========== 🔵 GET ORDER DETAILS API ==========");
+    AppLogger.d("URL : $url");
+
+    try {
+      final http.Response response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      AppLogger.d("✅ Status Code : ${response.statusCode}");
+
+      final decodedJson = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && decodedJson['success'] == true) {
+        AppLogger.d("✅ Order details fetched successfully");
+        return decodedJson['data'] as Map<String, dynamic>;
+      } else {
+        AppLogger.d("❌ Order details fetch failed: ${decodedJson['message']}");
+        return null;
+      }
+    } catch (e) {
+      AppLogger.d("❌ Exception in get_order_details: $e");
+      return null;
     }
   }
 }

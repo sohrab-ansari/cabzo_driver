@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter_svg/svg.dart';
 import 'package:nzcu_driver/controllers/home_controllers/controllers.dart';
 import 'package:nzcu_driver/controllers/home_controllers/driver_toggle_duty_controller.dart';
 import 'package:nzcu_driver/controllers/home_controllers/home_controller.dart';
@@ -31,6 +32,7 @@ import 'package:nzcu_driver/utilities/widgets/app_logger.dart';
 import 'package:nzcu_driver/controllers/profile_controllers/get_city_by_location_controller.dart';
 import 'package:nzcu_driver/utilities/widgets/navigator.dart';
 import 'package:nzcu_driver/views/profile_screens/payment_related/walletscreen.dart';
+import 'package:nzcu_driver/utilities/widgets/permission_gate_popup.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool? isOnDuty;
@@ -383,15 +385,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       OverlayService.instance.hideOverlay();
       socketManager.goOffline();
     } else {
+      // ── Comprehensive Permission Gate ──
+      // Checks: Location (Always), Battery Unrestricted, Notifications, Overlay
+      // Blocks going online if ANY permission is missing (non-bypassable)
+      if (mounted) {
+        final allGranted = await PermissionGatePopup.checkAndShow(context);
+        if (!allGranted) return; // Driver cannot bypass this
+      }
+
       // Check wallet balance before going online (Refreshed via home_data_method)
       await homeController.home_data_method();
-
-      // Request overlay permission before going online (one-time prompt)
-      final hasOverlayPermission = await OverlayService.instance
-          .hasPermission();
-      if (!hasOverlayPermission) {
-        await OverlayService.instance.requestPermission();
-      }
 
       socketManager.goOnline();
     }
@@ -1332,7 +1335,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return Column(
       children: [
         /// Offline Image
-        Image.asset("assets/images/onlinee.png", height: 120),
+        // Image.asset("assets/images/onlinee.png", height: 120),
+
+        SvgPicture.asset('assets/images/online.svg', height: 120),
+
 
         const SizedBox(height: 12),
 

@@ -54,9 +54,10 @@ class ProfileApiServices {
 
       AppLogger.d("Status Code : ${response.statusCode}");
       AppLogger.d("Response Body  get city by id>>>>>> data : ${response.body}");
+      
+      final Map<String, dynamic> data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body);
         final GetCityByLocationResponse categoriesResponse =
             GetCityByLocationResponse.fromJson(data);
         return categoriesResponse;
@@ -64,11 +65,11 @@ class ProfileApiServices {
         // Handle non-200 status codes
         return GetCityByLocationResponse(
           success: false,
-          message: "Error: ${response.statusCode}",
+          message: "Error: ${data['message']}",
         );
       }
-    } catch (e) {
-      AppLogger.d("❌ Exception in get city by id>>>>>> data : $e");
+    } catch (e) { 
+      AppLogger.d("Exception in get city by id>>>>>> data : $e");
       return GetCityByLocationResponse(
         success: false,
         message: "Connection error: $e",
